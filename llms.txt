@@ -1,0 +1,17 @@
+# MCP Tool Discovery for PHP
+
+> A PHP library (novalo/mcp-tool-discovery, MIT, PHP 8.1 to 8.5, no dependency) that decides how an MCP server shows its tools to clients. Its compact mode shows three tools - search_tools, run_read_tool, run_write_tool - instead of the whole list, with a BM25F tool search. The server keeps every access decision through one interface, ToolGate.
+
+- Answers shaped and validated for the MCP revisions 2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25 and 2026-07-28.
+- Modes are packs in src/Mode/: Compact is shipped; Grouped (one tool per group) and Gateway (a single tool) are open to contribution.
+- A hidden tool is never listed, found, described or run; nothing runs without the host's authorize(); a tool counts as a read only with readOnlyHint: true.
+- Plain PHP arrays in and out, in the shape of the specification: works with the official PHP SDK, a framework, or a handler written by hand.
+
+## Docs
+
+- [README](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/README.md): install, quick start, modes, search, security model
+- [Architecture](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/ARCHITECTURE.md): layers, the flow of a call, protocol revisions
+- [Modes](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/MODES.md): the mode contract, Compact, and the modes wanted
+- [Search](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/SEARCH.md): the ranking and its measures
+- [Contributing](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/CONTRIBUTING.md): branches, checks, writing a mode
+- [Security](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/SECURITY.md): reporting a vulnerability

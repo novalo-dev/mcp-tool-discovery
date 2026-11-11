@@ -1,0 +1,122 @@
+[
+ {
+  "query": "show the latest orders",
+  "expected": "acme_list_orders"
+ },
+ {
+  "query": "details of order 1042",
+  "expected": "acme_get_order"
+ },
+ {
+  "query": "find the order of jane@example.com",
+  "expected": "acme_search_orders"
+ },
+ {
+  "query": "mark the order as shipped",
+  "expected": "acme_set_order_status"
+ },
+ {
+  "query": "cancel an order",
+  "expected": "acme_cancel_order"
+ },
+ {
+  "query": "refund the customer",
+  "expected": "acme_refund_payment"
+ },
+ {
+  "query": "leave an internal note on an order",
+  "expected": "acme_add_order_note"
+ },
+ {
+  "query": "find a customer by phone",
+  "expected": "acme_search_customers"
+ },
+ {
+  "query": "change a customer's email",
+  "expected": "acme_update_customer"
+ },
+ {
+  "query": "remove a customer account",
+  "expected": "acme_delete_customer"
+ },
+ {
+  "query": "add a new product",
+  "expected": "acme_create_product"
+ },
+ {
+  "query": "change the price of a product",
+  "expected": "acme_update_product"
+ },
+ {
+  "query": "hide a product from the shop",
+  "expected": "acme_set_product_visibility"
+ },
+ {
+  "query": "how many units are in stock",
+  "expected": "acme_get_inventory"
+ },
+ {
+  "query": "update stock quantity",
+  "expected": "acme_set_inventory_level"
+ },
+ {
+  "query": "products running low",
+  "expected": "acme_list_low_inventory"
+ },
+ {
+  "query": "create a discount code",
+  "expected": "acme_create_coupon"
+ },
+ {
+  "query": "write a blog post",
+  "expected": "acme_create_post"
+ },
+ {
+  "query": "publish the draft",
+  "expected": "acme_publish_post"
+ },
+ {
+  "query": "delete spam comments",
+  "expected": "acme_delete_comment"
+ },
+ {
+  "query": "revenue last month",
+  "expected": "acme_get_sales_report"
+ },
+ {
+  "query": "best sellers",
+  "expected": "acme_list_top_products"
+ },
+ {
+  "query": "which carriers do we offer",
+  "expected": "acme_list_shipping_methods"
+ },
+ {
+  "query": "where is my parcel",
+  "expected": "acme_get_shipment_tracking"
+ },
+ {
+  "query": "invite a colleague",
+  "expected": "acme_invite_user"
+ },
+ {
+  "query": "give admin rights to a staff member",
+  "expected": "acme_set_user_role"
+ },
+ {
+  "query": "flush the cache",
+  "expected": "acme_clear_cache"
+ },
+ {
+  "query": "change the store currency",
+  "expected": "acme_update_settings"
+ },
+ {
+  "query": "add a webhook",
+  "expected": "acme_create_webhook"
+ },
+ {
+  "query": "email all subscribers",
+  "expected": "acme_send_newsletter"
+ }
+]

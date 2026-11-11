@@ -1,0 +1,26 @@
+name: Branches
+
+# Nothing is written on main directly: it only receives develop, through a
+# pull request the maintainer merges for a release.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  from-develop:
+    name: main only receives develop
+    runs-on: ubuntu-24.04
+    steps:
+      - name: The pull request comes from develop
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$HEAD_REF" != develop ] || [ "$HEAD_REPO" != "$REPO" ]; then
+            echo "::error::A pull request to main must come from develop. Target develop instead."
+            exit 1
+          fi

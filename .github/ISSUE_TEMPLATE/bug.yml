@@ -1,0 +1,35 @@
+name: Bug
+description: Something the library does wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: A vulnerability is reported privately, never here - see SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version of the library
+      placeholder: 0.1.0, or the commit of develop
+    validations:
+      required: true
+  - type: input
+    id: php
+    attributes:
+      label: PHP version
+      placeholder: '8.3'
+    validations:
+      required: true
+  - type: dropdown
+    id: revision
+    attributes:
+      label: MCP revision negotiated with the client
+      options: ['2026-07-28', '2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05', I do not know]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens, and what you expected
+      description: The smallest tool list and call that shows it. A failing test is best.
+    validations:
+      required: true

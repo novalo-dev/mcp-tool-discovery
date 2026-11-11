@@ -1,0 +1,18 @@
+name: Mode
+description: Propose or take a mode (Grouped, Gateway, or another)
+labels: [mode]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Mode
+      placeholder: Grouped
+    validations:
+      required: true
+  - type: textarea
+    id: shape
+    attributes:
+      label: What the client sees, and how a call is routed
+      description: See docs/MODES.md. Say how a change stays flagged as a change.
+    validations:
+      required: true

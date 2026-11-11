@@ -1,0 +1,104 @@
+name: CI
+
+# Every push to develop and every pull request runs the whole suite. main only
+# receives develop through a pull request, so it is checked on the way in.
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Coding standard, static analysis, hygiene
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2
+      - name: Composer file
+        run: composer validate --strict
+      - name: Install
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Coding standard
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+      - name: PHPStan, level max on the library
+        run: vendor/bin/phpstan analyse --no-progress --error-format=github --memory-limit=512M
+      - name: PHPStan on the tests
+        run: vendor/bin/phpstan analyse -c phpstan-tests.neon --no-progress --error-format=github --memory-limit=512M
+      - name: Hygiene of the files
+        run: php bin/check-hygiene.php
+      - name: Hygiene of the commit messages
+        # A commit that credits the work to a tool is refused here, before it
+        # can reach develop, since history is not rewritten afterwards.
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then RANGE="$HEAD"; else RANGE="$BASE..$HEAD"; fi
+          php bin/check-hygiene.php --commits "$RANGE"
+
+  tests:
+    name: Tests on PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.1', '8.2', '8.3', '8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer:v2
+      - name: Install
+        # The lock is resolved for PHP 8.1 (config.platform), the lowest the
+        # library supports, so every PHP of the matrix runs the same versions.
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Official MCP schemas
+        run: php bin/fetch-schemas.php
+      - name: PHPUnit
+        # Skipped tests fail the run: a conformance test skipped for a missing
+        # schema would otherwise look like a pass.
+        run: vendor/bin/phpunit --fail-on-skipped
+
+  package:
+    name: What Composer installs
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: The archive holds the library and nothing else
+        run: |
+          git archive --format=tar HEAD | tar -t > files.txt
+          cat files.txt
+          for f in composer.json LICENSE README.md src/Discovery.php; do
+            grep -qx "$f" files.txt || { echo "::error::$f is missing from the package"; exit 1; }
+          done
+          if grep -E '^(tests|bin|docs|\.github)/' files.txt; then
+            echo "::error::The package carries files a host does not need"; exit 1
+          fi
+
+  passed:
+    name: CI passed
+    # One stable name for the required check, whatever the matrix becomes.
+    if: always()
+    needs: [quality, tests, package]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Every job is green
+        run: |
+          [ "${{ needs.quality.result }}" = success ] && [ "${{ needs.tests.result }}" = success ] && [ "${{ needs.package.result }}" = success ]

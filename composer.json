@@ -1,0 +1,73 @@
+{
+    "name": "novalo/mcp-tool-discovery",
+    "description": "Tool discovery for PHP MCP servers: a compact mode that shows three tools instead of hundreds, a BM25F tool search, and a contract for more modes.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "mcp",
+        "model-context-protocol",
+        "mcp-server",
+        "tools",
+        "tool-search",
+        "search",
+        "bm25",
+        "ai",
+        "llm",
+        "agents"
+    ],
+    "homepage": "https://github.com/novalo-dev/mcp-tool-discovery",
+    "authors": [
+        {
+            "name": "Novalo",
+            "homepage": "https://novalo.fr"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/novalo-dev/mcp-tool-discovery/issues",
+        "source": "https://github.com/novalo-dev/mcp-tool-discovery",
+        "security": "https://github.com/novalo-dev/mcp-tool-discovery/security/policy"
+    },
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "opis/json-schema": "^2.4",
+        "phpstan/phpstan": "^2.1",
+        "phpstan/phpstan-strict-rules": "^2.0",
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Novalo\\McpToolDiscovery\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Novalo\\McpToolDiscovery\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "platform": {
+            "php": "8.1.0"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "analyse": [
+            "phpstan analyse --memory-limit=512M",
+            "phpstan analyse -c phpstan-tests.neon --memory-limit=512M"
+        ],
+        "cs": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "conformance": "php bin/conformance.php",
+        "benchmark": "php bin/benchmark.php",
+        "check": [
+            "@cs",
+            "@analyse",
+            "@test",
+            "@conformance"
+        ]
+    }
+}

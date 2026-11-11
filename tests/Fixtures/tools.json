@@ -1,0 +1,956 @@
+[
+ {
+  "name": "acme_list_orders",
+  "title": "List orders",
+  "description": "Lists the orders of the store, newest first, with their status, total and customer. Filter by status or date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "Order status to keep"
+    },
+    "since": {
+     "type": "string",
+     "description": "Oldest order date, YYYY-MM-DD"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_get_order",
+  "title": "Get an order",
+  "description": "Returns one order in full: lines, totals, addresses, payments, shipments and history.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order, from list_orders or search_orders"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_search_orders",
+  "title": "Search orders",
+  "description": "Finds orders by reference, customer email or name.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Reference, email or name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_order",
+  "title": "Create an order",
+  "description": "Creates an order for a customer from a list of products, as staff do on the phone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Customer identifier"
+    },
+    "lines": {
+     "type": "string",
+     "description": "Products and quantities"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_cancel_order",
+  "title": "Cancel an order",
+  "description": "Cancels an order that has not shipped. Stock goes back and the customer is told.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_set_order_status",
+  "title": "Change the status of an order",
+  "description": "Sets the status of one order: paid, shipped, delivered, cancelled. May email the customer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    },
+    "status": {
+     "type": "string",
+     "description": "New status"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_add_order_note",
+  "title": "Add a note to an order",
+  "description": "Adds a private staff note to an order. The customer does not see it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    },
+    "note": {
+     "type": "string",
+     "description": "Text of the note"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_refund_payment",
+  "title": "Refund a payment",
+  "description": "Refunds all or part of the payment of an order to the customer's card.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    },
+    "amount": {
+     "type": "string",
+     "description": "Amount to refund"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_customers",
+  "title": "List customers",
+  "description": "Lists customer accounts, newest first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "string",
+     "description": "Page number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_get_customer",
+  "title": "Get a customer",
+  "description": "Returns one customer account: contact details, addresses and order count.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Customer identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_search_customers",
+  "title": "Search customers",
+  "description": "Finds customer accounts by email, name or phone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Email, name or phone"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_customer",
+  "title": "Create a customer",
+  "description": "Creates a customer account with a name and an email.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    },
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_update_customer",
+  "title": "Update a customer",
+  "description": "Changes the name, email or phone of a customer account.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Customer identifier"
+    },
+    "email": {
+     "type": "string",
+     "description": "New email"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_delete_customer",
+  "title": "Delete a customer",
+  "description": "Deletes a customer account. Their orders are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Customer identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_products",
+  "title": "List products",
+  "description": "Lists the products of the catalog with price and stock.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "category": {
+     "type": "string",
+     "description": "Category to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_get_product",
+  "title": "Get a product",
+  "description": "Returns one product in full: prices, variants, images, stock and description.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_search_products",
+  "title": "Search products",
+  "description": "Finds products by name, SKU or barcode.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Name, SKU or barcode"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_product",
+  "title": "Create a product",
+  "description": "Adds a product to the catalog with a name, a price and a stock.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Product name"
+    },
+    "price": {
+     "type": "string",
+     "description": "Price"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_update_product",
+  "title": "Update a product",
+  "description": "Changes the name, price, description or images of a product.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    },
+    "price": {
+     "type": "string",
+     "description": "New price"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_delete_product",
+  "title": "Delete a product",
+  "description": "Deletes a product from the catalog for good.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_set_product_visibility",
+  "title": "Show or hide a product",
+  "description": "Publishes a product on the storefront or hides it, without deleting it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    },
+    "visible": {
+     "type": "string",
+     "description": "true to show it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_get_inventory",
+  "title": "Get inventory",
+  "description": "Returns the stock level of a product in each warehouse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_set_inventory_level",
+  "title": "Set inventory level",
+  "description": "Sets the quantity in stock of a product in a warehouse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "product_id": {
+     "type": "string",
+     "description": "Product identifier"
+    },
+    "quantity": {
+     "type": "string",
+     "description": "Quantity in stock"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_low_inventory",
+  "title": "List low inventory",
+  "description": "Lists the products whose stock is below their alert threshold.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "threshold": {
+     "type": "string",
+     "description": "Alert threshold"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_list_coupons",
+  "title": "List coupons",
+  "description": "Lists discount coupons with their code, value and expiry.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_coupon",
+  "title": "Create a coupon",
+  "description": "Creates a discount coupon code, as a percentage or an amount.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "code": {
+     "type": "string",
+     "description": "Coupon code"
+    },
+    "value": {
+     "type": "string",
+     "description": "Discount value"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_delete_coupon",
+  "title": "Delete a coupon",
+  "description": "Deletes a discount coupon. Orders that used it keep their discount.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "code": {
+     "type": "string",
+     "description": "Coupon code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_posts",
+  "title": "List blog posts",
+  "description": "Lists the posts of the blog with their status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "draft or published"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_get_post",
+  "title": "Get a blog post",
+  "description": "Returns one blog post with its content.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "post_id": {
+     "type": "string",
+     "description": "Post identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_post",
+  "title": "Create a blog post",
+  "description": "Writes a new blog post as a draft.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "body": {
+     "type": "string",
+     "description": "Content"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_update_post",
+  "title": "Update a blog post",
+  "description": "Changes the title or content of a blog post.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "post_id": {
+     "type": "string",
+     "description": "Post identifier"
+    },
+    "body": {
+     "type": "string",
+     "description": "New content"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_publish_post",
+  "title": "Publish a blog post",
+  "description": "Publishes a draft post on the blog.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "post_id": {
+     "type": "string",
+     "description": "Post identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_delete_post",
+  "title": "Delete a blog post",
+  "description": "Deletes a blog post.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "post_id": {
+     "type": "string",
+     "description": "Post identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_comments",
+  "title": "List comments",
+  "description": "Lists the comments left on blog posts, newest first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "post_id": {
+     "type": "string",
+     "description": "Post identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_delete_comment",
+  "title": "Delete a comment",
+  "description": "Deletes a comment from a blog post, for spam or abuse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "comment_id": {
+     "type": "string",
+     "description": "Comment identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_get_sales_report",
+  "title": "Get the sales report",
+  "description": "Returns revenue, order count and average basket over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Start date"
+    },
+    "to": {
+     "type": "string",
+     "description": "End date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_list_top_products",
+  "title": "List best-selling products",
+  "description": "Lists the products that sold the most over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Start date"
+    },
+    "to": {
+     "type": "string",
+     "description": "End date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_list_shipping_methods",
+  "title": "List shipping methods",
+  "description": "Lists the carriers and shipping methods offered at checkout, with their price.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_shipment",
+  "title": "Create a shipment",
+  "description": "Creates a shipment for an order and books the carrier.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    },
+    "carrier": {
+     "type": "string",
+     "description": "Carrier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_get_shipment_tracking",
+  "title": "Get shipment tracking",
+  "description": "Returns the tracking number and delivery progress of a shipment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "order_id": {
+     "type": "string",
+     "description": "Identifier of the order"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_list_users",
+  "title": "List staff users",
+  "description": "Lists the staff accounts of the back office with their role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_invite_user",
+  "title": "Invite a staff user",
+  "description": "Sends an invitation to a new staff member with a role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_set_user_role",
+  "title": "Change a staff role",
+  "description": "Changes the role and permissions of a staff account.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "User identifier"
+    },
+    "role": {
+     "type": "string",
+     "description": "New role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_clear_cache",
+  "title": "Clear the cache",
+  "description": "Empties the cache of the store so changes show at once.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_get_settings",
+  "title": "Get store settings",
+  "description": "Returns the store name, currency, languages and time zone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_update_settings",
+  "title": "Update store settings",
+  "description": "Changes the store name, currency, languages or time zone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Store name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_list_webhooks",
+  "title": "List webhooks",
+  "description": "Lists the webhooks the store calls on events.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acme_create_webhook",
+  "title": "Create a webhook",
+  "description": "Registers an address the store calls when an event happens.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": "string",
+     "description": "Address to call"
+    },
+    "event": {
+     "type": "string",
+     "description": "Event"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_delete_webhook",
+  "title": "Delete a webhook",
+  "description": "Removes a webhook.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "webhook_id": {
+     "type": "string",
+     "description": "Webhook identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acme_send_newsletter",
+  "title": "Send a newsletter",
+  "description": "Sends an email campaign to the subscribers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "body": {
+     "type": "string",
+     "description": "Content"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ }
+]

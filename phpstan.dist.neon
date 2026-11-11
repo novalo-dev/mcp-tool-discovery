@@ -1,0 +1,11 @@
+includes:
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The highest level for the library itself: it is small, has no framework
+    # to excuse a loose type, and every host relies on its contracts.
+    level: max
+    phpVersion: 80100
+    paths:
+        - src
+        - bin

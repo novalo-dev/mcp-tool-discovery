@@ -1,0 +1,7 @@
+parameters:
+    # Tests read decoded JSON answers, mixed by nature: level 6 keeps types
+    # and signatures checked without an assertion per array offset.
+    level: 6
+    phpVersion: 80100
+    paths:
+        - tests
