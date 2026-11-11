@@ -1,0 +1,823 @@
+[
+ {
+  "name": "people.directory",
+  "title": "Employee directory",
+  "description": "Lists the employees with their team, manager and office.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "team": {
+     "type": "string",
+     "description": "Team to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "people.profile",
+  "title": "Employee profile",
+  "description": "Returns one employee: role, manager, start date, contact details.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "people.find",
+  "title": "Find an employee",
+  "description": "Finds employees by name, email or skill.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Name, email or skill"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "people.hire",
+  "title": "Add an employee",
+  "description": "Creates the record of a new hire with their start date and role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    },
+    "role": {
+     "type": "string",
+     "description": "Job title"
+    },
+    "start_date": {
+     "type": "string",
+     "description": "First day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "people.update",
+  "title": "Update an employee",
+  "description": "Changes the job title, team, manager or contact details of an employee.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "title": {
+     "type": "string",
+     "description": "New job title"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "people.offboard",
+  "title": "Offboard an employee",
+  "description": "Records the departure of an employee and starts the leaving checklist.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "last_day": {
+     "type": "string",
+     "description": "Last working day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "org.chart",
+  "title": "Organisation chart",
+  "description": "Returns the reporting lines of a team or the whole company.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "team": {
+     "type": "string",
+     "description": "Team"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teams.list",
+  "title": "Teams",
+  "description": "Lists the teams with their lead and headcount.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teams.create",
+  "title": "Create a team",
+  "description": "Creates a team and sets its lead.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "lead": {
+     "type": "string",
+     "description": "Team lead"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "leave.balance",
+  "title": "Leave balance",
+  "description": "Returns the days of holiday and sick leave an employee has left.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "leave.request",
+  "title": "Request time off",
+  "description": "Files a request for holiday or other leave between two dates.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "from": {
+     "type": "string",
+     "description": "First day"
+    },
+    "to": {
+     "type": "string",
+     "description": "Last day"
+    },
+    "type": {
+     "type": "string",
+     "description": "holiday, sick, unpaid"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "leave.approve",
+  "title": "Approve time off",
+  "description": "Approves or declines a pending leave request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request identifier"
+    },
+    "decision": {
+     "type": "string",
+     "description": "approve or decline"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "leave.calendar",
+  "title": "Team absences",
+  "description": "Shows who is away and when, for a team, over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "team": {
+     "type": "string",
+     "description": "Team"
+    },
+    "from": {
+     "type": "string",
+     "description": "Start"
+    },
+    "to": {
+     "type": "string",
+     "description": "End"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "leave.pending",
+  "title": "Pending leave requests",
+  "description": "Lists the leave requests waiting for a decision.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "manager": {
+     "type": "string",
+     "description": "Manager"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "time.entries",
+  "title": "Timesheet entries",
+  "description": "Lists the hours an employee logged per day and project.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "week": {
+     "type": "string",
+     "description": "Week"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "time.log",
+  "title": "Log hours",
+  "description": "Records hours worked on a project for a day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "project": {
+     "type": "string",
+     "description": "Project"
+    },
+    "hours": {
+     "type": "string",
+     "description": "Hours"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "time.submit",
+  "title": "Submit a timesheet",
+  "description": "Sends a week of hours to the manager for approval.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "week": {
+     "type": "string",
+     "description": "Week"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "payroll.payslips",
+  "title": "Payslips",
+  "description": "Lists the payslips of an employee.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payroll.run",
+  "title": "Run payroll",
+  "description": "Calculates and books the salaries of a month.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "payroll.adjust",
+  "title": "Adjust a salary",
+  "description": "Changes the salary of an employee from a given date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "amount": {
+     "type": "string",
+     "description": "New salary"
+    },
+    "from": {
+     "type": "string",
+     "description": "Effective date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "expenses.list",
+  "title": "Expense claims",
+  "description": "Lists expense claims with their amount and status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "Status to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "expenses.submit",
+  "title": "Submit an expense",
+  "description": "Files an expense claim with its receipt.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "amount": {
+     "type": "string",
+     "description": "Amount"
+    },
+    "receipt": {
+     "type": "string",
+     "description": "Receipt file"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "expenses.approve",
+  "title": "Approve an expense",
+  "description": "Approves or rejects an expense claim.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "claim_id": {
+     "type": "string",
+     "description": "Claim identifier"
+    },
+    "decision": {
+     "type": "string",
+     "description": "approve or reject"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "reviews.cycles",
+  "title": "Review cycles",
+  "description": "Lists the performance review cycles and their deadlines.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reviews.start",
+  "title": "Start a review cycle",
+  "description": "Opens a performance review cycle for a group of employees.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "deadline": {
+     "type": "string",
+     "description": "Deadline"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "reviews.feedback",
+  "title": "Give feedback",
+  "description": "Writes feedback about a colleague for a review cycle.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "text": {
+     "type": "string",
+     "description": "Feedback"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "goals.list",
+  "title": "Goals",
+  "description": "Lists the goals of an employee or a team and their progress.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "goals.set",
+  "title": "Set a goal",
+  "description": "Creates a goal with a target and a due date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "goal": {
+     "type": "string",
+     "description": "Goal"
+    },
+    "due": {
+     "type": "string",
+     "description": "Due date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "training.courses",
+  "title": "Training courses",
+  "description": "Lists the courses employees can take.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "topic": {
+     "type": "string",
+     "description": "Topic"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "training.enroll",
+  "title": "Enroll in a course",
+  "description": "Signs an employee up for a training course.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "course_id": {
+     "type": "string",
+     "description": "Course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "recruiting.jobs",
+  "title": "Open positions",
+  "description": "Lists the open job positions and their hiring manager.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recruiting.post",
+  "title": "Post a job",
+  "description": "Publishes a new job opening.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Job title"
+    },
+    "team": {
+     "type": "string",
+     "description": "Team"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "recruiting.candidates",
+  "title": "Candidates",
+  "description": "Lists the candidates of a position and their stage.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "Position"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recruiting.advance",
+  "title": "Move a candidate",
+  "description": "Moves a candidate to the next stage, such as interview or offer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "candidate_id": {
+     "type": "string",
+     "description": "Candidate"
+    },
+    "stage": {
+     "type": "string",
+     "description": "Stage"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "recruiting.interview",
+  "title": "Schedule an interview",
+  "description": "Books an interview between a candidate and interviewers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "candidate_id": {
+     "type": "string",
+     "description": "Candidate"
+    },
+    "time": {
+     "type": "string",
+     "description": "Time"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "benefits.plans",
+  "title": "Benefit plans",
+  "description": "Lists the health, pension and other plans an employee is enrolled in.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "documents.sign",
+  "title": "Send for signature",
+  "description": "Sends a contract or policy to an employee to sign.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    },
+    "document": {
+     "type": "string",
+     "description": "Document"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "documents.list",
+  "title": "Employee documents",
+  "description": "Lists the contracts and documents on file for an employee.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee_id": {
+     "type": "string",
+     "description": "Employee identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "surveys.results",
+  "title": "Survey results",
+  "description": "Returns the results of an engagement survey.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "survey_id": {
+     "type": "string",
+     "description": "Survey"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reports.headcount",
+  "title": "Headcount report",
+  "description": "Returns headcount, hires and departures over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Start"
+    },
+    "to": {
+     "type": "string",
+     "description": "End"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

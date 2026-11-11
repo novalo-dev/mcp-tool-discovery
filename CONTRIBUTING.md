@@ -15,7 +15,7 @@ on the shape before you spend an evening on it.
 - **`main`** only receives `develop`, merged by the maintainer for a release.
   A pull request to `main` from any other branch fails the **Branches** check.
 - Branch from `develop` and name the branch after the change: `mode/grouped`,
-  `search/verb-table`, `fix/empty-properties`.
+  `search/field-weights`, `fix/empty-properties`.
 
 ## Setup
 
@@ -98,15 +98,17 @@ A mode that fails the contract is not merged, however useful.
 
 The search is measured, not tuned by feel.
 
-- `composer benchmark` prints the score on the fixture server. A change must not
-  lower it: `tests/Search/BenchmarkTest.php` holds the floors.
+- `composer benchmark` prints the scores on the three fixture servers. A change
+  must not lower them: `tests/Search/BenchmarkTest.php` holds the floors.
 - A change that raises it raises the floors in the same pull request, and
   updates the numbers in docs/SEARCH.md and the README.
 - New fixture queries go in `tests/Fixtures/queries.json`, written **before**
   running them against your change, so the benchmark keeps measuring and does
-  not just repeat what was tuned.
-- `VerbIntent` holds plain English action words only. A word of a business
-  ("meeting", "admin") belongs in the host's synonyms, not in the library.
+  not just repeat what was tuned. Settings are chosen on the `train` half and
+  judged on the `test` half.
+- The library holds no list of words and assumes no naming convention: no stop
+  words, no verbs, no prefix to strip. A word of a business ("meeting",
+  "admin") belongs in the host's synonyms, not in the library.
 
 ## Protocol revisions
 

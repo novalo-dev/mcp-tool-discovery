@@ -1,0 +1,829 @@
+[
+ {
+  "name": "repositories",
+  "title": "Repositories",
+  "description": "Lists the code repositories of the organisation with their language and last push.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Organisation or user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repositoryDetails",
+  "title": "Repository details",
+  "description": "Returns one repository: description, default branch, visibility, stars and open issues.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "newRepository",
+  "title": "New repository",
+  "description": "Creates an empty code repository, public or private.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "private": {
+     "type": "string",
+     "description": "true for private"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "archiveRepository",
+  "title": "Archive a repository",
+  "description": "Makes a repository read-only and hides it from active lists.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "branches",
+  "title": "Branches",
+  "description": "Lists the branches of a repository with their last commit.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "branchCreate",
+  "title": "Create a branch",
+  "description": "Starts a new branch from another branch or a commit.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "from": {
+     "type": "string",
+     "description": "Source branch or commit"
+    },
+    "name": {
+     "type": "string",
+     "description": "New branch"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "branchRemove",
+  "title": "Delete a branch",
+  "description": "Deletes a branch that is no longer needed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "name": {
+     "type": "string",
+     "description": "Branch"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "commitHistory",
+  "title": "Commit history",
+  "description": "Lists the commits of a branch with author, date and message.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "branch": {
+     "type": "string",
+     "description": "Branch"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fileContent",
+  "title": "File content",
+  "description": "Returns the content of a file at a given branch or commit.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "path": {
+     "type": "string",
+     "description": "Path of the file"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "codeSearch",
+  "title": "Search code",
+  "description": "Finds code by text or symbol across repositories.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Text or symbol"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pullRequests",
+  "title": "Pull requests",
+  "description": "Lists pull requests with their state, author and reviewers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "state": {
+     "type": "string",
+     "description": "open, closed or merged"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pullRequest",
+  "title": "Pull request",
+  "description": "Returns one pull request with its diff summary, checks and comments.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "number": {
+     "type": "string",
+     "description": "Pull request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "openPullRequest",
+  "title": "Open a pull request",
+  "description": "Proposes the changes of a branch for review and merge.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "head": {
+     "type": "string",
+     "description": "Branch with the changes"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "mergePullRequest",
+  "title": "Merge a pull request",
+  "description": "Merges an approved pull request into its base branch.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "number": {
+     "type": "string",
+     "description": "Pull request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "requestReview",
+  "title": "Request a review",
+  "description": "Asks people to review a pull request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Pull request number"
+    },
+    "reviewers": {
+     "type": "string",
+     "description": "People"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "approvePullRequest",
+  "title": "Approve a pull request",
+  "description": "Leaves an approving review on a pull request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Pull request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "commentOnPullRequest",
+  "title": "Comment on a pull request",
+  "description": "Adds a comment to the conversation of a pull request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Pull request number"
+    },
+    "body": {
+     "type": "string",
+     "description": "Comment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "issues",
+  "title": "Issues",
+  "description": "Lists the issues of a repository with labels and assignees.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "label": {
+     "type": "string",
+     "description": "Label to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "issue",
+  "title": "Issue",
+  "description": "Returns one issue with its comments and linked pull requests.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "number": {
+     "type": "string",
+     "description": "Issue number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fileIssue",
+  "title": "File an issue",
+  "description": "Opens an issue to report a bug or suggest a feature.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "body": {
+     "type": "string",
+     "description": "Description"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "closeIssue",
+  "title": "Close an issue",
+  "description": "Closes an issue as done or not planned.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "number": {
+     "type": "string",
+     "description": "Issue number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "labelIssue",
+  "title": "Label an issue",
+  "description": "Adds labels to an issue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Issue number"
+    },
+    "labels": {
+     "type": "string",
+     "description": "Labels"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "assignIssue",
+  "title": "Assign an issue",
+  "description": "Gives an issue to one or more people.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Issue number"
+    },
+    "assignees": {
+     "type": "string",
+     "description": "People"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "milestones",
+  "title": "Milestones",
+  "description": "Lists the milestones of a repository with their due date and progress.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pipelineRuns",
+  "title": "Pipeline runs",
+  "description": "Lists the CI pipeline runs of a repository with their result.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "branch": {
+     "type": "string",
+     "description": "Branch"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pipelineRun",
+  "title": "Pipeline run",
+  "description": "Returns one CI run: jobs, steps, duration and failure reason.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "run_id": {
+     "type": "string",
+     "description": "Run identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rerunPipeline",
+  "title": "Re-run a pipeline",
+  "description": "Starts a failed CI run again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "run_id": {
+     "type": "string",
+     "description": "Run identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "cancelPipeline",
+  "title": "Cancel a pipeline",
+  "description": "Stops a CI run that is in progress.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "run_id": {
+     "type": "string",
+     "description": "Run identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "jobLog",
+  "title": "Job log",
+  "description": "Returns the log output of one CI job.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "Job identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releases",
+  "title": "Releases",
+  "description": "Lists the published releases of a repository.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publishRelease",
+  "title": "Publish a release",
+  "description": "Tags a commit and publishes a release with notes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "tag": {
+     "type": "string",
+     "description": "Version tag"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Release notes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "secrets",
+  "title": "Secrets",
+  "description": "Lists the names of the CI secrets of a repository, never their values.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setSecret",
+  "title": "Set a secret",
+  "description": "Creates or replaces a CI secret.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "name": {
+     "type": "string",
+     "description": "Secret name"
+    },
+    "value": {
+     "type": "string",
+     "description": "Value"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "members",
+  "title": "Members",
+  "description": "Lists the members of the organisation and their teams.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addMember",
+  "title": "Add a member",
+  "description": "Invites a person to the organisation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email"
+    },
+    "team": {
+     "type": "string",
+     "description": "Team"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "removeMember",
+  "title": "Remove a member",
+  "description": "Removes a person from the organisation and its repositories.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "Username"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "teamPermissions",
+  "title": "Change team permissions",
+  "description": "Sets what a team may do on a repository: read, write or admin.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "team": {
+     "type": "string",
+     "description": "Team"
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    },
+    "permission": {
+     "type": "string",
+     "description": "read, write or admin"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "auditLog",
+  "title": "Audit log",
+  "description": "Lists the security events of the organisation: sign-ins, permission changes, deletions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "since": {
+     "type": "string",
+     "description": "Start date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "dependencyAlerts",
+  "title": "Dependency alerts",
+  "description": "Lists the known vulnerabilities in the dependencies of a repository.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repo": {
+     "type": "string",
+     "description": "Repository name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "webhookDeliveries",
+  "title": "Webhook deliveries",
+  "description": "Lists the recent calls of a webhook and their response codes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hook_id": {
+     "type": "string",
+     "description": "Webhook identifier"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

@@ -21,14 +21,17 @@ namespace Novalo\McpToolDiscovery\Search;
  * each field is normalised on its own. A rare word weighs more than a common
  * one ("rollback" against "file"), and repeating a word earns less each time.
  *
- * Built per request from a few hundred documents in well under a millisecond
- * each, so there is no file, no lock and nothing to rebuild when the host's
- * list changes. Know nothing of tools: any document with text fields fits.
+ * Building it is the cost of a search, so it can be saved as a plain array
+ * (toArray) and restored (fromArray) by a cache. It knows nothing of tools:
+ * any document with text fields fits.
  */
 final class Index
 {
     private const K1 = 1.2;
     private const B = 0.75;
+
+    /** Raised whenever the saved shape changes, so an old cache entry is rebuilt. */
+    private const FORMAT = 1;
 
     /**
      * @param array<int|string, array<string, array{0: array<array-key, int>, 1: int, 2: array<array-key, int>, 3: int}>> $documents
@@ -56,7 +59,7 @@ final class Index
      * @param array<string, float> $weights field => weight; a field missing here is not indexed
      * @param float $trigramWeight how much trigram matches count against whole-word matches
      */
-    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.35): self
+    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6): self
     {
         $indexed = [];
         $wordFrequency = [];
@@ -157,5 +160,74 @@ final class Index
         }
 
         return $score;
+    }
+
+    /**
+     * Whether a word, as the Analyzer cuts it, appears in any document.
+     */
+    public function has(string $word): bool
+    {
+        return isset($this->wordFrequency[$word]);
+    }
+
+    /**
+     * The ids of the documents, in index order.
+     *
+     * @return list<int|string>
+     */
+    public function ids(): array
+    {
+        return array_keys($this->documents);
+    }
+
+    /**
+     * The index as a plain array of scalars, for a cache to keep.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        return [
+            'format' => self::FORMAT,
+            'documents' => $this->documents,
+            'weights' => $this->weights,
+            'averages' => $this->averages,
+            'words' => $this->wordFrequency,
+            'grams' => $this->gramFrequency,
+            'trigramWeight' => $this->trigramWeight,
+        ];
+    }
+
+    /**
+     * An index saved by toArray(), or null when the array is not one, so the
+     * caller builds it again rather than searching a broken index.
+     *
+     * @param array<array-key, mixed> $saved
+     */
+    public static function fromArray(array $saved, Analyzer $analyzer = new Analyzer()): ?self
+    {
+        if (($saved['format'] ?? null) !== self::FORMAT) {
+            return null;
+        }
+        foreach (['documents', 'weights', 'averages', 'words', 'grams'] as $key) {
+            if (!is_array($saved[$key] ?? null)) {
+                return null;
+            }
+        }
+        if (!is_float($saved['trigramWeight'] ?? null) && !is_int($saved['trigramWeight'] ?? null)) {
+            return null;
+        }
+        /** @var array<int|string, array<string, array{0: array<array-key, int>, 1: int, 2: array<array-key, int>, 3: int}>> $documents */
+        $documents = $saved['documents'];
+        /** @var array<string, float> $weights */
+        $weights = $saved['weights'];
+        /** @var array<string, array{0: float, 1: float}> $averages */
+        $averages = $saved['averages'];
+        /** @var array<array-key, int> $words */
+        $words = $saved['words'];
+        /** @var array<array-key, int> $grams */
+        $grams = $saved['grams'];
+
+        return new self($analyzer, $documents, $weights, $averages, $words, $grams, (float) $saved['trigramWeight']);
     }
 }

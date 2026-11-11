@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Tests\Conformance;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Opis\JsonSchema\Validator;
 
@@ -54,12 +55,16 @@ final class Conformance
         $modes = [
             'compact' => new CompactMode(),
             'compact with prefix and pin' => new CompactMode(prefix: 'acme_', pinned: ['acme_get_settings']),
+            'compact that learns' => new CompactMode(learning: new MemoryLearningStore()),
         ];
         foreach ($modes as $label => $mode) {
             $discovery = new Discovery($mode, new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
-            $own = static fn(string $name): string => $label === 'compact' ? $name : 'acme_' . $name;
+            $own = static fn(string $name): string => $label === 'compact with prefix and pin' ? 'acme_' . $name : $name;
             $checks[$label . ': tools/list'] = ['definition' => 'ListToolsResult', 'value' => $discovery->listTools($tools, $revision, 60000)];
             $checks[$label . ': search with a query'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'ticket status'], $tools, $revision)];
+            $checks[$label . ': search in fields'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['action' => 'change', 'object' => 'ticket status', 'description' => 'move a ticket to done'], $tools, $revision)];
+            $checks[$label . ': search with unknown words'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['action' => 'zzzz', 'object' => 'ticket'], $tools, $revision)];
+            $checks[$label . ': run with a search id'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_get_file', 'arguments' => ['file_id' => '1'], 'search_id' => 'ZmlsZQ'], $tools, $revision)];
             $checks[$label . ': search by names'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['names' => ['acme_get_file', 'acme_nope']], $tools, $revision)];
             $checks[$label . ': search with no argument'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), [], $tools, $revision)];
             $checks[$label . ': search with nothing found'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'zzzz'], $tools, $revision)];

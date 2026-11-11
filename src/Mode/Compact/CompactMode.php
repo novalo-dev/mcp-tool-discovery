@@ -17,7 +17,10 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Protocol\Json;
+use Novalo\McpToolDiscovery\Search\Cache\IndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\LearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
+use Novalo\McpToolDiscovery\Search\SearchQuery;
 use Novalo\McpToolDiscovery\Search\ToolSearch;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -53,6 +56,8 @@ final class CompactMode implements DiscoveryMode
      * @param list<string> $pinned host tools listed as themselves next to the three, e.g. a ping
      * @param array{search?: string, read?: string, write?: string} $titles the titles shown to people, translated by the host
      * @param (callable(Tool): string)|null $groupOf the group a tool belongs to, for the list a search with no argument gives
+     * @param IndexCache|null $indexCache keeps the search index between requests
+     * @param LearningStore|null $learning learns from the tools run after a search; none by default
      * @param int $maxDescribed the most tools one search describes in full
      * @param bool $schemaOnError add the tool's parameters to a failed run, so the assistant can fix its call
      */
@@ -62,6 +67,8 @@ final class CompactMode implements DiscoveryMode
         private readonly array $titles = [],
         ?callable $groupOf = null,
         private readonly SearchOptions $searchOptions = new SearchOptions(),
+        private readonly ?IndexCache $indexCache = null,
+        private readonly ?LearningStore $learning = null,
         private readonly int $maxDescribed = 10,
         private readonly bool $schemaOnError = true,
     ) {
@@ -156,16 +163,28 @@ final class CompactMode implements DiscoveryMode
                 'name' => $this->searchName,
                 'title' => $this->titles['search'] ?? 'Search the tools',
                 'description' => sprintf(
-                    'Finds the tools you may use on this server and gives their parameters. The server lists its tools in compact form: call this first, then run what you found with %s (reads) or %s (changes), as each result says. Give keywords in English ("ticket status", "backup"), or the exact names a guide gives. With neither, lists every tool you may use, names only. Reads only.',
+                    'Finds the tools you may use on this server and gives their parameters. The server lists its tools in compact form: call this first, then run what you found with %s (reads) or %s (changes), as each result says. Say what you look for in separate fields, in English: action, object and description. Or give the exact names a guide gives. With nothing, lists every tool you may use, names only. Reads only.',
                     $this->readName,
                     $this->writeName,
                 ),
                 'inputSchema' => [
                     'type' => 'object',
                     'properties' => [
+                        'action' => [
+                            'type' => 'string',
+                            'description' => 'What to do, one or two words, e.g. "change", "list", "restore".',
+                        ],
+                        'object' => [
+                            'type' => 'string',
+                            'description' => 'What it is done to, e.g. "ticket status", "backup".',
+                        ],
+                        'description' => [
+                            'type' => 'string',
+                            'description' => sprintf('The request in a short sentence, e.g. "move the ticket to done". Up to %d tools come back, best match first, each with its inputSchema.', $this->maxDescribed),
+                        ],
                         'query' => [
                             'type' => 'string',
-                            'description' => sprintf('Keywords in English, e.g. "restore a backup". Up to %d tools come back, best match first, each with its inputSchema.', $this->maxDescribed),
+                            'description' => 'Free keywords, when the request does not split into fields. The fields find the right tool more often.',
                         ],
                         'names' => [
                             'type' => 'array',
@@ -177,23 +196,30 @@ final class CompactMode implements DiscoveryMode
                 ],
                 'annotations' => ['readOnlyHint' => true, 'destructiveHint' => false, 'idempotentHint' => true, 'openWorldHint' => false],
             ]),
-            self::runner($this->readName, $this->titles['read'] ?? 'Run a reading tool', 'Runs one tool that only reads, found with ' . $this->searchName . '. A tool that changes something is refused here: run it with ' . $this->writeName . '.', true),
-            self::runner($this->writeName, $this->titles['write'] ?? 'Run a tool that changes something', 'Runs one tool that changes something, found with ' . $this->searchName . '. Ask the person before each call, as for any change. A tool that only reads is refused here: run it with ' . $this->readName . '.', false),
+            $this->runner($this->readName, $this->titles['read'] ?? 'Run a reading tool', 'Runs one tool that only reads, found with ' . $this->searchName . '. A tool that changes something is refused here: run it with ' . $this->writeName . '.', true),
+            $this->runner($this->writeName, $this->titles['write'] ?? 'Run a tool that changes something', 'Runs one tool that changes something, found with ' . $this->searchName . '. Ask the person before each call, as for any change. A tool that only reads is refused here: run it with ' . $this->readName . '.', false),
         ];
     }
 
-    private static function runner(string $name, string $title, string $description, bool $reads): Tool
+    private function runner(string $name, string $title, string $description, bool $reads): Tool
     {
+        $properties = [
+            'name' => ['type' => 'string', 'description' => 'The exact name of the tool, as the search gave it.'],
+            'arguments' => ['type' => 'object', 'description' => 'The arguments of that tool, following its inputSchema.'],
+        ];
+        // Offered only when the host learns: a parameter nothing reads would
+        // only cost the assistant tokens.
+        if ($this->learning !== null) {
+            $properties['search_id'] = ['type' => 'string', 'description' => 'The search_id of the search that found the tool, so the next searches find it sooner.'];
+        }
+
         return Tool::fromArray([
             'name' => $name,
             'title' => $title,
             'description' => $description,
             'inputSchema' => [
                 'type' => 'object',
-                'properties' => [
-                    'name' => ['type' => 'string', 'description' => 'The exact name of the tool, as the search gave it.'],
-                    'arguments' => ['type' => 'object', 'description' => 'The arguments of that tool, following its inputSchema.'],
-                ],
+                'properties' => $properties,
                 'required' => ['name'],
                 'additionalProperties' => false,
             ],
@@ -210,18 +236,21 @@ final class CompactMode implements DiscoveryMode
      */
     private function search(array $arguments, ToolSet $visible): CallResult
     {
-        $query = $arguments['query'] ?? null;
         $names = $arguments['names'] ?? null;
-        if (($query !== null && !is_string($query)) || ($names !== null && !is_array($names))) {
-            return CallResult::error('query must be a string and names a list of tool names.');
+        try {
+            $query = SearchQuery::fromArguments($arguments);
+        } catch (\InvalidArgumentException) {
+            $query = null;
+        }
+        if ($query === null || ($names !== null && !is_array($names))) {
+            return CallResult::error('action, object, description and query must be strings, and names a list of tool names.');
         }
         $names = array_values(array_unique(array_filter(
             array_map(static fn($name): string => is_string($name) ? trim($name) : '', $names ?? []),
             static fn(string $name): bool => $name !== '',
         )));
-        $query = trim($query ?? '');
 
-        if ($query === '' && $names === []) {
+        if ($query->isEmpty() && $names === []) {
             return CallResult::json(['tools' => $this->everyTool($visible)]);
         }
 
@@ -237,8 +266,12 @@ final class CompactMode implements DiscoveryMode
                 $found[$name] = $tool;
             }
         }
-        if ($query !== '' && count($found) < $this->maxDescribed) {
-            foreach ((new ToolSearch($visible, $this->searchOptions))->search($query, $this->maxDescribed) as $tool) {
+        $result = null;
+        $search = null;
+        if (!$query->isEmpty() && count($found) < $this->maxDescribed) {
+            $search = $this->toolSearch($visible);
+            $result = $search->find($query, $this->maxDescribed);
+            foreach ($result->tools as $tool) {
                 if (count($found) >= $this->maxDescribed) {
                     break;
                 }
@@ -256,11 +289,27 @@ final class CompactMode implements DiscoveryMode
         if ($unknown !== []) {
             $answer['unknown'] = $unknown;
         }
+        if ($this->learning !== null && $result !== null && $result->searchId !== null && $result->tools !== []) {
+            $answer['search_id'] = $result->searchId;
+        }
+        if ($search !== null && ($found === [] || $result->unmatched !== [])) {
+            // The words this server uses, computed from its own tools, so the
+            // assistant can say again what no tool understood.
+            if ($result->unmatched !== []) {
+                $answer['unmatched'] = array_map([ToolRunner::class, 'printable'], $result->unmatched);
+            }
+            $answer['vocabulary'] = $search->vocabulary();
+        }
         if ($found === []) {
-            $answer['hint'] = 'Nothing matches. Try other keywords in English, or call with no argument for every tool you may use.';
+            $answer['hint'] = 'Nothing matches. Say it again with words from vocabulary, or call with no argument for every tool you may use.';
         }
 
         return CallResult::json($answer);
+    }
+
+    private function toolSearch(ToolSet $visible): ToolSearch
+    {
+        return new ToolSearch($visible, $this->searchOptions, $this->indexCache, $this->learning);
     }
 
     /**
@@ -310,6 +359,10 @@ final class CompactMode implements DiscoveryMode
         }
         /** @var array<string, mixed> $inner */
         $result = $runner->run($name, $inner);
+        $searchId = $arguments['search_id'] ?? null;
+        if ($this->learning !== null && $tool !== null && !$result->isError && is_string($searchId) && $searchId !== '') {
+            $this->toolSearch($runner->visible())->learn($searchId, $name);
+        }
         if ($tool !== null && $result->isError && $this->schemaOnError) {
             $schema = json_encode($tool->inputSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             if (is_string($schema)) {

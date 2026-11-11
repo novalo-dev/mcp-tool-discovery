@@ -37,6 +37,8 @@ final class CompactModeContractTest extends ModeContractTestCase
         return [
             [CompactMode::SEARCH, []],
             [CompactMode::SEARCH, ['query' => 'list users staff']],
+            [CompactMode::SEARCH, ['action' => 'list', 'object' => 'users', 'description' => 'every member of the staff']],
+            [CompactMode::SEARCH, ['action' => 'deactivate', 'object' => 'zzzz']],
             [CompactMode::SEARCH, ['names' => [self::READ]]],
         ];
     }

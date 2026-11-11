@@ -13,19 +13,29 @@ declare(strict_types=1);
 
 
 /*
- * Prints the score of the search benchmark and writes its shields.io endpoint
- * file into build/badges/.
+ * Prints the scores of the search benchmark and writes the shields.io endpoint
+ * file of the one that counts, the requests in fields, into build/badges/.
  */
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Novalo\McpToolDiscovery\Tests\Fixtures\Benchmark;
 
-$score = Benchmark::run();
-printf("Right tool first: %d/%d\nRight tool in the top 3: %d/%d\n", $score['first'], $score['queries'], $score['top3'], $score['queries']);
-foreach ($score['misses'] as $miss) {
+$labels = [
+    'fields' => 'In fields, nothing learned',
+    'sentence' => 'The same requests as one sentence',
+    'learnedUnseen' => 'In fields, after learning from the other half',
+    'learnedAgain' => 'In fields, asked a second time',
+];
+$scores = Benchmark::run();
+echo "Test half, requests kept aside while the settings were chosen:\n";
+foreach ($labels as $key => $label) {
+    printf("  %-46s first %3d/%d   top 3 %3d/%d\n", $label, $scores[$key]['first'], $scores[$key]['queries'], $scores[$key]['top3'], $scores[$key]['queries']);
+}
+foreach ($scores['fields']['misses'] as $miss) {
     echo '  missed ', $miss, "\n";
 }
+$score = $scores['fields'];
 $dir = dirname(__DIR__) . '/build/badges';
 if (!is_dir($dir) && !mkdir($dir, 0o777, true) && !is_dir($dir)) {
     fwrite(STDERR, 'Cannot create ' . $dir . "\n");

@@ -69,9 +69,19 @@ final class RecordingGate implements ToolGate
      */
     public static function fixtureTools(): ToolSet
     {
-        $json = file_get_contents(__DIR__ . '/tools.json');
+        return self::server('tools');
+    }
+
+    /**
+     * One of the fixture servers: tools (a workspace, snake_case names),
+     * platform (a developer platform, camelCase) or people (people
+     * operations, dotted names).
+     */
+    public static function server(string $file): ToolSet
+    {
+        $json = file_get_contents(__DIR__ . '/' . $file . '.json');
         if ($json === false) {
-            throw new \RuntimeException('tests/Fixtures/tools.json is missing.');
+            throw new \RuntimeException('tests/Fixtures/' . $file . '.json is missing.');
         }
         /** @var list<array<string, mixed>> $definitions */
         $definitions = json_decode($json, true, 512, JSON_THROW_ON_ERROR);

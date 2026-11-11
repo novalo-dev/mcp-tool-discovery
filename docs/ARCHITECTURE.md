@@ -17,7 +17,9 @@ src/
   Mode/
     DiscoveryMode.php    the contract of a mode
     Compact/             the compact pack
-  Search/                Analyzer, Index (BM25F), ToolSearch, VerbIntent, SearchOptions
+  Search/                Analyzer, Index (BM25F), ToolSearch, SearchQuery, SearchOptions
+    Cache/               IndexCache: in memory, in PHP files
+    Learning/            LearningStore: in memory, in a JSON file
   Exception/
 ```
 
@@ -118,7 +120,9 @@ package of its own, so the core keeps none.
 
 ## Performance
 
-Everything is built per request, in memory. For 135 tools, building the search
-index takes about 12 ms and a query about 1 ms; for 500 tools the test suite
-holds the whole of it under a generous bound. There is no file, no lock and no
-cache to invalidate when the host's list changes.
+Without a cache, the search index is built per request, in memory: about 2 ms
+for 50 tools and 25 ms for 500, query included. With an `IndexCache`, the build
+is done once per set of visible tools: a search over 500 tools then takes
+about 6 ms, and the `FileIndexCache` read through OPcache costs no more than
+memory. The cache key is a hash of every text indexed, so there is nothing to
+invalidate: a changed tool gives a new key.

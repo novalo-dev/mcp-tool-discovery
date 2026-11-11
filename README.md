@@ -153,7 +153,7 @@ The client receives three tools:
 
 | Tool | What it does | Annotations |
 |---|---|---|
-| `search_tools` | finds the tools that match keywords, or describes tools by name, with their `inputSchema` and the runner each one goes through; with no argument, lists every tool by name | reads only |
+| `search_tools` | finds the tools that match a request given in fields (action, object, description) or as keywords, or describes tools by name, with their `inputSchema` and the runner each one goes through; with no argument, lists every tool by name | reads only |
 | `run_read_tool` | runs a tool that only reads | reads only |
 | `run_write_tool` | runs a tool that changes something | destructive |
 
@@ -169,6 +169,8 @@ new CompactMode(
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
     groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
     searchOptions: new SearchOptions(synonyms: ['meeting' => 'calendar event']),
+    indexCache: new FileIndexCache('/var/cache/mcp-index'), // build the index once
+    learning: new FileLearningStore('/var/lib/mcp/learning.json'), // opt in
 );
 ```
 
@@ -186,29 +188,44 @@ do.
 
 ## Search
 
-The search behind `search_tools` is a BM25F ranking held in memory, built for
-tool lists: no index file, no lock, nothing to rebuild when the list changes.
+The search behind `search_tools` is a BM25F ranking built for tool lists. The
+client gives its request **in fields**, and each field is scored on its own:
 
-- **Text relevance** over the name, title, description and parameters, each
-  field with its weight. A rare word counts more than a common one.
+```json
+{"action": "change", "object": "ticket status", "description": "move the ticket to done"}
+```
+
+- **Text relevance** over the name, title, description and parameters of each
+  tool, each with its weight. A rare word counts more than a common one, so a
+  prefix or a verb every tool shares weighs almost nothing.
 - **Whole words and trigrams**, so `statuses` meets `status` and `categories`
-  meets `category` without a stemmer or any rule of a language.
-- **Verb intent**: "change", "turn off" or "rename" in a query point to tools
-  named `set_...` or `update_...`, through a table of plain English action
-  words.
-- **Object coverage**: "change the ticket status" prefers `set_ticket_status`
-  to `set_user_role`.
+  meets `category` without a stemmer.
+- **No list, no convention.** No stop words, no table of verbs, no prefix
+  rule, in any language: snake_case, camelCase and dotted names are all read
+  the same way. Synonyms are the host's, when it has some.
+- **Words to say it again.** Words no tool uses come back with the words of
+  the server's own tool titles, so the client rephrases instead of guessing.
 - **A cut** at 60% of the best score, so the client receives a few schemas.
+- **A cache** for the index (in memory, or PHP files read through OPcache),
+  one per set of visible tools.
+- **Learning, opt in.** A search returns a `search_id`; a run that succeeds
+  with it lifts that tool for those words, within a cap. Only words the tools
+  use are kept.
 
-| Benchmark | Right tool first | Right tool in the top 3 |
+300 requests over three fictional servers, a workspace (snake_case), a
+developer platform (camelCase) and people operations (dotted names). Half were
+used to choose the settings; the other half, kept aside, gives the score:
+
+| Test half, 150 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The fixture server of this repository, 50 tools, 30 queries written before any tuning | 18/30 | 20/30 |
-| A real server of 135 tools, 75 queries used while designing the ranking | 65/75 | 70/75 |
-| The keyword search it replaced, on that same server | 26/75 | 45/75 |
+| The request in fields | **125** | **140** |
+| The same request as one sentence | 57 | 79 |
+| In fields, after learning from the other half | 127 | 140 |
+| In fields, asked a second time | 133 | 142 |
 
-A query and an index of 135 tools take about a millisecond and a dozen
-milliseconds. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the
-measures and how to change them.
+A search over 50 tools takes about 2 ms with no cache and half a millisecond
+with one. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
+and how to change them.
 
 ---
 

@@ -17,6 +17,7 @@ use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use PHPUnit\Framework\TestCase;
@@ -82,7 +83,7 @@ final class CompactModeTest extends TestCase
 
     public function testASearchGivesSchemasAndTheRunnerToUse(): void
     {
-        $answer = self::search(['query' => 'change the status of a ticket']);
+        $answer = self::search(['action' => 'change', 'object' => 'ticket status', 'description' => 'move a ticket to done']);
 
         self::assertIsArray($answer['tools']);
         self::assertIsArray($answer['tools'][0]);
@@ -126,12 +127,60 @@ final class CompactModeTest extends TestCase
         self::assertArrayHasKey('group', $grouped['tools'][0]);
     }
 
-    public function testNothingFoundGivesAHint(): void
+    public function testFreeKeywordsStillWork(): void
     {
-        $answer = self::search(['query' => 'zzzz']);
+        $answer = self::search(['query' => 'list backups']);
+
+        self::assertIsArray($answer['tools']);
+        self::assertSame('acme_list_backups', $answer['tools'][0]['name'] ?? null);
+    }
+
+    public function testNothingFoundGivesTheWordsOfTheServer(): void
+    {
+        $answer = self::search(['action' => 'zzzz', 'object' => 'qqqq']);
 
         self::assertSame([], $answer['tools']);
+        self::assertSame(['zzzz', 'qqqq'], $answer['unmatched']);
+        self::assertIsArray($answer['vocabulary']);
+        self::assertContains('ticket', $answer['vocabulary']);
         self::assertArrayHasKey('hint', $answer);
+    }
+
+    public function testAFieldThatIsNotTextIsRefused(): void
+    {
+        $result = (new Discovery(new CompactMode(), new RecordingGate()))->call(CompactMode::SEARCH, ['object' => ['ticket']], RecordingGate::fixtureTools());
+
+        self::assertTrue($result->isError);
+    }
+
+    public function testWithoutLearningNoSearchIdIsOffered(): void
+    {
+        $mode = new CompactMode();
+        $tools = [];
+        foreach ($mode->listTools(RecordingGate::fixtureTools()) as $tool) {
+            $tools[$tool->name] = $tool;
+        }
+
+        self::assertArrayNotHasKey('search_id', self::search(['action' => 'list', 'object' => 'backups']));
+        self::assertArrayNotHasKey('search_id', $tools[CompactMode::RUN_READ]->inputSchema()['properties'] ?? []);
+    }
+
+    public function testARunWithTheSearchIdTeachesTheSearch(): void
+    {
+        $store = new MemoryLearningStore();
+        $mode = new CompactMode(learning: $store);
+        $discovery = new Discovery($mode, new RecordingGate());
+        $answer = self::search(['action' => 'show', 'object' => 'ticket'], $mode);
+        self::assertIsString($answer['search_id']);
+
+        $discovery->call(CompactMode::RUN_READ, ['name' => 'acme_get_ticket', 'arguments' => [], 'search_id' => $answer['search_id']], RecordingGate::fixtureTools());
+        self::assertArrayHasKey('ticket', $store->load());
+
+        // A run that fails teaches nothing.
+        $failing = new MemoryLearningStore();
+        $refusing = new CompactMode(learning: $failing);
+        (new Discovery($refusing, new RecordingGate(refused: ['acme_get_ticket'])))->call(CompactMode::RUN_READ, ['name' => 'acme_get_ticket', 'search_id' => $answer['search_id']], RecordingGate::fixtureTools());
+        self::assertSame([], $failing->load());
     }
 
     public function testAChangeSentToTheReadRunnerIsRefusedAndNeverRuns(): void

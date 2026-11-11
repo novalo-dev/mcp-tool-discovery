@@ -1,6 +1,6 @@
 # MCP Tool Discovery for PHP
 
-> A PHP library (novalo/mcp-tool-discovery, MIT, PHP 8.1 to 8.5, no dependency) that decides how an MCP server shows its tools to clients. Its compact mode shows three tools - search_tools, run_read_tool, run_write_tool - instead of the whole list, with a BM25F tool search. The server keeps every access decision through one interface, ToolGate.
+> A PHP library (novalo/mcp-tool-discovery, MIT, PHP 8.1 to 8.5, no dependency) that decides how an MCP server shows its tools to clients. Its compact mode shows three tools - search_tools, run_read_tool, run_write_tool - instead of the whole list, with a BM25F tool search that takes the request in fields (action, object, description), holds no list of words, assumes no naming convention, can cache its index and can learn from the tools run after a search. The server keeps every access decision through one interface, ToolGate.
 
 - Answers shaped and validated for the MCP revisions 2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25 and 2026-07-28.
 - Modes are packs in src/Mode/: Compact is shipped; Grouped (one tool per group) and Gateway (a single tool) are open to contribution.

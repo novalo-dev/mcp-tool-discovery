@@ -43,13 +43,19 @@ before writing a line: it is the review your mode will get.
 
 Three tools: `search_tools`, `run_read_tool`, `run_write_tool`.
 
-- `search_tools` takes `query` (keywords) and `names` (exact names). Names are
-  described first, then the query fills up to `maxDescribed` (10). Each result
+- `search_tools` takes `action`, `object` and `description` (the request in
+  fields), `query` (free keywords) and `names` (exact names). Names are
+  described first, then the search fills up to `maxDescribed` (10). Each result
   has `name`, `title`, `run_with`, `description` and `inputSchema`. Names the
   caller may not use come back in `unknown`, as names that do not exist do.
+  Words no visible tool uses come back in `unmatched`, with `vocabulary`, the
+  words of the visible tools' titles, so the client can say it again.
+  With a learning store, the answer carries a `search_id`.
   With no argument it lists every visible tool, names only, grouped when the
   host gives `groupOf`.
-- `run_read_tool` and `run_write_tool` take `name` and `arguments`. Each refuses
+- `run_read_tool` and `run_write_tool` take `name` and `arguments`, and
+  `search_id` when the host learns: a run that succeeds with it teaches the
+  search which tool answered those words. Each refuses
   the other kind of tool, and both refuse the mode's own tools. A failed run
   carries the tool's parameters, so the client can correct its call.
 - `pinned` tools are listed as themselves, next to the three.

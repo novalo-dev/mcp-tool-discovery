@@ -24,46 +24,21 @@ namespace Novalo\McpToolDiscovery\Search;
  */
 final class Analyzer
 {
-    /**
-     * English words that say nothing about which tool is wanted. Tool names
-     * and descriptions of MCP servers are written in English, and assistants
-     * search them in English.
-     */
-    private const STOP_WORDS = [
-        'a', 'about', 'all', 'an', 'and', 'any', 'are', 'as', 'at', 'be', 'by', 'can', 'do', 'does', 'each',
-        'for', 'from', 'how', 'i', 'in', 'into', 'is', 'it', 'its', 'me', 'my', 'of', 'on', 'one', 'or', 'our',
-        'please', 'that', 'the', 'their', 'this', 'to', 'us', 'was', 'we', 'were', 'what', 'which', 'who',
-        'with', 'you', 'your',
-    ];
-
-    /**
-     * Latin letters with accents, brought to plain ASCII without the intl,
-     * iconv or mbstring extensions, which shared hosts do not always have.
-     */
-    private const FOLD = [
-        'à' => 'a', 'À' => 'a', 'á' => 'a', 'Á' => 'a', 'â' => 'a', 'Â' => 'a', 'ã' => 'a', 'Ã' => 'a',
-        'ä' => 'a', 'Ä' => 'a', 'å' => 'a', 'Å' => 'a', 'ç' => 'c', 'Ç' => 'c', 'è' => 'e', 'È' => 'e',
-        'é' => 'e', 'É' => 'e', 'ê' => 'e', 'Ê' => 'e', 'ë' => 'e', 'Ë' => 'e', 'ì' => 'i', 'Ì' => 'i',
-        'í' => 'i', 'Í' => 'i', 'î' => 'i', 'Î' => 'i', 'ï' => 'i', 'Ï' => 'i', 'ñ' => 'n', 'Ñ' => 'n',
-        'ò' => 'o', 'Ò' => 'o', 'ó' => 'o', 'Ó' => 'o', 'ô' => 'o', 'Ô' => 'o', 'õ' => 'o', 'Õ' => 'o',
-        'ö' => 'o', 'Ö' => 'o', 'ù' => 'u', 'Ù' => 'u', 'ú' => 'u', 'Ú' => 'u', 'û' => 'u', 'Û' => 'u',
-        'ü' => 'u', 'Ü' => 'u', 'ý' => 'y', 'Ý' => 'y', 'ÿ' => 'y', 'Ÿ' => 'y', 'œ' => 'oe', 'Œ' => 'oe',
-        'æ' => 'ae', 'Æ' => 'ae', 'ß' => 'ss',
-    ];
-
     /** @var array<string, true> */
     private readonly array $stopWords;
 
     /**
-     * @param list<string>|null $stopWords null for the built-in English list
+     * @param list<string> $stopWords words the host wants ignored. None by
+     *        default: BM25 already gives a word found in every tool almost no
+     *        weight, so the library needs no list of its own, in any language.
      */
-    public function __construct(?array $stopWords = null)
+    public function __construct(array $stopWords = [])
     {
-        $this->stopWords = array_fill_keys(array_map('strtolower', $stopWords ?? self::STOP_WORDS), true);
+        $this->stopWords = array_fill_keys(array_map('strtolower', $stopWords), true);
     }
 
     /**
-     * The words of a text, lowercased, stop words and numbers left out.
+     * The words of a text, lowercased, numbers and the host's stop words left out.
      *
      * snake_case, kebab-case, dotted names and camelCase are split, so a tool
      * named set_ticket_status or setTicketStatus matches "ticket status".
@@ -73,12 +48,18 @@ final class Analyzer
     public function words(string $text): array
     {
         $split = preg_replace(['/([a-z0-9])([A-Z])/', '/([A-Z]+)([A-Z][a-z])/'], '$1 $2', $text);
-        $parts = preg_split('/[^a-z0-9]+/', strtolower(self::fold(is_string($split) ? $split : $text)));
+        $split = is_string($split) ? $split : $text;
+        // Letters and digits of any script: the library holds no alphabet of
+        // its own. mbstring lowers every script when the server has it;
+        // without it, strtolower() lowers ASCII, which covers the English
+        // most tool lists are written in.
+        $lower = function_exists('mb_strtolower') ? mb_strtolower($split, 'UTF-8') : strtolower($split);
+        $parts = preg_split('/[^\p{L}\p{N}]+/u', $lower);
         $words = [];
         foreach ($parts === false ? [] : $parts as $part) {
             // A number is an identifier ("ticket 12"), never a word that tells
             // tools apart, and its trigrams would only add noise.
-            if ($part !== '' && preg_match('/^[0-9]+$/', $part) !== 1 && !isset($this->stopWords[$part])) {
+            if ($part !== '' && preg_match('/^\p{N}+$/u', $part) !== 1 && !isset($this->stopWords[$part])) {
                 $words[] = $part;
             }
         }
@@ -93,17 +74,16 @@ final class Analyzer
      */
     public static function trigrams(string $word): array
     {
-        $padded = ' ' . $word . ' ';
+        // Characters, not bytes, so a word outside ASCII gives whole trigrams.
+        $characters = preg_split('//u', ' ' . $word . ' ', -1, PREG_SPLIT_NO_EMPTY);
+        if ($characters === false) {
+            return [];
+        }
         $grams = [];
-        for ($i = 0, $last = strlen($padded) - 3; $i <= $last; ++$i) {
-            $grams[] = substr($padded, $i, 3);
+        for ($i = 0, $last = count($characters) - 3; $i <= $last; ++$i) {
+            $grams[] = $characters[$i] . $characters[$i + 1] . $characters[$i + 2];
         }
 
         return $grams;
-    }
-
-    private static function fold(string $text): string
-    {
-        return strtr($text, self::FOLD);
     }
 }

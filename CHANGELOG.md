@@ -17,10 +17,28 @@ becomes the next version's section when it is published.
   refuses the other kind of tool. Options: a prefix for the three names, tools
   kept in the list as themselves, translated titles, groups for the full list,
   and the search settings.
-- **Tool search.** BM25F over the name, title, description and parameters of
-  each tool, with trigrams for plurals and near spellings, verb intent for
-  queries such as "change" or "turn off", object coverage, synonyms given by the
-  host, and a cut that keeps only the tools close to the best.
+- **Tool search in fields.** The client says the action, the object and the
+  request in its own words in separate fields of `search_tools`; each field is
+  scored on its own with BM25F over the name, title, description and
+  parameters of each tool, with trigrams for plurals and near spellings. On 150
+  requests kept aside over three servers named in three styles, the right tool
+  comes first 125 times, against 57 for the same requests as one sentence. Free
+  keywords still work.
+- **No list and no naming convention.** The search holds no stop words, no
+  verbs and no prefix rule, in any language: a word every tool carries weighs
+  almost nothing by itself. Synonyms and stop words are the host's, when it
+  gives them.
+- **Words to say it again.** When words of a search match no tool, the answer
+  lists them and gives the words of the visible tools' titles.
+- **Index cache.** `MemoryIndexCache` for a long-running server,
+  `FileIndexCache` for one where each request starts afresh, read through
+  OPcache. One index per set of visible tools, so a caller never reads an index
+  built over tools hidden from them.
+- **Learning, opt in.** With a `LearningStore`, a search returns a `search_id`
+  and a run that succeeds with it lifts that tool for those words next time.
+  Only words the tools use are kept, never what a person typed beyond them;
+  what was learned reorders the tools a query finds, within a cap, and never
+  brings a tool the query does not describe.
 - **The host keeps the control.** `ToolGate` is the one interface a server
   implements: what the caller may see, whether a call may go ahead, and the
   call itself. A mode only reaches tools through `ToolRunner`, which asks the
