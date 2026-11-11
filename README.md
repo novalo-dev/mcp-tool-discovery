@@ -12,6 +12,7 @@
 [![PHPStan](https://img.shields.io/badge/PHPStan-level%20max-2A5EA7)](phpstan.dist.neon)
 [![Search](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2Fnovalo-dev%2Fmcp-tool-discovery%2Fbadges%2Fsearch.json)](docs/SEARCH.md)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Sponsor](https://img.shields.io/badge/sponsor-novalo--dev-EA4AAA?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/novalo-dev)
 
 **Show an assistant three tools instead of three hundred, and let it find the one it needs.**
 
@@ -255,6 +256,7 @@ explains.
 | [docs/MODES.md](docs/MODES.md) | how a mode works, the modes wanted, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |
+| [ROADMAP.md](ROADMAP.md) | the work wanted: modes, search, hosts |
 | [CHANGELOG.md](CHANGELOG.md) | what changed, version by version |
 
 ---
@@ -263,9 +265,12 @@ explains.
 
 Contributions go to `develop`, through pull requests; `main` only receives
 releases. New modes are the most wanted. Read [CONTRIBUTING.md](CONTRIBUTING.md)
-first: every pull request runs the coding standard, PHPStan at level max, the
-tests on PHP 8.1 to 8.5, the contract tests, the conformance suite and the
-search benchmark.
+first: every pull request runs the coding standard, PHP 8.1+ compatibility,
+PHPStan at level max, the tests on PHP 8.1 to 8.5, the contract tests, the
+conformance suite, the search benchmark, Semgrep, Psalm's taint analysis and
+Gitleaks. Contributors sign the [CLA](CLA.md) once. The [roadmap](ROADMAP.md)
+lists the work wanted; [sponsors](https://github.com/sponsors/novalo-dev) have
+their issues read first.
 
 ## License
 

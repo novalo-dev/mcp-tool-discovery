@@ -51,6 +51,25 @@ jobs:
           if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ]; then RANGE="$HEAD"; else RANGE="$BASE..$HEAD"; fi
           php bin/check-hygiene.php --commits "$RANGE"
 
+  compatibility:
+    # The tests prove the code they run, on each PHP of the matrix. This reads
+    # every construct, function and class against each version from 8.1 up,
+    # so code that only works on a newer PHP fails here, not on a server.
+    name: PHP 8.1+ compatibility
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+          tools: composer:v2, cs2pr
+      - name: Install
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: PHPCompatibility
+        # cs2pr turns each finding into an annotation on the file and line.
+        run: vendor/bin/phpcs -q --standard=phpcompatibility.xml --report=checkstyle | cs2pr
+
   tests:
     name: Tests on PHP ${{ matrix.php }}
     runs-on: ubuntu-24.04
@@ -96,9 +115,9 @@ jobs:
     name: CI passed
     # One stable name for the required check, whatever the matrix becomes.
     if: always()
-    needs: [quality, tests, package]
+    needs: [quality, compatibility, tests, package]
     runs-on: ubuntu-24.04
     steps:
       - name: Every job is green
         run: |
-          [ "${{ needs.quality.result }}" = success ] && [ "${{ needs.tests.result }}" = success ] && [ "${{ needs.package.result }}" = success ]
+          [ "${{ needs.quality.result }}" = success ] && [ "${{ needs.compatibility.result }}" = success ] && [ "${{ needs.tests.result }}" = success ] && [ "${{ needs.package.result }}" = success ]

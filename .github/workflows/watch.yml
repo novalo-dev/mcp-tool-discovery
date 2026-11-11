@@ -1,0 +1,46 @@
+name: Watch
+
+# Every three days, and on demand: is a new revision of the MCP specification
+# out? The library shapes and validates its answers for each revision it
+# lists, so a new one is work to plan, not something to find out from a
+# client. One issue per revision, never a duplicate; nothing changes here: a
+# revision is added in a commit, checked by the CI.
+on:
+  schedule:
+    # Days 1, 4, 7... of the month: every 72 hours, except across the end of a
+    # month, where cron has no notion of "three days after the last run".
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  specification:
+    name: MCP specification
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Newest revision against the library
+        env:
+          GH_TOKEN: ${{ github.token }}
+        # The revisions the library speaks are the cases of Revision; the
+        # specification repository has one folder per revision under schema/.
+        run: |
+          OURS=$(grep -oE "case V[0-9_]+ = '[0-9]{4}-[0-9]{2}-[0-9]{2}'" src/Protocol/Revision.php | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | sort | tail -1)
+          THEIRS=$(gh api repos/modelcontextprotocol/modelcontextprotocol/contents/schema --jq '.[].name' | grep -E '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' | sort | tail -1)
+          echo "| MCP specification | library $OURS, latest $THEIRS |" >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$OURS" ] || [ -z "$THEIRS" ]; then
+            echo "::error::a revision could not be read (library: '$OURS', specification: '$THEIRS')"; exit 1
+          fi
+          [ "$THEIRS" \> "$OURS" ] || exit 0
+          TITLE="MCP specification $THEIRS is out (library speaks up to $OURS)"
+          gh issue list --state all --search "\"$TITLE\" in:title" --json number --jq '.[0].number' | grep -q . && exit 0
+          gh issue create --title "$TITLE" --label dependencies --body "A new revision of the Model Context Protocol, **$THEIRS**, is published; the newest case of \`Revision\` is $OURS.
+
+          1. Read the changelog of the revision: https://modelcontextprotocol.io/specification/$THEIRS/changelog
+          2. Check what changes in a Tool, in \`tools/list\` and in \`tools/call\`: \`src/Protocol/Revision.php\` and \`src/Protocol/Shaper.php\` decide the fields of each revision.
+          3. Add the case, move \`Conformance::SPEC_COMMIT\` (tests/Conformance/Conformance.php) to a commit that holds the new schema, and add its line to the conformance table of the README.
+          4. Push: the conformance suite validates every answer against the new schema." \
+            || gh issue create --title "$TITLE" --body "MCP specification $THEIRS is out; the library speaks up to $OURS."

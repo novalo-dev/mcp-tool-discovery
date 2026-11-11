@@ -28,8 +28,8 @@ php bin/fetch-schemas.php
 composer check
 ```
 
-`composer check` runs what the CI runs: the coding standard, PHPStan, the tests
-and the conformance suite. `composer cs-fix` fixes the coding standard, licence
+`composer check` runs what the CI runs: the coding standard, PHP 8.1+
+compatibility, PHPStan, the tests and the conformance suite. `composer cs-fix` fixes the coding standard, licence
 headers included.
 
 ## Checks
@@ -39,10 +39,12 @@ Every pull request runs:
 | Workflow | Job | What it checks |
 |---|---|---|
 | CI | Coding standard, static analysis, hygiene | PER-CS 2.0, PHPStan level max on `src/` and `bin/`, level 6 on `tests/`, the hygiene of files and commit messages |
+| CI | PHP 8.1+ compatibility | PHPCompatibility reads every construct, function and class against each PHP from 8.1 up |
 | CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search and conformance suites |
 | CI | What Composer installs | the package holds `src/` and the licence, not the tests |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
-| Security | Dependencies, Secrets, Semgrep | `composer audit`, Gitleaks, Semgrep rules for PHP and secrets |
+| Security | Dependencies, Secrets, Semgrep, Psalm taint analysis | `composer audit`, Gitleaks over the whole history, Semgrep rules for PHP and secrets, and Psalm following what a client sends (`tests/Security/entry.php`) to a file, a query, a command or an output |
+| CLA | license/cla | the contributor has signed the [CLA](CLA.md) |
 
 The required check is **CI passed**: one name, whatever the matrix becomes.
 
@@ -58,8 +60,8 @@ The required check is **CI passed**: one name, whatever the matrix becomes.
 
 ## Writing code
 
-- **PHP 8.1** is the floor: no syntax from a later version. The CI runs 8.1 to
-  8.5.
+- **PHP 8.1** is the floor: no syntax, function or class from a later version.
+  `composer compat` checks every line; the CI also runs the tests on 8.1 to 8.5.
 - **No dependency** in `require`, and no PHP extension beyond what PHP always
   has. A host on shared hosting must be able to install the library.
 - **Comments say why**, in English. The reader sees what the line does.
@@ -119,6 +121,13 @@ The search is measured, not tuned by feel.
   its behaviour in the other methods, and a row in the README table.
 
 ---
+
+## Contributor License Agreement
+
+Before your first pull request is merged, you sign the [CLA](CLA.md). You keep
+the copyright of your contribution; you allow the maintainer to distribute it
+under the MIT licence and under any other. The CLA Assistant bot posts the link
+on your pull request; you sign once, with your GitHub account.
 
 ## Commits and pull requests
 

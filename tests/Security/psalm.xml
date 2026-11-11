@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  Psalm's taint analysis only: the type checks are PHPStan's. entry.php is
+  where the data of a client comes in.
+-->
+<psalm errorLevel="8" phpVersion="8.1" resolveFromConfigFile="true" findUnusedCode="false" findUnusedBaselineEntry="false"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://getpsalm.org/schema/config"
+       xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd">
+    <projectFiles>
+        <directory name="../../src"/>
+        <file name="entry.php"/>
+    </projectFiles>
+</psalm>

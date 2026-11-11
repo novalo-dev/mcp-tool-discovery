@@ -36,13 +36,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          # Every commit, not only the last one: a secret removed in a later
+          # commit is still published in the history.
           fetch-depth: 0
       - name: Gitleaks
         env:
-          VERSION: 8.21.2
+          VERSION: 8.30.1
         run: |
           curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" | tar -xz gitleaks
-          ./gitleaks detect --source . --redact --no-banner
+          ./gitleaks git --no-banner --redact --exit-code 1 .
 
   semgrep:
     name: Semgrep
@@ -50,6 +52,31 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Semgrep
+        env:
+          VERSION: 1.182.1
         run: |
-          pip install --quiet semgrep
+          pip install --quiet "semgrep==${VERSION}"
           semgrep scan --config p/php --config p/secrets --error --metrics=off src bin
+
+  taint:
+    # PHP has no CodeQL. Psalm's taint analysis follows what a client sends,
+    # the name and arguments of a call, across every function of the library
+    # to a file it includes or writes, a query, a command or an output, and
+    # fails on any path that reaches one unescaped.
+    name: Psalm taint analysis
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          # Psalm 6 needs PHP 8.2; it reads the code as PHP 8.1, as the config says.
+          php-version: '8.4'
+          coverage: none
+          tools: none
+      - name: Psalm
+        env:
+          VERSION: 6.20.1
+        run: |
+          curl -fsSL -o /tmp/psalm.phar "https://github.com/vimeo/psalm/releases/download/${VERSION}/psalm.phar"
+          cd tests/Security
+          php /tmp/psalm.phar --no-cache --no-progress --taint-analysis --output-format=github

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  PHPCompatibility: every construct, function and class the library uses must
+  exist on PHP 8.1, the lowest version it supports, and still exist on the
+  newest. The tests on PHP 8.1 to 8.5 only prove the code they run; this reads
+  every line, so a function of a newer PHP in a branch no test takes fails
+  here, not on a server running 8.1. Run it with composer compat.
+-->
+<ruleset name="mcp-tool-discovery PHP compatibility">
+    <file>src</file>
+    <file>bin</file>
+    <file>tests</file>
+    <arg name="extensions" value="php"/>
+    <config name="testVersion" value="8.1-"/>
+
+    <rule ref="PHPCompatibility"/>
+</ruleset>
