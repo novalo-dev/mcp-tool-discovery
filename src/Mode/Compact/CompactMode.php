@@ -215,10 +215,10 @@ final class CompactMode implements DiscoveryMode
         if (($query !== null && !is_string($query)) || ($names !== null && !is_array($names))) {
             return CallResult::error('query must be a string and names a list of tool names.');
         }
-        $names = array_values(array_unique(array_filter(array_map(
-            static fn($name): string => is_string($name) ? trim($name) : '',
-            $names ?? [],
-        ))));
+        $names = array_values(array_unique(array_filter(
+            array_map(static fn($name): string => is_string($name) ? trim($name) : '', $names ?? []),
+            static fn(string $name): bool => $name !== '',
+        )));
         $query = trim($query ?? '');
 
         if ($query === '' && $names === []) {
@@ -274,16 +274,19 @@ final class CompactMode implements DiscoveryMode
         if ($this->groupOf === null) {
             return array_map($entry, $visible->all());
         }
-        $groups = [];
-        foreach ($visible as $tool) {
-            $groups[($this->groupOf)($tool)][] = $entry($tool);
-        }
+        // A list in the order groups first appear, so the host's order holds.
         $list = [];
-        foreach ($groups as $group => $tools) {
-            $list[] = ['group' => (string) $group, 'tools' => $tools];
+        $position = [];
+        foreach ($visible as $tool) {
+            $group = ($this->groupOf)($tool);
+            if (!isset($position[$group])) {
+                $position[$group] = count($list);
+                $list[] = ['group' => $group, 'tools' => []];
+            }
+            $list[$position[$group]]['tools'][] = $entry($tool);
         }
 
-        return $list;
+        return array_values($list);
     }
 
     /**

@@ -41,7 +41,7 @@ final class CompactModeTest extends TestCase
     /**
      * @param array<string, mixed> $arguments
      */
-    private static function run(string $runner, array $arguments, ?RecordingGate $gate = null): CallResult
+    private static function runTool(string $runner, array $arguments, ?RecordingGate $gate = null): CallResult
     {
         return (new Discovery(new CompactMode(), $gate ?? new RecordingGate()))->call($runner, $arguments, RecordingGate::storeTools());
     }
@@ -137,7 +137,7 @@ final class CompactModeTest extends TestCase
     public function testAChangeSentToTheReadRunnerIsRefusedAndNeverRuns(): void
     {
         $gate = new RecordingGate();
-        $result = self::run(CompactMode::RUN_READ, ['name' => 'acme_delete_post'], $gate);
+        $result = self::runTool(CompactMode::RUN_READ, ['name' => 'acme_delete_post'], $gate);
 
         self::assertTrue($result->isError);
         self::assertStringContainsString(CompactMode::RUN_WRITE, self::text($result));
@@ -146,7 +146,7 @@ final class CompactModeTest extends TestCase
 
     public function testAReadSentToTheChangeRunnerIsRefused(): void
     {
-        $result = self::run(CompactMode::RUN_WRITE, ['name' => 'acme_get_order']);
+        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_get_order']);
 
         self::assertTrue($result->isError);
         self::assertStringContainsString(CompactMode::RUN_READ, self::text($result));
@@ -155,21 +155,21 @@ final class CompactModeTest extends TestCase
     public function testARunnerDoesNotRunARunnerOrTheSearch(): void
     {
         foreach ([CompactMode::RUN_READ, CompactMode::RUN_WRITE, CompactMode::SEARCH] as $inner) {
-            self::assertTrue(self::run(CompactMode::RUN_READ, ['name' => $inner])->isError, $inner);
+            self::assertTrue(self::runTool(CompactMode::RUN_READ, ['name' => $inner])->isError, $inner);
         }
     }
 
     public function testTheArgumentsReachTheToolUnchanged(): void
     {
         $gate = new RecordingGate();
-        self::run(CompactMode::RUN_WRITE, ['name' => 'acme_set_order_status', 'arguments' => ['order_id' => '7', 'status' => 'shipped']], $gate);
+        self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_set_order_status', 'arguments' => ['order_id' => '7', 'status' => 'shipped']], $gate);
 
         self::assertSame([['name' => 'acme_set_order_status', 'arguments' => ['order_id' => '7', 'status' => 'shipped']]], $gate->called);
     }
 
     public function testAFailedRunCarriesTheToolsParameters(): void
     {
-        $result = self::run(CompactMode::RUN_WRITE, ['name' => 'acme_delete_customer'], new RecordingGate([], ['acme_delete_customer']));
+        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_delete_customer'], new RecordingGate([], ['acme_delete_customer']));
 
         self::assertTrue($result->isError);
         self::assertStringContainsString('Parameters of acme_delete_customer', self::text($result));
@@ -191,7 +191,7 @@ final class CompactModeTest extends TestCase
     #[\PHPUnit\Framework\Attributes\DataProvider('malformedRuns')]
     public function testAMalformedRunIsRefused(array $arguments): void
     {
-        self::assertTrue(self::run(CompactMode::RUN_READ, $arguments)->isError);
+        self::assertTrue(self::runTool(CompactMode::RUN_READ, $arguments)->isError);
     }
 
     public function testTheGuideHeaderSaysWhichRunnerToUse(): void

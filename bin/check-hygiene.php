@@ -49,7 +49,10 @@ if ($range !== null) {
         fwrite(STDERR, "git log failed\n");
         exit(1);
     }
-    foreach (array_filter(explode("\x01", implode("\n", $log))) as $commit) {
+    foreach (explode("\x01", implode("\n", $log)) as $commit) {
+        if (trim($commit) === '') {
+            continue;
+        }
         $parts = explode("\0", trim($commit), 2);
         $sha = $parts[0];
         $message = $parts[1] ?? '';
@@ -70,7 +73,8 @@ foreach ($files as $file) {
     if ($text === false || str_contains($text, "\0")) {
         continue;
     }
-    foreach (preg_split('/\R/', $text) ?: [] as $index => $line) {
+    $lines = preg_split('/\R/', $text);
+    foreach ($lines === false ? [] : $lines as $index => $line) {
         $at = $file . ':' . ($index + 1);
         if (str_contains($line, $longDash)) {
             $problems[] = $at . ': long dash, use a simple hyphen';

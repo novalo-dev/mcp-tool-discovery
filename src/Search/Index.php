@@ -145,7 +145,8 @@ final class Index
                 if ($occurrences === 0) {
                     continue;
                 }
-                $average = $this->averages[$field][$slot === 0 ? 0 : 1] ?: 1.0;
+                $average = $this->averages[$field][$slot === 0 ? 0 : 1];
+                $average = $average > 0 ? $average : 1.0;
                 $length = $fields[$field][$slot + 1];
                 $weighted += $weight * $occurrences / (1 - self::B + self::B * $length / $average);
             }
