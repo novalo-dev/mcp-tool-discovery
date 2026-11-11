@@ -274,19 +274,18 @@ final class CompactMode implements DiscoveryMode
         if ($this->groupOf === null) {
             return array_map($entry, $visible->all());
         }
-        // A list in the order groups first appear, so the host's order holds.
-        $list = [];
-        $position = [];
+        // Groups in the order they first appear, so the host's order holds.
+        $order = [];
+        $members = [];
         foreach ($visible as $tool) {
             $group = ($this->groupOf)($tool);
-            if (!isset($position[$group])) {
-                $position[$group] = count($list);
-                $list[] = ['group' => $group, 'tools' => []];
+            if (!isset($members[$group])) {
+                $order[] = $group;
             }
-            $list[$position[$group]]['tools'][] = $entry($tool);
+            $members[$group][] = $entry($tool);
         }
 
-        return array_values($list);
+        return array_map(static fn(string $group): array => ['group' => $group, 'tools' => $members[$group]], $order);
     }
 
     /**
