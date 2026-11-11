@@ -66,7 +66,7 @@ final class Analyzer
      * The words of a text, lowercased, stop words and numbers left out.
      *
      * snake_case, kebab-case, dotted names and camelCase are split, so a tool
-     * named set_order_status or setOrderStatus matches "order status".
+     * named set_ticket_status or setTicketStatus matches "ticket status".
      *
      * @return list<string>
      */
@@ -76,7 +76,7 @@ final class Analyzer
         $parts = preg_split('/[^a-z0-9]+/', strtolower(self::fold(is_string($split) ? $split : $text)));
         $words = [];
         foreach ($parts === false ? [] : $parts as $part) {
-            // A number is an identifier ("order 12"), never a word that tells
+            // A number is an identifier ("ticket 12"), never a word that tells
             // tools apart, and its trigrams would only add noise.
             if ($part !== '' && preg_match('/^[0-9]+$/', $part) !== 1 && !isset($this->stopWords[$part])) {
                 $words[] = $part;

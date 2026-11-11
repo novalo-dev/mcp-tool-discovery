@@ -25,27 +25,27 @@ final class DiscoveryTest extends TestCase
     public function testAHostToolCalledByItsOwnNameStillWorks(): void
     {
         $gate = new RecordingGate();
-        $result = (new Discovery(new CompactMode(), $gate))->callTool('acme_get_order', ['order_id' => '1'], RecordingGate::storeTools(), Revision::latest());
+        $result = (new Discovery(new CompactMode(), $gate))->callTool('acme_get_file', ['file_id' => '1'], RecordingGate::fixtureTools(), Revision::latest());
 
         self::assertArrayNotHasKey('isError', $result);
-        self::assertSame(['acme_get_order'], array_column($gate->called, 'name'));
+        self::assertSame(['acme_get_file'], array_column($gate->called, 'name'));
     }
 
     public function testAHiddenToolCalledByItsNameIsUnknown(): void
     {
-        $gate = new RecordingGate(['acme_get_order']);
-        $hidden = (new Discovery(new CompactMode(), $gate))->call('acme_get_order', [], RecordingGate::storeTools());
-        $missing = (new Discovery(new CompactMode(), $gate))->call('acme_nope', [], RecordingGate::storeTools());
+        $gate = new RecordingGate(['acme_get_file']);
+        $hidden = (new Discovery(new CompactMode(), $gate))->call('acme_get_file', [], RecordingGate::fixtureTools());
+        $missing = (new Discovery(new CompactMode(), $gate))->call('acme_nope', [], RecordingGate::fixtureTools());
 
         self::assertTrue($hidden->isError);
-        self::assertSame(str_replace('acme_nope', 'acme_get_order', json_encode($missing->content) ?: ''), json_encode($hidden->content));
+        self::assertSame(str_replace('acme_nope', 'acme_get_file', json_encode($missing->content) ?: ''), json_encode($hidden->content));
         self::assertSame([], $gate->called);
     }
 
     public function testARefusalIsAlwaysAnError(): void
     {
-        $result = (new Discovery(new CompactMode(), new RecordingGate([], ['acme_get_order'])))
-            ->callTool('acme_get_order', [], RecordingGate::storeTools(), Revision::V2025_06_18);
+        $result = (new Discovery(new CompactMode(), new RecordingGate([], ['acme_get_file'])))
+            ->callTool('acme_get_file', [], RecordingGate::fixtureTools(), Revision::V2025_06_18);
 
         self::assertTrue($result['isError']);
     }
@@ -54,19 +54,19 @@ final class DiscoveryTest extends TestCase
     {
         $tools = ToolSet::of([
             ['name' => CompactMode::SEARCH, 'description' => 'The host\'s own search.', 'inputSchema' => ['type' => 'object']],
-            ['name' => 'get_order', 'description' => 'One order.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]],
+            ['name' => 'get_file', 'description' => 'One file.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]],
         ]);
         $gate = new RecordingGate();
         $result = (new Discovery(new CompactMode(), $gate))->call(CompactMode::SEARCH, [], $tools);
 
         self::assertFalse($result->isError);
-        self::assertSame(['get_order'], array_column($result->structuredContent['tools'] ?? [], 'name'));
+        self::assertSame(['get_file'], array_column($result->structuredContent['tools'] ?? [], 'name'));
         self::assertSame([], $gate->called, 'the host tool was not run instead of the search');
     }
 
     public function testTheListIsShapedForTheRevision(): void
     {
-        $listed = (new Discovery(new CompactMode(), new RecordingGate()))->listTools(RecordingGate::storeTools(), Revision::V2024_11_05);
+        $listed = (new Discovery(new CompactMode(), new RecordingGate()))->listTools(RecordingGate::fixtureTools(), Revision::V2024_11_05);
 
         self::assertIsArray($listed['tools']);
         foreach ($listed['tools'] as $tool) {

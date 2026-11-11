@@ -25,9 +25,9 @@ final class ShaperTest extends TestCase
     private static function richTool(): Tool
     {
         return Tool::fromArray([
-            'name' => 'get_order',
-            'title' => 'Get an order',
-            'description' => 'Returns one order.',
+            'name' => 'get_file',
+            'title' => 'Get a file',
+            'description' => 'Returns one file.',
             'inputSchema' => ['type' => 'object'],
             'outputSchema' => ['type' => 'object'],
             'annotations' => ['readOnlyHint' => true],
@@ -51,7 +51,7 @@ final class ShaperTest extends TestCase
         $shaped = Shaper::tool(self::richTool(), Revision::V2025_03_26);
 
         self::assertArrayNotHasKey('title', $shaped);
-        self::assertSame(['title' => 'Get an order', 'readOnlyHint' => true], $shaped['annotations']);
+        self::assertSame(['title' => 'Get a file', 'readOnlyHint' => true], $shaped['annotations']);
     }
 
     public function testAHostFieldIsNeverSent(): void

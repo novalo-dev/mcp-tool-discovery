@@ -35,13 +35,13 @@ abstract class ModeContractTestCase extends TestCase
     protected const HIDDEN = 'acme_list_users';
 
     /** A change the gate shows but refuses at call time. */
-    protected const REFUSED = 'acme_delete_customer';
+    protected const REFUSED = 'acme_deactivate_user';
 
     /** A read the caller may run. */
-    protected const READ = 'acme_get_order';
+    protected const READ = 'acme_get_file';
 
     /** A change the caller may run. */
-    protected const WRITE = 'acme_set_order_status';
+    protected const WRITE = 'acme_set_ticket_status';
 
     abstract protected function mode(): DiscoveryMode;
 
@@ -70,7 +70,7 @@ abstract class ModeContractTestCase extends TestCase
 
     private function tools(): ToolSet
     {
-        return RecordingGate::storeTools();
+        return RecordingGate::fixtureTools();
     }
 
     private function tool(string $name): Tool

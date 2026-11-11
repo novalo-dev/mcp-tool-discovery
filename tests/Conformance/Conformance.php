@@ -49,26 +49,26 @@ final class Conformance
      */
     public static function checks(Revision $revision): array
     {
-        $tools = RecordingGate::storeTools();
+        $tools = RecordingGate::fixtureTools();
         $checks = [];
         $modes = [
             'compact' => new CompactMode(),
             'compact with prefix and pin' => new CompactMode(prefix: 'acme_', pinned: ['acme_get_settings']),
         ];
         foreach ($modes as $label => $mode) {
-            $discovery = new Discovery($mode, new RecordingGate(['acme_list_users'], ['acme_delete_customer']));
+            $discovery = new Discovery($mode, new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
             $own = static fn(string $name): string => $label === 'compact' ? $name : 'acme_' . $name;
             $checks[$label . ': tools/list'] = ['definition' => 'ListToolsResult', 'value' => $discovery->listTools($tools, $revision, 60000)];
-            $checks[$label . ': search with a query'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'order status'], $tools, $revision)];
-            $checks[$label . ': search by names'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['names' => ['acme_get_order', 'acme_nope']], $tools, $revision)];
+            $checks[$label . ': search with a query'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'ticket status'], $tools, $revision)];
+            $checks[$label . ': search by names'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['names' => ['acme_get_file', 'acme_nope']], $tools, $revision)];
             $checks[$label . ': search with no argument'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), [], $tools, $revision)];
             $checks[$label . ': search with nothing found'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'zzzz'], $tools, $revision)];
-            $checks[$label . ': read runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_get_order', 'arguments' => ['order_id' => '1']], $tools, $revision)];
-            $checks[$label . ': change runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_WRITE), ['name' => 'acme_set_order_status', 'arguments' => []], $tools, $revision)];
-            $checks[$label . ': wrong runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_delete_post'], $tools, $revision)];
-            $checks[$label . ': refused by the host'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_WRITE), ['name' => 'acme_delete_customer'], $tools, $revision)];
+            $checks[$label . ': read runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_get_file', 'arguments' => ['file_id' => '1']], $tools, $revision)];
+            $checks[$label . ': change runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_WRITE), ['name' => 'acme_set_ticket_status', 'arguments' => []], $tools, $revision)];
+            $checks[$label . ': wrong runner'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_delete_file'], $tools, $revision)];
+            $checks[$label . ': refused by the host'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_WRITE), ['name' => 'acme_deactivate_user'], $tools, $revision)];
             $checks[$label . ': hidden tool'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['name' => 'acme_list_users'], $tools, $revision)];
-            $checks[$label . ': host tool by its own name'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool('acme_get_order', [], $tools, $revision)];
+            $checks[$label . ': host tool by its own name'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool('acme_get_file', [], $tools, $revision)];
             $checks[$label . ': malformed run'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['arguments' => 'x'], $tools, $revision)];
         }
 

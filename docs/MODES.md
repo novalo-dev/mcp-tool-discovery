@@ -58,7 +58,7 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`.
 
 ## Grouped (wanted)
 
-One tool per group of host tools - `orders`, `catalog`, `customers` - so the
+One tool per group of host tools - `files`, `calendar`, `tickets` - so the
 client sees the map of the server without searching, in tens of tools rather
 than hundreds.
 

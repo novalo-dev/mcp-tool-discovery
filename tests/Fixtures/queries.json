@@ -1,122 +1,122 @@
 [
  {
-  "query": "show the latest orders",
-  "expected": "acme_list_orders"
+  "query": "show the files in the shared folder",
+  "expected": "acme_list_files"
  },
  {
-  "query": "details of order 1042",
-  "expected": "acme_get_order"
+  "query": "find the document about the budget",
+  "expected": "acme_search_files"
  },
  {
-  "query": "find the order of jane@example.com",
-  "expected": "acme_search_orders"
+  "query": "rename the report",
+  "expected": "acme_rename_file"
  },
  {
-  "query": "mark the order as shipped",
-  "expected": "acme_set_order_status"
+  "query": "put this file in the archive folder",
+  "expected": "acme_move_file"
  },
  {
-  "query": "cancel an order",
-  "expected": "acme_cancel_order"
+  "query": "remove an old file",
+  "expected": "acme_delete_file"
  },
  {
-  "query": "refund the customer",
-  "expected": "acme_refund_payment"
+  "query": "give Paul edit access to the plan",
+  "expected": "acme_share_file"
  },
  {
-  "query": "leave an internal note on an order",
-  "expected": "acme_add_order_note"
+  "query": "what is on my calendar next week",
+  "expected": "acme_list_events"
  },
  {
-  "query": "find a customer by phone",
-  "expected": "acme_search_customers"
+  "query": "book a meeting with the team on Monday",
+  "expected": "acme_create_event"
  },
  {
-  "query": "change a customer's email",
-  "expected": "acme_update_customer"
+  "query": "move the meeting to 3pm",
+  "expected": "acme_update_event"
  },
  {
-  "query": "remove a customer account",
-  "expected": "acme_delete_customer"
+  "query": "call off tomorrow's meeting",
+  "expected": "acme_cancel_event"
  },
  {
-  "query": "add a new product",
-  "expected": "acme_create_product"
+  "query": "when are Ana and Leo both available",
+  "expected": "acme_find_free_slots"
  },
  {
-  "query": "change the price of a product",
-  "expected": "acme_update_product"
+  "query": "open support tickets",
+  "expected": "acme_list_tickets"
  },
  {
-  "query": "hide a product from the shop",
-  "expected": "acme_set_product_visibility"
+  "query": "give this ticket to Sara",
+  "expected": "acme_assign_ticket"
  },
  {
-  "query": "how many units are in stock",
-  "expected": "acme_get_inventory"
+  "query": "mark the ticket as solved",
+  "expected": "acme_set_ticket_status"
  },
  {
-  "query": "update stock quantity",
-  "expected": "acme_set_inventory_level"
+  "query": "answer the person who opened ticket 88",
+  "expected": "acme_reply_to_ticket"
  },
  {
-  "query": "products running low",
-  "expected": "acme_list_low_inventory"
+  "query": "tag the ticket as a bug",
+  "expected": "acme_add_ticket_label"
  },
  {
-  "query": "create a discount code",
-  "expected": "acme_create_coupon"
+  "query": "who has access to the workspace",
+  "expected": "acme_list_users"
  },
  {
-  "query": "write a blog post",
-  "expected": "acme_create_post"
- },
- {
-  "query": "publish the draft",
-  "expected": "acme_publish_post"
- },
- {
-  "query": "delete spam comments",
-  "expected": "acme_delete_comment"
- },
- {
-  "query": "revenue last month",
-  "expected": "acme_get_sales_report"
- },
- {
-  "query": "best sellers",
-  "expected": "acme_list_top_products"
- },
- {
-  "query": "which carriers do we offer",
-  "expected": "acme_list_shipping_methods"
- },
- {
-  "query": "where is my parcel",
-  "expected": "acme_get_shipment_tracking"
- },
- {
-  "query": "invite a colleague",
+  "query": "add a new team member",
   "expected": "acme_invite_user"
  },
  {
-  "query": "give admin rights to a staff member",
+  "query": "make Leo an admin",
   "expected": "acme_set_user_role"
  },
  {
-  "query": "flush the cache",
-  "expected": "acme_clear_cache"
+  "query": "block a former employee",
+  "expected": "acme_deactivate_user"
  },
  {
-  "query": "change the store currency",
+  "query": "post in the general channel",
+  "expected": "acme_send_message"
+ },
+ {
+  "query": "latest messages in the dev channel",
+  "expected": "acme_read_messages"
+ },
+ {
+  "query": "ship version 2.4 to production",
+  "expected": "acme_deploy_app"
+ },
+ {
+  "query": "undo the last release",
+  "expected": "acme_rollback_deployment"
+ },
+ {
+  "query": "show the error logs",
+  "expected": "acme_get_logs"
+ },
+ {
+  "query": "is the app slow today",
+  "expected": "acme_get_metrics"
+ },
+ {
+  "query": "mute the disk alert",
+  "expected": "acme_silence_alert"
+ },
+ {
+  "query": "back up the database now",
+  "expected": "acme_create_backup"
+ },
+ {
+  "query": "bring the database back to yesterday",
+  "expected": "acme_restore_backup"
+ },
+ {
+  "query": "change the workspace time zone",
   "expected": "acme_update_settings"
- },
- {
-  "query": "add a webhook",
-  "expected": "acme_create_webhook"
- },
- {
-  "query": "email all subscribers",
-  "expected": "acme_send_newsletter"
  }
 ]

@@ -23,8 +23,8 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * - BM25F text relevance over the name, title, description and parameters;
  * - verb intent: the query's action word ("change", "turn off") against the
  *   verb the tool name starts with ("set_");
- * - object coverage: how much of the rest of the name ("order_status") the
- *   query names, which tells set_product_active from set_module_active.
+ * - object coverage: how much of the rest of the name ("ticket_status") the
+ *   query names, which tells set_user_role from set_ticket_status.
  * Then everything far below the best is cut, so an assistant receives a few
  * schemas rather than the whole list.
  */
@@ -149,7 +149,7 @@ final class ToolSearch
     }
 
     /**
-     * A prefix every name shares, such as "shop_", which tells no tool apart
+     * A prefix every name shares, such as "acme_", which tells no tool apart
      * and would hide the verb the name starts with.
      *
      * @param list<string> $names

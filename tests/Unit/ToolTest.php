@@ -23,7 +23,7 @@ final class ToolTest extends TestCase
 {
     public function testKeepsTheDefinitionAsGiven(): void
     {
-        $definition = ['name' => 'get_order', 'inputSchema' => ['type' => 'object'], 'x-custom' => 1];
+        $definition = ['name' => 'get_file', 'inputSchema' => ['type' => 'object'], 'x-custom' => 1];
 
         self::assertSame($definition, Tool::fromArray($definition)->toArray());
     }
@@ -50,7 +50,7 @@ final class ToolTest extends TestCase
     public static function invalidDefinitions(): iterable
     {
         yield 'no name' => [['inputSchema' => ['type' => 'object']]];
-        yield 'a space in the name' => [['name' => 'get order', 'inputSchema' => ['type' => 'object']]];
+        yield 'a space in the name' => [['name' => 'get file', 'inputSchema' => ['type' => 'object']]];
         yield 'a name too long' => [['name' => str_repeat('a', 129), 'inputSchema' => ['type' => 'object']]];
         yield 'no input schema' => [['name' => 'a']];
         yield 'a schema that is not an object' => [['name' => 'a', 'inputSchema' => ['type' => 'string']]];

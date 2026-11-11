@@ -37,82 +37,82 @@ final class ToolSearchTest extends TestCase
     {
         $analyzer = new Analyzer();
 
-        self::assertSame(['set', 'order', 'status'], $analyzer->words('set_order_status'));
-        self::assertSame(['set', 'order', 'status'], $analyzer->words('setOrderStatus'));
+        self::assertSame(['set', 'ticket', 'status'], $analyzer->words('set_ticket_status'));
+        self::assertSame(['set', 'ticket', 'status'], $analyzer->words('setTicketStatus'));
         self::assertSame(['get', 'html', 'page'], $analyzer->words('getHTMLPage'));
-        self::assertSame(['refund', 'order'], $analyzer->words('Refund the order 1042'), 'stop words and numbers left out');
+        self::assertSame(['close', 'ticket'], $analyzer->words('Close the ticket 1042'), 'stop words and numbers left out');
         self::assertSame(['categorie', 'etat'], $analyzer->words('Catégorie État'), 'accents folded without mbstring');
     }
 
     public function testTheMostRelevantToolComesFirst(): void
     {
-        $search = new ToolSearch(RecordingGate::storeTools());
+        $search = new ToolSearch(RecordingGate::fixtureTools());
 
-        self::assertSame('acme_set_order_status', $search->search('change the status of an order')[0]->name);
-        self::assertSame('acme_refund_payment', $search->search('refund a payment')[0]->name);
-        self::assertSame('acme_list_low_inventory', $search->search('low inventory')[0]->name);
+        self::assertSame('acme_set_ticket_status', $search->search('change the status of a ticket')[0]->name);
+        self::assertSame('acme_rollback_deployment', $search->search('roll back a deployment')[0]->name);
+        self::assertSame('acme_list_backups', $search->search('list backups')[0]->name);
     }
 
     public function testFarWeakerMatchesAreCut(): void
     {
-        $found = (new ToolSearch(RecordingGate::storeTools()))->search('coupons');
+        $found = (new ToolSearch(RecordingGate::fixtureTools()))->search('webhooks');
 
-        self::assertLessThanOrEqual(5, count($found), 'not every tool that mentions a discount');
-        self::assertContains('acme_list_coupons', self::names($found));
+        self::assertLessThanOrEqual(5, count($found), 'not every tool that mentions an event');
+        self::assertContains('acme_list_webhooks', self::names($found));
     }
 
     public function testTheLimitHolds(): void
     {
-        $search = new ToolSearch(RecordingGate::storeTools(), new SearchOptions(cut: 0.0, limit: 3));
+        $search = new ToolSearch(RecordingGate::fixtureTools(), new SearchOptions(cut: 0.0, limit: 3));
 
-        self::assertCount(3, $search->search('order'));
-        self::assertCount(1, $search->search('order', 1));
+        self::assertCount(3, $search->search('ticket'));
+        self::assertCount(1, $search->search('ticket', 1));
     }
 
     public function testNothingMatchesNothing(): void
     {
-        self::assertSame([], (new ToolSearch(RecordingGate::storeTools()))->search('zzzz qqqq'));
-        self::assertSame([], (new ToolSearch(RecordingGate::storeTools()))->search('the of a'));
+        self::assertSame([], (new ToolSearch(RecordingGate::fixtureTools()))->search('zzzz qqqq'));
+        self::assertSame([], (new ToolSearch(RecordingGate::fixtureTools()))->search('the of a'));
     }
 
     public function testTheSameQueryAlwaysGivesTheSameOrder(): void
     {
-        $search = new ToolSearch(RecordingGate::storeTools(), new SearchOptions(cut: 0.0));
+        $search = new ToolSearch(RecordingGate::fixtureTools(), new SearchOptions(cut: 0.0));
 
         self::assertSame(self::names($search->search('delete')), self::names($search->search('delete')));
     }
 
     public function testHostSynonymsBringTheHostVocabulary(): void
     {
-        $tools = RecordingGate::storeTools();
+        $tools = RecordingGate::fixtureTools();
 
-        self::assertNotSame('acme_get_shipment_tracking', (new ToolSearch($tools))->search('where is my parcel')[0]->name ?? null);
+        self::assertNotSame('acme_create_event', (new ToolSearch($tools))->search('create a meeting')[0]->name ?? null);
         self::assertSame(
-            'acme_get_shipment_tracking',
-            (new ToolSearch($tools, new SearchOptions(synonyms: ['parcel' => 'shipment tracking'])))->search('where is my parcel')[0]->name,
+            'acme_create_event',
+            (new ToolSearch($tools, new SearchOptions(synonyms: ['meeting' => 'calendar event'])))->search('create a meeting')[0]->name,
         );
     }
 
     public function testASharedVerbIsNotTakenForAPrefix(): void
     {
         $tools = ToolSet::of([
-            ['name' => 'get_order', 'description' => 'One order.', 'inputSchema' => ['type' => 'object']],
-            ['name' => 'get_customer', 'description' => 'One customer.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'get_file', 'description' => 'One file.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'get_user', 'description' => 'One user.', 'inputSchema' => ['type' => 'object']],
         ]);
 
-        self::assertSame('get_customer', (new ToolSearch($tools))->search('get customer')[0]->name);
+        self::assertSame('get_user', (new ToolSearch($tools))->search('get user')[0]->name);
     }
 
     public function testFiveHundredToolsAreSearchedFast(): void
     {
         $definitions = [];
-        foreach (RecordingGate::storeTools() as $tool) {
+        foreach (RecordingGate::fixtureTools() as $tool) {
             for ($copy = 0; $copy < 10; ++$copy) {
                 $definitions[] = ['name' => $tool->name . '_' . $copy] + $tool->toArray();
             }
         }
         $start = hrtime(true);
-        (new ToolSearch(ToolSet::of($definitions)))->search('change the status of an order');
+        (new ToolSearch(ToolSet::of($definitions)))->search('change the status of a ticket');
         $milliseconds = (hrtime(true) - $start) / 1e6;
 
         // Generous on purpose: CI machines are slow and shared. On a laptop

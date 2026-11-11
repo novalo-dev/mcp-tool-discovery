@@ -25,8 +25,8 @@ final class SearchOptions
     /**
      * @param array<string, float> $weights how much a match counts in each field of a tool
      * @param array<string, string> $synonyms a word of the caller => words of the tools,
-     *        e.g. ['voucher' => 'cart rule']; the host's own vocabulary, never built in
-     * @param string|null $namePrefix a prefix every tool name carries, e.g. "shop_",
+     *        e.g. ['meeting' => 'calendar event']; the host's own vocabulary, never built in
+     * @param string|null $namePrefix a prefix every tool name carries, e.g. "acme_",
      *        left out of the name when matching; null to detect it
      */
     public function __construct(

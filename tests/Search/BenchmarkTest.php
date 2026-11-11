@@ -30,7 +30,7 @@ final class BenchmarkTest extends TestCase
     {
         $score = Benchmark::run();
 
-        self::assertGreaterThanOrEqual(26, $score['first'], implode("\n", $score['misses']));
-        self::assertGreaterThanOrEqual(27, $score['top3'], implode("\n", $score['misses']));
+        self::assertGreaterThanOrEqual(18, $score['first'], implode("\n", $score['misses']));
+        self::assertGreaterThanOrEqual(20, $score['top3'], implode("\n", $score['misses']));
     }
 }

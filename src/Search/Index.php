@@ -19,7 +19,7 @@ namespace Novalo\McpToolDiscovery\Search;
  * BM25F rather than plain BM25: each field has a weight, so a word in a tool's
  * name counts more than the same word in its description, and the length of
  * each field is normalised on its own. A rare word weighs more than a common
- * one ("refund" against "order"), and repeating a word earns less each time.
+ * one ("rollback" against "file"), and repeating a word earns less each time.
  *
  * Built per request from a few hundred documents in well under a millisecond
  * each, so there is no file, no lock and nothing to rebuild when the host's

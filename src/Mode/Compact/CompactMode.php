@@ -49,7 +49,7 @@ final class CompactMode implements DiscoveryMode
     private readonly ?\Closure $groupOf;
 
     /**
-     * @param string $prefix put before the three names, e.g. "shop_" for shop_search_tools
+     * @param string $prefix put before the three names, e.g. "acme_" for acme_search_tools
      * @param list<string> $pinned host tools listed as themselves next to the three, e.g. a ping
      * @param array{search?: string, read?: string, write?: string} $titles the titles shown to people, translated by the host
      * @param (callable(Tool): string)|null $groupOf the group a tool belongs to, for the list a search with no argument gives
@@ -156,7 +156,7 @@ final class CompactMode implements DiscoveryMode
                 'name' => $this->searchName,
                 'title' => $this->titles['search'] ?? 'Search the tools',
                 'description' => sprintf(
-                    'Finds the tools you may use on this server and gives their parameters. The server lists its tools in compact form: call this first, then run what you found with %s (reads) or %s (changes), as each result says. Give keywords in English ("order status", "stock"), or the exact names a guide gives. With neither, lists every tool you may use, names only. Reads only.',
+                    'Finds the tools you may use on this server and gives their parameters. The server lists its tools in compact form: call this first, then run what you found with %s (reads) or %s (changes), as each result says. Give keywords in English ("ticket status", "backup"), or the exact names a guide gives. With neither, lists every tool you may use, names only. Reads only.',
                     $this->readName,
                     $this->writeName,
                 ),
@@ -165,7 +165,7 @@ final class CompactMode implements DiscoveryMode
                     'properties' => [
                         'query' => [
                             'type' => 'string',
-                            'description' => sprintf('Keywords in English, e.g. "refund order". Up to %d tools come back, best match first, each with its inputSchema.', $this->maxDescribed),
+                            'description' => sprintf('Keywords in English, e.g. "restore a backup". Up to %d tools come back, best match first, each with its inputSchema.', $this->maxDescribed),
                         ],
                         'names' => [
                             'type' => 'array',
@@ -222,7 +222,7 @@ final class CompactMode implements DiscoveryMode
         $query = trim($query ?? '');
 
         if ($query === '' && $names === []) {
-            return CallResult::json(['tools' => $this->catalogue($visible)]);
+            return CallResult::json(['tools' => $this->everyTool($visible)]);
         }
 
         $found = [];
@@ -268,7 +268,7 @@ final class CompactMode implements DiscoveryMode
      *
      * @return list<array<string, mixed>>
      */
-    private function catalogue(ToolSet $visible): array
+    private function everyTool(ToolSet $visible): array
     {
         $entry = fn(Tool $tool): array => ['name' => $tool->name, 'title' => $tool->title(), 'run_with' => $this->runnerFor($tool)];
         if ($this->groupOf === null) {

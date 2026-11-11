@@ -14,7 +14,8 @@ declare(strict_types=1);
 /*
  * The rules of the repository a linter does not know, checked on every file
  * git tracks:
- * - src/ names no host framework, so the library stays usable by any server;
+ * - src/ names no host framework and no business vocabulary, so the library
+ *   stays usable by any server;
  * - every PHP file carries the licence header;
  * - no long dash and no stock phrase, so the text reads as written by a person;
  * - no line that credits the work to a tool rather than to its authors, in a
@@ -39,6 +40,9 @@ $header = "/*\n * This file is part of novalo/mcp-tool-discovery.\n";
 $credit = '/(' . implode('|', ['Co-Authored' . '-By', 'Generated (with|by) ', 'Claude', 'Anthropic', 'Chat' . 'GPT', 'Open' . 'AI', "\u{1F916}", 'written by (an )?AI', 'AI-generated']) . ')/i';
 $stock = '/\b(' . implode('|', ['del' . 've', 'seam' . 'less(ly)?', 'lever' . 'age', 'cutting' . '-edge', 'game' . '-changer', 'robust' . 'ness', 'in con' . 'clusion', "it's worth " . 'noting']) . ')\b/i';
 $framework = '/\b(' . implode('|', ['PrestaShop', 'somcp', 'Laravel', 'Illuminate', 'Symfony', 'WordPress', 'Drupal', 'Magento']) . ')\b/i';
+// The vocabulary of one business: src/ serves every kind of server, so its
+// examples stay neutral (files, tickets, users) and name no trade.
+$trade = '/(order_|_order|\\b(' . implode('|', ['orders', 'products?', 'carts?', 'checkout', 'coupons?', 'vouchers?', 'refunds?', 'shops?', 'catalog(ue)?', 'inventory', 'shipping', 'shipments?', 'customers?', 'merchants?', 'stock']) . ')\\b)/i';
 $longDash = "\u{2014}";
 
 $problems = [];
@@ -87,6 +91,9 @@ foreach ($files as $file) {
         }
         if (str_starts_with($file, 'src/') && preg_match($framework, $line, $match) === 1) {
             $problems[] = $at . ': src/ names a host framework, "' . $match[1] . '"';
+        }
+        if (str_starts_with($file, 'src/') && preg_match($trade, $line, $match) === 1) {
+            $problems[] = $at . ': src/ uses the vocabulary of one business, "' . $match[1] . '"';
         }
     }
     if (str_ends_with($file, '.php') && !str_starts_with(substr($text, 0, 200), "<?php\n\n" . $header)) {

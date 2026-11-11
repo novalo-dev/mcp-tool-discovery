@@ -31,7 +31,7 @@ final class CompactModeTest extends TestCase
     private static function search(array $arguments, ?CompactMode $mode = null, ?RecordingGate $gate = null): array
     {
         $result = (new Discovery($mode ?? new CompactMode(), $gate ?? new RecordingGate()))
-            ->call(CompactMode::SEARCH, $arguments, RecordingGate::storeTools());
+            ->call(CompactMode::SEARCH, $arguments, RecordingGate::fixtureTools());
         self::assertFalse($result->isError);
         self::assertIsArray($result->structuredContent);
 
@@ -43,7 +43,7 @@ final class CompactModeTest extends TestCase
      */
     private static function runTool(string $runner, array $arguments, ?RecordingGate $gate = null): CallResult
     {
-        return (new Discovery(new CompactMode(), $gate ?? new RecordingGate()))->call($runner, $arguments, RecordingGate::storeTools());
+        return (new Discovery(new CompactMode(), $gate ?? new RecordingGate()))->call($runner, $arguments, RecordingGate::fixtureTools());
     }
 
     private static function text(CallResult $result): string
@@ -54,7 +54,7 @@ final class CompactModeTest extends TestCase
     public function testTheListHoldsThePinnedToolsAndTheThree(): void
     {
         $mode = new CompactMode(prefix: 'acme_', pinned: ['acme_get_settings']);
-        $names = array_map(static fn(Tool $tool): string => $tool->name, $mode->listTools(RecordingGate::storeTools()));
+        $names = array_map(static fn(Tool $tool): string => $tool->name, $mode->listTools(RecordingGate::fixtureTools()));
 
         self::assertSame(['acme_get_settings', 'acme_search_tools', 'acme_run_read_tool', 'acme_run_write_tool'], $names);
     }
@@ -62,7 +62,7 @@ final class CompactModeTest extends TestCase
     public function testAPinnedToolTheCallerMayNotSeeIsNotListed(): void
     {
         $mode = new CompactMode(pinned: ['acme_get_settings']);
-        $listed = (new Discovery($mode, new RecordingGate(['acme_get_settings'])))->listTools(RecordingGate::storeTools(), Revision::latest());
+        $listed = (new Discovery($mode, new RecordingGate(['acme_get_settings'])))->listTools(RecordingGate::fixtureTools(), Revision::latest());
 
         self::assertNotContains('acme_get_settings', array_column($listed['tools'], 'name'));
     }
@@ -70,7 +70,7 @@ final class CompactModeTest extends TestCase
     public function testOnlyTheChangeRunnerIsMarkedDestructive(): void
     {
         $tools = [];
-        foreach ((new CompactMode())->listTools(RecordingGate::storeTools()) as $tool) {
+        foreach ((new CompactMode())->listTools(RecordingGate::fixtureTools()) as $tool) {
             $tools[$tool->name] = $tool;
         }
 
@@ -82,21 +82,21 @@ final class CompactModeTest extends TestCase
 
     public function testASearchGivesSchemasAndTheRunnerToUse(): void
     {
-        $answer = self::search(['query' => 'change the status of an order']);
+        $answer = self::search(['query' => 'change the status of a ticket']);
 
         self::assertIsArray($answer['tools']);
         self::assertIsArray($answer['tools'][0]);
-        self::assertSame('acme_set_order_status', $answer['tools'][0]['name']);
+        self::assertSame('acme_set_ticket_status', $answer['tools'][0]['name']);
         self::assertSame(CompactMode::RUN_WRITE, $answer['tools'][0]['run_with']);
         self::assertSame('object', $answer['tools'][0]['inputSchema']['type'] ?? null);
     }
 
     public function testNamesAreDescribedFirstAndUnknownOnesSaidSo(): void
     {
-        $answer = self::search(['names' => ['acme_get_order', 'acme_nope']]);
+        $answer = self::search(['names' => ['acme_get_file', 'acme_nope']]);
 
         self::assertIsArray($answer['tools']);
-        self::assertSame('acme_get_order', $answer['tools'][0]['name'] ?? null);
+        self::assertSame('acme_get_file', $answer['tools'][0]['name'] ?? null);
         self::assertSame(['acme_nope'], $answer['unknown']);
     }
 
@@ -118,7 +118,7 @@ final class CompactModeTest extends TestCase
     {
         $flat = self::search([]);
         self::assertIsArray($flat['tools']);
-        self::assertCount(count(RecordingGate::storeTools()), $flat['tools']);
+        self::assertCount(count(RecordingGate::fixtureTools()), $flat['tools']);
 
         $grouped = self::search([], new CompactMode(groupOf: static fn(Tool $tool): string => explode('_', $tool->name)[2] ?? 'other'));
         self::assertIsArray($grouped['tools']);
@@ -137,7 +137,7 @@ final class CompactModeTest extends TestCase
     public function testAChangeSentToTheReadRunnerIsRefusedAndNeverRuns(): void
     {
         $gate = new RecordingGate();
-        $result = self::runTool(CompactMode::RUN_READ, ['name' => 'acme_delete_post'], $gate);
+        $result = self::runTool(CompactMode::RUN_READ, ['name' => 'acme_delete_file'], $gate);
 
         self::assertTrue($result->isError);
         self::assertStringContainsString(CompactMode::RUN_WRITE, self::text($result));
@@ -146,7 +146,7 @@ final class CompactModeTest extends TestCase
 
     public function testAReadSentToTheChangeRunnerIsRefused(): void
     {
-        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_get_order']);
+        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_get_file']);
 
         self::assertTrue($result->isError);
         self::assertStringContainsString(CompactMode::RUN_READ, self::text($result));
@@ -162,17 +162,17 @@ final class CompactModeTest extends TestCase
     public function testTheArgumentsReachTheToolUnchanged(): void
     {
         $gate = new RecordingGate();
-        self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_set_order_status', 'arguments' => ['order_id' => '7', 'status' => 'shipped']], $gate);
+        self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_set_ticket_status', 'arguments' => ['ticket_id' => '7', 'status' => 'solved']], $gate);
 
-        self::assertSame([['name' => 'acme_set_order_status', 'arguments' => ['order_id' => '7', 'status' => 'shipped']]], $gate->called);
+        self::assertSame([['name' => 'acme_set_ticket_status', 'arguments' => ['ticket_id' => '7', 'status' => 'solved']]], $gate->called);
     }
 
     public function testAFailedRunCarriesTheToolsParameters(): void
     {
-        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_delete_customer'], new RecordingGate([], ['acme_delete_customer']));
+        $result = self::runTool(CompactMode::RUN_WRITE, ['name' => 'acme_deactivate_user'], new RecordingGate([], ['acme_deactivate_user']));
 
         self::assertTrue($result->isError);
-        self::assertStringContainsString('Parameters of acme_delete_customer', self::text($result));
+        self::assertStringContainsString('Parameters of acme_deactivate_user', self::text($result));
     }
 
     /**
@@ -182,7 +182,7 @@ final class CompactModeTest extends TestCase
     {
         yield 'no name' => [[]];
         yield 'a name that is not a string' => [['name' => 1]];
-        yield 'arguments that are not an object' => [['name' => 'acme_get_order', 'arguments' => 'x']];
+        yield 'arguments that are not an object' => [['name' => 'acme_get_file', 'arguments' => 'x']];
     }
 
     /**
@@ -197,11 +197,11 @@ final class CompactModeTest extends TestCase
     public function testTheGuideHeaderSaysWhichRunnerToUse(): void
     {
         $mode = new CompactMode();
-        $header = $mode->guideHeader(['acme_get_order', 'acme_set_order_status', 'acme_list_users'], RecordingGate::storeTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));
+        $header = $mode->guideHeader(['acme_get_file', 'acme_set_ticket_status', 'acme_list_users'], RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));
 
-        self::assertStringContainsString('run_read_tool: acme_get_order', $header);
-        self::assertStringContainsString('run_write_tool: acme_set_order_status', $header);
+        self::assertStringContainsString('run_read_tool: acme_get_file', $header);
+        self::assertStringContainsString('run_write_tool: acme_set_ticket_status', $header);
         self::assertStringNotContainsString('acme_list_users', $header);
-        self::assertSame('', $mode->guideHeader(['acme_nope'], RecordingGate::storeTools()));
+        self::assertSame('', $mode->guideHeader(['acme_nope'], RecordingGate::fixtureTools()));
     }
 }

@@ -140,7 +140,7 @@ nothing else, and every pack is held to the same
 | Mode | The client sees | State |
 |---|---|---|
 | **Compact** | a search tool and two runners: three tools, whatever the size of the server | shipped |
-| **Grouped** | one tool per group of tools ("orders", "catalog"), each listing its actions | open to contribution |
+| **Grouped** | one tool per group of tools ("files", "calendar"), each listing its actions | open to contribution |
 | **Gateway** | a single tool that searches and runs everything | open to contribution |
 
 A host tool called by its own name is accepted in every mode, through the same
@@ -164,11 +164,11 @@ confirmation. A runner never runs a runner or the search.
 
 ```php
 new CompactMode(
-    prefix: 'shop_',                 // shop_search_tools, shop_run_read_tool, ...
-    pinned: ['shop_ping'],           // host tools listed as themselves
+    prefix: 'acme_',                 // acme_search_tools, acme_run_read_tool, ...
+    pinned: ['acme_ping'],           // host tools listed as themselves
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
     groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
-    searchOptions: new SearchOptions(synonyms: ['voucher' => 'cart rule']),
+    searchOptions: new SearchOptions(synonyms: ['meeting' => 'calendar event']),
 );
 ```
 
@@ -196,13 +196,13 @@ tool lists: no index file, no lock, nothing to rebuild when the list changes.
 - **Verb intent**: "change", "turn off" or "rename" in a query point to tools
   named `set_...` or `update_...`, through a table of plain English action
   words.
-- **Object coverage**: "disable product" prefers `set_product_active` to
-  `set_module_active`.
+- **Object coverage**: "change the ticket status" prefers `set_ticket_status`
+  to `set_user_role`.
 - **A cut** at 60% of the best score, so the client receives a few schemas.
 
 | Benchmark | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The fixture server of this repository, 50 tools, 30 queries written before any tuning | 26/30 | 27/30 |
+| The fixture server of this repository, 50 tools, 30 queries written before any tuning | 18/30 | 20/30 |
 | A real server of 135 tools, 75 queries used while designing the ranking | 65/75 | 70/75 |
 | The keyword search it replaced, on that same server | 26/75 | 45/75 |
 

@@ -4,7 +4,7 @@
 `search_tools` uses, and it can be used on its own:
 
 ```php
-$found = (new ToolSearch($visibleTools))->search('change the status of an order');
+$found = (new ToolSearch($visibleTools))->search('change the status of a ticket');
 ```
 
 ---
@@ -17,24 +17,24 @@ Three signals, added up.
 
 | Field | Weight | Text |
 |---|---|---|
-| name | 3 | the name, split (`set_order_status` gives "set order status"), shared prefix left out |
+| name | 3 | the name, split (`set_ticket_status` gives "set ticket status"), shared prefix left out |
 | title | 2 | `title`, or the title of the annotations |
 | description | 1 | `description` |
 | parameters | 0.5 | the names and descriptions of the `inputSchema` properties |
 
 BM25F gives each field its weight and normalises each field's length on its
-own. A rare word weighs more than a common one: on a store server, "refund"
-counts more than "order", which half the tools mention. A word repeated earns
+own. A rare word weighs more than a common one: "rollback" counts more than
+"file", which many tools mention. A word repeated earns
 less each time.
 
 **2. Verb intent.** Tool names are conventionally `verb_object`. A query says
-"change the status" or "turn off a product", and no text match links "change"
+"change the status" or "turn off a user", and no text match links "change"
 to `set`. `VerbIntent` holds plain English action words and the verbs a tool
 name may start with for each; a tool whose verb matches gains a bonus.
 
-**3. Object coverage.** The share of the name's object words ("order",
-"status") the query names. It tells `set_product_active` from
-`set_module_active` when the query says "product".
+**3. Object coverage.** The share of the name's object words ("ticket",
+"status") the query names. It tells `set_ticket_status` from
+`set_user_role` when the query says "ticket".
 
 Then the ranking is **cut** at 60% of the best score, and **limited** to 10
 tools. Equal scores keep the host's order, so a query always gives the same
@@ -44,7 +44,7 @@ answer.
 
 The Analyzer splits snake_case, kebab-case, dots and camelCase, lowercases,
 folds accented Latin letters to ASCII without any extension, and leaves out
-English stop words and numbers ("order 1042" is about an order, not about
+English stop words and numbers ("ticket 1042" is about a ticket, not about
 1042).
 
 Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
@@ -59,10 +59,10 @@ wants the list tool, and more tools tie.
 ## Synonyms
 
 The library holds no business vocabulary. A host that knows its clients say
-"voucher" for a cart rule, or "parcel" for a shipment, gives a map:
+"meeting" for a calendar event, or "admin" for a role, gives a map:
 
 ```php
-new SearchOptions(synonyms: ['voucher' => 'cart rule', 'parcel' => 'shipment tracking']);
+new SearchOptions(synonyms: ['meeting' => 'calendar event', 'admin' => 'role']);
 ```
 
 The synonyms are added to the query; the caller's own words still count.
@@ -76,14 +76,17 @@ even one that never searches.
 
 | Set | Tools | Queries | Right tool first | Top 3 |
 |---|---|---|---|---|
-| Fixture server of this repository, queries written before any tuning | 50 | 30 | 26 | 27 |
+| Fixture server of this repository, queries written before any tuning | 50 | 30 | 18 | 20 |
 | A real server, queries used while designing the ranking | 135 | 75 | 65 | 70 |
 | The keyword search it replaced, same real server | 135 | 75 | 26 | 45 |
 
-The fixture set is the honest one: its queries were written and run once,
-against the finished ranking, before anything was adjusted. Its misses are
-vocabulary the tools do not use ("parcel" for a shipment, "admin rights" for a
-role): synonyms or descriptions fix those, not weights.
+The fixture set is the honest one: its queries were written as a person would
+say them, then run once against the finished ranking, before anything was
+adjusted. Most of its misses are words the tools do not use - "meeting" for a
+calendar event, "admin" for a role, "undo the last release" for a rollback,
+"book" for create. Host synonyms and descriptions written in the users' words
+fix those; the next gains of the library are there too, measured on new
+queries rather than on these ones.
 
 On the real server, raising the weights further reached 37/40 on the queries
 used to choose them and stayed lower on the others: the gap a text search

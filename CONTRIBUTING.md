@@ -106,7 +106,7 @@ The search is measured, not tuned by feel.
   running them against your change, so the benchmark keeps measuring and does
   not just repeat what was tuned.
 - `VerbIntent` holds plain English action words only. A word of a business
-  ("voucher", "parcel") belongs in the host's synonyms, not in the library.
+  ("meeting", "admin") belongs in the host's synonyms, not in the library.
 
 ## Protocol revisions
 

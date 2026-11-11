@@ -64,10 +64,10 @@ final class RecordingGate implements ToolGate
     }
 
     /**
-     * The fixture tools of a fictional store server, the same ones the search
+     * The fixture tools of a fictional workspace server, the same ones the search
      * benchmark uses.
      */
-    public static function storeTools(): ToolSet
+    public static function fixtureTools(): ToolSet
     {
         $json = file_get_contents(__DIR__ . '/tools.json');
         if ($json === false) {

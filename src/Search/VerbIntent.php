@@ -16,7 +16,7 @@ namespace Novalo\McpToolDiscovery\Search;
 /**
  * What a caller's action word means for the verb a tool name starts with.
  *
- * MCP tools are conventionally named verb_object: list_orders, set_status,
+ * MCP tools are conventionally named verb_object: list_files, set_status,
  * delete_page. A query says "change the status" or "turn off the page", and
  * no text match links "change" to "set". This table does, for plain English
  * action words only: it holds no word of any business domain, which belongs

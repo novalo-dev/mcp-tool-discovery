@@ -36,7 +36,7 @@ final class Benchmark
         }
         /** @var list<array{query: string, expected: string}> $queries */
         $queries = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
-        $search = new ToolSearch(RecordingGate::storeTools(), $options);
+        $search = new ToolSearch(RecordingGate::fixtureTools(), $options);
         $first = 0;
         $top3 = 0;
         $misses = [];
