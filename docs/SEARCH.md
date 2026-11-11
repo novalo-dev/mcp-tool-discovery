@@ -1,7 +1,8 @@
 # Search
 
-`ToolSearch` finds the tools that answer a request, the best first. It is what
-`search_tools` uses, and it can be used on its own:
+`ToolSearch` finds the tools that answer a request, the best first. Every mode
+reaches it through `ToolRunner::search()`, with the `SearchSetup` the host gave
+`Discovery`; it can also be used on its own:
 
 ```php
 $search = new ToolSearch($visibleTools);
@@ -92,11 +93,12 @@ client reads them, even one that never searches.
 
 ## Cache
 
-Building the index is most of the cost of a search. An `IndexCache` keeps it:
+Building the index is most of the cost of a search. An `IndexCache`, given
+once in the `SearchSetup`, keeps it for every mode:
 
 ```php
-new ToolSearch($visibleTools, cache: new MemoryIndexCache());           // a long-running server
-new ToolSearch($visibleTools, cache: new FileIndexCache($cacheDir));    // each request starts afresh
+new SearchSetup(cache: new MemoryIndexCache());        // a long-running server
+new SearchSetup(cache: new FileIndexCache($cacheDir)); // each request starts afresh
 ```
 
 The key is a hash of every text indexed and of the settings. Two callers who
@@ -116,8 +118,9 @@ A search with the three fields, on one machine; the times include the request.
 
 ## Learning
 
-Off by default. With a `LearningStore`, the search learns which tool answered
-which words:
+Off by default. With a `LearningStore` in the `SearchSetup`, the search learns
+which tool answered which words. It is wired in the core, in `ToolRunner`, so
+every mode learns the same way and none can skip the checks:
 
 1. A search returns a `search_id`: the words of the request that the tools
    use, and only those.

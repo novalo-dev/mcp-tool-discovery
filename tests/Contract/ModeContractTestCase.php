@@ -16,6 +16,10 @@ namespace Novalo\McpToolDiscovery\Tests\Contract;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Search\ToolSearch;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -47,11 +51,12 @@ abstract class ModeContractTestCase extends TestCase
 
     /**
      * How an assistant runs this host tool through the mode: the name of one
-     * of the mode's own tools and its arguments.
+     * of the mode's own tools and its arguments, carrying the search id when
+     * one is given, so the search learns from the run.
      *
      * @return array{0: string, 1: array<string, mixed>}
      */
-    abstract protected function callTo(Tool $tool): array;
+    abstract protected function callTo(Tool $tool, ?string $searchId = null): array;
 
     /**
      * Calls of the mode's own tools that run no host tool, such as searches
@@ -163,6 +168,27 @@ abstract class ModeContractTestCase extends TestCase
             }
         }
         self::fail($name . ' runs changes but is not in the list');
+    }
+
+    public function testTheSearchLearnsOnlyFromAnAllowedRunThatSucceeded(): void
+    {
+        $visible = $this->tools()->filter(static fn(Tool $tool): bool => $tool->name !== self::HIDDEN);
+        // Words every target shares, so each run could teach something.
+        $searchId = (new ToolSearch($visible))->find(new SearchQuery(text: 'list get file user ticket status'))->searchId;
+        self::assertNotNull($searchId);
+        $store = new MemoryLearningStore();
+        $discovery = new Discovery($this->mode(), $this->gate(), new SearchSetup(learning: $store));
+
+        foreach ([self::HIDDEN, self::REFUSED, self::READ] as $target) {
+            [$name, $arguments] = $this->callTo($this->tool($target), $searchId);
+            $discovery->call($name, $arguments, $this->tools());
+        }
+        foreach ($this->probes() as [$name, $arguments]) {
+            $discovery->call($name, $arguments, $this->tools());
+        }
+
+        $learned = array_unique(array_merge(...array_map('array_keys', array_values($store->load()))));
+        self::assertSame([self::READ], array_values($learned), 'only the allowed run that succeeded, and the mode passes the id on');
     }
 
     public function testTheModesOwnToolsAreValidForEveryRevision(): void

@@ -129,6 +129,24 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
 envelope, the transport and the session.
 
+**4. Optionally, tune the search**, once, for whichever mode you use. The
+cache and the learning store are both optional:
+
+```php
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchOptions;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+
+$discovery = new Discovery(new CompactMode(), new MyGate($user, $myTools), new SearchSetup(
+    options: new SearchOptions(synonyms: ['meeting' => 'calendar event']),
+    cache: new FileIndexCache('/var/cache/mcp-index'),            // build the index once
+    learning: new FileLearningStore('/var/lib/mcp/learning.json'), // learn from successful runs
+));
+```
+
+A server that changes modes keeps its settings, its cache and what it learned.
+
 ---
 
 ## Modes
@@ -169,9 +187,6 @@ new CompactMode(
     pinned: ['acme_ping'],           // host tools listed as themselves
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
     groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
-    searchOptions: new SearchOptions(synonyms: ['meeting' => 'calendar event']),
-    indexCache: new FileIndexCache('/var/cache/mcp-index'), // build the index once
-    learning: new FileLearningStore('/var/lib/mcp/learning.json'), // opt in
 );
 ```
 

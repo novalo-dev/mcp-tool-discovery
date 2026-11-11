@@ -15,8 +15,13 @@ becomes the next version's section when it is published.
   `run_read_tool` or `run_write_tool` to run it. The change runner carries
   `destructiveHint`, so clients ask the person before a change, and each runner
   refuses the other kind of tool. Options: a prefix for the three names, tools
-  kept in the list as themselves, translated titles, groups for the full list,
-  and the search settings.
+  kept in the list as themselves, translated titles and groups for the full
+  list.
+- **Search settings for every mode.** `SearchSetup` holds the search options,
+  the cache and the learning store, both optional, and is given once to
+  `Discovery`. Modes search through `ToolRunner::search()`, and the runner
+  learns from a run that succeeded, so a server that changes modes keeps what
+  it learned and no mode can skip the checks.
 - **Tool search in fields.** The client says the action, the object and the
   request in its own words in separate fields of `search_tools`; each field is
   scored on its own with BM25F over the name, title, description and

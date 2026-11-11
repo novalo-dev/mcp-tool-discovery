@@ -26,7 +26,7 @@ src/
 | Layer | Knows | Does not know |
 |---|---|---|
 | Tool | the MCP definition of a tool | who calls it |
-| Gate | that a host decides | how the host decides |
+| Gate | that a host decides; the search of the visible tools, and when it may learn | how the host decides |
 | Protocol | each revision's fields | modes, search |
 | Mode | how to present tools and route its own calls | access rules, transports |
 | Search | text, words, scores | tools beyond their text, access |

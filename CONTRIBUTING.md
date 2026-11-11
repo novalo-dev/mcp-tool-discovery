@@ -80,8 +80,9 @@ stands between a client and a server's tools.
 1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and what the two
    wanted modes should do.
 2. **Create the pack** in `src/Mode/<Name>/`, with a class that implements
-   `DiscoveryMode`. Keep everything the mode needs in its folder, and use
-   `src/Search/` if it searches.
+   `DiscoveryMode`. Keep everything the mode needs in its folder, and
+   search through `$runner->search()`: the host's settings, cache and learning
+   come with it. Pass the `search_id` a client gives back to `$runner->run()`.
 3. **Pass the contract.** Add `tests/Contract/<Name>ModeContractTest.php`,
    extending `ModeContractTestCase`. It checks that the mode never lists,
    describes or runs a hidden tool, never runs without authorization, and

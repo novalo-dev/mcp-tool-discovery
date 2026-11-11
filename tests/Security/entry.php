@@ -15,7 +15,7 @@ declare(strict_types=1);
  *
  * A host passes the library what a client sent: the name and arguments of a
  * tools/call. Psalm cannot know that from the library alone, so this file
- * hands it request data, through every mode and with the cache and the
+ * hands it request data, through the mode and with the cache and the
  * learning store on files, the paths the analysis must follow. It is never
  * run.
  */
@@ -27,6 +27,7 @@ use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
@@ -57,13 +58,13 @@ $tools = ToolSet::of([
     ['name' => 'example_read', 'description' => 'Reads one record.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]],
     ['name' => 'example_write', 'description' => 'Changes one record.', 'inputSchema' => ['type' => 'object']],
 ]);
-$mode = new CompactMode(
-    indexCache: new FileIndexCache(sys_get_temp_dir() . '/mcp-tool-discovery-index'),
+$setup = new SearchSetup(
+    cache: new FileIndexCache(sys_get_temp_dir() . '/mcp-tool-discovery-index'),
     learning: new FileLearningStore(sys_get_temp_dir() . '/mcp-tool-discovery-learning.json'),
 );
 $name = $_POST['name'] ?? '';
 $arguments = $_POST['arguments'] ?? [];
-$result = (new Discovery($mode, $gate))->callTool(
+$result = (new Discovery(new CompactMode(), $gate, $setup))->callTool(
     is_string($name) ? $name : '',
     is_array($arguments) ? $arguments : [],
     $tools,

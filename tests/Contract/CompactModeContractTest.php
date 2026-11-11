@@ -24,11 +24,11 @@ final class CompactModeContractTest extends ModeContractTestCase
         return new CompactMode();
     }
 
-    protected function callTo(Tool $tool): array
+    protected function callTo(Tool $tool, ?string $searchId = null): array
     {
         return [
             $tool->readsOnly() ? CompactMode::RUN_READ : CompactMode::RUN_WRITE,
-            ['name' => $tool->name, 'arguments' => []],
+            ['name' => $tool->name, 'arguments' => []] + ($searchId === null ? [] : ['search_id' => $searchId]),
         ];
     }
 

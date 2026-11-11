@@ -17,6 +17,7 @@ use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Opis\JsonSchema\Validator;
 
@@ -55,10 +56,11 @@ final class Conformance
         $modes = [
             'compact' => new CompactMode(),
             'compact with prefix and pin' => new CompactMode(prefix: 'acme_', pinned: ['acme_get_settings']),
-            'compact that learns' => new CompactMode(learning: new MemoryLearningStore()),
+            'compact that learns' => new CompactMode(),
         ];
         foreach ($modes as $label => $mode) {
-            $discovery = new Discovery($mode, new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
+            $setup = $label === 'compact that learns' ? new SearchSetup(learning: new MemoryLearningStore()) : new SearchSetup();
+            $discovery = new Discovery($mode, new RecordingGate(['acme_list_users'], ['acme_deactivate_user']), $setup);
             $own = static fn(string $name): string => $label === 'compact with prefix and pin' ? 'acme_' . $name : $name;
             $checks[$label . ': tools/list'] = ['definition' => 'ListToolsResult', 'value' => $discovery->listTools($tools, $revision, 60000)];
             $checks[$label . ': search with a query'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::SEARCH), ['query' => 'ticket status'], $tools, $revision)];

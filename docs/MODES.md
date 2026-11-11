@@ -30,6 +30,10 @@ interface DiscoveryMode
   checks.
 - `call()` reaches host tools only through `$runner->run()`, which refuses a
   tool outside the visible set and asks the host's `authorize()` first.
+- A mode that searches calls `$runner->search()`, never a `ToolSearch` of its
+  own: the host's settings, cache and learning store come with it. A mode
+  that hands out a `search_id` passes it back to `$runner->run()`, which
+  learns only from a visible, authorized run that succeeded.
 - Build your tool definitions with `Tool::fromArray()`, so they are validated,
   and let `Shaper` adapt them to each revision.
 
@@ -90,7 +94,8 @@ very low or for small models.
 What it should do:
 
 - list one tool, with an `action` of `search`, `describe` or `run`;
-- reuse `ToolSearch` for the search, as the compact mode does;
+- search through `$runner->search()`, as the compact mode does, so the host's
+  settings, cache and learning apply;
 - keep changes visible to the client despite the single tool: the destructive
   flag of the one tool, or a two-step run where the first call returns what
   would change. Whatever the choice, the contract test
@@ -103,4 +108,5 @@ What it should do:
 - show, find or describe a tool the gate hides;
 - run anything without going through the runner;
 - present a change as a read;
-- decide access, cache across requests, or reach the network.
+- decide access, keep state of its own across requests (the cache and the
+  learning store are the host's, in its `SearchSetup`), or reach the network.

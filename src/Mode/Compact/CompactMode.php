@@ -17,11 +17,7 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Protocol\Json;
-use Novalo\McpToolDiscovery\Search\Cache\IndexCache;
-use Novalo\McpToolDiscovery\Search\Learning\LearningStore;
-use Novalo\McpToolDiscovery\Search\SearchOptions;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
-use Novalo\McpToolDiscovery\Search\ToolSearch;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
@@ -56,8 +52,6 @@ final class CompactMode implements DiscoveryMode
      * @param list<string> $pinned host tools listed as themselves next to the three, e.g. a ping
      * @param array{search?: string, read?: string, write?: string} $titles the titles shown to people, translated by the host
      * @param (callable(Tool): string)|null $groupOf the group a tool belongs to, for the list a search with no argument gives
-     * @param IndexCache|null $indexCache keeps the search index between requests
-     * @param LearningStore|null $learning learns from the tools run after a search; none by default
      * @param int $maxDescribed the most tools one search describes in full
      * @param bool $schemaOnError add the tool's parameters to a failed run, so the assistant can fix its call
      */
@@ -66,9 +60,6 @@ final class CompactMode implements DiscoveryMode
         private readonly array $pinned = [],
         private readonly array $titles = [],
         ?callable $groupOf = null,
-        private readonly SearchOptions $searchOptions = new SearchOptions(),
-        private readonly ?IndexCache $indexCache = null,
-        private readonly ?LearningStore $learning = null,
         private readonly int $maxDescribed = 10,
         private readonly bool $schemaOnError = true,
     ) {
@@ -107,7 +98,7 @@ final class CompactMode implements DiscoveryMode
     public function call(string $name, array $arguments, ToolRunner $runner): CallResult
     {
         return $name === $this->searchName
-            ? $this->search($arguments, $runner->visible())
+            ? $this->search($arguments, $runner)
             : $this->run($name === $this->writeName, $arguments, $runner);
     }
 
@@ -206,12 +197,11 @@ final class CompactMode implements DiscoveryMode
         $properties = [
             'name' => ['type' => 'string', 'description' => 'The exact name of the tool, as the search gave it.'],
             'arguments' => ['type' => 'object', 'description' => 'The arguments of that tool, following its inputSchema.'],
+            // Always in the schema, since the list is built without the
+            // host's search settings; a search only gives one out when the
+            // host learns, so a client never has a value to send otherwise.
+            'search_id' => ['type' => 'string', 'description' => 'The search_id the search gave with the tool, if it gave one, so the next searches find it sooner.'],
         ];
-        // Offered only when the host learns: a parameter nothing reads would
-        // only cost the assistant tokens.
-        if ($this->learning !== null) {
-            $properties['search_id'] = ['type' => 'string', 'description' => 'The search_id of the search that found the tool, so the next searches find it sooner.'];
-        }
 
         return Tool::fromArray([
             'name' => $name,
@@ -234,8 +224,9 @@ final class CompactMode implements DiscoveryMode
     /**
      * @param array<string, mixed> $arguments
      */
-    private function search(array $arguments, ToolSet $visible): CallResult
+    private function search(array $arguments, ToolRunner $runner): CallResult
     {
+        $visible = $runner->visible();
         $names = $arguments['names'] ?? null;
         try {
             $query = SearchQuery::fromArguments($arguments);
@@ -267,10 +258,8 @@ final class CompactMode implements DiscoveryMode
             }
         }
         $result = null;
-        $search = null;
         if (!$query->isEmpty() && count($found) < $this->maxDescribed) {
-            $search = $this->toolSearch($visible);
-            $result = $search->find($query, $this->maxDescribed);
+            $result = $runner->search($query, $this->maxDescribed);
             foreach ($result->tools as $tool) {
                 if (count($found) >= $this->maxDescribed) {
                     break;
@@ -289,27 +278,22 @@ final class CompactMode implements DiscoveryMode
         if ($unknown !== []) {
             $answer['unknown'] = $unknown;
         }
-        if ($this->learning !== null && $result !== null && $result->searchId !== null && $result->tools !== []) {
+        if ($runner->learns() && $result !== null && $result->searchId !== null && $result->tools !== []) {
             $answer['search_id'] = $result->searchId;
         }
-        if ($search !== null && ($found === [] || $result->unmatched !== [])) {
+        if ($result !== null && ($found === [] || $result->unmatched !== [])) {
             // The words this server uses, computed from its own tools, so the
             // assistant can say again what no tool understood.
             if ($result->unmatched !== []) {
                 $answer['unmatched'] = array_map([ToolRunner::class, 'printable'], $result->unmatched);
             }
-            $answer['vocabulary'] = $search->vocabulary();
+            $answer['vocabulary'] = $runner->vocabulary();
         }
         if ($found === []) {
             $answer['hint'] = 'Nothing matches. Say it again with words from vocabulary, or call with no argument for every tool you may use.';
         }
 
         return CallResult::json($answer);
-    }
-
-    private function toolSearch(ToolSet $visible): ToolSearch
-    {
-        return new ToolSearch($visible, $this->searchOptions, $this->indexCache, $this->learning);
     }
 
     /**
@@ -357,12 +341,9 @@ final class CompactMode implements DiscoveryMode
         if ($tool !== null && $tool->readsOnly() === $writes) {
             return CallResult::error(sprintf('%s %s: run it with %s.', $name, $writes ? 'only reads' : 'changes something', $this->runnerFor($tool)));
         }
-        /** @var array<string, mixed> $inner */
-        $result = $runner->run($name, $inner);
         $searchId = $arguments['search_id'] ?? null;
-        if ($this->learning !== null && $tool !== null && !$result->isError && is_string($searchId) && $searchId !== '') {
-            $this->toolSearch($runner->visible())->learn($searchId, $name);
-        }
+        /** @var array<string, mixed> $inner */
+        $result = $runner->run($name, $inner, is_string($searchId) ? $searchId : null);
         if ($tool !== null && $result->isError && $this->schemaOnError) {
             $schema = json_encode($tool->inputSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             if (is_string($schema)) {

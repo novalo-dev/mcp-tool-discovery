@@ -19,6 +19,7 @@ use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Protocol\Shaper;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
@@ -30,9 +31,14 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  */
 final class Discovery
 {
+    /**
+     * @param SearchSetup $search the search settings, and the optional cache and
+     *        learning store, for whichever mode is used
+     */
     public function __construct(
         private readonly DiscoveryMode $mode,
         private readonly ToolGate $gate,
+        private readonly SearchSetup $search = new SearchSetup(),
     ) {}
 
     /**
@@ -70,7 +76,7 @@ final class Discovery
      */
     public function call(string $name, array $arguments, ToolSet $tools): CallResult
     {
-        $runner = new ToolRunner($this->visible($tools), $this->gate);
+        $runner = new ToolRunner($this->visible($tools), $this->gate, $this->search);
 
         return $this->mode->owns($name) ? $this->mode->call($name, $arguments, $runner) : $runner->run($name, $arguments);
     }
