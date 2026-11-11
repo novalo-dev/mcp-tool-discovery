@@ -57,7 +57,8 @@ final class FileLearningStore implements LearningStore
             }
             ftruncate($handle, 0);
             rewind($handle);
-            fwrite($handle, json_encode($counts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?: '{}');
+            $json = json_encode($counts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            fwrite($handle, is_string($json) ? $json : '{}');
             fflush($handle);
             flock($handle, LOCK_UN);
             $this->loaded = $counts;

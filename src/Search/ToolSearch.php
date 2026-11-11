@@ -155,7 +155,7 @@ final class ToolSearch
         $total = count($this->tools->names());
         // A word in most titles (a brand, a prefix) tells no tool apart.
         $count = array_filter($count, static fn(int $tools): bool => $total < 4 || $tools <= $total / 2);
-        uksort($count, static fn(int|string $a, int|string $b): int => [$count[$b], (string) $a] <=> [$count[$a], (string) $b]);
+        uksort($count, static fn(string $a, string $b): int => [$count[$b], $a] <=> [$count[$a], $b]);
 
         return array_map('strval', array_slice(array_keys($count), 0, $size));
     }
