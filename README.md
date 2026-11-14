@@ -283,9 +283,9 @@ releases. New modes are the most wanted. Read [CONTRIBUTING.md](CONTRIBUTING.md)
 first: every pull request runs the coding standard, PHP 8.1+ compatibility,
 PHPStan at level max, the tests on PHP 8.1 to 8.5, the contract tests, the
 conformance suite, the search benchmark, Semgrep, Psalm's taint analysis and
-Gitleaks. Contributors sign the [CLA](CLA.md) once. The [roadmap](ROADMAP.md)
-lists the work wanted; [sponsors](https://github.com/sponsors/novalo-dev) have
-their issues read first.
+Gitleaks. Contributions are published under the MIT licence, with nothing to
+sign. The [roadmap](ROADMAP.md) lists the work wanted;
+[sponsors](https://github.com/sponsors/novalo-dev) have their issues read first.
 
 ## License
 

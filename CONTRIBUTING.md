@@ -44,9 +44,10 @@ Every pull request runs:
 | CI | What Composer installs | the package holds `src/` and the licence, not the tests |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
 | Security | Dependencies, Secrets, Semgrep, Psalm taint analysis | `composer audit`, Gitleaks over the whole history, Semgrep rules for PHP and secrets, and Psalm following what a client sends (`tests/Security/entry.php`) to a file, a query, a command or an output |
-| CLA | license/cla | the contributor has signed the [CLA](CLA.md) |
 
-The required check is **CI passed**: one name, whatever the matrix becomes.
+Required before anything reaches `develop` or `main`: **CI passed** (one name,
+whatever the matrix becomes), **PHP 8.1+ compatibility**, **Semgrep**,
+**Psalm taint analysis** and **Secrets**.
 
 **Hygiene** (`bin/check-hygiene.php`) is specific to this repository:
 
@@ -123,12 +124,10 @@ The search is measured, not tuned by feel.
 
 ---
 
-## Contributor License Agreement
+## Licence of contributions
 
-Before your first pull request is merged, you sign the [CLA](CLA.md). You keep
-the copyright of your contribution; you allow the maintainer to distribute it
-under the MIT licence and under any other. The CLA Assistant bot posts the link
-on your pull request; you sign once, with your GitHub account.
+There is nothing to sign. What you contribute is published under the MIT
+licence, like the rest of the library, and you keep its copyright.
 
 ## Commits and pull requests
 

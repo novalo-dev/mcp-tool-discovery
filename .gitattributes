@@ -17,5 +17,4 @@
 /llms.txt export-ignore
 /phpstan-tests.neon export-ignore
 /phpcompatibility.xml export-ignore
-/CLA.md export-ignore
 /ROADMAP.md export-ignore

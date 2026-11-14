@@ -5,7 +5,6 @@
 ## Checklist
 
 - [ ] The pull request targets `develop`.
-- [ ] I have signed the [CLA](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/CLA.md), or will when the bot asks.
 - [ ] `composer check` passes locally.
 - [ ] Tests come with the change; a fix comes with the test that failed before it.
 - [ ] A new mode extends `ModeContractTestCase` and is added to the conformance checks.

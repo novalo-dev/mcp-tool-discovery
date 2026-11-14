@@ -13,6 +13,6 @@
 - [Architecture](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/ARCHITECTURE.md): layers, the flow of a call, protocol revisions
 - [Modes](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/MODES.md): the mode contract, Compact, and the modes wanted
 - [Search](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/SEARCH.md): the ranking and its measures
-- [Contributing](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/CONTRIBUTING.md): branches, checks, CLA, writing a mode
+- [Contributing](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/CONTRIBUTING.md): branches, checks, writing a mode
 - [Roadmap](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/ROADMAP.md): the modes, search work and host examples wanted
 - [Security](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/SECURITY.md): reporting a vulnerability
