@@ -16,11 +16,11 @@ namespace Novalo\McpToolDiscovery\Tests\Search;
 use Novalo\McpToolDiscovery\Search\Analyzer;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
-use Novalo\McpToolDiscovery\Search\Index;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\ToolIndex;
 use Novalo\McpToolDiscovery\Search\ToolSearch;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -163,8 +163,8 @@ final class ToolSearchTest extends TestCase
 
     public function testABrokenCacheEntryIsBuiltAgain(): void
     {
-        self::assertNull(Index::fromArray(['format' => 0]));
-        self::assertNull(Index::fromArray([]));
+        self::assertNull(ToolIndex::fromArray(['format' => 0]));
+        self::assertNull(ToolIndex::fromArray([]));
     }
 
     public function testLearningLiftsTheToolThatWorked(): void

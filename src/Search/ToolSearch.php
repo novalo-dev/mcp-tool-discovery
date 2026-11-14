@@ -34,7 +34,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  */
 final class ToolSearch
 {
-    private readonly Index $index;
+    private readonly ToolIndex $index;
     private readonly Analyzer $analyzer;
 
     /** @var array<string, int> */
@@ -186,18 +186,18 @@ final class ToolSearch
     /**
      * @param array<string, array<string, string>> $documents
      */
-    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache): Index
+    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache): ToolIndex
     {
         if ($cache === null) {
-            return Index::build($documents, $options->weights, $analyzer, $options->trigramWeight);
+            return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
         }
         // The key covers every text indexed, so it changes with any tool and
         // differs between callers who see different tools.
         $key = hash('xxh128', serialize($documents) . $options->indexKey());
         $saved = $cache->get($key);
-        $index = $saved === null ? null : Index::fromArray($saved, $analyzer);
+        $index = $saved === null ? null : ToolIndex::fromArray($saved, $analyzer);
         if ($index === null) {
-            $index = Index::build($documents, $options->weights, $analyzer, $options->trigramWeight);
+            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
             $cache->set($key, $index->toArray());
         }
 

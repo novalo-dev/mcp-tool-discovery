@@ -19,7 +19,10 @@ declare(strict_types=1);
  * - every PHP file carries the licence header;
  * - no long dash and no stock phrase, so the text reads as written by a person;
  * - no line that credits the work to a tool rather than to its authors, in a
- *   file or, with --commits <range>, in a commit message.
+ *   file or, with --commits <range>, in a commit message;
+ * - no two paths that differ by case alone, and no index.php in any case: a
+ *   host that drops an index.php in every folder of its package would put it
+ *   beside the file, and a filesystem that ignores case keeps one of the two.
  * This file holds the patterns, so it is the one file not read.
  */
 
@@ -68,6 +71,17 @@ if ($range !== null) {
         }
     }
     $files = [];
+}
+$seen = [];
+foreach ($files as $file) {
+    $lower = strtolower($file);
+    if (isset($seen[$lower])) {
+        $problems[] = $file . ': differs from ' . $seen[$lower] . ' by case alone';
+    }
+    $seen[$lower] = $file;
+    if (strtolower(basename($file)) === 'index.php') {
+        $problems[] = $file . ': a file named index.php, in any case, meets the one hosts add to every folder';
+    }
 }
 foreach ($files as $file) {
     if ($file === 'bin/check-hygiene.php' || !is_file($root . '/' . $file)) {
