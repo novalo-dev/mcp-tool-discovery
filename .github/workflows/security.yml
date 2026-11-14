@@ -17,7 +17,7 @@ jobs:
     name: Dependencies
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
@@ -34,7 +34,7 @@ jobs:
     name: Secrets
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           # Every commit, not only the last one: a secret removed in a later
           # commit is still published in the history.
@@ -50,7 +50,7 @@ jobs:
     name: Semgrep
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - name: Semgrep
         env:
           VERSION: 1.182.1
@@ -66,7 +66,7 @@ jobs:
     name: Psalm taint analysis
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           # Psalm 6 needs PHP 8.2; it reads the code as PHP 8.1, as the config says.
