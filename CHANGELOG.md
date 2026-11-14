@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.2.0 - 2026-11-14
+
 ### Changed
 
 - **`Search\Index` is now `Search\ToolIndex`.** A host that drops an
