@@ -17,7 +17,7 @@ src/
   Mode/
     DiscoveryMode.php    the contract of a mode
     Compact/             the compact pack
-  Search/                Analyzer, Index (BM25F), ToolSearch, SearchQuery, SearchOptions
+  Search/                Analyzer, ToolIndex (BM25F), ToolSearch, SearchQuery, SearchOptions
     Cache/               IndexCache: in memory, in PHP files
     Learning/            LearningStore: in memory, in a JSON file
   Exception/

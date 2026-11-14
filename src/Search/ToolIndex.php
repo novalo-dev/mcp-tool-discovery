@@ -24,8 +24,12 @@ namespace Novalo\McpToolDiscovery\Search;
  * Building it is the cost of a search, so it can be saved as a plain array
  * (toArray) and restored (fromArray) by a cache. It knows nothing of tools:
  * any document with text fields fits.
+ *
+ * Not named Index: a host that drops an index.php in every folder of its
+ * package, as some plugin stores require, would put it beside Index.php, and
+ * on a filesystem that ignores case one of the two overwrites the other.
  */
-final class Index
+final class ToolIndex
 {
     private const K1 = 1.2;
     private const B = 0.75;

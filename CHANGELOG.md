@@ -8,6 +8,20 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Changed
+
+- **`Search\Index` is now `Search\ToolIndex`.** A host that drops an
+  `index.php` in every folder of its package, as some plugin stores require,
+  put it beside `Index.php`, and unpacked on a filesystem that ignores case one
+  of the two replaced the other. Code that built or restored the index itself
+  (`Index::build()`, `Index::fromArray()`) uses the new name; arrays saved by
+  an `IndexCache` are read back unchanged.
+
+### Added
+
+- `bin/check-hygiene.php` refuses two paths that differ by case alone, and a
+  file named `index.php` in any case.
+
 ## 0.1.0 - 2026-11-14
 
 ### Added
