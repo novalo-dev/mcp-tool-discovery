@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.1.0 - 2026-11-14
+
 ### Added
 
 - **Compact mode.** A server shows its clients three tools instead of its whole
