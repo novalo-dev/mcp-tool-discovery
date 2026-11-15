@@ -57,6 +57,7 @@ final class Conformance
             'compact' => new CompactMode(),
             'compact with prefix and pin' => new CompactMode(prefix: 'acme_', pinned: ['acme_get_settings']),
             'compact that learns' => new CompactMode(),
+            'compact with batch' => new CompactMode(batchLimit: 5),
         ];
         foreach ($modes as $label => $mode) {
             $setup = $label === 'compact that learns' ? new SearchSetup(learning: new MemoryLearningStore()) : new SearchSetup();
@@ -78,6 +79,11 @@ final class Conformance
             $checks[$label . ': host tool by its own name'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool('acme_get_file', [], $tools, $revision)];
             $checks[$label . ': malformed run'] = ['definition' => 'CallToolResult', 'value' => $discovery->callTool($own(CompactMode::RUN_READ), ['arguments' => 'x'], $tools, $revision)];
         }
+        $batch = new Discovery($modes['compact with batch'], new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
+        $checks['compact with batch: batch run'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_set_ticket_status', 'items' => [['ticket_id' => '1', 'status' => 'solved'], ['ticket_id' => '2', 'status' => 'solved']]], $tools, $revision)];
+        $checks['compact with batch: batch refused by the host'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_deactivate_user', 'items' => [['user_id' => '1']]], $tools, $revision)];
+        $checks['compact with batch: batch of a read'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_get_file', 'items' => [[]]], $tools, $revision)];
+        $checks['compact with batch: batch over the limit'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_set_ticket_status', 'items' => array_fill(0, 6, [])], $tools, $revision)];
 
         return $checks;
     }

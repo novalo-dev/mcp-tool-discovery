@@ -64,7 +64,7 @@ $setup = new SearchSetup(
 );
 $name = $_POST['name'] ?? '';
 $arguments = $_POST['arguments'] ?? [];
-$result = (new Discovery(new CompactMode(), $gate, $setup))->callTool(
+$result = (new Discovery(new CompactMode(batchLimit: 50), $gate, $setup))->callTool(
     is_string($name) ? $name : '',
     is_array($arguments) ? $arguments : [],
     $tools,

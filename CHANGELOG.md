@@ -8,6 +8,22 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **`run_write_batch` in compact mode**, off by default. `batchLimit: N` on
+  `CompactMode` adds a fourth tool that runs one change tool once for each
+  item of a list (`name`, `items`, `search_id`), up to N items a call, so a
+  client changing thirty items asks the person once instead of thirty times.
+  Each item goes through the gate on its own, as a call of `run_write_tool`
+  would; the list is refused whole, before anything runs, when it is
+  malformed, longer than the limit, or names a read, a runner or a tool the
+  caller may not see. The answer reports `succeeded`, `failed` and each item's
+  result, and is an error only when no item succeeded. The tool carries
+  `destructiveHint`, tells the client to show the complete list before
+  confirming, and the search learns once per batch. With the option left at
+  0, the list of tools is unchanged and a host tool of that name stays the
+  host's.
+
 ## 0.2.0 - 2026-11-14
 
 ### Changed
