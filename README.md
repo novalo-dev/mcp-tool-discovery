@@ -168,18 +168,27 @@ working.
 
 ### Compact
 
-The client receives three tools:
+The client receives three tools, four with the batch runner:
 
 | Tool | What it does | Annotations |
 |---|---|---|
 | `search_tools` | finds the tools that match a request given in fields (action, object, description) or as keywords, or describes tools by name, with their `inputSchema` and the runner each one goes through; with no argument, lists every tool by name | reads only |
 | `run_read_tool` | runs a tool that only reads | reads only |
 | `run_write_tool` | runs a tool that changes something | destructive |
+| `run_write_batch` | runs one tool that changes something on a list of items, in one call; only with `batchLimit` | destructive |
 
 Two runners rather than one: `destructiveHint` is the only lever a client has
 to ask the person before a call. A change sent to the read runner, or a read
 sent to the change runner, is refused, so a change never slips past that
 confirmation. A runner never runs a runner or the search.
+
+A client that must change thirty items would make, and confirm, thirty calls.
+With `batchLimit` the mode adds a fourth tool, `run_write_batch`: one change
+tool, a list of `items` (the arguments of each run), one call and one
+confirmation of the whole list. It is destructive like `run_write_tool`, and
+every item meets your gate on its own, exactly as a single call: a hidden
+tool, a read or a refused item never runs because it came in a list. The
+answer reports each item, and one failure never hides the others.
 
 ```php
 new CompactMode(
@@ -187,6 +196,7 @@ new CompactMode(
     pinned: ['acme_ping'],           // host tools listed as themselves
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
     groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
+    batchLimit: 50,                  // adds run_write_batch, up to 50 items a call; 0 (default) leaves it out
 );
 ```
 

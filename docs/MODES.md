@@ -45,7 +45,8 @@ before writing a line: it is the review your mode will get.
 
 ## Compact
 
-Three tools: `search_tools`, `run_read_tool`, `run_write_tool`.
+Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
+`run_write_batch`, when the host turns it on.
 
 - `search_tools` takes `action`, `object` and `description` (the request in
   fields), `query` (free keywords) and `names` (exact names). Names are
@@ -62,6 +63,18 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`.
   search which tool answered those words. Each refuses
   the other kind of tool, and both refuse the mode's own tools. A failed run
   carries the tool's parameters, so the client can correct its call.
+- `run_write_batch`, off by default, runs one change tool once per item of a
+  list in a single call: `name`, `items` (one object of arguments per item)
+  and `search_id`. The host turns it on with `batchLimit`, the most items one
+  call takes. Each item goes through `$runner->run()` on its own, so the
+  gate's `authorize()` and `call()` see it exactly as a single call; the list
+  is checked first (an object per item, within the limit, a change tool the
+  caller may see) and nothing runs when it is malformed. The answer gives
+  `succeeded`, `failed` and one entry per item with its `isError`, `content`
+  and `structuredContent`, and is an error only when no item succeeded. It
+  is marked `destructiveHint`, and its description asks the client to show
+  the whole list before the one confirmation. The search learns once per
+  batch, from the first item that succeeds.
 - `pinned` tools are listed as themselves, next to the three.
 - `guideHeader()` gives the block to put at the top of a prompt that names
   tools, saying which runner each one goes through.
