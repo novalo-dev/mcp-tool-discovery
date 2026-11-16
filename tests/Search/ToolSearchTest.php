@@ -116,15 +116,11 @@ final class ToolSearchTest extends TestCase
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());
-        if (function_exists('memory_reset_peak_usage')) {
-            memory_reset_peak_usage();
-        }
-        $before = memory_get_usage();
         $peak = memory_get_peak_usage();
         $search->find(new SearchQuery(str_repeat('a', 2_000_000), str_repeat('ab ', 700_000), str_repeat('é', 1_000_000), str_repeat('x', 2_000_000)));
 
         // The request itself is about 8 MB; reading it must not cost much more.
-        self::assertLessThan(max($peak, $before) + 16_000_000, memory_get_peak_usage());
+        self::assertLessThan($peak + 16_000_000, memory_get_peak_usage());
     }
 
     public function testNothingMatchesNothing(): void
