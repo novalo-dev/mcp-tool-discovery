@@ -4,3 +4,5 @@
 /.php-cs-fixer.cache
 /build/
 /docs/examples/var/
+/docs/examples/sdk/vendor/
+/docs/examples/sdk/composer.lock

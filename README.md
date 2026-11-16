@@ -320,7 +320,7 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio and HTTP |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP and the official PHP SDK |
 | [docs/MODES.md](docs/MODES.md) | how a mode works, the three written, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |

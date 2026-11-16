@@ -21,6 +21,8 @@ use PHPUnit\Framework\TestCase;
  */
 final class StdioServerTest extends TestCase
 {
+    use StdioSession;
+
     private const INITIALIZE = ['method' => 'initialize', 'params' => ['protocolVersion' => '2025-06-18', 'capabilities' => [], 'clientInfo' => ['name' => 'test', 'version' => '1']]];
 
     public function testTheClientSeesTheCompactToolsAndNegotiatesItsRevision(): void
@@ -109,48 +111,12 @@ final class StdioServerTest extends TestCase
     }
 
     /**
-     * Sends each message with its position as id (none for a notification),
-     * and returns the replies by id.
-     *
      * @param list<array<string, mixed>> $messages
      *
      * @return array<int, array<string, mixed>>
      */
     private static function session(array $messages, string $role = 'reader'): array
     {
-        $input = '';
-        foreach ($messages as $i => $message) {
-            $notification = ($message['notification'] ?? false) === true;
-            unset($message['notification']);
-            $input .= json_encode(['jsonrpc' => '2.0'] + ($notification ? [] : ['id' => $i + 1]) + $message, JSON_THROW_ON_ERROR) . "\n";
-        }
-
-        $process = proc_open(
-            [PHP_BINARY, dirname(__DIR__, 2) . '/docs/examples/stdio-server.php'],
-            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
-            $pipes,
-            null,
-            ['MCP_NOTES_ROLE' => $role] + getenv(),
-        );
-        self::assertIsResource($process);
-        fwrite($pipes[0], $input);
-        fclose($pipes[0]);
-        $output = (string) stream_get_contents($pipes[1]);
-        $errors = (string) stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        self::assertSame(0, proc_close($process), $errors);
-        self::assertSame('', $errors);
-
-        $replies = [];
-        foreach (explode("\n", trim($output)) as $line) {
-            $reply = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
-            self::assertIsArray($reply);
-            self::assertSame('2.0', $reply['jsonrpc']);
-            self::assertIsInt($reply['id']);
-            $replies[$reply['id']] = $reply;
-        }
-
-        return $replies;
+        return self::exchange(dirname(__DIR__, 2) . '/docs/examples/stdio-server.php', $messages, $role);
     }
 }

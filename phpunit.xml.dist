@@ -23,6 +23,10 @@
         <testsuite name="conformance">
             <directory>tests/Conformance</directory>
         </testsuite>
+        <!-- Needs composer install in docs/examples/sdk; CI runs it in its own job. -->
+        <testsuite name="sdk">
+            <directory>tests/Sdk</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

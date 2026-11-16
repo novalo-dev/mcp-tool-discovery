@@ -93,7 +93,8 @@ jobs:
       - name: PHPUnit
         # Skipped tests fail the run: a conformance test skipped for a missing
         # schema would otherwise look like a pass.
-        run: vendor/bin/phpunit --fail-on-skipped
+        # The SDK suite needs the SDK installed: its own job runs it.
+        run: vendor/bin/phpunit --fail-on-skipped --exclude-testsuite sdk
 
   package:
     name: What Composer installs
@@ -110,6 +111,32 @@ jobs:
           if grep -E '^(tests|bin|docs|\.github)/' files.txt; then
             echo "::error::The package carries files a host does not need"; exit 1
           fi
+
+  sdk:
+    # The example on the official PHP SDK, installed at the exact version the
+    # example pins, so a host copies code that is proved to run. Left out of
+    # CI passed while the SDK is below 1.0: a change on its side is read and
+    # the example fixed, it does not block the library. mcp/sdk never enters
+    # the library's own composer.json.
+    name: Example on the official PHP SDK
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          # The lowest PHP the SDK supports.
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+      - name: Install the library's tools
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Install the example
+        working-directory: docs/examples/sdk
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: PHPStan on the example
+        run: vendor/bin/phpstan analyse -c docs/examples/sdk/phpstan.neon --no-progress --error-format=github --memory-limit=512M
+      - name: PHPUnit
+        run: vendor/bin/phpunit --testsuite sdk --fail-on-skipped
 
   passed:
     name: CI passed

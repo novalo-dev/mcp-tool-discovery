@@ -22,6 +22,8 @@ $header = <<<'TEXT'
 
 $finder = (new PhpCsFixer\Finder())
     ->in([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin', __DIR__ . '/docs/examples'])
+    // What Composer installs for the SDK example is not ours to format.
+    ->exclude('sdk/vendor')
     ->append([__FILE__]);
 
 return (new PhpCsFixer\Config())

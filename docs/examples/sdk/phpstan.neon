@@ -1,0 +1,15 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The SDK example, held to the level of the other examples. It is read
+    # with the SDK installed in this directory, which the main analysis
+    # does not have.
+    level: max
+    phpVersion: 80200
+    paths:
+        - server.php
+    scanFiles:
+        - ../notes.php
+    bootstrapFiles:
+        - vendor/autoload.php
