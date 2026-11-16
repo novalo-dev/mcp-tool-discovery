@@ -18,6 +18,7 @@ use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Tests\Fixtures\Groups;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Opis\JsonSchema\Validator;
 
@@ -84,6 +85,17 @@ final class Conformance
         $checks['compact with batch: batch refused by the host'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_deactivate_user', 'items' => [['user_id' => '1']]], $tools, $revision)];
         $checks['compact with batch: batch of a read'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_get_file', 'items' => [[]]], $tools, $revision)];
         $checks['compact with batch: batch over the limit'] = ['definition' => 'CallToolResult', 'value' => $batch->callTool(CompactMode::RUN_WRITE_BATCH, ['name' => 'acme_set_ticket_status', 'items' => array_fill(0, 6, [])], $tools, $revision)];
+
+        $grouped = new Discovery(Groups::mode(), new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
+        $checks['grouped: tools/list'] = ['definition' => 'ListToolsResult', 'value' => $grouped->listTools($tools, $revision, 60000)];
+        $checks['grouped: read'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('files', ['action' => 'acme_get_file', 'arguments' => ['file_id' => '1']], $tools, $revision)];
+        $checks['grouped: change'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('tickets_change', ['action' => 'acme_set_ticket_status', 'arguments' => []], $tools, $revision)];
+        $checks['grouped: describe'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users', ['describe' => ['acme_get_user', 'acme_deactivate_user', 'acme_nope']], $tools, $revision)];
+        $checks['grouped: describe nothing known'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users', ['describe' => ['acme_nope']], $tools, $revision)];
+        $checks['grouped: wrong tool'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('files', ['action' => 'acme_delete_file'], $tools, $revision)];
+        $checks['grouped: refused by the host'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users_change', ['action' => 'acme_deactivate_user'], $tools, $revision)];
+        $checks['grouped: hidden action'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users', ['action' => 'acme_list_users'], $tools, $revision)];
+        $checks['grouped: tool outside the groups'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('acme_deploy_app', [], $tools, $revision)];
 
         return $checks;
     }

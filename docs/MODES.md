@@ -1,12 +1,12 @@
 # Modes
 
 A mode decides what a client sees in `tools/list` and how calls to the mode's
-own tools reach the host's tools. Three are planned:
+own tools reach the host's tools. Three are planned, two are written:
 
 | Mode | Pack | State |
 |---|---|---|
 | Compact | `src/Mode/Compact/` | shipped |
-| Grouped | `src/Mode/Grouped/` | open to contribution |
+| Grouped | `src/Mode/Grouped/` | shipped |
 | Gateway | `src/Mode/Gateway/` | open to contribution |
 
 ---
@@ -79,25 +79,47 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
 - `guideHeader()` gives the block to put at the top of a prompt that names
   tools, saying which runner each one goes through.
 
-## Grouped (wanted)
+## Grouped
 
 One tool per group of host tools - `files`, `calendar`, `tickets` - so the
 client sees the map of the server without searching, in tens of tools rather
 than hundreds.
 
-What it should do:
+```php
+new GroupedMode(
+    groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '',
+    groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title, in list order
+    prefix: 'acme_',                     // acme_files, acme_files_change, ...
+    changeTitles: ['files' => 'Change files'], // optional; "<title>: changes" otherwise
+);
+```
 
-- take the groups from the host, as `groupOf: callable(Tool): string`, like the
-  compact mode;
-- list one tool per group that holds at least one visible tool, named after the
-  group, whose description lists its actions in one line each;
-- take `action` (the host tool's name) and `arguments`, and describe one
-  action's `inputSchema` on request, since the group's own schema cannot hold
-  them all;
-- face the same question as the compact mode with changes: a group mixes reads
-  and changes, so the change flag must still reach the client. One way is a
-  read tool and a change tool per group; another may be better. Say which in the
-  pull request, and why.
+Each declared group that holds at least one visible tool becomes:
+
+| Tool | What it does | Annotations |
+|---|---|---|
+| `<group>` | runs one of the group's reads (`action`, `arguments`), or describes any of its actions, reads or changes, with their `inputSchema` (`describe`: a list of names); its description lists every action in one line | reads only |
+| `<group>_change` | runs one of the group's changes (`action`, `arguments`); listed only when the group has a change the caller may see | destructive |
+
+Why a read tool and a change tool per group: a group mixes reads and changes,
+and `destructiveHint` is the only lever a client offers to ask the person
+first. One tool per group would have to be marked destructive, and every read
+would then ask for a confirmation. Describing goes through the read tool for
+the same reason: reading a schema never asks the person anything. An action
+sent to the wrong tool of its group, or to another group, is refused before
+the gate is asked, with the name of the tool that runs it.
+
+The groups are declared up front, not taken from the tools: `Discovery` asks
+`owns()` with a name alone, before any tool is listed, so the mode must know
+its names without the list. A tool whose `groupOf` is not a declared group
+(an empty string, say) is listed as itself and called by its own name, which
+is also how a host pins a ping. A group whose names would not make a valid
+tool name, or that clashes with another group's change tool, is refused in
+the constructor. Pick a `prefix` if a host tool could carry a group's name:
+`Discovery` leaves such a host tool out rather than shadow it.
+
+The mode does not search, so it never hands out a `search_id` and never
+teaches the search; the contract test checks that too.
 
 ## Gateway (wanted)
 

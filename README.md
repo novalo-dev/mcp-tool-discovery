@@ -161,7 +161,7 @@ nothing else, and every pack is held to the same
 | Mode | The client sees | State |
 |---|---|---|
 | **Compact** | a search tool and two runners: three tools, whatever the size of the server | shipped |
-| **Grouped** | one tool per group of tools ("files", "calendar"), each listing its actions | open to contribution |
+| **Grouped** | one tool per group of tools ("files", "calendar") listing its actions, and one for its changes | shipped |
 | **Gateway** | a single tool that searches and runs everything | open to contribution |
 
 A host tool called by its own name is accepted in every mode, through the same
@@ -206,9 +206,30 @@ An MCP prompt that names tools should tell the client they are not in its
 list: `$mode->guideHeader($toolNames, $visible)` returns the block to put at
 the top of the prompt text.
 
-### Grouped and Gateway
+### Grouped
 
-Not written yet, and wanted. [docs/MODES.md](docs/MODES.md) describes what each
+The client sees the map of the server without searching: for each group you
+declare, one tool named after it that runs its reads and describes its
+actions, and `<group>_change`, destructive, for its changes.
+
+```php
+new GroupedMode(
+    groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '', // '' lists the tool as itself
+    groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title
+    prefix: 'acme_',                 // acme_files, acme_files_change, ...
+);
+```
+
+```json
+{"action": "acme_get_file", "arguments": {"file_id": "42"}}
+{"describe": ["acme_move_file"]}
+```
+
+[docs/MODES.md](docs/MODES.md#grouped) explains the choices.
+
+### Gateway
+
+Not written yet, and wanted. [docs/MODES.md](docs/MODES.md) describes what it
 should do and how to build a mode; the contract tests say what it must never
 do.
 
