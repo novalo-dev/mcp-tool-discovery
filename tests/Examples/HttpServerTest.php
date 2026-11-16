@@ -102,6 +102,46 @@ final class HttpServerTest extends TestCase
         self::assertSame(-32600, $body['error']['code'] ?? null);
     }
 
+    public function testTheStatelessRevisionIsDiscoveredAndNamedOnEveryRequest(): void
+    {
+        [$status, $discovered] = self::post(['method' => 'server/discover', 'params' => self::stateless()], self::READER, '2026-07-28');
+        self::assertSame(200, $status);
+        self::assertContains('2026-07-28', $discovered['result']['supportedVersions'] ?? []);
+        self::assertContains('2025-11-25', $discovered['result']['supportedVersions'] ?? []);
+        self::assertSame('complete', $discovered['result']['resultType'] ?? null);
+
+        [, $listed] = self::post(['method' => 'tools/list', 'params' => self::stateless()], self::READER, '2026-07-28');
+        self::assertSame('complete', $listed['result']['resultType'] ?? null);
+        self::assertArrayHasKey('ttlMs', $listed['result']);
+        self::assertSame('notes_search_tools', $listed['result']['tools'][0]['name'] ?? null);
+
+        $call = ['name' => 'notes_search_tools', 'arguments' => ['action' => 'add', 'object' => 'note']];
+        [, $found] = self::post(['method' => 'tools/call', 'params' => $call + self::stateless()], self::READER, '2026-07-28');
+        self::assertSame('complete', $found['result']['resultType'] ?? null);
+        self::assertSame('notes_add', $found['result']['structuredContent']['tools'][0]['name'] ?? null);
+    }
+
+    public function testAStatelessRequestMustNameARevisionTheServerSpeaksAndTheHeaderRepeats(): void
+    {
+        [$status, $mismatch] = self::post(['method' => 'tools/list', 'params' => self::stateless()], self::READER, '2025-11-25');
+        self::assertSame(400, $status);
+        self::assertSame(-32600, $mismatch['error']['code'] ?? null);
+
+        [$status, $unknown] = self::post(['method' => 'tools/list', 'params' => self::stateless('2099-01-01')], self::READER, '2099-01-01');
+        self::assertSame(400, $status);
+        self::assertSame(-32022, $unknown['error']['code'] ?? null);
+        self::assertSame('2099-01-01', $unknown['error']['data']['requested'] ?? null);
+        self::assertContains('2026-07-28', $unknown['error']['data']['supported'] ?? []);
+
+        // A revision with a handshake is not named in _meta.
+        self::assertSame(-32022, self::post(['method' => 'tools/list', 'params' => self::stateless('2025-11-25')], self::READER, '2025-11-25')[1]['error']['code'] ?? null);
+        // The stateless revision always carries _meta.
+        self::assertSame(400, self::post(['method' => 'tools/list'], self::READER, '2026-07-28')[0]);
+        self::assertSame(400, self::post(['method' => 'server/discover'], self::READER, '2026-07-28')[0]);
+        // It has no ping.
+        self::assertSame(-32601, self::post(['method' => 'ping', 'params' => self::stateless()], self::READER, '2026-07-28')[1]['error']['code'] ?? null);
+    }
+
     public function testANoteAddedByOneRequestIsReadByTheNext(): void
     {
         [, $found] = self::post(['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['action' => 'add', 'object' => 'note']]], self::READER);
@@ -138,6 +178,19 @@ final class HttpServerTest extends TestCase
         self::assertSame(-32602, self::post(['method' => 'tools/call', 'params' => ['arguments' => []]], self::READER)[1]['error']['code'] ?? null);
         self::assertSame(405, self::request('GET', '', ['Authorization: Bearer ' . self::READER])[0]);
         self::assertSame(403, self::request('POST', '{}', ['Authorization: Bearer ' . self::READER, 'Origin: https://elsewhere.example'])[0]);
+    }
+
+    /**
+     * The params every request of the stateless revision carries.
+     *
+     * @return array{_meta: array<string, mixed>}
+     */
+    private static function stateless(string $revision = '2026-07-28'): array
+    {
+        return ['_meta' => [
+            'io.modelcontextprotocol/protocolVersion' => $revision,
+            'io.modelcontextprotocol/clientCapabilities' => new \stdClass(),
+        ]];
     }
 
     /**

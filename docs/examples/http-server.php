@@ -24,8 +24,11 @@ declare(strict_types=1);
  *            -H 'MCP-Protocol-Version: 2025-11-25' \
  *            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
  *
- * Like the stdio example, it speaks the revisions that open with an
- * `initialize` handshake.
+ * It speaks every revision the library knows: those that open with an
+ * `initialize` handshake, and the stateless one of 2026-07-28, where each
+ * request names its revision in `_meta` and `server/discover` replaces the
+ * handshake. Such a request sends `MCP-Protocol-Version: 2026-07-28` and
+ * repeats it in params._meta["io.modelcontextprotocol/protocolVersion"].
  */
 
 namespace Example\Notes;
@@ -69,11 +72,25 @@ function reply(int $status, ?array $body = null, array $headers = []): never
 }
 
 /**
+ * @param array<string, mixed>|null $data
+ *
  * @return array<string, mixed>
  */
-function error(mixed $id, int $code, string $message): array
+function error(mixed $id, int $code, string $message, ?array $data = null): array
 {
-    return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => $code, 'message' => $message]];
+    $error = ['code' => $code, 'message' => $message] + ($data === null ? [] : ['data' => $data]);
+
+    return ['jsonrpc' => '2.0', 'id' => $id, 'error' => $error];
+}
+
+/**
+ * The revisions this server speaks, for a client that asked for another.
+ *
+ * @return list<string>
+ */
+function supported(): array
+{
+    return array_map(static fn(Revision $revision): string => $revision->value, Revision::cases());
 }
 
 $server = $_SERVER;
@@ -107,21 +124,50 @@ $id = $message['id'];
 $method = $message['method'];
 $params = is_array($message['params'] ?? null) ? $message['params'] : [];
 
-if ($method === 'initialize') {
-    reply(200, ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
-        'protocolVersion' => negotiate($params['protocolVersion'] ?? null)->value,
-        'capabilities' => ['tools' => new \stdClass()],
-        'serverInfo' => ['name' => 'notes', 'version' => '1.0.0'],
-    ]]);
-}
-
-// After initialize the client sends the agreed revision on every request. A
-// request without it comes from a client of 2025-03-26, which had no header,
-// as the specification says to assume; one the server does not speak is refused.
 $version = $header('HTTP_MCP_PROTOCOL_VERSION');
-$revision = $version === null ? Revision::V2025_03_26 : Revision::tryFrom($version);
-if ($revision === null || $revision->isStateless()) {
-    reply(400, error($id, -32600, 'Unsupported MCP-Protocol-Version.'));
+$meta = is_array($params['_meta'] ?? null) ? $params['_meta'] : [];
+$stated = $meta['io.modelcontextprotocol/protocolVersion'] ?? null;
+
+if ($stated !== null || $method === 'server/discover') {
+    // A stateless request names its revision in _meta, and the header must
+    // say the same, or the request is malformed.
+    if (!is_string($stated) || $stated !== $version) {
+        reply(400, error($id, -32600, 'The protocol version in _meta must match the MCP-Protocol-Version header.'));
+    }
+    $revision = Revision::tryFrom($stated);
+    // Only a stateless revision is named this way; for any other the client
+    // gets the list to choose from, in the error its revision defines.
+    if ($revision === null || !$revision->isStateless()) {
+        reply(400, error($id, -32022, 'Unsupported protocol version.', ['requested' => $stated, 'supported' => supported()]));
+    }
+    if ($method === 'server/discover') {
+        // The same for every caller, so any cache may keep it.
+        reply(200, ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
+            'supportedVersions' => supported(),
+            'capabilities' => ['tools' => new \stdClass()],
+            'ttlMs' => 3_600_000,
+            'cacheScope' => 'public',
+            'resultType' => 'complete',
+            '_meta' => ['io.modelcontextprotocol/serverInfo' => ['name' => 'notes', 'version' => '1.0.0']],
+        ]]);
+    }
+} else {
+    if ($method === 'initialize') {
+        reply(200, ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
+            'protocolVersion' => negotiate($params['protocolVersion'] ?? null)->value,
+            'capabilities' => ['tools' => new \stdClass()],
+            'serverInfo' => ['name' => 'notes', 'version' => '1.0.0'],
+        ]]);
+    }
+
+    // After initialize the client sends the agreed revision on every request.
+    // A request without it comes from a client of 2025-03-26, which had no
+    // header, as the specification says to assume. A stateless revision with
+    // no _meta is not a request that revision defines.
+    $revision = $version === null ? Revision::V2025_03_26 : Revision::tryFrom($version);
+    if ($revision === null || $revision->isStateless()) {
+        reply(400, error($id, -32600, 'Unsupported MCP-Protocol-Version.'));
+    }
 }
 
 $data = getenv('MCP_NOTES_DATA');
@@ -153,7 +199,8 @@ if ($method === 'tools/call') {
 }
 
 $result = match ($method) {
-    'ping' => new \stdClass(),
+    // The stateless revision has no ping: a request there is its own check.
+    'ping' => $revision->isStateless() ? null : new \stdClass(),
     'tools/list' => $discovery->listTools($tools, $revision),
     default => null,
 };

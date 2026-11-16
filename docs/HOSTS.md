@@ -58,7 +58,7 @@ What changes from stdio:
 | Part | Over HTTP | Why |
 |---|---|---|
 | The caller | the `Authorization` header of each request | the gate is built for the caller this request names, so a `Discovery` lives for one request |
-| The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version` | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
+| The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version`. In the stateless revision each request names it in `_meta` instead | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
 | The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
 | The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
 
@@ -84,7 +84,20 @@ directory must be one only the server writes to: the index files are run.
   the result with `isError`, as the specification asks; JSON-RPC errors are
   for requests the host cannot read.
 
-The stateless revision `2026-07-28` has no `initialize` handshake, so the
-example does not offer it. How a request gives its version there belongs to
-the transport; once the host has read it, it goes to `Revision::fromString()`
-like any other.
+The stateless revision `2026-07-28` has no `initialize` handshake and no
+session at all, which suits one process per request. The HTTP example serves
+it beside the others:
+
+- **`server/discover`** replaces the handshake: it lists the revisions the
+  server speaks and its capabilities, the same for every caller.
+- **Every request names its revision** in
+  `params._meta["io.modelcontextprotocol/protocolVersion"]`, and the
+  `MCP-Protocol-Version` header must say the same; a mismatch gets 400.
+- **A revision the server does not speak** gets 400 with error `-32022`,
+  whose `data` gives the requested revision and the supported ones, so the
+  client can choose and retry.
+
+Once the host has read the revision, it goes to `Revision::fromString()` like
+any other, and the library adds the `resultType`, `ttlMs` and `cacheScope`
+that revision asks for. The stdio example keeps to the revisions with a
+handshake.

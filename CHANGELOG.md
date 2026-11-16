@@ -56,7 +56,10 @@ becomes the next version's section when it is published.
   without it, 400 for one the library does not shape), the search index kept
   in a `FileIndexCache` between requests, and the 202, 401, 403 and 405 a
   host answers itself. `docs/HOSTS.md` says what changes from stdio. The tests
-  run it behind PHP's built-in server and call it over HTTP. The tools, the
+  run it behind PHP's built-in server and call it over HTTP. It also serves
+  the stateless revision `2026-07-28`: `server/discover`, the revision read
+  from each request's `_meta` and checked against the header, and error
+  -32022 with the supported revisions for one it does not speak. The tools, the
   gate and the choice of revision moved to `docs/examples/notes.php`, shared
   by both examples.
 - **A complete server written by hand, in `docs/examples/`.** A stdio MCP
