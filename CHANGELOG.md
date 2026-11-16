@@ -23,6 +23,14 @@ becomes the next version's section when it is published.
   confirming, and the search learns once per batch. With the option left at
   0, the list of tools is unchanged and a host tool of that name stays the
   host's.
+- **A complete server written by hand, in `docs/examples/`.** A stdio MCP
+  server with no SDK, in one file: four note tools, a gate that hides one of
+  them from all but an admin, the compact mode with the batch runner, the
+  revision negotiated at `initialize`, and the JSON-RPC errors a host keeps.
+  `docs/HOSTS.md` walks through it. The new `examples` test suite runs it in
+  its own process as a client would, and the coding standard, PHPStan at
+  level max and the PHP 8.1 check read it, so the example stays true to the
+  library.
 - **A fourth benchmark server, in French.** `composer benchmark` now also
   measures a network of public libraries: 40 tools with kebab-case names and
   French titles and descriptions, and 100 requests written before any of them

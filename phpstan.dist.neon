@@ -3,9 +3,11 @@ includes:
 
 parameters:
     # The highest level for the library itself: it is small, has no framework
-    # to excuse a loose type, and every host relies on its contracts.
+    # to excuse a loose type, and every host relies on its contracts. The
+    # examples are held to it too, since hosts copy them.
     level: max
     phpVersion: 80100
     paths:
         - src
         - bin
+        - docs/examples
