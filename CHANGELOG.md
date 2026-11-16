@@ -40,6 +40,18 @@ becomes the next version's section when it is published.
   top 3, 174 asked again); the share shown by the badge moves from 83% to 82%
   because the new server is harder, not because the search got worse.
 
+### Changed
+
+- **A cached search is about five times faster.** `ToolIndex` is now an
+  inverted index: each word and trigram points to the tools that hold it,
+  with its weight there worked out when the index is built, so a search only
+  visits the tools that share a term with the request instead of every tool
+  for every term. With a cache, a search over 500 tools goes from about 6 ms
+  to about 1 ms, over 50 tools from 0.6 ms to 0.1 ms; building the index costs
+  the same. The scores are identical to the last digit, so the ranking and the
+  benchmark do not move. An index saved by an `IndexCache` in the former shape
+  is rebuilt once, on its own; the new one is about a third larger on disk.
+
 ## 0.2.0 - 2026-11-14
 
 ### Changed

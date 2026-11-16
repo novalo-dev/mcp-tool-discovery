@@ -165,6 +165,24 @@ final class ToolSearchTest extends TestCase
     {
         self::assertNull(ToolIndex::fromArray(['format' => 0]));
         self::assertNull(ToolIndex::fromArray([]));
+        // The shape saved before the index was inverted: rebuilt, never misread.
+        self::assertNull(ToolIndex::fromArray(['format' => 1, 'documents' => [], 'weights' => [], 'averages' => [], 'words' => [], 'grams' => [], 'trigramWeight' => 0.6]));
+    }
+
+    public function testARestoredIndexScoresExactlyLikeTheBuiltOne(): void
+    {
+        $documents = [];
+        foreach (RecordingGate::fixtureTools() as $name => $tool) {
+            $documents[$name] = ['name' => $name, 'title' => $tool->title(), 'description' => $tool->description()];
+        }
+        $built = ToolIndex::build($documents, ['name' => 1.0, 'title' => 2.0, 'description' => 1.0]);
+        $restored = ToolIndex::fromArray($built->toArray());
+
+        self::assertNotNull($restored);
+        self::assertSame($built->ids(), $restored->ids());
+        foreach (['change the ticket status', 'roll back a deployment', 'statuses', 'nothing like it'] as $query) {
+            self::assertSame($built->score($query), $restored->score($query));
+        }
     }
 
     public function testLearningLiftsTheToolThatWorked(): void
