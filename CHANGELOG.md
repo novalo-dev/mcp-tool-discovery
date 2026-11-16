@@ -88,6 +88,12 @@ becomes the next version's section when it is published.
   index is the same to the last digit, saved shape included, so a cache entry
   stays valid and the ranking does not move.
 
+### Security
+
+- A search reads at most the first 1024 bytes of each field of a request
+  (`action`, `object`, `description`, `query`), cut between two characters,
+  so its cost stays small whatever the size of the request.
+
 ## 0.2.0 - 2026-11-14
 
 ### Changed
