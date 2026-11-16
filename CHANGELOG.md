@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Gateway mode**, `src/Mode/Gateway/GatewayMode.php`: a single tool,
+  `use_tools`, for clients that accept very few tools. Each call gives an
+  `operation`: `search` (the compact search, same fields and same answer),
+  `describe` (`names`) or `run` (`name`, `arguments`, `search_id`, passed to
+  the runner so the search learns). The tool is marked destructive as soon as
+  the caller may run a change through it, and as a read when every visible
+  tool only reads. With `changesApart: true` the changes are listed as
+  themselves with their own annotations, the gateway only reads, and a change
+  sent through `run` is refused before the gate is asked. Options: `prefix`,
+  `title`, `changesApart`, `groupOf`, `maxDescribed`, `schemaOnError`. It
+  passes the mode contract in both settings and is in the conformance checks.
 - **Grouped mode**, `src/Mode/Grouped/GroupedMode.php`. The host declares its
   groups (`groups`: name => title) and says where each tool belongs
   (`groupOf`); each group holding a visible tool becomes a tool named after
@@ -57,6 +68,9 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- The compact search moved to `src/Mode/ToolFinder.php`, shared with the
+  gateway mode, so both answer a request with the same tools. Its answers
+  are unchanged.
 - **A cached search is about five times faster.** `ToolIndex` is now an
   inverted index: each word and trigram points to the tools that hold it,
   with its weight there worked out when the index is built, so a search only

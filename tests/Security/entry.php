@@ -24,6 +24,7 @@ use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
@@ -65,10 +66,12 @@ $setup = new SearchSetup(
 );
 $name = $_POST['name'] ?? '';
 $arguments = $_POST['arguments'] ?? [];
-// Both written modes, since each reads the client's arguments its own way.
-$mode = ($_GET['mode'] ?? '') === 'grouped'
-    ? new GroupedMode(static fn(Tool $tool): string => 'records', ['records' => 'Records'])
-    : new CompactMode(batchLimit: 50);
+// Every written mode, since each reads the client's arguments its own way.
+$mode = match ($_GET['mode'] ?? '') {
+    'grouped' => new GroupedMode(static fn(Tool $tool): string => 'records', ['records' => 'Records']),
+    'gateway' => new GatewayMode(),
+    default => new CompactMode(batchLimit: 50),
+};
 $result = (new Discovery($mode, $gate, $setup))->callTool(
     is_string($name) ? $name : '',
     is_array($arguments) ? $arguments : [],

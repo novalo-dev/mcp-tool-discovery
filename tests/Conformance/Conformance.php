@@ -15,6 +15,7 @@ namespace Novalo\McpToolDiscovery\Tests\Conformance;
 
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -96,6 +97,24 @@ final class Conformance
         $checks['grouped: refused by the host'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users_change', ['action' => 'acme_deactivate_user'], $tools, $revision)];
         $checks['grouped: hidden action'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('users', ['action' => 'acme_list_users'], $tools, $revision)];
         $checks['grouped: tool outside the groups'] = ['definition' => 'CallToolResult', 'value' => $grouped->callTool('acme_deploy_app', [], $tools, $revision)];
+
+        $gateways = [
+            'gateway' => new Discovery(new GatewayMode(), new RecordingGate(['acme_list_users'], ['acme_deactivate_user']), new SearchSetup(learning: new MemoryLearningStore())),
+            'gateway with changes apart' => new Discovery(new GatewayMode(prefix: 'acme_', changesApart: true), new RecordingGate(['acme_list_users'], ['acme_deactivate_user'])),
+        ];
+        foreach ($gateways as $label => $gateway) {
+            $own = $label === 'gateway' ? GatewayMode::NAME : 'acme_' . GatewayMode::NAME;
+            $checks[$label . ': tools/list'] = ['definition' => 'ListToolsResult', 'value' => $gateway->listTools($tools, $revision, 60000)];
+            $checks[$label . ': search in fields'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'search', 'action' => 'change', 'object' => 'ticket status', 'description' => 'move a ticket to done'], $tools, $revision)];
+            $checks[$label . ': search with nothing found'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'search', 'query' => 'zzzz'], $tools, $revision)];
+            $checks[$label . ': search with no field'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'search'], $tools, $revision)];
+            $checks[$label . ': describe'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'describe', 'names' => ['acme_get_file', 'acme_nope']], $tools, $revision)];
+            $checks[$label . ': run a read'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'run', 'name' => 'acme_get_file', 'arguments' => ['file_id' => '1'], 'search_id' => 'ZmlsZQ'], $tools, $revision)];
+            $checks[$label . ': run a change'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'run', 'name' => 'acme_set_ticket_status', 'arguments' => []], $tools, $revision)];
+            $checks[$label . ': refused by the host'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'run', 'name' => 'acme_deactivate_user'], $tools, $revision)];
+            $checks[$label . ': hidden tool'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'run', 'name' => 'acme_list_users'], $tools, $revision)];
+            $checks[$label . ': no operation'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, [], $tools, $revision)];
+        }
 
         return $checks;
     }

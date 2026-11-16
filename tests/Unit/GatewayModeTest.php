@@ -1,0 +1,208 @@
+<?php
+
+/*
+ * This file is part of novalo/mcp-tool-discovery.
+ *
+ * (c) Novalo <https://novalo.fr>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+namespace Novalo\McpToolDiscovery\Tests\Unit;
+
+use Novalo\McpToolDiscovery\Discovery;
+use Novalo\McpToolDiscovery\Gate\CallResult;
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
+use Novalo\McpToolDiscovery\Tool\Tool;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
+use PHPUnit\Framework\TestCase;
+
+final class GatewayModeTest extends TestCase
+{
+    /**
+     * @param array<string, mixed> $arguments
+     */
+    private static function call(array $arguments, ?GatewayMode $mode = null, ?RecordingGate $gate = null, SearchSetup $setup = new SearchSetup()): CallResult
+    {
+        return (new Discovery($mode ?? new GatewayMode(), $gate ?? new RecordingGate(['acme_list_users'], ['acme_deactivate_user']), $setup))
+            ->call(GatewayMode::NAME, $arguments, RecordingGate::fixtureTools());
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function answer(CallResult $result): array
+    {
+        self::assertIsArray($result->structuredContent);
+
+        return $result->structuredContent;
+    }
+
+    private static function text(CallResult $result): string
+    {
+        return implode("\n", array_map(static fn(array $block): string => is_string($block['text'] ?? null) ? $block['text'] : '', $result->content));
+    }
+
+    /**
+     * @return list<Tool>
+     */
+    private static function listed(GatewayMode $mode, ?ToolSet $tools = null): array
+    {
+        return $mode->listTools($tools ?? RecordingGate::fixtureTools());
+    }
+
+    public function testOneToolIsListedAndMarkedDestructiveWhenAChangeCanGoThrough(): void
+    {
+        $listed = self::listed(new GatewayMode(prefix: 'acme_', title: 'Outils'));
+
+        self::assertCount(1, $listed);
+        self::assertSame('acme_use_tools', $listed[0]->name);
+        self::assertSame('Outils', $listed[0]->title());
+        self::assertFalse($listed[0]->readsOnly());
+        self::assertTrue($listed[0]->annotations()['destructiveHint'] ?? null);
+    }
+
+    public function testTheToolOnlyReadsWhenEveryVisibleToolOnlyReads(): void
+    {
+        $reads = RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->readsOnly());
+        $listed = self::listed(new GatewayMode(), $reads);
+
+        self::assertCount(1, $listed);
+        self::assertTrue($listed[0]->readsOnly());
+        self::assertFalse($listed[0]->annotations()['destructiveHint'] ?? null);
+    }
+
+    public function testWithChangesApartTheChangesAreListedAsThemselves(): void
+    {
+        $listed = self::listed(new GatewayMode(changesApart: true));
+        $names = array_map(static fn(Tool $tool): string => $tool->name, $listed);
+
+        self::assertSame(GatewayMode::NAME, $names[0]);
+        self::assertTrue($listed[0]->readsOnly());
+        self::assertContains('acme_delete_file', $names);
+        self::assertNotContains('acme_get_file', $names);
+        foreach (array_slice($listed, 1) as $tool) {
+            self::assertFalse($tool->readsOnly(), $tool->name);
+        }
+    }
+
+    public function testASearchGivesSchemasAndSaysWhatRunsEachTool(): void
+    {
+        $tools = self::answer(self::call(['operation' => 'search', 'action' => 'change', 'object' => 'ticket status']))['tools'];
+        self::assertIsArray($tools);
+        self::assertIsArray($tools[0]);
+        self::assertSame('acme_set_ticket_status', $tools[0]['name']);
+        self::assertSame(GatewayMode::NAME, $tools[0]['run_with']);
+        self::assertArrayHasKey('inputSchema', $tools[0]);
+
+        $apart = self::answer(self::call(['operation' => 'search', 'action' => 'change', 'object' => 'ticket status'], new GatewayMode(changesApart: true)))['tools'];
+        self::assertIsArray($apart);
+        self::assertIsArray($apart[0]);
+        self::assertSame('acme_set_ticket_status', $apart[0]['run_with']);
+    }
+
+    public function testTheSearchAnswersLikeTheCompactSearch(): void
+    {
+        $arguments = ['action' => 'list', 'object' => 'backups', 'description' => 'every backup of last week'];
+        $gateway = self::answer(self::call(['operation' => 'search'] + $arguments));
+        $compact = (new Discovery(new CompactMode(), new RecordingGate(['acme_list_users'], ['acme_deactivate_user'])))
+            ->call(CompactMode::SEARCH, $arguments, RecordingGate::fixtureTools())->structuredContent;
+        self::assertIsArray($compact);
+        self::assertIsArray($gateway['tools']);
+        self::assertIsArray($compact['tools']);
+
+        self::assertSame(array_column($compact['tools'], 'name'), array_column($gateway['tools'], 'name'));
+    }
+
+    public function testASearchWithNoFieldListsEveryVisibleTool(): void
+    {
+        $tools = self::answer(self::call(['operation' => 'search']))['tools'];
+        self::assertIsArray($tools);
+
+        self::assertCount(49, $tools);
+        self::assertNotContains('acme_list_users', array_column($tools, 'name'));
+    }
+
+    public function testStrayNamesDoNotTurnASearchIntoADescription(): void
+    {
+        $tools = self::answer(self::call(['operation' => 'search', 'names' => ['acme_get_file']]))['tools'];
+        self::assertIsArray($tools);
+
+        self::assertCount(49, $tools, 'names belongs to describe: a search with no field lists everything');
+    }
+
+    public function testDescribeGivesTheNamedToolsAndAHiddenOneReadsAsMissing(): void
+    {
+        $answer = self::answer(self::call(['operation' => 'describe', 'names' => ['acme_get_file', 'acme_list_users', 'acme_nope']]));
+        self::assertIsArray($answer['tools']);
+
+        self::assertSame(['acme_get_file'], array_column($answer['tools'], 'name'));
+        self::assertSame(['acme_list_users', 'acme_nope'], $answer['unknown']);
+        self::assertTrue(self::call(['operation' => 'describe'])->isError);
+    }
+
+    public function testARunGoesThroughTheGateAndPassesTheSearchIdOn(): void
+    {
+        $store = new MemoryLearningStore();
+        $setup = new SearchSetup(learning: $store);
+        $answer = self::answer(self::call(['operation' => 'search', 'action' => 'show', 'object' => 'ticket'], null, null, $setup));
+        self::assertIsString($answer['search_id']);
+
+        $gate = new RecordingGate();
+        $result = self::call(['operation' => 'run', 'name' => 'acme_get_ticket', 'arguments' => ['ticket_id' => '7'], 'search_id' => $answer['search_id']], null, $gate, $setup);
+
+        self::assertFalse($result->isError);
+        self::assertSame([['name' => 'acme_get_ticket', 'arguments' => ['ticket_id' => '7']]], $gate->called);
+        self::assertArrayHasKey('ticket', $store->load());
+    }
+
+    public function testAHiddenToolReadsLikeOneThatDoesNotExist(): void
+    {
+        $gate = new RecordingGate(['acme_list_users']);
+        $hidden = self::call(['operation' => 'run', 'name' => 'acme_list_users'], null, $gate);
+        $missing = self::call(['operation' => 'run', 'name' => 'acme_nope'], null, $gate);
+
+        self::assertSame(str_replace('acme_list_users', 'X', self::text($hidden)), str_replace('acme_nope', 'X', self::text($missing)));
+        self::assertSame([], $gate->authorized);
+    }
+
+    public function testARefusedRunNeverRunsAndGetsItsParameters(): void
+    {
+        $gate = new RecordingGate([], ['acme_deactivate_user']);
+        $result = self::call(['operation' => 'run', 'name' => 'acme_deactivate_user'], null, $gate);
+
+        self::assertTrue($result->isError);
+        self::assertSame([], $gate->called);
+        self::assertStringContainsString('Parameters of acme_deactivate_user', self::text($result));
+    }
+
+    public function testWithChangesApartAChangeIsRefusedThroughTheGatewayBeforeTheGate(): void
+    {
+        $gate = new RecordingGate();
+        $result = self::call(['operation' => 'run', 'name' => 'acme_delete_file'], new GatewayMode(changesApart: true), $gate);
+
+        self::assertTrue($result->isError);
+        self::assertStringContainsString('call it by its own name', self::text($result));
+        self::assertSame([], $gate->authorized);
+    }
+
+    public function testMalformedCallsAreAnsweredAsErrors(): void
+    {
+        foreach ([[], ['operation' => 'delete'], ['operation' => 'run'], ['operation' => 'run', 'name' => 'acme_get_file', 'arguments' => 'x'], ['operation' => 'run', 'name' => GatewayMode::NAME], ['operation' => 'search', 'query' => 3]] as $arguments) {
+            self::assertTrue(self::call($arguments)->isError, (string) json_encode($arguments));
+        }
+    }
+
+    public function testALimitBelowOneIsRefusedAtBoot(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new GatewayMode(maxDescribed: 0);
+    }
+}

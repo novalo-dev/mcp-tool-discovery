@@ -14,7 +14,7 @@ on the shape before you spend an evening on it.
 - **`develop`** receives every change, through a pull request.
 - **`main`** only receives `develop`, merged by the maintainer for a release.
   A pull request to `main` from any other branch fails the **Branches** check.
-- Branch from `develop` and name the branch after the change: `mode/gateway`,
+- Branch from `develop` and name the branch after the change: `mode/<name>`,
   `search/field-weights`, `fix/empty-properties`.
 
 ## Setup
@@ -78,12 +78,12 @@ whatever the matrix becomes), **PHP 8.1+ compatibility**, **Semgrep**,
 A mode is the most useful contribution and the most guarded one, because it
 stands between a client and a server's tools.
 
-1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and what the wanted
-   mode should do.
+1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and how the three
+   written ones make their choices.
 2. **Create the pack** in `src/Mode/<Name>/`, with a class that implements
    `DiscoveryMode`. Keep everything the mode needs in its folder, and
    search through `$runner->search()`: the host's settings, cache and learning
-   come with it. Pass the `search_id` a client gives back to `$runner->run()`. A mode
+   come with it; `ToolFinder` gives the answer the other searching modes give. Pass the `search_id` a client gives back to `$runner->run()`. A mode
    that does not search, like the grouped one, hands out none.
 3. **Pass the contract.** Add `tests/Contract/<Name>ModeContractTest.php`,
    extending `ModeContractTestCase`. It checks that the mode never lists,
