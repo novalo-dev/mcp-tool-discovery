@@ -21,6 +21,11 @@ namespace Novalo\McpToolDiscovery\Search;
  * each field is normalised on its own. A rare word weighs more than a common
  * one ("rollback" against "file"), and repeating a word earns less each time.
  *
+ * Inverted: each term points to the documents that hold it, with its
+ * weighted frequency there already worked out, so a search only visits the
+ * documents that share a term with the query. Visiting every document for
+ * every term was most of the cost of a search once the index is cached.
+ *
  * Building it is the cost of a search, so it can be saved as a plain array
  * (toArray) and restored (fromArray) by a cache. It knows nothing of tools:
  * any document with text fields fits.
@@ -35,26 +40,22 @@ final class ToolIndex
     private const B = 0.75;
 
     /** Raised whenever the saved shape changes, so an old cache entry is rebuilt. */
-    private const FORMAT = 1;
+    private const FORMAT = 2;
 
     /**
-     * @param array<int|string, array<string, array{0: array<array-key, int>, 1: int, 2: array<array-key, int>, 3: int}>> $documents
-     *        per document, per field: word counts, word total, trigram counts, trigram total
-     * @param array<string, float> $weights
-     * @param array<string, array{0: float, 1: float}> $averages per field: average word and trigram lengths
-     * @param array<array-key, int> $wordFrequency documents holding each word
-     * @param array<array-key, int> $gramFrequency documents holding each trigram
+     * @param list<int|string> $ids the documents, in index order
+     * @param array<array-key, array<int|string, float>> $words per word, per document holding it: its
+     *        weighted frequency, the fields' weights and lengths already applied
+     * @param array<array-key, array<int|string, float>> $grams the same for trigrams
      *
      * Keys are array-key, not string: PHP turns a key such as "123", a trigram
      * of a word with digits, into an integer, and looks it up the same way.
      */
     private function __construct(
         private readonly Analyzer $analyzer,
-        private readonly array $documents,
-        private readonly array $weights,
-        private readonly array $averages,
-        private readonly array $wordFrequency,
-        private readonly array $gramFrequency,
+        private readonly array $ids,
+        private readonly array $words,
+        private readonly array $grams,
         private readonly float $trigramWeight,
     ) {}
 
@@ -65,39 +66,40 @@ final class ToolIndex
      */
     public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6): self
     {
-        $indexed = [];
-        $wordFrequency = [];
-        $gramFrequency = [];
+        $counts = [];
         $totals = [];
         foreach ($documents as $id => $fields) {
-            $seenWords = [];
-            $seenGrams = [];
             foreach ($weights as $field => $weight) {
-                $words = $analyzer->words($fields[$field] ?? '');
-                $grams = [];
-                foreach ($words as $word) {
-                    array_push($grams, ...Analyzer::trigrams($word));
+                $fieldWords = $analyzer->words($fields[$field] ?? '');
+                $fieldGrams = [];
+                foreach ($fieldWords as $word) {
+                    array_push($fieldGrams, ...Analyzer::trigrams($word));
                 }
-                $indexed[$id][$field] = [array_count_values($words), count($words), array_count_values($grams), count($grams)];
-                $totals[$field][0] = ($totals[$field][0] ?? 0) + count($words);
-                $totals[$field][1] = ($totals[$field][1] ?? 0) + count($grams);
-                $seenWords += array_fill_keys($words, true);
-                $seenGrams += array_fill_keys($grams, true);
-            }
-            foreach (array_keys($seenWords) as $word) {
-                $wordFrequency[$word] = ($wordFrequency[$word] ?? 0) + 1;
-            }
-            foreach (array_keys($seenGrams) as $gram) {
-                $gramFrequency[$gram] = ($gramFrequency[$gram] ?? 0) + 1;
+                $counts[$id][$field] = [array_count_values($fieldWords), count($fieldWords), array_count_values($fieldGrams), count($fieldGrams)];
+                $totals[$field][0] = ($totals[$field][0] ?? 0) + count($fieldWords);
+                $totals[$field][1] = ($totals[$field][1] ?? 0) + count($fieldGrams);
             }
         }
-        $count = max(1, count($indexed));
-        $averages = [];
-        foreach ($weights as $field => $weight) {
-            $averages[$field] = [($totals[$field][0] ?? 0) / $count, ($totals[$field][1] ?? 0) / $count];
+        $count = max(1, count($counts));
+        $words = [];
+        $grams = [];
+        // A term's weighted frequency in a document does not depend on the
+        // query, so it is worked out once here rather than at every search.
+        foreach ($counts as $id => $fields) {
+            foreach ($weights as $field => $weight) {
+                [$fieldWords, $wordLength, $fieldGrams, $gramLength] = $fields[$field];
+                $wordNorm = self::norm($wordLength, ($totals[$field][0] ?? 0) / $count);
+                foreach ($fieldWords as $word => $occurrences) {
+                    $words[$word][$id] = ($words[$word][$id] ?? 0.0) + $weight * $occurrences / $wordNorm;
+                }
+                $gramNorm = self::norm($gramLength, ($totals[$field][1] ?? 0) / $count);
+                foreach ($fieldGrams as $gram => $occurrences) {
+                    $grams[$gram][$id] = ($grams[$gram][$id] ?? 0.0) + $weight * $occurrences / $gramNorm;
+                }
+            }
         }
 
-        return new self($analyzer, $indexed, $weights, $averages, $wordFrequency, $gramFrequency, $trigramWeight);
+        return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight);
     }
 
     /**
@@ -116,14 +118,15 @@ final class ToolIndex
             array_push($grams, ...Analyzer::trigrams($word));
         }
         $words = array_values(array_unique($words));
-        $grams = array_values(array_unique($grams));
+        $wordScores = $this->bm25f($words, $this->words);
+        $gramScores = $this->bm25f(array_values(array_unique($grams)), $this->grams);
 
         $scores = [];
-        foreach ($this->documents as $id => $fields) {
-            $score = $this->bm25f($fields, $words, 0, $this->wordFrequency)
+        foreach ($this->ids as $id) {
+            $score = ($wordScores[$id] ?? 0.0)
                 // Divided by the number of query words, so a long query does
                 // not let its many trigrams outweigh the words themselves.
-                + $this->trigramWeight * $this->bm25f($fields, $grams, 2, $this->gramFrequency) / count($words);
+                + $this->trigramWeight * ($gramScores[$id] ?? 0.0) / count($words);
             if ($score > 0) {
                 $scores[$id] = $score;
             }
@@ -133,37 +136,42 @@ final class ToolIndex
     }
 
     /**
-     * @param array<string, array{0: array<array-key, int>, 1: int, 2: array<array-key, int>, 3: int}> $fields
+     * The BM25F score of each document holding at least one of the terms.
+     *
+     * Term at a time, in the order of the query, so each document adds up
+     * its terms in the same order whatever documents are around it.
+     *
      * @param list<string> $terms
-     * @param 0|2 $slot 0 for words, 2 for trigrams
-     * @param array<array-key, int> $frequency
+     * @param array<array-key, array<int|string, float>> $postings
+     *
+     * @return array<int|string, float>
      */
-    private function bm25f(array $fields, array $terms, int $slot, array $frequency): float
+    private function bm25f(array $terms, array $postings): array
     {
-        $documents = count($this->documents);
-        $score = 0.0;
+        $documents = count($this->ids);
+        $scores = [];
         foreach ($terms as $term) {
-            if (!isset($frequency[$term])) {
+            if (!isset($postings[$term])) {
                 continue;
             }
-            $weighted = 0.0;
-            foreach ($this->weights as $field => $weight) {
-                $occurrences = $fields[$field][$slot][$term] ?? 0;
-                if ($occurrences === 0) {
-                    continue;
+            $frequency = count($postings[$term]);
+            $idf = log(1 + ($documents - $frequency + 0.5) / ($frequency + 0.5));
+            foreach ($postings[$term] as $id => $weighted) {
+                if ($weighted > 0) {
+                    $scores[$id] = ($scores[$id] ?? 0.0) + $idf * $weighted * (self::K1 + 1) / ($weighted + self::K1);
                 }
-                $average = $this->averages[$field][$slot === 0 ? 0 : 1];
-                $average = $average > 0 ? $average : 1.0;
-                $length = $fields[$field][$slot + 1];
-                $weighted += $weight * $occurrences / (1 - self::B + self::B * $length / $average);
-            }
-            if ($weighted > 0) {
-                $idf = log(1 + ($documents - $frequency[$term] + 0.5) / ($frequency[$term] + 0.5));
-                $score += $idf * $weighted * (self::K1 + 1) / ($weighted + self::K1);
             }
         }
 
-        return $score;
+        return $scores;
+    }
+
+    /**
+     * How much a field's length tempers a match in it, against the average.
+     */
+    private static function norm(int $length, float $average): float
+    {
+        return 1 - self::B + self::B * $length / ($average > 0 ? $average : 1.0);
     }
 
     /**
@@ -171,7 +179,7 @@ final class ToolIndex
      */
     public function has(string $word): bool
     {
-        return isset($this->wordFrequency[$word]);
+        return isset($this->words[$word]);
     }
 
     /**
@@ -181,7 +189,7 @@ final class ToolIndex
      */
     public function ids(): array
     {
-        return array_keys($this->documents);
+        return $this->ids;
     }
 
     /**
@@ -193,11 +201,9 @@ final class ToolIndex
     {
         return [
             'format' => self::FORMAT,
-            'documents' => $this->documents,
-            'weights' => $this->weights,
-            'averages' => $this->averages,
-            'words' => $this->wordFrequency,
-            'grams' => $this->gramFrequency,
+            'ids' => $this->ids,
+            'words' => $this->words,
+            'grams' => $this->grams,
             'trigramWeight' => $this->trigramWeight,
         ];
     }
@@ -213,7 +219,7 @@ final class ToolIndex
         if (($saved['format'] ?? null) !== self::FORMAT) {
             return null;
         }
-        foreach (['documents', 'weights', 'averages', 'words', 'grams'] as $key) {
+        foreach (['ids', 'words', 'grams'] as $key) {
             if (!is_array($saved[$key] ?? null)) {
                 return null;
             }
@@ -221,17 +227,13 @@ final class ToolIndex
         if (!is_float($saved['trigramWeight'] ?? null) && !is_int($saved['trigramWeight'] ?? null)) {
             return null;
         }
-        /** @var array<int|string, array<string, array{0: array<array-key, int>, 1: int, 2: array<array-key, int>, 3: int}>> $documents */
-        $documents = $saved['documents'];
-        /** @var array<string, float> $weights */
-        $weights = $saved['weights'];
-        /** @var array<string, array{0: float, 1: float}> $averages */
-        $averages = $saved['averages'];
-        /** @var array<array-key, int> $words */
+        /** @var list<int|string> $ids */
+        $ids = $saved['ids'];
+        /** @var array<array-key, array<int|string, float>> $words */
         $words = $saved['words'];
-        /** @var array<array-key, int> $grams */
+        /** @var array<array-key, array<int|string, float>> $grams */
         $grams = $saved['grams'];
 
-        return new self($analyzer, $documents, $weights, $averages, $words, $grams, (float) $saved['trigramWeight']);
+        return new self($analyzer, $ids, $words, $grams, (float) $saved['trigramWeight']);
     }
 }

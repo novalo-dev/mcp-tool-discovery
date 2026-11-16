@@ -252,8 +252,8 @@ the settings; the other half, kept aside, gives the score:
 | In fields, after learning from the other half | 166 | 183 |
 | In fields, asked a second time | 174 | 187 |
 
-A search over 50 tools takes about 2 ms with no cache and half a millisecond
-with one. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
+A search over 50 tools takes about 2 ms with no cache and a tenth of a
+millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
 and how to change them.
 
 ---
