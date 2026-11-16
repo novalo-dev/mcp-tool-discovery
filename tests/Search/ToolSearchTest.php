@@ -258,6 +258,23 @@ final class ToolSearchTest extends TestCase
         self::assertNotContains('acme_delete_file', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('list', 'backups'))));
     }
 
+    public function testAWordSharedWithALearnedSearchLiftsNothing(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(SearchQuery::text('show ticket'))->searchId, 'acme_get_ticket');
+        }
+        $assign = SearchQuery::text('assign the ticket');
+
+        // "ticket" alone says which object, not which action: what was
+        // learned for showing a ticket must not reorder the tools that
+        // assign one.
+        self::assertSame(self::names((new ToolSearch($tools))->search($assign)), self::names((new ToolSearch($tools, learning: $store))->search($assign)));
+        self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
+    }
+
     public function testTheFileStoreKeepsWhatWasLearned(): void
     {
         $file = self::temporary('learning') . '.json';

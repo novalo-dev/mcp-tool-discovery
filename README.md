@@ -274,21 +274,22 @@ client gives its request **in fields**, and each field is scored on its own:
 - **A cache** for the index (in memory, or PHP files read through OPcache),
   one per set of visible tools.
 - **Learning, opt in.** A search returns a `search_id`; a run that succeeds
-  with it lifts that tool for those words, within a cap. Only words the tools
-  use are kept.
+  with it lifts that tool for those pairs of words, within a cap. Only words
+  the tools use are kept.
 
-500 requests over five fictional servers, a workspace (snake_case), a
+697 requests over six fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
-of public libraries written in French (kebab-case) and the office of a school
-written in German (PascalCase). Half were used to choose the settings; the
-other half, kept aside, gives the score:
+of public libraries written in French (kebab-case), the office of a school
+written in German (PascalCase) and a cloud hosting panel with 176 tools.
+Half were used to choose the settings; the other half, kept aside, gives the
+score:
 
-| Test half, 250 requests | Right tool first | Right tool in the top 3 |
+| Test half, 349 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **202** | **227** |
-| The same request as one sentence | 94 | 135 |
-| In fields, after learning from the other half | 203 | 227 |
-| In fields, asked a second time | 215 | 231 |
+| The request in fields | **286** | **321** |
+| The same request as one sentence | 155 | 213 |
+| In fields, after learning from the other half | 288 | 321 |
+| In fields, asked a second time | 304 | 327 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

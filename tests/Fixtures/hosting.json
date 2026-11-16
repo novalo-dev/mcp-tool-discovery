@@ -1,0 +1,3477 @@
+[
+ {
+  "name": "nimbo_list_servers",
+  "title": "List servers",
+  "description": "Lists the servers of the project with their status, size, region and IP addresses.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "project_id": {
+     "type": "string",
+     "description": "ID of the project"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_server",
+  "title": "Get a server",
+  "description": "Shows one server: status, size, image, IP addresses, attached volumes and tags.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_server",
+  "title": "Create a server",
+  "description": "Creates a new server from an image, in a region and at a size.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    },
+    "size": {
+     "type": "string",
+     "description": "Size slug, for example s-2vcpu-4gb"
+    },
+    "image_id": {
+     "type": "string",
+     "description": "ID of the image"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_server",
+  "title": "Delete a server",
+  "description": "Destroys a server and its local disk. Attached volumes are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_start_server",
+  "title": "Start a server",
+  "description": "Powers on a server that is stopped.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_stop_server",
+  "title": "Stop a server",
+  "description": "Shuts a server down cleanly, as the shutdown command would. It keeps its IP and disk.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_power_off_server",
+  "title": "Power off a server",
+  "description": "Cuts the power of a server at once, without a clean shutdown, as pulling the plug.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_reboot_server",
+  "title": "Reboot a server",
+  "description": "Restarts a server cleanly.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_resize_server",
+  "title": "Resize a server",
+  "description": "Changes the size of a server: more or fewer CPUs, more or less memory.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "size": {
+     "type": "string",
+     "description": "Size slug, for example s-2vcpu-4gb"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_rename_server",
+  "title": "Rename a server",
+  "description": "Gives a server a new name.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_rebuild_server",
+  "title": "Rebuild a server",
+  "description": "Reinstalls a server from an image, erasing its disk and keeping its IP.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "image_id": {
+     "type": "string",
+     "description": "ID of the image"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_get_server_console",
+  "title": "Open the server console",
+  "description": "Gives a link to the web console of a server, to log in when SSH does not answer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_server_metrics",
+  "title": "Get server metrics",
+  "description": "Shows the CPU, memory, disk and bandwidth use of a server over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    },
+    "until": {
+     "type": "string",
+     "description": "End of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_tag_server",
+  "title": "Tag a server",
+  "description": "Adds a tag to a server, to group it with others.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_untag_server",
+  "title": "Untag a server",
+  "description": "Removes a tag from a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_enable_server_ipv6",
+  "title": "Enable IPv6 on a server",
+  "description": "Gives a server an IPv6 address.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_reset_server_password",
+  "title": "Reset the root password",
+  "description": "Sets a new root password on a server and sends it by email.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_server_logs",
+  "title": "Get server logs",
+  "description": "Shows the last lines of the system log of a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "lines": {
+     "type": "integer",
+     "description": "How many lines"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_enable_rescue_mode",
+  "title": "Boot in rescue mode",
+  "description": "Restarts a server on a rescue system, to repair a disk or a broken boot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_disable_rescue_mode",
+  "title": "Leave rescue mode",
+  "description": "Restarts a server on its own disk after rescue mode.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_sizes",
+  "title": "List server sizes",
+  "description": "Lists the server sizes: CPUs, memory, disk, transfer and monthly price.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_regions",
+  "title": "List regions",
+  "description": "Lists the data center regions and what each one offers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_volumes",
+  "title": "List volumes",
+  "description": "Lists the block storage volumes, their size and the server each one is attached to.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_volume",
+  "title": "Get a volume",
+  "description": "Shows one volume: size, region, file system and attached server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_volume",
+  "title": "Create a volume",
+  "description": "Creates a block storage volume, an extra disk for a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "size_gb": {
+     "type": "integer",
+     "description": "Size in GB"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_volume",
+  "title": "Delete a volume",
+  "description": "Destroys a volume and all its data. It must be detached first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_attach_volume",
+  "title": "Attach a volume",
+  "description": "Attaches a volume to a server, where it shows up as a new disk.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_detach_volume",
+  "title": "Detach a volume",
+  "description": "Detaches a volume from its server. The data stays on the volume.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_resize_volume",
+  "title": "Resize a volume",
+  "description": "Makes a volume bigger. A volume can grow but never shrink.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    },
+    "size_gb": {
+     "type": "integer",
+     "description": "Size in GB"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_snapshots",
+  "title": "List snapshots",
+  "description": "Lists the snapshots of servers and volumes, with their size and date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_server_snapshot",
+  "title": "Snapshot a server",
+  "description": "Takes a snapshot of a server disk at this moment, kept until deleted.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_volume_snapshot",
+  "title": "Snapshot a volume",
+  "description": "Takes a snapshot of a volume at this moment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volume_id": {
+     "type": "string",
+     "description": "ID of the volume"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_snapshot",
+  "title": "Delete a snapshot",
+  "description": "Deletes a snapshot for good.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "snapshot_id": {
+     "type": "string",
+     "description": "ID of the snapshot"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_restore_snapshot",
+  "title": "Restore a snapshot",
+  "description": "Puts a server or a volume back to the state of a snapshot, erasing what came after.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "snapshot_id": {
+     "type": "string",
+     "description": "ID of the snapshot"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_volume_from_snapshot",
+  "title": "Create a volume from a snapshot",
+  "description": "Creates a new volume holding the data of a volume snapshot, leaving the original alone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "snapshot_id": {
+     "type": "string",
+     "description": "ID of the snapshot"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_backups",
+  "title": "List backups",
+  "description": "Lists the automatic backups of a server, newest first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_enable_backups",
+  "title": "Turn on automatic backups",
+  "description": "Turns on the automatic weekly backups of a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_disable_backups",
+  "title": "Turn off automatic backups",
+  "description": "Turns off the automatic backups of a server. Existing backups are deleted.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_get_backup_schedule",
+  "title": "Get the backup schedule",
+  "description": "Shows when the automatic backups of a server run and how long they are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_backup_schedule",
+  "title": "Set the backup schedule",
+  "description": "Changes the day, the hour and the retention of the automatic backups of a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "schedule": {
+     "type": "string",
+     "description": "When to run, as a cron expression"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_restore_backup",
+  "title": "Restore a backup",
+  "description": "Puts a server back to the state of one of its automatic backups.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "backup_id": {
+     "type": "string",
+     "description": "ID of the backup"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_backup_now",
+  "title": "Run a backup now",
+  "description": "Starts an extra backup of a server right away, outside the schedule.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_images",
+  "title": "List images",
+  "description": "Lists the images a server can be created from: distributions, apps and your own images.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_image",
+  "title": "Get an image",
+  "description": "Shows one image: system, version, minimum disk size and regions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "image_id": {
+     "type": "string",
+     "description": "ID of the image"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_image",
+  "title": "Create a custom image",
+  "description": "Saves a server as a custom image, to create more servers like it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_import_image",
+  "title": "Import an image",
+  "description": "Imports a disk image from a URL as a custom image.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_image",
+  "title": "Delete a custom image",
+  "description": "Deletes one of your custom images.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "image_id": {
+     "type": "string",
+     "description": "ID of the image"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_copy_image",
+  "title": "Copy an image to a region",
+  "description": "Copies a custom image to another region so servers can be created there.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "image_id": {
+     "type": "string",
+     "description": "ID of the image"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_ssh_keys",
+  "title": "List SSH keys",
+  "description": "Lists the SSH public keys of the account, with their fingerprint.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_ssh_key",
+  "title": "Add an SSH key",
+  "description": "Adds an SSH public key to the account, to install on new servers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_ssh_key",
+  "title": "Delete an SSH key",
+  "description": "Removes an SSH public key from the account. Servers already built keep it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "key_id": {
+     "type": "string",
+     "description": "ID of the SSH key"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_firewalls",
+  "title": "List firewalls",
+  "description": "Lists the cloud firewalls and how many servers each protects.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_firewall",
+  "title": "Get a firewall",
+  "description": "Shows one firewall: its inbound and outbound rules and its servers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_firewall",
+  "title": "Create a firewall",
+  "description": "Creates a cloud firewall with a first set of rules.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_firewall",
+  "title": "Delete a firewall",
+  "description": "Deletes a firewall. Its servers are left open to all traffic.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_add_firewall_rule",
+  "title": "Add a firewall rule",
+  "description": "Adds an inbound or outbound rule to a firewall, to allow a port from some sources.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_firewall_rule",
+  "title": "Remove a firewall rule",
+  "description": "Removes a rule from a firewall, closing that port.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_apply_firewall",
+  "title": "Apply a firewall to a server",
+  "description": "Puts a server behind a firewall.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_firewall_server",
+  "title": "Take a server out of a firewall",
+  "description": "Takes a server out of a firewall, without deleting the firewall.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "firewall_id": {
+     "type": "string",
+     "description": "ID of the firewall"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_load_balancers",
+  "title": "List load balancers",
+  "description": "Lists the load balancers with their IP and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_load_balancer",
+  "title": "Get a load balancer",
+  "description": "Shows one load balancer: rules, targets, health of each target.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_load_balancer",
+  "title": "Create a load balancer",
+  "description": "Creates a load balancer that spreads traffic over servers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_load_balancer",
+  "title": "Delete a load balancer",
+  "description": "Deletes a load balancer. Its servers are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_add_lb_target",
+  "title": "Add a server to a load balancer",
+  "description": "Adds a server to the targets a load balancer sends traffic to.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_lb_target",
+  "title": "Remove a server from a load balancer",
+  "description": "Stops sending traffic to a server, without touching the server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_lb_health_check",
+  "title": "Set the health check",
+  "description": "Changes how a load balancer checks that its servers answer: path, port and interval.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_lb_forwarding_rule",
+  "title": "Add a forwarding rule",
+  "description": "Forwards a port of the load balancer to a port of its servers, with its protocol.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_lb_sticky_sessions",
+  "title": "Set sticky sessions",
+  "description": "Keeps each visitor on the same server with a cookie, or turns that off.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "load_balancer_id": {
+     "type": "string",
+     "description": "ID of the load balancer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_networks",
+  "title": "List private networks",
+  "description": "Lists the private networks (VPC) and their IP ranges.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_network",
+  "title": "Create a private network",
+  "description": "Creates a private network so servers talk to each other without the internet.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_network",
+  "title": "Delete a private network",
+  "description": "Deletes an empty private network.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "network_id": {
+     "type": "string",
+     "description": "ID of the private network"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_add_network_server",
+  "title": "Connect a server to a private network",
+  "description": "Gives a server an address on a private network.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "network_id": {
+     "type": "string",
+     "description": "ID of the private network"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_network_server",
+  "title": "Disconnect a server from a private network",
+  "description": "Removes a server from a private network.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "network_id": {
+     "type": "string",
+     "description": "ID of the private network"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_floating_ips",
+  "title": "List floating IPs",
+  "description": "Lists the floating IP addresses and the server each one points to.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_reserve_floating_ip",
+  "title": "Reserve a floating IP",
+  "description": "Reserves a new floating IP address in a region.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_release_floating_ip",
+  "title": "Release a floating IP",
+  "description": "Gives a floating IP address back. It cannot be recovered.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ip": {
+     "type": "string",
+     "description": "The floating IP address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_assign_floating_ip",
+  "title": "Assign a floating IP",
+  "description": "Points a floating IP address at a server, moving it from its current server if needed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ip": {
+     "type": "string",
+     "description": "The floating IP address"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_unassign_floating_ip",
+  "title": "Unassign a floating IP",
+  "description": "Detaches a floating IP from its server and keeps it reserved.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ip": {
+     "type": "string",
+     "description": "The floating IP address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_reverse_dns",
+  "title": "Set reverse DNS",
+  "description": "Sets the reverse DNS name (PTR) of an IP address, which mail servers check.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ip": {
+     "type": "string",
+     "description": "The floating IP address"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_domains",
+  "title": "List domains",
+  "description": "Lists the domains whose DNS is hosted here.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_domain",
+  "title": "Add a domain",
+  "description": "Adds a domain to the DNS service. Its name servers must then point here.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_domain",
+  "title": "Delete a domain",
+  "description": "Removes a domain and all its DNS records.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_dns_records",
+  "title": "List DNS records",
+  "description": "Lists the DNS records of a domain: A, CNAME, MX, TXT and others.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    },
+    "type": {
+     "type": "string",
+     "description": "Record type: A, AAAA, CNAME, MX, TXT, SRV or CAA"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_dns_record",
+  "title": "Create a DNS record",
+  "description": "Adds a DNS record to a domain, such as a subdomain pointing at a server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    },
+    "type": {
+     "type": "string",
+     "description": "Record type: A, AAAA, CNAME, MX, TXT, SRV or CAA"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "data": {
+     "type": "string",
+     "description": "Value of the record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_update_dns_record",
+  "title": "Update a DNS record",
+  "description": "Changes the value or the TTL of a DNS record.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    },
+    "record_id": {
+     "type": "string",
+     "description": "ID of the DNS record"
+    },
+    "data": {
+     "type": "string",
+     "description": "Value of the record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_dns_record",
+  "title": "Delete a DNS record",
+  "description": "Removes one DNS record from a domain.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    },
+    "record_id": {
+     "type": "string",
+     "description": "ID of the DNS record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_check_dns_propagation",
+  "title": "Check DNS propagation",
+  "description": "Asks public resolvers around the world what they answer for a name.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_certificates",
+  "title": "List certificates",
+  "description": "Lists the TLS certificates with their domains and expiry date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_certificate",
+  "title": "Get a certificate",
+  "description": "Shows one TLS certificate: domains, issuer, expiry and where it is used.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate_id": {
+     "type": "string",
+     "description": "ID of the certificate"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_request_certificate",
+  "title": "Request a free certificate",
+  "description": "Requests a free Let's Encrypt certificate for some domains, renewed on its own.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_upload_certificate",
+  "title": "Upload a certificate",
+  "description": "Uploads a certificate bought elsewhere, with its private key and chain.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_renew_certificate",
+  "title": "Renew a certificate",
+  "description": "Renews a certificate now, before it expires.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate_id": {
+     "type": "string",
+     "description": "ID of the certificate"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_certificate",
+  "title": "Delete a certificate",
+  "description": "Deletes a certificate that nothing uses any more.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate_id": {
+     "type": "string",
+     "description": "ID of the certificate"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_databases",
+  "title": "List database clusters",
+  "description": "Lists the managed database clusters: engine, version, size and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_database",
+  "title": "Get a database cluster",
+  "description": "Shows one database cluster: engine, nodes, storage use and maintenance window.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_database",
+  "title": "Create a database cluster",
+  "description": "Creates a managed PostgreSQL, MySQL or Redis cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    },
+    "size": {
+     "type": "string",
+     "description": "Size slug, for example s-2vcpu-4gb"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_database",
+  "title": "Delete a database cluster",
+  "description": "Destroys a database cluster and all its data.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_resize_database",
+  "title": "Resize a database cluster",
+  "description": "Moves a database cluster to a bigger or smaller size, or changes its number of nodes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "size": {
+     "type": "string",
+     "description": "Size slug, for example s-2vcpu-4gb"
+    },
+    "count": {
+     "type": "integer",
+     "description": "Number of nodes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_database_connection",
+  "title": "Get connection details",
+  "description": "Gives the host, port, user and connection string to reach a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_database_users",
+  "title": "List database users",
+  "description": "Lists the users of a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_database_user",
+  "title": "Create a database user",
+  "description": "Adds a user to a database cluster with a generated password.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "username": {
+     "type": "string",
+     "description": "Name of the database user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_database_user",
+  "title": "Delete a database user",
+  "description": "Removes a user from a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "username": {
+     "type": "string",
+     "description": "Name of the database user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_reset_database_password",
+  "title": "Reset a database user password",
+  "description": "Gives a database user a new generated password.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "username": {
+     "type": "string",
+     "description": "Name of the database user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_database_backups",
+  "title": "List database backups",
+  "description": "Lists the daily backups of a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_restore_database",
+  "title": "Restore a database to a point in time",
+  "description": "Creates a new database cluster from a backup or from any minute of the last seven days.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_read_replica",
+  "title": "Add a read replica",
+  "description": "Adds a read-only copy of a database cluster, in the same or another region.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_read_replica",
+  "title": "Remove a read replica",
+  "description": "Removes a read-only copy of a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_set_database_trusted_sources",
+  "title": "Set trusted sources",
+  "description": "Limits which servers and IP addresses may connect to a database cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_upgrade_database",
+  "title": "Upgrade the database engine",
+  "description": "Moves a database cluster to a newer major version of its engine.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "version": {
+     "type": "string",
+     "description": "Version to move to"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_maintenance_window",
+  "title": "Set the maintenance window",
+  "description": "Chooses the day and hour when a database cluster may be updated.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "schedule": {
+     "type": "string",
+     "description": "When to run, as a cron expression"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_slow_queries",
+  "title": "List slow queries",
+  "description": "Lists the slowest queries a database cluster ran recently.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "database_id": {
+     "type": "string",
+     "description": "ID of the database cluster"
+    },
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_buckets",
+  "title": "List buckets",
+  "description": "Lists the object storage buckets and their size.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_bucket",
+  "title": "Create a bucket",
+  "description": "Creates an object storage bucket to keep files.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_bucket",
+  "title": "Delete a bucket",
+  "description": "Deletes an empty bucket.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_objects",
+  "title": "List objects in a bucket",
+  "description": "Lists the files in a bucket, under a prefix.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "key": {
+     "type": "string",
+     "description": "Key of the object in the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_upload_object",
+  "title": "Upload a file to a bucket",
+  "description": "Uploads a file to a bucket under a key.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "key": {
+     "type": "string",
+     "description": "Key of the object in the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_object",
+  "title": "Delete a file from a bucket",
+  "description": "Deletes one file from a bucket.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "key": {
+     "type": "string",
+     "description": "Key of the object in the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_get_object_link",
+  "title": "Get a temporary link",
+  "description": "Gives a signed link to download a private file from a bucket, valid for some minutes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "key": {
+     "type": "string",
+     "description": "Key of the object in the bucket"
+    },
+    "minutes": {
+     "type": "integer",
+     "description": "How long, in minutes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_bucket_access",
+  "title": "Set bucket access",
+  "description": "Makes a bucket private or lets anyone read its files.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_bucket_cors",
+  "title": "Set CORS rules",
+  "description": "Sets which websites may load files from a bucket in a browser.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_bucket_lifecycle",
+  "title": "Set a lifecycle rule",
+  "description": "Deletes files on their own after some days, or the old versions of files.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_access_key",
+  "title": "Create storage access keys",
+  "description": "Creates an access key and secret for the object storage API.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_enable_cdn",
+  "title": "Turn on the CDN",
+  "description": "Serves the files of a bucket through the CDN, cached near visitors.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_purge_cdn_cache",
+  "title": "Purge the CDN cache",
+  "description": "Removes files from the CDN cache so visitors get the new versions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bucket": {
+     "type": "string",
+     "description": "Name of the bucket"
+    },
+    "key": {
+     "type": "string",
+     "description": "Key of the object in the bucket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_clusters",
+  "title": "List Kubernetes clusters",
+  "description": "Lists the Kubernetes clusters, their version and node count.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_cluster",
+  "title": "Get a Kubernetes cluster",
+  "description": "Shows one Kubernetes cluster: version, node pools and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_cluster",
+  "title": "Create a Kubernetes cluster",
+  "description": "Creates a managed Kubernetes cluster with a first node pool.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    },
+    "version": {
+     "type": "string",
+     "description": "Version to move to"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_cluster",
+  "title": "Delete a Kubernetes cluster",
+  "description": "Destroys a Kubernetes cluster and its nodes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_upgrade_cluster",
+  "title": "Upgrade a Kubernetes cluster",
+  "description": "Moves a Kubernetes cluster to a newer version.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    },
+    "version": {
+     "type": "string",
+     "description": "Version to move to"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_kubeconfig",
+  "title": "Get the kubeconfig",
+  "description": "Gives the kubeconfig file to reach a cluster with kubectl.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_node_pools",
+  "title": "List node pools",
+  "description": "Lists the node pools of a Kubernetes cluster and their sizes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_node_pool",
+  "title": "Add a node pool",
+  "description": "Adds a group of worker nodes of one size to a Kubernetes cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    },
+    "size": {
+     "type": "string",
+     "description": "Size slug, for example s-2vcpu-4gb"
+    },
+    "count": {
+     "type": "integer",
+     "description": "Number of nodes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_scale_node_pool",
+  "title": "Scale a node pool",
+  "description": "Changes the number of nodes in a node pool, or its autoscaling limits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    },
+    "pool_id": {
+     "type": "string",
+     "description": "ID of the node pool"
+    },
+    "count": {
+     "type": "integer",
+     "description": "Number of nodes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_node_pool",
+  "title": "Delete a node pool",
+  "description": "Removes a node pool and its nodes from a cluster.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    },
+    "pool_id": {
+     "type": "string",
+     "description": "ID of the node pool"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_recycle_node",
+  "title": "Replace a node",
+  "description": "Drains one node of a cluster and replaces it with a fresh one.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cluster_id": {
+     "type": "string",
+     "description": "ID of the Kubernetes cluster"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_apps",
+  "title": "List apps",
+  "description": "Lists the apps deployed from a Git repository, with their live URL.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_app",
+  "title": "Get an app",
+  "description": "Shows one app: its components, its live URL and its last deployment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_app",
+  "title": "Create an app",
+  "description": "Creates an app that builds and deploys a Git repository on each push.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_app",
+  "title": "Delete an app",
+  "description": "Deletes an app and takes it offline.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_deploy_app",
+  "title": "Deploy an app",
+  "description": "Builds and deploys the latest commit of an app now.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_deployments",
+  "title": "List deployments",
+  "description": "Lists the deployments of an app, with their state and commit.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_rollback_app",
+  "title": "Roll back an app",
+  "description": "Goes back to an earlier deployment of an app.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    },
+    "deployment_id": {
+     "type": "string",
+     "description": "ID of the deployment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_build_logs",
+  "title": "Get build logs",
+  "description": "Shows the build output of a deployment, to see why it failed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    },
+    "deployment_id": {
+     "type": "string",
+     "description": "ID of the deployment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_app_logs",
+  "title": "Get app logs",
+  "description": "Shows what a running app writes to its output.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    },
+    "lines": {
+     "type": "integer",
+     "description": "How many lines"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_app_env",
+  "title": "Set environment variables",
+  "description": "Sets the environment variables of an app; it redeploys.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    },
+    "variables": {
+     "type": "object",
+     "description": "Variables as a map of names to values"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_add_app_domain",
+  "title": "Add a domain to an app",
+  "description": "Serves an app on your own domain, with a certificate.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "app_id": {
+     "type": "string",
+     "description": "ID of the app"
+    },
+    "domain": {
+     "type": "string",
+     "description": "Domain name, for example example.net"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_alert_policies",
+  "title": "List alert policies",
+  "description": "Lists the alert policies: what they watch, their threshold and who they warn.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_alert_policy",
+  "title": "Create an alert policy",
+  "description": "Warns by email or Slack when a metric of a server crosses a threshold.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    },
+    "rule": {
+     "type": "string",
+     "description": "Rule: protocol, port range and sources"
+    },
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_alert_policy",
+  "title": "Delete an alert policy",
+  "description": "Deletes an alert policy.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "policy_id": {
+     "type": "string",
+     "description": "ID of the alert policy"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_alerts",
+  "title": "List alerts",
+  "description": "Lists the alerts that fired, open ones first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_acknowledge_alert",
+  "title": "Acknowledge an alert",
+  "description": "Marks an alert as seen, so it stops warning people.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "alert_id": {
+     "type": "string",
+     "description": "ID of the alert"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_mute_alert_policy",
+  "title": "Mute an alert policy",
+  "description": "Silences an alert policy for some minutes, during planned work.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "policy_id": {
+     "type": "string",
+     "description": "ID of the alert policy"
+    },
+    "minutes": {
+     "type": "integer",
+     "description": "How long, in minutes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_uptime_check",
+  "title": "Create an uptime check",
+  "description": "Checks a URL from several regions every minute and warns when it does not answer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_uptime",
+  "title": "Get uptime",
+  "description": "Shows the uptime and response times of an uptime check over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    },
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_projects",
+  "title": "List projects",
+  "description": "Lists the projects that group resources.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_project",
+  "title": "Create a project",
+  "description": "Creates a project to group resources.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_delete_project",
+  "title": "Delete a project",
+  "description": "Deletes an empty project.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "project_id": {
+     "type": "string",
+     "description": "ID of the project"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_move_to_project",
+  "title": "Move resources to a project",
+  "description": "Moves servers, volumes or databases to another project.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "project_id": {
+     "type": "string",
+     "description": "ID of the project"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_team_members",
+  "title": "List team members",
+  "description": "Lists the people of the team and their role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_invite_team_member",
+  "title": "Invite a team member",
+  "description": "Sends an invitation by email to join the team with a role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role: owner, member, billing or read-only"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_remove_team_member",
+  "title": "Remove a team member",
+  "description": "Removes a person from the team; their access ends at once.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member_id": {
+     "type": "string",
+     "description": "ID of the team member"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_change_member_role",
+  "title": "Change a member role",
+  "description": "Gives a team member another role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member_id": {
+     "type": "string",
+     "description": "ID of the team member"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role: owner, member, billing or read-only"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_api_tokens",
+  "title": "List API tokens",
+  "description": "Lists the personal API tokens, their scopes and last use.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_create_api_token",
+  "title": "Create an API token",
+  "description": "Creates a personal API token for scripts, with read or write scope.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name to give"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_revoke_api_token",
+  "title": "Revoke an API token",
+  "description": "Revokes an API token at once.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "token_id": {
+     "type": "string",
+     "description": "ID of the API token"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "nimbo_list_audit_events",
+  "title": "List the audit log",
+  "description": "Lists who did what on the account and when: creations, deletions, logins.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    },
+    "until": {
+     "type": "string",
+     "description": "End of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_balance",
+  "title": "Get the current balance",
+  "description": "Shows what the month costs so far and the amount due.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_usage",
+  "title": "Get usage by resource",
+  "description": "Breaks down the cost of the month by project and by resource.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "since": {
+     "type": "string",
+     "description": "Start of the period, ISO 8601"
+    },
+    "until": {
+     "type": "string",
+     "description": "End of the period, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_invoices",
+  "title": "List invoices",
+  "description": "Lists the monthly invoices and whether each one is paid.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_invoice_pdf",
+  "title": "Download an invoice",
+  "description": "Gives the PDF of one invoice.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "ID of the invoice"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_set_spending_alert",
+  "title": "Set a spending alert",
+  "description": "Sends an email when the month costs more than an amount.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_list_support_tickets",
+  "title": "List support tickets",
+  "description": "Lists the support tickets of the account and their status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_open_support_ticket",
+  "title": "Open a support ticket",
+  "description": "Asks the support team for help with a message.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "message": {
+     "type": "string",
+     "description": "Text of the message"
+    },
+    "server_id": {
+     "type": "string",
+     "description": "ID of the server"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_reply_support_ticket",
+  "title": "Reply to a support ticket",
+  "description": "Adds a message to an open support ticket.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "ID of the support ticket"
+    },
+    "message": {
+     "type": "string",
+     "description": "Text of the message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_close_support_ticket",
+  "title": "Close a support ticket",
+  "description": "Closes a support ticket that is solved.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "ID of the support ticket"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "nimbo_get_status_page",
+  "title": "Get the platform status",
+  "description": "Shows the incidents and planned maintenance of the platform, by region.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "region": {
+     "type": "string",
+     "description": "Region slug, for example fra1"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

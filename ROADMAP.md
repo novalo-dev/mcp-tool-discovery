@@ -28,9 +28,9 @@ The benchmark says where the search still misses, in
   without a list built into the library is welcome.
 - **More fixture servers**, named in other styles and in other languages, with
   their requests written before any tuning. A French one (a network of public
-  libraries, kebab-case) and a German one (the office of a school,
-  PascalCase) are in; another script or a server with many more tools would
-  test what they do not.
+  libraries, kebab-case), a German one (the office of a school,
+  PascalCase) and one with 176 tools (a cloud hosting panel) are in; another
+  script would test what they do not.
 
 A change to the search comes with the benchmark before and after.
 

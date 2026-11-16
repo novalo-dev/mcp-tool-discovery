@@ -88,9 +88,33 @@ becomes the next version's section when it is published.
   The test half is now 250 requests, and the floors in
   `BenchmarkTest` are the new counts (202 first, 227 in the top 3, 215 asked
   again); the badge moves from 82% to 81% for the same reason as above.
+- **A sixth benchmark server, with 176 tools.** A cloud hosting panel in
+  English with snake_case names (`nimbo_detach_volume`), most tools sharing
+  an object with several neighbours (stop, power off, reboot a server;
+  snapshot, back up, restore), and 197 requests written before any of them
+  was run. The weights and the cut were not touched: 84 of its 99 test
+  requests find the right tool first in fields, 94 in the top 3. The test
+  half is now 349 requests, and the floors in `BenchmarkTest` are the new
+  counts (286 first, 321 in the top 3, 304 asked again); the badge moves from
+  81% to 82%.
 
 ### Changed
 
+- **Learning works by pairs of words.** A run that succeeds now records the
+  pairs of words of its search beside the words, and a request of two words
+  or more is lifted by the pairs it shares with past searches. Word by word,
+  one run of "get the certificate" lifted the tool that shows a certificate
+  for every request naming a certificate, "delete" ones included: on the
+  176-tool server, learning from the train half cost 3 test requests their
+  first place, and the benchmark broke its own rule that learning never
+  hurts. By pairs it costs none, and learning from other requests now gains
+  2 (288 first against 286 with nothing learned). Repeated requests lose one
+  first place against word by word (304 against 305) and gain one in the top
+  3. A request of one word still uses the single words. Nothing changes in
+  `LearningStore`: a pair is one more key, two words with a space between.
+  A store filled before keeps lifting requests of one word and learns the
+  pairs from the next runs, so a request of several words starts again from
+  what the text finds. The pairs come from at most 16 words of a search.
 - The compact search moved to `src/Mode/ToolFinder.php`, shared with the
   gateway mode, so both answer a request with the same tools. Its answers
   are unchanged.
