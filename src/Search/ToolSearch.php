@@ -34,6 +34,13 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  */
 final class ToolSearch
 {
+    /**
+     * The bytes of each field of a request that are read. A request names a
+     * tool in a few words; each word read costs memory for its trigrams, so
+     * an unbounded field would let one call use memory out of all proportion.
+     */
+    private const MAX_FIELD_BYTES = 1024;
+
     private readonly ToolIndex $index;
     private readonly Analyzer $analyzer;
 
@@ -74,7 +81,7 @@ final class ToolSearch
         $scores = [];
         $words = [];
         foreach ($fields as $field => $text) {
-            $text = $this->expand($text);
+            $text = $this->expand(self::bounded($text));
             array_push($words, ...$this->analyzer->words($text));
             $weight = $this->options->queryWeights[$field] ?? 1.0;
             foreach ($this->index->score($text) as $name => $score) {
@@ -208,6 +215,19 @@ final class ToolSearch
      * The query with the host's synonyms added after the words they stand
      * for, so the original words still count.
      */
+    private static function bounded(string $text): string
+    {
+        if (strlen($text) <= self::MAX_FIELD_BYTES) {
+            return $text;
+        }
+        // Cut on a character, not inside one: a broken last character would
+        // make the whole field invalid UTF-8 for a server without mbstring.
+        $cut = substr($text, 0, self::MAX_FIELD_BYTES);
+        $clean = preg_replace('/[\xC0-\xFF][\x80-\xBF]*\z/', '', $cut);
+
+        return is_string($clean) ? $clean : $cut;
+    }
+
     private function expand(string $text): string
     {
         if ($this->options->synonyms === []) {
