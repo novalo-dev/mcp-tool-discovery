@@ -83,6 +83,17 @@ final class StdioServerTest extends TestCase
         self::assertSame(1, $batch['failed']);
     }
 
+    public function testTheListGivesTheStartOfEachNoteWhateverItsAlphabet(): void
+    {
+        $replies = self::session([
+            self::INITIALIZE,
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_add', 'arguments' => ['text' => 'a' . str_repeat('é', 50)]]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_run_read_tool', 'arguments' => ['name' => 'notes_list']]],
+        ]);
+
+        self::assertSame(['id' => 2, 'text' => 'a' . str_repeat('é', 39)], $replies[3]['result']['structuredContent']['notes'][1]);
+    }
+
     public function testNotificationsGetNoAnswerAndMistakesGetJsonRpcErrors(): void
     {
         $replies = self::session([

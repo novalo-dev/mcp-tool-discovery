@@ -165,8 +165,10 @@ final class NotesGate implements ToolGate
             case 'notes_list':
                 $notes = $this->notes->all();
 
+                // Forty characters, not bytes: a cut inside a character
+                // would leave invalid UTF-8, and no answer could be encoded.
                 return CallResult::json(['notes' => array_map(
-                    static fn(int $id, string $text): array => ['id' => $id, 'text' => substr($text, 0, 40)],
+                    static fn(int $id, string $text): array => ['id' => $id, 'text' => preg_match('/^.{0,40}/su', $text, $start) === 1 ? $start[0] : ''],
                     array_keys($notes),
                     array_values($notes),
                 )]);
