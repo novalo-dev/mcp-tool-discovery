@@ -88,6 +88,17 @@ becomes the next version's section when it is published.
   index is the same to the last digit, saved shape included, so a cache entry
   stays valid and the ranking does not move.
 
+### Fixed
+
+- A tool whose name is only digits, such as `"123"`, no longer breaks the
+  search: every `search_tools` call (and `use_tools` with `search`) of a
+  server holding one failed with a `TypeError`, in every mode. PHP turns such
+  a name into an integer array key; `ToolSet` now hands out the tool's own
+  name everywhere, so `names()` and a `foreach` over the set always give
+  strings. `ToolSet::getIterator()` returns a `Generator` instead of an
+  `ArrayIterator`, which a host only notices if it called `ArrayIterator`
+  methods on it.
+
 ### Security
 
 - A search reads at most the first 1024 bytes of each field of a request
