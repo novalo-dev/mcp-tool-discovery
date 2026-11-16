@@ -117,6 +117,9 @@ becomes the next version's section when it is published.
 - A search reads at most the first 1024 bytes of each field of a request
   (`action`, `object`, `description`, `query`), cut between two characters,
   so its cost stays small whatever the size of the request.
+- The notes example shared by the stdio and HTTP servers cuts the start of
+  each note it lists between two characters, so its list answers for notes
+  written in any alphabet.
 
 ## 0.2.0 - 2026-11-14
 
