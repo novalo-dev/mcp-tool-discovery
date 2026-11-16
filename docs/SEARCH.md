@@ -140,11 +140,24 @@ every mode learns the same way and none can skip the checks:
 1. A search returns a `search_id`: the words of the request that the tools
    use, and only those.
 2. The client runs the tool it chose with that `search_id`.
-3. If the run succeeds, each of those words counts one more run for that tool.
+3. If the run succeeds, each of those words, and each pair of them, counts
+   one more run for that tool.
 
-Next time, a tool is lifted by the share of the request's words that led to
-it, each word counting fully after `learningCap` (5) runs, by at most
-`learningWeight` (0.75) of the best score.
+Next time, a tool is lifted by the share of the request's pairs of words that
+led to it (its single word, for a request of one word), each pair counting
+fully after `learningCap` (5) runs, by at most `learningWeight` (0.75) of the
+best score.
+
+Pairs, not single words, because of servers with many tools about the same
+thing. Word by word, "get the certificate" run once taught "certificate" to
+the tool that shows a certificate, and "delete the unused certificate" then
+found it before the tool that deletes one. A pair is only shared by requests
+that agree on more than the object. On the hosting server, word by word,
+learning from the train half cost 3 test requests their first place; by
+pairs, it costs none. A store filled word by word before this keeps working
+for requests of one word, and learns the pairs from the next runs. The pairs
+of a request are taken from its first 16 words in alphabetical order, so a
+long request costs at most 120 keys.
 
 The limits are the point:
 
@@ -165,21 +178,22 @@ locked while it is written.
 
 ## The measures
 
-Five fictional servers, each named in its own style: a workspace (50 tools,
-`acme_set_ticket_status`), a developer platform (40 tools, `archiveRepository`),
-people operations (40 tools, `people.leave.approve`), a network of public
-libraries written in French (40 tools, `prolonger-pret`) and the office of a
-school written in German (40 tools, `KlassenfahrtAbsagen`). 500 requests, each
-written as one sentence and in fields, with the tool a person would expect.
+Six fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+developer platform (40 tools, `archiveRepository`), people operations (40
+tools, `people.leave.approve`), a network of public libraries written in
+French (40 tools, `prolonger-pret`), the office of a school written in German
+(40 tools, `KlassenfahrtAbsagen`) and a cloud hosting panel (176 tools,
+`nimbo_detach_volume`). 697 requests, each written as one sentence and in
+fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 250 requests | Right tool first | Top 3 |
+| Test half, 349 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 202 | 227 |
-| The same request as one sentence | 94 | 135 |
-| In fields, after every train request was run once | 203 | 227 |
-| In fields, after the test requests were run once, then asked again | 215 | 231 |
+| The request in fields | 286 | 321 |
+| The same request as one sentence | 155 | 213 |
+| In fields, after every train request was run once | 288 | 321 |
+| In fields, after the test requests were run once, then asked again | 304 | 327 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -195,8 +209,22 @@ the tools call a "Fehlzeit"), and a short word inside an unrelated one: "Buch"
 (a book) shares its trigrams with "buchen" (to book), so a request to lend a
 book finds the tool that books a meeting with parents first.
 
+The hosting server is the crowd: 176 tools, most of them sharing an object
+with five or ten others (start, stop, power off, reboot, resize, rebuild a
+server; snapshot, back up, restore), as on a real server that exposes its
+whole back office. Its 197 requests were written before any of them was run,
+many of them on purpose between two neighbours. The weights and the cut at
+60% were not touched for it, and they hold: 84 of its 99 test requests find
+the right tool first in fields, 94 in the top 3. What it misses is mostly the
+neighbour of the same object ("drop the old MySQL cluster" finds the tool that
+creates one, the word "cluster" being in both), and a few words the tools do
+not use ("machine" and "VM" where the tools say "server").
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
+Learning by pairs of words loses one repeated request against learning word
+by word (304 against 305 first, 327 against 326 in the top 3) and wins 4 new
+ones (288 against 284): new requests are the ones that count.
 Stronger settings gained more on repeats and lost on new requests: they were
 not kept.
 

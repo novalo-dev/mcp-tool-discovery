@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace Novalo\McpToolDiscovery\Search\Learning;
 
 /**
- * Remembers which tool was run after a search, word by word.
+ * Remembers which tool was run after a search, by its words and its pairs of
+ * words ("certificate delete", a space between the two).
  *
  * Only words the tools themselves use reach a store: ToolSearch drops the
  * others before recording, so a store never holds a name, an address or
@@ -23,12 +24,12 @@ namespace Novalo\McpToolDiscovery\Search\Learning;
 interface LearningStore
 {
     /**
-     * @return array<string, array<string, int>> word => tool name => successful runs
+     * @return array<string, array<string, int>> word or pair of words => tool name => successful runs
      */
     public function load(): array;
 
     /**
-     * @param list<string> $words the words of the search, as the Analyzer cuts them
+     * @param list<string> $words the words of the search, as the Analyzer cuts them, and their pairs
      * @param string $tool the tool run with success after that search
      */
     public function record(array $words, string $tool): void;

@@ -29,8 +29,8 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * what BM25 is for.
  *
  * With a learning store, the tools run with success after past searches are
- * lifted, word by word, within a cap; without one, the same query always
- * gives the same answer.
+ * lifted, by the pairs of words a new query shares with those searches,
+ * within a cap; without one, the same query always gives the same answer.
  */
 final class ToolSearch
 {
@@ -40,6 +40,13 @@ final class ToolSearch
      * an unbounded field would let one call use memory out of all proportion.
      */
     private const MAX_FIELD_BYTES = 1024;
+
+    /**
+     * The words of a search that are paired for learning. A request names a
+     * tool in a few words; the pairs grow with the square of the words, so a
+     * long one is cut to keep each search and each record small.
+     */
+    private const MAX_PAIRED_WORDS = 16;
 
     private readonly ToolIndex $index;
     private readonly Analyzer $analyzer;
@@ -144,7 +151,7 @@ final class ToolSearch
         }
         $words = array_values(array_filter(self::decode($searchId), fn(string $word): bool => $this->index->has($word)));
         if ($words !== []) {
-            $this->learning->record($words, $tool);
+            $this->learning->record([...$words, ...self::pairs($words)], $tool);
         }
     }
 
@@ -173,6 +180,14 @@ final class ToolSearch
     /**
      * How far what was learned lifts each tool for these words, from 0 to 1.
      *
+     * A query of two words or more is matched by its pairs of words, not word
+     * by word. On a server with many tools about the same thing, a single
+     * word ("certificate") learned from one search ("get the certificate")
+     * would lift that tool for every other search naming the thing ("delete
+     * the certificate"); a pair is only shared by searches that agree on
+     * more than the thing. A query of one word has no pair and uses the
+     * single words.
+     *
      * @param list<string> $words
      *
      * @return array<string, float>
@@ -184,6 +199,9 @@ final class ToolSearch
         }
         $counts = $this->learning->load();
         $lift = [];
+        if (count($words) > 1) {
+            $words = self::pairs($words);
+        }
         foreach ($words as $word) {
             foreach ($counts[$word] ?? [] as $tool => $runs) {
                 $lift[$tool] = ($lift[$tool] ?? 0.0) + min($runs, $this->options->learningCap) / $this->options->learningCap;
@@ -191,6 +209,30 @@ final class ToolSearch
         }
 
         return array_map(static fn(float $sum): float => $sum / count($words), $lift);
+    }
+
+    /**
+     * Each pair of distinct words as one key, "a b" with a before b. The
+     * Analyzer never keeps a space inside a word, so a pair cannot be taken
+     * for a word, and the store keeps both under its one format.
+     *
+     * @param list<string> $words
+     *
+     * @return list<string>
+     */
+    private static function pairs(array $words): array
+    {
+        $words = array_values(array_unique($words));
+        sort($words);
+        $words = array_slice($words, 0, self::MAX_PAIRED_WORDS);
+        $pairs = [];
+        foreach ($words as $i => $first) {
+            foreach (array_slice($words, $i + 1) as $second) {
+                $pairs[] = $first . ' ' . $second;
+            }
+        }
+
+        return $pairs;
     }
 
     /**
