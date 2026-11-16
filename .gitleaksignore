@@ -1,0 +1,8 @@
+# Findings Gitleaks reports on purpose-made examples, not on secrets. The
+# Security workflow scans the whole history, so a finding stays reported even
+# after the line changes: each one is listed by the commit that added it.
+
+# reader-token is the caller the HTTP example server accepts, the one its
+# tests send; it opens nothing outside that example.
+5e5d08524324f8c11ac792bc5f88e3e57348cda3:docs/examples/http-server.php:curl-auth-header:23
+5e5d08524324f8c11ac792bc5f88e3e57348cda3:docs/HOSTS.md:curl-auth-header:51
