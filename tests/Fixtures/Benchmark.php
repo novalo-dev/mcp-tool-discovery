@@ -22,14 +22,14 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 400 requests over four servers named in four styles,
- * one of them in French.
+ * The search benchmark: 500 requests over five servers named in five styles,
+ * one of them in French and one in German.
  *
  * Each request is written twice, as one sentence (query) and in fields
  * (action, object, description), with the tool a person would expect. Half
  * of them (train) were used to choose the settings; the other half (test)
- * was kept aside and is the score that counts. The library server came after
- * the settings were chosen, so neither of its halves shaped them.
+ * was kept aside and is the score that counts. The library and school servers
+ * came after the settings were chosen, so neither of their halves shaped them.
  *
  * Shared by the test that guards the floors and by bin/benchmark.php, which
  * prints the score and writes its badge, so both measure the same thing.
@@ -37,7 +37,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    private const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library'];
+    private const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school'];
 
     /**
      * Four measures on the test half:

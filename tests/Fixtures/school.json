@@ -1,0 +1,918 @@
+[
+ {
+  "name": "SchuelerSuchen",
+  "title": "Schüler suchen",
+  "description": "Sucht Schülerinnen und Schüler nach Name, Klasse oder Geburtsdatum.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Vor- oder Nachname"
+    },
+    "klasse": {
+     "type": "string",
+     "description": "Klasse, etwa 7b"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SchuelerAkte",
+  "title": "Schülerakte anzeigen",
+  "description": "Zeigt die Akte eines Schülers: Kontaktdaten, Klasse, Erziehungsberechtigte und Notizen.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SchuelerAufnehmen",
+  "title": "Schüler aufnehmen",
+  "description": "Nimmt einen neuen Schüler an der Schule auf und legt seine Akte an.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Vor- und Nachname"
+    },
+    "geburtsdatum": {
+     "type": "string",
+     "description": "Geburtsdatum"
+    },
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SchuelerAbmelden",
+  "title": "Schüler abmelden",
+  "description": "Meldet einen Schüler von der Schule ab, etwa bei Umzug oder Schulwechsel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "grund": {
+     "type": "string",
+     "description": "Grund der Abmeldung"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "KlasseWechseln",
+  "title": "Klasse wechseln",
+  "description": "Versetzt einen Schüler in eine andere Klasse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "klasse": {
+     "type": "string",
+     "description": "Neue Klasse"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KlassenListe",
+  "title": "Klassen auflisten",
+  "description": "Listet alle Klassen mit Klassenleitung und Schülerzahl.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "jahrgang": {
+     "type": "string",
+     "description": "Jahrgang, leer für alle"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KlasseAnlegen",
+  "title": "Klasse anlegen",
+  "description": "Legt eine neue Klasse für das Schuljahr an.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name der Klasse"
+    },
+    "schuljahr": {
+     "type": "string",
+     "description": "Schuljahr"
+    },
+    "klassenleitung": {
+     "type": "string",
+     "description": "Kennung der Lehrkraft"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "StundenplanAnzeigen",
+  "title": "Stundenplan anzeigen",
+  "description": "Zeigt den Stundenplan einer Klasse, einer Lehrkraft oder eines Raums für eine Woche.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    },
+    "lehrkraft": {
+     "type": "string",
+     "description": "Kennung der Lehrkraft"
+    },
+    "woche": {
+     "type": "string",
+     "description": "Kalenderwoche"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "StundeVerlegen",
+  "title": "Stunde verlegen",
+  "description": "Verlegt eine Unterrichtsstunde auf einen anderen Tag, eine andere Zeit oder in einen anderen Raum.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "stunde": {
+     "type": "string",
+     "description": "Kennung der Stunde"
+    },
+    "tag": {
+     "type": "string",
+     "description": "Neuer Tag"
+    },
+    "raum": {
+     "type": "string",
+     "description": "Neuer Raum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "VertretungPlanen",
+  "title": "Vertretung planen",
+  "description": "Trägt eine Vertretungslehrkraft für eine ausfallende Stunde ein.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "stunde": {
+     "type": "string",
+     "description": "Kennung der Stunde"
+    },
+    "lehrkraft": {
+     "type": "string",
+     "description": "Kennung der Vertretungslehrkraft"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "VertretungsplanAnzeigen",
+  "title": "Vertretungsplan anzeigen",
+  "description": "Zeigt die Vertretungen und Ausfälle eines Tages.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "datum": {
+     "type": "string",
+     "description": "Datum"
+    },
+    "klasse": {
+     "type": "string",
+     "description": "Klasse, leer für alle"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "StundeAusfallenLassen",
+  "title": "Stunde ausfallen lassen",
+  "description": "Streicht eine Unterrichtsstunde und informiert die Klasse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "stunde": {
+     "type": "string",
+     "description": "Kennung der Stunde"
+    },
+    "grund": {
+     "type": "string",
+     "description": "Grund"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "LehrkraftSuchen",
+  "title": "Lehrkräfte suchen",
+  "description": "Sucht Lehrkräfte nach Name oder Fach.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "fach": {
+     "type": "string",
+     "description": "Fach"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "LehrkraftKrankMelden",
+  "title": "Lehrkraft krank melden",
+  "description": "Meldet eine Lehrkraft für einen oder mehrere Tage krank; ihre Stunden erscheinen im Vertretungsplan.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lehrkraft": {
+     "type": "string",
+     "description": "Kennung der Lehrkraft"
+    },
+    "von": {
+     "type": "string",
+     "description": "Erster Tag"
+    },
+    "bis": {
+     "type": "string",
+     "description": "Letzter Tag"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "NoteEintragen",
+  "title": "Note eintragen",
+  "description": "Trägt eine Note für eine Klassenarbeit, einen Test oder eine mündliche Leistung ein.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "fach": {
+     "type": "string",
+     "description": "Fach"
+    },
+    "note": {
+     "type": "string",
+     "description": "Note von 1 bis 6"
+    },
+    "art": {
+     "type": "string",
+     "description": "Klassenarbeit, Test, mündlich"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "NoteAendern",
+  "title": "Note ändern",
+  "description": "Korrigiert eine bereits eingetragene Note.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "note": {
+     "type": "string",
+     "description": "Kennung der Note"
+    },
+    "wert": {
+     "type": "string",
+     "description": "Neue Note"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "NotenUebersicht",
+  "title": "Notenübersicht",
+  "description": "Zeigt alle Noten eines Schülers in einem Fach oder im ganzen Halbjahr.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "fach": {
+     "type": "string",
+     "description": "Fach, leer für alle"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ZeugnisErstellen",
+  "title": "Zeugnis erstellen",
+  "description": "Erstellt das Halbjahres- oder Jahreszeugnis eines Schülers als PDF.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "art": {
+     "type": "string",
+     "description": "Halbjahr oder Jahr"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KlassenarbeitAnsetzen",
+  "title": "Klassenarbeit ansetzen",
+  "description": "Setzt eine Klassenarbeit für eine Klasse an einem Datum an.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    },
+    "fach": {
+     "type": "string",
+     "description": "Fach"
+    },
+    "datum": {
+     "type": "string",
+     "description": "Datum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KlassenarbeitenKalender",
+  "title": "Klassenarbeiten anzeigen",
+  "description": "Zeigt die angesetzten Klassenarbeiten und Tests einer Klasse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "FehlzeitEintragen",
+  "title": "Fehlzeit eintragen",
+  "description": "Trägt ein, dass ein Schüler im Unterricht gefehlt hat oder zu spät kam.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "stunden": {
+     "type": "string",
+     "description": "Betroffene Stunden"
+    },
+    "verspaetung": {
+     "type": "string",
+     "description": "Minuten zu spät"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "EntschuldigungAnnehmen",
+  "title": "Entschuldigung annehmen",
+  "description": "Nimmt die Entschuldigung der Eltern für eine Fehlzeit an.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "fehlzeit": {
+     "type": "string",
+     "description": "Kennung der Fehlzeit"
+    },
+    "nachweis": {
+     "type": "string",
+     "description": "Attest oder Brief"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "FehlzeitenBericht",
+  "title": "Fehlzeitenbericht",
+  "description": "Zählt die entschuldigten und unentschuldigten Fehlstunden eines Schülers oder einer Klasse.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ElternbriefSenden",
+  "title": "Elternbrief senden",
+  "description": "Schickt einen Brief an die Eltern einer Klasse oder der ganzen Schule.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse, leer für alle"
+    },
+    "betreff": {
+     "type": "string",
+     "description": "Betreff"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ElternNachrichten",
+  "title": "Nachrichten der Eltern",
+  "description": "Listet die Nachrichten, die Eltern an die Schule geschickt haben.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ungelesen": {
+     "type": "string",
+     "description": "Nur ungelesene"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ElterngespraechBuchen",
+  "title": "Elterngespräch buchen",
+  "description": "Bucht einen Termin für ein Gespräch zwischen Eltern und einer Lehrkraft.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lehrkraft": {
+     "type": "string",
+     "description": "Kennung der Lehrkraft"
+    },
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "zeit": {
+     "type": "string",
+     "description": "Datum und Uhrzeit"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RaumBuchen",
+  "title": "Raum buchen",
+  "description": "Reserviert einen Raum, etwa die Aula, die Turnhalle oder einen Computerraum.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "raum": {
+     "type": "string",
+     "description": "Raum"
+    },
+    "von": {
+     "type": "string",
+     "description": "Beginn"
+    },
+    "bis": {
+     "type": "string",
+     "description": "Ende"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RaumBelegung",
+  "title": "Raumbelegung",
+  "description": "Zeigt, wann ein Raum frei oder belegt ist.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "raum": {
+     "type": "string",
+     "description": "Raum"
+    },
+    "datum": {
+     "type": "string",
+     "description": "Datum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BuchungStornieren",
+  "title": "Raumbuchung stornieren",
+  "description": "Storniert die Reservierung eines Raums.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "buchung": {
+     "type": "string",
+     "description": "Kennung der Buchung"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "KlassenfahrtPlanen",
+  "title": "Klassenfahrt planen",
+  "description": "Legt eine Klassenfahrt oder einen Ausflug mit Ziel, Datum und Kosten an.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    },
+    "ziel": {
+     "type": "string",
+     "description": "Ziel"
+    },
+    "datum": {
+     "type": "string",
+     "description": "Datum"
+    },
+    "kosten": {
+     "type": "string",
+     "description": "Kosten pro Kind"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KlassenfahrtAbsagen",
+  "title": "Klassenfahrt absagen",
+  "description": "Sagt eine geplante Klassenfahrt ab und benachrichtigt die Eltern.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "fahrt": {
+     "type": "string",
+     "description": "Kennung der Fahrt"
+    },
+    "grund": {
+     "type": "string",
+     "description": "Grund"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "EinverstaendnisEinholen",
+  "title": "Einverständnis einholen",
+  "description": "Bittet die Eltern um ihre Zustimmung, etwa für eine Fahrt oder für Fotos.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "klasse": {
+     "type": "string",
+     "description": "Klasse"
+    },
+    "anlass": {
+     "type": "string",
+     "description": "Wofür die Zustimmung gilt"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MensaSpeiseplan",
+  "title": "Speiseplan der Mensa",
+  "description": "Zeigt das Mittagessen der Mensa für die Woche.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "woche": {
+     "type": "string",
+     "description": "Kalenderwoche"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MensaAnmelden",
+  "title": "Zum Mittagessen anmelden",
+  "description": "Meldet einen Schüler für das Mittagessen in der Mensa an oder ab.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "tage": {
+     "type": "string",
+     "description": "Wochentage"
+    },
+    "abmelden": {
+     "type": "string",
+     "description": "Abmelden statt anmelden"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SchulbuecherAusgeben",
+  "title": "Schulbücher ausgeben",
+  "description": "Leiht einem Schüler die Schulbücher seines Jahrgangs aus.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schueler": {
+     "type": "string",
+     "description": "Kennung des Schülers"
+    },
+    "titel": {
+     "type": "string",
+     "description": "Einzelnes Buch, leer für alle"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SchulbuchRueckgabe",
+  "title": "Schulbuch zurücknehmen",
+  "description": "Nimmt ein ausgeliehenes Schulbuch zurück und vermerkt Schäden.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exemplar": {
+     "type": "string",
+     "description": "Kennung des Exemplars"
+    },
+    "schaden": {
+     "type": "string",
+     "description": "Beschreibung des Schadens"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "TerminkalenderSchule",
+  "title": "Termine der Schule",
+  "description": "Listet Ferien, Konferenzen, Elternabende und Schulfeste.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "von": {
+     "type": "string",
+     "description": "Ab Datum"
+    },
+    "bis": {
+     "type": "string",
+     "description": "Bis Datum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "TerminEintragen",
+  "title": "Termin eintragen",
+  "description": "Trägt einen Termin in den Schulkalender ein.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "titel": {
+     "type": "string",
+     "description": "Titel"
+    },
+    "datum": {
+     "type": "string",
+     "description": "Datum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "KonferenzProtokoll",
+  "title": "Protokoll speichern",
+  "description": "Speichert das Protokoll einer Konferenz oder Sitzung.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sitzung": {
+     "type": "string",
+     "description": "Konferenz oder Sitzung"
+    },
+    "text": {
+     "type": "string",
+     "description": "Protokoll"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BenutzerkontoSperren",
+  "title": "Benutzerkonto sperren",
+  "description": "Sperrt das Konto eines Schülers oder einer Lehrkraft auf der Lernplattform.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "konto": {
+     "type": "string",
+     "description": "Kennung des Kontos"
+    },
+    "grund": {
+     "type": "string",
+     "description": "Grund"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ }
+]

@@ -78,6 +78,16 @@ becomes the next version's section when it is published.
   the floors in `BenchmarkTest` are the new counts (164 first, 183 in the
   top 3, 174 asked again); the share shown by the badge moves from 83% to 82%
   because the new server is harder, not because the search got worse.
+- **A fifth benchmark server, in German.** The office of a school: 40 tools
+  with PascalCase names (`KlassenfahrtAbsagen`) and German titles and
+  descriptions, and 100 requests written before any of them was run. Nothing
+  in the search changed for it: 38 of its 50 test requests find the right
+  tool first in fields, 44 in the top 3. Learning from its train half moves
+  one of them out of first place, while the benchmark as a whole still gains
+  one: the first server where learned words met new requests and cost one.
+  The test half is now 250 requests, and the floors in
+  `BenchmarkTest` are the new counts (202 first, 227 in the top 3, 215 asked
+  again); the badge moves from 82% to 81% for the same reason as above.
 
 ### Changed
 
