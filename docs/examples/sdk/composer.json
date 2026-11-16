@@ -1,0 +1,20 @@
+{
+    "name": "example/notes-sdk-server",
+    "description": "The notes server on the official MCP PHP SDK, with its tools shown through novalo/mcp-tool-discovery.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2",
+        "mcp/sdk": "0.10.0",
+        "novalo/mcp-tool-discovery": "*@dev"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../.."
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}

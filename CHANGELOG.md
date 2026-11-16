@@ -49,6 +49,15 @@ becomes the next version's section when it is published.
   confirming, and the search learns once per batch. With the option left at
   0, the list of tools is unchanged and a host tool of that name stays the
   host's.
+- **A server on the official PHP SDK, in `docs/examples/sdk/`.** The notes
+  server on `mcp/sdk` 0.10.0 over stdio: one request handler answers
+  `tools/list` and `tools/call` from the library, and the SDK keeps the
+  handshake, sessions and the stateless revision. `docs/HOSTS.md` lists the
+  five things a host on the SDK writes, among them decoding the arguments
+  again as arrays, since the SDK hands nested objects over as `stdClass`. A
+  CI job of its own installs the SDK at that exact version and runs the new
+  `sdk` test suite; it stays out of **CI passed** while the SDK is below 1.0,
+  and `mcp/sdk` never enters the library's `composer.json`.
 - **A server over HTTP, in `docs/examples/http-server.php`.** The notes
   server served over the Streamable HTTP transport, one process per request as
   under PHP-FPM: the gate built from the request's `Authorization` header, the

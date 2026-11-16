@@ -4,8 +4,9 @@ The library has no transport, no session and no JSON-RPC envelope: the host
 keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
-over stdio and one over HTTP. Both serve the same notes tools, kept with their
-gate in [examples/notes.php](examples/notes.php): only the transport differs.
+over stdio and one over HTTP, and in one on the official PHP SDK. All three
+serve the same notes tools, kept with their gate in
+[examples/notes.php](examples/notes.php): only the transport differs.
 
 ---
 
@@ -66,6 +67,38 @@ The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
 another origin, which the specification asks a server to refuse. The cache
 directory must be one only the server writes to: the index files are run.
+
+---
+
+## A server on the official PHP SDK
+
+[examples/sdk/server.php](examples/sdk/server.php) serves the same tools on
+[`mcp/sdk`](https://github.com/modelcontextprotocol/php-sdk), the official
+PHP SDK, over its stdio transport. The SDK keeps all it already does: the
+handshake, sessions, the stateless revision, JSON-RPC errors. The library takes
+over `tools/list` and `tools/call` through one request handler, which the SDK
+asks before its own. The SDK needs PHP 8.2; the example pins its version in
+[examples/sdk/composer.json](examples/sdk/composer.json), and a CI job installs
+it there and runs [tests/Sdk/SdkServerTest.php](../tests/Sdk/SdkServerTest.php),
+so the example is proved against that version.
+
+```
+cd docs/examples/sdk && composer install && cd -
+php docs/examples/sdk/server.php
+```
+
+In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` and `CallToolRequest` from `listTools()` and `callTool()`; the SDK's registry of tools stays empty |
+| The capability | `setCapabilities(new ServerCapabilities(tools: true, ...))` | with an empty registry the SDK would not announce tools by itself |
+| The revision | `RequestContext::getProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
+| The arguments | decoded again as arrays | the SDK keeps nested objects as `stdClass`; without this, every item of a batch is refused as not an object |
+| The answer | `Answer`, a `ResultInterface` holding the array | the SDK encodes an object; in the stateless revision it keeps the `resultType`, `ttlMs` and `cacheScope` the answer carries |
+
+Over the SDK's HTTP transport the handler stays the same; build the gate and
+the `Discovery` from the caller of each request, as in the HTTP example.
 
 ---
 

@@ -11,3 +11,7 @@ parameters:
         - src
         - bin
         - docs/examples
+    excludePaths:
+        # Read with the SDK installed, by its own job: without it, every
+        # class of mcp/sdk is unknown here.
+        - docs/examples/sdk

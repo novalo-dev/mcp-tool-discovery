@@ -12,10 +12,11 @@
 declare(strict_types=1);
 
 /*
- * What the two example servers share: the notes tools, where the notes are
- * kept, the gate, and how a server picks the revision at `initialize`. Only
- * the transport differs between docs/examples/stdio-server.php and
- * docs/examples/http-server.php, which is the part a host writes itself.
+ * What the example servers share: the notes tools, where the notes are kept,
+ * the gate, and how a server picks the revision at `initialize`. Only the
+ * transport differs between docs/examples/stdio-server.php,
+ * docs/examples/http-server.php and docs/examples/sdk/server.php, which is the
+ * part a host writes itself or takes from an SDK.
  */
 
 namespace Example\Notes;
