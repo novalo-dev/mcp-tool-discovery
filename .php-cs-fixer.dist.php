@@ -21,7 +21,7 @@ $header = <<<'TEXT'
     TEXT;
 
 $finder = (new PhpCsFixer\Finder())
-    ->in([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin'])
+    ->in([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin', __DIR__ . '/docs/examples'])
     ->append([__FILE__]);
 
 return (new PhpCsFixer\Config())

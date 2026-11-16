@@ -17,6 +17,9 @@
         <testsuite name="search">
             <directory>tests/Search</directory>
         </testsuite>
+        <testsuite name="examples">
+            <directory>tests/Examples</directory>
+        </testsuite>
         <testsuite name="conformance">
             <directory>tests/Conformance</directory>
         </testsuite>

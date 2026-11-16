@@ -39,8 +39,8 @@ A change to the search comes with the benchmark before and after.
 
 ## Hosts
 
-- Examples of the gate for the official PHP SDK and for a handler written by
-  hand, under `docs/`.
+- An example of the gate for the official PHP SDK, beside the server written
+  by hand in [docs/HOSTS.md](docs/HOSTS.md).
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.
 
