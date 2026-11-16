@@ -212,8 +212,7 @@ final class ToolSearch
     }
 
     /**
-     * The query with the host's synonyms added after the words they stand
-     * for, so the original words still count.
+     * The field cut to its first MAX_FIELD_BYTES bytes.
      */
     private static function bounded(string $text): string
     {
@@ -228,6 +227,10 @@ final class ToolSearch
         return is_string($clean) ? $clean : $cut;
     }
 
+    /**
+     * The query with the host's synonyms added after the words they stand
+     * for, so the original words still count.
+     */
     private function expand(string $text): string
     {
         if ($this->options->synonyms === []) {
