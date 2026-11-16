@@ -66,6 +66,13 @@ becomes the next version's section when it is published.
   the same. The scores are identical to the last digit, so the ranking and the
   benchmark do not move. An index saved by an `IndexCache` in the former shape
   is rebuilt once, on its own; the new one is about a third larger on disk.
+- **Building the index is about a third faster**, which is the cost of every
+  search made without a cache: over 500 tools it goes from about 25 ms to
+  about 16 ms, over 50 tools from 2.3 ms to 1.5 ms. Each word is cut into
+  trigrams once per build instead of once per field it appears in, and a word
+  written in ASCII is cut by bytes rather than split into characters. The
+  index is the same to the last digit, saved shape included, so a cache entry
+  stays valid and the ranking does not move.
 
 ## 0.2.0 - 2026-11-14
 

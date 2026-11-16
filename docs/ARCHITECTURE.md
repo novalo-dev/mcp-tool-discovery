@@ -121,8 +121,8 @@ package of its own, so the core keeps none.
 
 ## Performance
 
-Without a cache, the search index is built per request, in memory: about 2 ms
-for 50 tools and 25 ms for 500, query included. With an `IndexCache`, the build
+Without a cache, the search index is built per request, in memory: about 1.5 ms
+for 50 tools and 16 ms for 500, query included. With an `IndexCache`, the build
 is done once per set of visible tools: a search over 500 tools then takes
 about 1 ms, since the index is inverted and a search only visits the tools
 that share a term with it, and the `FileIndexCache` read through OPcache costs

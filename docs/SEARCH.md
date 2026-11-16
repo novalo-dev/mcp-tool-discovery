@@ -110,9 +110,9 @@ one only the server writes to.
 
 | Tools | No cache | Memory | Files, with OPcache |
 |---|---|---|---|
-| 50 | 2.3 ms | 0.1 ms | 0.1 ms |
-| 150 | 7 ms | 0.3 ms | 0.3 ms |
-| 500 | 25 ms | 1.1 ms | 1.2 ms |
+| 50 | 1.5 ms | 0.1 ms | 0.1 ms |
+| 150 | 5 ms | 0.3 ms | 0.3 ms |
+| 500 | 16 ms | 1.1 ms | 1.2 ms |
 
 A search with the three fields, on one machine, the median of 200; the times
 include the request.
@@ -124,6 +124,12 @@ Before, it read every tool for every term, and a cached search over 500 tools
 took 6 ms; the ranking is the same to the last digit. The saved index is
 about a third larger (220 KB for 50 tools in `FileIndexCache`), and a process
 holding it uses less memory than before.
+
+Without a cache, a third of the build was cutting words into trigrams, once for
+each field a word appears in. Each word is now cut once per build, and a word
+in ASCII is cut by bytes, which is several times faster than splitting it into
+characters: a build over 500 tools went from 25 ms to 16 ms, and the index is
+the same to the last digit.
 
 ## Learning
 
