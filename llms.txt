@@ -12,7 +12,7 @@
 - [README](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/README.md): install, quick start, modes, search, security model
 - [Architecture](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/ARCHITECTURE.md): layers, the flow of a call, protocol revisions
 - [Hosts](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/HOSTS.md): wiring a server, with complete servers written by hand over stdio and HTTP, and one on the official PHP SDK
-- [Modes](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/MODES.md): the mode contract, Compact, Grouped and Gateway
+- [Modes](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/MODES.md): choosing a mode with the bytes each list costs, the mode contract, Compact, Grouped and Gateway
 - [Search](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/docs/SEARCH.md): the ranking and its measures
 - [Contributing](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/CONTRIBUTING.md): branches, checks, writing a mode
 - [Roadmap](https://github.com/novalo-dev/mcp-tool-discovery/blob/develop/ROADMAP.md): the modes, search work and host examples wanted

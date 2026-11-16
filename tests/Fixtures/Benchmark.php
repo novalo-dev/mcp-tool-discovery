@@ -38,7 +38,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    private const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting'];
 
     /**
      * Four measures on the test half:
@@ -113,9 +113,12 @@ final class Benchmark
     }
 
     /**
+     * Every request of the benchmark, both halves. Public so the measure of
+     * what each mode costs (ListCost) asks the same requests.
+     *
      * @return list<array{server: string, half: string, action: string, object: string, description: string, query: string, expected: string}>
      */
-    private static function queries(): array
+    public static function queries(): array
     {
         $json = file_get_contents(__DIR__ . '/queries.json');
         if ($json === false) {

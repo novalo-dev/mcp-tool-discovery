@@ -8,6 +8,16 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **What each mode costs**, measured: `composer benchmark` now also prints
+  the bytes of JSON of each mode's list and of one compact search answer on
+  the six benchmark servers, and docs/MODES.md opens with "Choosing a mode",
+  that table and when to take each mode. On the server with 176 tools the
+  whole list is 60,640 bytes, the compact list 2,871 and the gateway list
+  1,845, whatever the number of tools. `tests/Search/ListCostTest.php`
+  guards those claims.
+
 ## 0.3.0 - 2026-11-16
 
 ### Added

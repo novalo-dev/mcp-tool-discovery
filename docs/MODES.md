@@ -11,6 +11,47 @@ own tools reach the host's tools. Three are written:
 
 ---
 
+## Choosing a mode
+
+A client sends the list of tools to the model with every request, so the list
+is the cost that repeats. A search answer enters the conversation once, when
+the client looks for a tool. Measured on the benchmark servers, in bytes of
+JSON on `2025-11-25` (`composer benchmark` prints this table, and
+[ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
+
+| Server | Tools | Every tool as itself | Compact | Gateway | Grouped | One compact search |
+|---|---|---|---|---|---|---|
+| workspace | 50 | 16,147 | 2,871 | 1,845 | 15,444 | 1,125 |
+| platform | 40 | 12,829 | 2,871 | 1,845 | - | 862 |
+| people | 40 | 12,814 | 2,871 | 1,845 | - | 874 |
+| library | 40 | 14,550 | 2,871 | 1,845 | - | 1,069 |
+| school | 40 | 15,096 | 2,871 | 1,845 | - | 1,076 |
+| hosting | 176 | 60,640 | 2,871 | 1,845 | - | 1,345 |
+
+The search is the mean over the test half of the benchmark requests, text
+content only: the structured copy carries the same data. For English JSON a
+token is about four bytes. The fixture tools are short, about 300 bytes each;
+tools with longer descriptions and schemas widen every gap. Only the
+workspace declares groups, in
+[tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
+tools stay outside them, listed as themselves.
+
+- **Compact** is the default. Its list is the same size whatever the server,
+  under a quarter of the whole list from 40 tools, and the list with one
+  search stays under half of it. Each change keeps the confirmation of a
+  destructive tool.
+- **Gateway** is the smallest list, for a client that caps its tools very low
+  or a small model that handles one tool better than three. Its single tool
+  is destructive as soon as a change goes through it, so a client that asks
+  before each destructive call asks before searches too, unless the host sets
+  `changesApart`.
+- **Grouped** shows the map of the server without a search, for a client that
+  searches badly and a server whose tools fall into a few clear groups. It
+  leaves the schemas out but names every action, so its list grows with the
+  server: on short tools it saves little, as the workspace shows.
+
+---
+
 ## The contract
 
 ```php

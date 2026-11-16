@@ -128,8 +128,9 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
 envelope, the transport and the session. [docs/HOSTS.md](docs/HOSTS.md) shows
-two complete servers written by hand, one over stdio and one over HTTP with a
-gate built for each request, that the tests run as a client would.
+complete servers that the tests run as a client would: two written by hand,
+one over stdio and one over HTTP with a gate built for each request, and one
+on the official PHP SDK.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:
@@ -166,7 +167,9 @@ nothing else, and every pack is held to the same
 
 A host tool called by its own name is accepted in every mode, through the same
 checks: a client holding a list from before the server switched modes keeps
-working.
+working. [Choosing a mode](docs/MODES.md#choosing-a-mode) gives what each
+list costs on the benchmark servers: on the one with 176 tools, 60,640 bytes
+for every tool as itself, 2,871 for the compact list.
 
 ### Compact
 
@@ -321,7 +324,7 @@ explains.
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
 | [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP and the official PHP SDK |
-| [docs/MODES.md](docs/MODES.md) | how a mode works, the three written, writing one |
+| [docs/MODES.md](docs/MODES.md) | choosing a mode, what each costs, how a mode works, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |
 | [ROADMAP.md](ROADMAP.md) | the work wanted: modes, search, hosts |
