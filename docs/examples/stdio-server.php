@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 /*
  * A complete MCP server over stdio, written by hand, with no SDK: a notes
- * server of four tools shown to the client in compact mode. It is the
- * smallest host the library can have, and the tests run it as a client would,
- * so it stays true to the library.
+ * server of four tools shown to the client in compact mode. It is the smallest
+ * host the library can have, and the tests run it as a client would, so it
+ * stays true to the library. The tools, the gate and the choice of revision
+ * are in notes.php, shared with the HTTP example; this file is the transport.
  *
  * Run it:   php docs/examples/stdio-server.php
  * As admin: MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
@@ -29,9 +30,6 @@ declare(strict_types=1);
 namespace Example\Notes;
 
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
-use Novalo\McpToolDiscovery\Gate\CallResult;
-use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -39,107 +37,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 // In a project of your own: require 'vendor/autoload.php'.
 require dirname(__DIR__, 2) . '/vendor/autoload.php';
-
-/**
- * The host's own tools, exactly as its tools/list would have sent them.
- *
- * @return list<array<string, mixed>>
- */
-function definitions(): array
-{
-    $id = ['type' => 'object', 'properties' => ['id' => ['type' => 'integer']], 'required' => ['id']];
-
-    return [
-        [
-            'name' => 'notes_list',
-            'title' => 'List the notes',
-            'description' => 'Lists every note, with its id and the start of its text.',
-            'inputSchema' => ['type' => 'object', 'properties' => []],
-            'annotations' => ['readOnlyHint' => true],
-        ],
-        [
-            'name' => 'notes_get',
-            'title' => 'Read a note',
-            'description' => 'Returns the full text of one note.',
-            'inputSchema' => $id,
-            'annotations' => ['readOnlyHint' => true],
-        ],
-        [
-            'name' => 'notes_add',
-            'title' => 'Add a note',
-            'description' => 'Adds a note and returns its id.',
-            'inputSchema' => ['type' => 'object', 'properties' => ['text' => ['type' => 'string']], 'required' => ['text']],
-        ],
-        [
-            'name' => 'notes_delete',
-            'title' => 'Delete a note',
-            'description' => 'Deletes one note for good.',
-            'inputSchema' => $id,
-            'annotations' => ['destructiveHint' => true],
-        ],
-    ];
-}
-
-/**
- * Every access decision lives here, and nowhere in the library.
- */
-final class NotesGate implements ToolGate
-{
-    /** @var array<int, string> */
-    private array $notes = [1 => 'Back up the server before the upgrade.'];
-
-    public function __construct(private readonly string $role) {}
-
-    // A tool the caller could never run is not shown at all: here only an
-    // admin may delete, so anyone else never learns the tool exists.
-    public function visible(Tool $tool): bool
-    {
-        return $tool->name !== 'notes_delete' || $this->role === 'admin';
-    }
-
-    // Checked again with the arguments, at call time: the listing never saw them.
-    public function authorize(Tool $tool, array $arguments): ?CallResult
-    {
-        if ($tool->name === 'notes_add' && strlen(is_string($arguments['text'] ?? null) ? $arguments['text'] : '') > 500) {
-            return CallResult::error('A note holds at most 500 characters.');
-        }
-
-        return null;
-    }
-
-    public function call(Tool $tool, array $arguments): CallResult
-    {
-        $id = is_int($arguments['id'] ?? null) ? $arguments['id'] : 0;
-
-        switch ($tool->name) {
-            case 'notes_list':
-                return CallResult::json(['notes' => array_map(
-                    static fn(int $id, string $text): array => ['id' => $id, 'text' => substr($text, 0, 40)],
-                    array_keys($this->notes),
-                    array_values($this->notes),
-                )]);
-            case 'notes_get':
-                return isset($this->notes[$id]) ? CallResult::text($this->notes[$id]) : CallResult::error('No note has this id.');
-            case 'notes_add':
-                $text = is_string($arguments['text'] ?? null) ? $arguments['text'] : '';
-                if ($text === '') {
-                    return CallResult::error('The text of the note is empty.');
-                }
-                $this->notes[] = $text;
-
-                return CallResult::json(['id' => array_key_last($this->notes)]);
-            case 'notes_delete':
-                if (!isset($this->notes[$id])) {
-                    return CallResult::error('No note has this id.');
-                }
-                unset($this->notes[$id]);
-
-                return CallResult::text('Deleted.');
-        }
-
-        return CallResult::error('Unknown tool.');
-    }
-}
+require __DIR__ . '/notes.php';
 
 /**
  * Answers one JSON-RPC message, or returns null for a notification.
@@ -159,17 +57,7 @@ function answer(array $message, Discovery $discovery, ToolSet $tools, ?Revision 
 
     switch ($method) {
         case 'initialize':
-            // The client's revision if the library shapes answers for it,
-            // otherwise the latest handshake revision, as the specification
-            // asks of a server that does not support the client's.
-            try {
-                $revision = Revision::fromString(is_string($params['protocolVersion'] ?? null) ? $params['protocolVersion'] : '');
-            } catch (UnsupportedRevision) {
-                $revision = Revision::V2025_11_25;
-            }
-            if ($revision->isStateless()) {
-                $revision = Revision::V2025_11_25;
-            }
+            $revision = negotiate($params['protocolVersion'] ?? null);
 
             return ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
                 'protocolVersion' => $revision->value,
@@ -200,7 +88,7 @@ $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 // life; over HTTP, build it per request, with that request's gate.
 $discovery = new Discovery(
     new CompactMode(prefix: 'notes_', batchLimit: 20),
-    new NotesGate(is_string($role) ? $role : 'reader'),
+    new NotesGate(is_string($role) ? $role : 'reader', new Notes()),
 );
 $revision = null;
 

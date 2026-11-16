@@ -3,11 +3,13 @@
 The library has no transport, no session and no JSON-RPC envelope: the host
 keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
-handed over. This page shows that wiring in a server written by hand.
+handed over. This page shows that wiring in two servers written by hand, one
+over stdio and one over HTTP. Both serve the same notes tools, kept with their
+gate in [examples/notes.php](examples/notes.php): only the transport differs.
 
 ---
 
-## A server written by hand
+## A server over stdio
 
 [examples/stdio-server.php](examples/stdio-server.php) is a complete MCP
 server over stdio, with no SDK: four note tools, a gate that hides deletion
@@ -24,14 +26,46 @@ Its parts, in the order a host writes them:
 
 | Part | In the example | What it holds |
 |---|---|---|
-| Tool definitions | `definitions()` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
-| The gate | `NotesGate` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
-| The revision | `initialize` in `answer()` | the client's revision when the library knows it, otherwise the latest handshake revision |
+| Tool definitions | `definitions()`, in `notes.php` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
+| The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
+| The revision | `initialize` in `answer()`, through `negotiate()` | the client's revision when the library knows it, otherwise the latest handshake revision |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
 ignoring notifications, the JSON-RPC errors for a method it does not serve or
 a call with no name.
+
+---
+
+## A server over HTTP
+
+[examples/http-server.php](examples/http-server.php) serves the same tools
+over the Streamable HTTP transport, the way most PHP applications run: one
+process per request, behind PHP-FPM or any web server. It answers every
+message with one JSON body and keeps no session. The tests run it behind PHP's
+built-in server and call it over HTTP
+([tests/Examples/HttpServerTest.php](../tests/Examples/HttpServerTest.php)).
+
+```
+php -S 127.0.0.1:8080 docs/examples/http-server.php
+curl -s http://127.0.0.1:8080/mcp -H 'Authorization: Bearer reader-token' \
+  -H 'MCP-Protocol-Version: 2025-11-25' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+What changes from stdio:
+
+| Part | Over HTTP | Why |
+|---|---|---|
+| The caller | the `Authorization` header of each request | the gate is built for the caller this request names, so a `Discovery` lives for one request |
+| The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version` | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
+| The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
+| The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
+
+The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
+notification, 401 without a known token, and 403 for a browser page of
+another origin, which the specification asks a server to refuse. The cache
+directory must be one only the server writes to: the index files are run.
 
 ---
 
