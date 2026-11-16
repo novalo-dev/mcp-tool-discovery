@@ -85,7 +85,9 @@ final class ToolSearch
             array_push($words, ...$this->analyzer->words($text));
             $weight = $this->options->queryWeights[$field] ?? 1.0;
             foreach ($this->index->score($text) as $name => $score) {
-                $scores[(string) $name] = ($scores[(string) $name] ?? 0.0) + $weight * $score;
+                // A cast would be undone: PHP keys "123" as an integer anyway, so
+                // the names are made strings again once ranked.
+                $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;
             }
         }
         $words = array_values(array_unique($words));
