@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.3.0 - 2026-11-16
+
 ### Added
 
 - **Gateway mode**, `src/Mode/Gateway/GatewayMode.php`: a single tool,
