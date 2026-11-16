@@ -128,8 +128,8 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
 envelope, the transport and the session. [docs/HOSTS.md](docs/HOSTS.md) shows
-a complete server over stdio, written by hand, that the tests run as a client
-would.
+two complete servers written by hand, one over stdio and one over HTTP with a
+gate built for each request, that the tests run as a client would.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:
@@ -318,7 +318,7 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with a complete example |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio and HTTP |
 | [docs/MODES.md](docs/MODES.md) | how a mode works, the three written, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |

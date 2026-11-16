@@ -49,6 +49,16 @@ becomes the next version's section when it is published.
   confirming, and the search learns once per batch. With the option left at
   0, the list of tools is unchanged and a host tool of that name stays the
   host's.
+- **A server over HTTP, in `docs/examples/http-server.php`.** The notes
+  server served over the Streamable HTTP transport, one process per request as
+  under PHP-FPM: the gate built from the request's `Authorization` header, the
+  revision read from `MCP-Protocol-Version` after `initialize` (`2025-03-26`
+  without it, 400 for one the library does not shape), the search index kept
+  in a `FileIndexCache` between requests, and the 202, 401, 403 and 405 a
+  host answers itself. `docs/HOSTS.md` says what changes from stdio. The tests
+  run it behind PHP's built-in server and call it over HTTP. The tools, the
+  gate and the choice of revision moved to `docs/examples/notes.php`, shared
+  by both examples.
 - **A complete server written by hand, in `docs/examples/`.** A stdio MCP
   server with no SDK, in one file: four note tools, a gate that hides one of
   them from all but an admin, the compact mode with the batch runner, the
