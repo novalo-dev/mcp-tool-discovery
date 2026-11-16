@@ -10,6 +10,21 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Grouped mode**, `src/Mode/Grouped/GroupedMode.php`. The host declares its
+  groups (`groups`: name => title) and says where each tool belongs
+  (`groupOf`); each group holding a visible tool becomes a tool named after
+  it, which runs the group's reads and describes any of its actions with
+  `describe`, and `<group>_change`, destructive, which runs its changes. Every
+  action of a group is listed in its tool's description and in an `enum`, so
+  the client sees the map of the server without searching. An action sent to
+  the wrong tool is refused before the gate is asked; a hidden one is answered
+  like one that does not exist. A tool outside the declared groups is listed
+  as itself. Options: `prefix`, `changeTitles`, `maxDescribed`,
+  `schemaOnError`. It passes the mode contract and is in the conformance
+  checks.
+- **`ModeContractTestCase::searches()`**: a mode that does not search
+  answers false, and the contract then checks it never teaches the search.
+
 - **`run_write_batch` in compact mode**, off by default. `batchLimit: N` on
   `CompactMode` adds a fourth tool that runs one change tool once for each
   item of a list (`name`, `items`, `search_id`), up to N items a call, so a

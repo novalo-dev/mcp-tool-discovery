@@ -68,6 +68,15 @@ abstract class ModeContractTestCase extends TestCase
      */
     abstract protected function probes(): array;
 
+    /**
+     * Whether the mode searches, and so hands the assistant search ids to
+     * give back. A mode that does not search must never teach the search.
+     */
+    protected function searches(): bool
+    {
+        return true;
+    }
+
     private function gate(): RecordingGate
     {
         return new RecordingGate([self::HIDDEN], [self::REFUSED]);
@@ -187,7 +196,12 @@ abstract class ModeContractTestCase extends TestCase
             $discovery->call($name, $arguments, $this->tools());
         }
 
-        $learned = array_unique(array_merge(...array_map('array_keys', array_values($store->load()))));
+        $learned = array_unique(array_merge([], ...array_map('array_keys', array_values($store->load()))));
+        if (!$this->searches()) {
+            self::assertSame([], array_values($learned), 'a mode that does not search hands out no search id to learn from');
+
+            return;
+        }
         self::assertSame([self::READ], array_values($learned), 'only the allowed run that succeeded, and the mode passes the id on');
     }
 

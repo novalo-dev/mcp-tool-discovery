@@ -11,12 +11,10 @@ before starting something large, so two people do not build the same thing.
 
 ## Modes
 
-Two modes are wanted, each a pack of its own in `src/Mode/<Name>/`, held to
-the same contract tests as the compact mode. [docs/MODES.md](docs/MODES.md)
-describes what each should do.
+The compact and grouped modes are written. One more is wanted, a pack of its
+own in `src/Mode/Gateway/`, held to the same contract tests.
+[docs/MODES.md](docs/MODES.md) describes what it should do.
 
-- **Grouped**: one tool per group of tools ("files", "calendar"), each
-  listing its actions, for clients that handle a few dozen tools well.
 - **Gateway**: a single tool that searches, describes and runs, for clients
   that accept only one.
 
