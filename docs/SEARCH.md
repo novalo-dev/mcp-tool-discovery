@@ -29,8 +29,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 164 times
-out of 200 in fields, and 76 times as one sentence.
+On the benchmark below, the same requests find the right tool first 202 times
+out of 250 in fields, and 94 times as one sentence.
 
 ## How a tool is scored
 
@@ -165,29 +165,35 @@ locked while it is written.
 
 ## The measures
 
-Four fictional servers, each named in its own style: a workspace (50 tools,
+Five fictional servers, each named in its own style: a workspace (50 tools,
 `acme_set_ticket_status`), a developer platform (40 tools, `archiveRepository`),
-people operations (40 tools, `people.leave.approve`) and a network of public
-libraries written in French (40 tools, `prolonger-pret`). 400 requests, each
+people operations (40 tools, `people.leave.approve`), a network of public
+libraries written in French (40 tools, `prolonger-pret`) and the office of a
+school written in German (40 tools, `KlassenfahrtAbsagen`). 500 requests, each
 written as one sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 200 requests | Right tool first | Top 3 |
+| Test half, 250 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 164 | 183 |
-| The same request as one sentence | 76 | 105 |
-| In fields, after every train request was run once | 166 | 183 |
-| In fields, after the test requests were run once, then asked again | 174 | 187 |
+| The request in fields | 202 | 227 |
+| The same request as one sentence | 94 | 135 |
+| In fields, after every train request was run once | 203 | 227 |
+| In fields, after the test requests were run once, then asked again | 215 | 231 |
 
-The library server came after the settings were chosen, with its 100
-requests written before any of them was run, so it measures what the search
-does on a server nobody tuned it for: 39 of its 50 test requests find the
-right tool first in fields, 43 in the top 3, against 125 and 140 of 150 on
-the other three. The search reads French as it reads English, with no list
-and no stemmer; what it misses there is mostly conjugation ("prêter" asked,
-"prêt" in the tool) and an object that names the kind of item ("livre",
-"DVD") and so finds the tool that lists those kinds in its description.
+The library and school servers came after the settings were chosen, each
+with its 100 requests written before any of them was run, so they measure
+what the search does on a server nobody tuned it for: 39 and 38 of their 50
+test requests find the right tool first in fields, 43 and 44 in the top 3,
+against 125 and 140 of 150 on the other three. The search reads French and
+German as it reads English, with no list and no stemmer. On the library, what
+it misses is mostly conjugation ("prêter" asked, "prêt" in the tool) and an
+object that names the kind of item ("livre", "DVD") and so finds the tool
+that lists those kinds in its description. On the school, it is mostly words
+the tools do not use ("Unterricht" for the timetable, "Abwesenheit" for what
+the tools call a "Fehlzeit"), and a short word inside an unrelated one: "Buch"
+(a book) shares its trigrams with "buchen" (to book), so a request to lend a
+book finds the tool that books a meeting with parents first.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

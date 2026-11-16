@@ -277,17 +277,18 @@ client gives its request **in fields**, and each field is scored on its own:
   with it lifts that tool for those words, within a cap. Only words the tools
   use are kept.
 
-400 requests over four fictional servers, a workspace (snake_case), a
-developer platform (camelCase), people operations (dotted names) and a network
-of public libraries written in French (kebab-case). Half were used to choose
-the settings; the other half, kept aside, gives the score:
+500 requests over five fictional servers, a workspace (snake_case), a
+developer platform (camelCase), people operations (dotted names), a network
+of public libraries written in French (kebab-case) and the office of a school
+written in German (PascalCase). Half were used to choose the settings; the
+other half, kept aside, gives the score:
 
-| Test half, 200 requests | Right tool first | Right tool in the top 3 |
+| Test half, 250 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **164** | **183** |
-| The same request as one sentence | 76 | 105 |
-| In fields, after learning from the other half | 166 | 183 |
-| In fields, asked a second time | 174 | 187 |
+| The request in fields | **202** | **227** |
+| The same request as one sentence | 94 | 135 |
+| In fields, after learning from the other half | 203 | 227 |
+| In fields, asked a second time | 215 | 231 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
