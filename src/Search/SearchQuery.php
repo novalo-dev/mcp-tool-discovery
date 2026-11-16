@@ -18,8 +18,8 @@ namespace Novalo\McpToolDiscovery\Search;
  *
  * An assistant that says the action ("change"), the object ("ticket status")
  * and the request in its own words in separate fields gives the search three
- * signals it can weigh apart: measured on 150 queries kept aside, the right
- * tool came first 125 times this way, against 57 for the same request
+ * signals it can weigh apart: on the benchmark in docs/SEARCH.md, the right
+ * tool comes first about twice as often this way as for the same request
  * as one sentence. No field is required and none is parsed: the library holds
  * no list of verbs or objects, and tool names may follow any convention.
  */
