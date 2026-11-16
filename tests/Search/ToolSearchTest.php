@@ -61,6 +61,14 @@ final class ToolSearchTest extends TestCase
         self::assertContains('statut', (new Analyzer())->words('Changer le statut'), 'any language');
     }
 
+    public function testTrigramsAreCutByCharacterInEveryScript(): void
+    {
+        self::assertSame([' st', 'sta', 'tat', 'atu', 'tus', 'us '], Analyzer::trigrams('status'), 'ASCII, cut by bytes');
+        self::assertSame([' pr', 'prê', 'rêt', 'êt '], Analyzer::trigrams('prêt'), 'a letter outside ASCII stays whole');
+        self::assertSame([' ab', 'ab '], Analyzer::trigrams('ab'));
+        self::assertSame([], Analyzer::trigrams(''));
+    }
+
     public function testTheFieldsOfAQueryFindTheRightTool(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

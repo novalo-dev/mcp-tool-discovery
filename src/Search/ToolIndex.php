@@ -68,12 +68,15 @@ final class ToolIndex
     {
         $counts = [];
         $totals = [];
+        $trigrams = [];
         foreach ($documents as $id => $fields) {
             foreach ($weights as $field => $weight) {
                 $fieldWords = $analyzer->words($fields[$field] ?? '');
                 $fieldGrams = [];
                 foreach ($fieldWords as $word) {
-                    array_push($fieldGrams, ...Analyzer::trigrams($word));
+                    // Tools of one server share most of their words: each
+                    // word is cut into trigrams once for the whole build.
+                    array_push($fieldGrams, ...($trigrams[$word] ??= Analyzer::trigrams($word)));
                 }
                 $counts[$id][$field] = [array_count_values($fieldWords), count($fieldWords), array_count_values($fieldGrams), count($fieldGrams)];
                 $totals[$field][0] = ($totals[$field][0] ?? 0) + count($fieldWords);

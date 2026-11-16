@@ -74,8 +74,19 @@ final class Analyzer
      */
     public static function trigrams(string $word): array
     {
+        $padded = ' ' . $word . ' ';
+        // Most tool lists are ASCII, where a byte is a character: cutting
+        // bytes is several times faster than splitting into characters.
+        if (preg_match('/[\x80-\xFF]/', $padded) !== 1) {
+            $grams = [];
+            for ($i = 0, $last = strlen($padded) - 3; $i <= $last; ++$i) {
+                $grams[] = substr($padded, $i, 3);
+            }
+
+            return $grams;
+        }
         // Characters, not bytes, so a word outside ASCII gives whole trigrams.
-        $characters = preg_split('//u', ' ' . $word . ' ', -1, PREG_SPLIT_NO_EMPTY);
+        $characters = preg_split('//u', $padded, -1, PREG_SPLIT_NO_EMPTY);
         if ($characters === false) {
             return [];
         }
