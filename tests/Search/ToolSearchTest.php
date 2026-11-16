@@ -268,6 +268,24 @@ final class ToolSearchTest extends TestCase
         unlink($file);
     }
 
+    public function testAToolWithANumericNameIsFoundAndLearned(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => '123', 'description' => 'Export the backup archive', 'inputSchema' => ['type' => 'object']],
+            ['name' => '42', 'description' => 'Remove a backup archive', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'list_files', 'description' => 'List the files', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $learning = new MemoryLearningStore();
+        $search = new ToolSearch($tools, new SearchOptions(), new MemoryIndexCache(), $learning);
+
+        $result = $search->find(SearchQuery::text('export backup archive'));
+        self::assertSame('123', self::names($result->tools)[0]);
+        self::assertNotNull($result->searchId);
+
+        $search->learn($result->searchId, '42');
+        self::assertSame(['42', '123'], self::names($search->search('backup archive')), 'what was learned lifts a numeric name too');
+    }
+
     public function testFiveHundredToolsAreSearchedFast(): void
     {
         $definitions = [];

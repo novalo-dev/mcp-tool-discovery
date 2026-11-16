@@ -57,7 +57,7 @@ final class ToolSearch
         $documents = [];
         foreach ($tools as $name => $tool) {
             $documents[$name] = [
-                'name' => $name,
+                'name' => $tool->name,
                 'title' => $tool->title(),
                 'description' => $tool->description(),
                 'parameters' => self::parameterText($tool),
@@ -106,7 +106,8 @@ final class ToolSearch
         }
         $ranked = [];
         foreach ($scores as $name => $score) {
-            $ranked[] = [$score, $this->position[$name] ?? PHP_INT_MAX, $name];
+            // Cast back: PHP keys a tool named "123" as an integer.
+            $ranked[] = [$score, $this->position[$name] ?? PHP_INT_MAX, (string) $name];
         }
         // Best score first; equal scores keep the host's order, so the same
         // query always lists the same tools in the same order.

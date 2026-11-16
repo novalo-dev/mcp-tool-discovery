@@ -88,4 +88,23 @@ final class ToolTest extends TestCase
         self::assertSame(['a'], $set->filter(static fn(Tool $tool): bool => $tool->name === 'a')->names());
         self::assertSame(['z', 'a'], $set->names(), 'filter() returns a new set');
     }
+
+    public function testANumericNameStaysAString(): void
+    {
+        // PHP keys "123" as an integer: the set must still hand out strings.
+        $set = ToolSet::of([
+            ['name' => '123', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'a', 'inputSchema' => ['type' => 'object']],
+        ]);
+
+        self::assertSame(['123', 'a'], $set->names());
+        $keys = [];
+        foreach ($set as $name => $tool) {
+            $keys[] = $name;
+            self::assertSame($tool->name, $name);
+        }
+        self::assertSame(['123', 'a'], $keys);
+        self::assertSame('123', $set->get('123')?->name);
+        self::assertSame(['123'], $set->filter(static fn(Tool $tool): bool => $tool->name === '123')->names());
+    }
 }

@@ -27,7 +27,8 @@ use Novalo\McpToolDiscovery\Exception\InvalidTool;
 final class ToolSet implements \IteratorAggregate, \Countable
 {
     /**
-     * @param array<string, Tool> $tools keyed by name
+     * @param array<array-key, Tool> $tools keyed by name; PHP turns a name such
+     *        as "123" into an integer key, so keys are never handed out as they are
      */
     private function __construct(private readonly array $tools) {}
 
@@ -74,7 +75,7 @@ final class ToolSet implements \IteratorAggregate, \Countable
      */
     public function names(): array
     {
-        return array_keys($this->tools);
+        return array_map(static fn(Tool $tool): string => $tool->name, array_values($this->tools));
     }
 
     /**
@@ -86,11 +87,15 @@ final class ToolSet implements \IteratorAggregate, \Countable
     }
 
     /**
-     * @return \ArrayIterator<string, Tool>
+     * @return \Generator<string, Tool>
      */
-    public function getIterator(): \ArrayIterator
+    public function getIterator(): \Generator
     {
-        return new \ArrayIterator($this->tools);
+        // The tool's own name, not the array key, so a host that iterates
+        // with strict types gets a string for a tool named "123" too.
+        foreach ($this->tools as $tool) {
+            yield $tool->name => $tool;
+        }
     }
 
     public function count(): int
