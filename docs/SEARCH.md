@@ -29,8 +29,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 125 times
-out of 150 in fields, and 57 times as one sentence.
+On the benchmark below, the same requests find the right tool first 164 times
+out of 200 in fields, and 76 times as one sentence.
 
 ## How a tool is scored
 
@@ -150,27 +150,37 @@ locked while it is written.
 
 ## The measures
 
-Three fictional servers, each named in its own style: a workspace (50 tools,
-`acme_set_ticket_status`), a developer platform (40 tools, `archiveRepository`)
-and people operations (40 tools, `people.leave.approve`). 300 requests, each
+Four fictional servers, each named in its own style: a workspace (50 tools,
+`acme_set_ticket_status`), a developer platform (40 tools, `archiveRepository`),
+people operations (40 tools, `people.leave.approve`) and a network of public
+libraries written in French (40 tools, `prolonger-pret`). 400 requests, each
 written as one sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 150 requests | Right tool first | Top 3 |
+| Test half, 200 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 125 | 140 |
-| The same request as one sentence | 57 | 79 |
-| In fields, after every train request was run once | 127 | 140 |
-| In fields, after the test requests were run once, then asked again | 133 | 142 |
+| The request in fields | 164 | 183 |
+| The same request as one sentence | 76 | 105 |
+| In fields, after every train request was run once | 166 | 183 |
+| In fields, after the test requests were run once, then asked again | 174 | 187 |
+
+The library server came after the settings were chosen, with its 100
+requests written before any of them was run, so it measures what the search
+does on a server nobody tuned it for: 39 of its 50 test requests find the
+right tool first in fields, 43 in the top 3, against 125 and 140 of 150 on
+the other three. The search reads French as it reads English, with no list
+and no stemmer; what it misses there is mostly conjugation ("prêter" asked,
+"prêt" in the tool) and an object that names the kind of item ("livre",
+"DVD") and so finds the tool that lists those kinds in its description.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
 Stronger settings gained more on repeats and lost on new requests: they were
 not kept.
 
-Of the 25 requests that miss the first place in fields, about half are near
-ties between two tools of the same object ("discussion of a pull request"
+Of the 25 requests of the first three servers that miss the first place in
+fields, about half are near ties between two tools of the same object ("discussion of a pull request"
 finds the comment tool before the pull request itself), and half use words
 the tools do not ("case" for a ticket, "workshop" for an event). The second
 kind is what `vocabulary` and the host's synonyms are for.
