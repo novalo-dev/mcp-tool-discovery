@@ -23,6 +23,14 @@ becomes the next version's section when it is published.
   confirming, and the search learns once per batch. With the option left at
   0, the list of tools is unchanged and a host tool of that name stays the
   host's.
+- **A fourth benchmark server, in French.** `composer benchmark` now also
+  measures a network of public libraries: 40 tools with kebab-case names and
+  French titles and descriptions, and 100 requests written before any of them
+  was run. Nothing in the search changed for it: 39 of its 50 test requests
+  find the right tool first in fields. The test half is now 200 requests, and
+  the floors in `BenchmarkTest` are the new counts (164 first, 183 in the
+  top 3, 174 asked again); the share shown by the badge moves from 83% to 82%
+  because the new server is harder, not because the search got worse.
 
 ## 0.2.0 - 2026-11-14
 

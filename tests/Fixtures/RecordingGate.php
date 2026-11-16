@@ -74,8 +74,9 @@ final class RecordingGate implements ToolGate
 
     /**
      * One of the fixture servers: tools (a workspace, snake_case names),
-     * platform (a developer platform, camelCase) or people (people
-     * operations, dotted names).
+     * platform (a developer platform, camelCase), people (people
+     * operations, dotted names) or library (a network of public libraries,
+     * written in French, kebab-case names).
      */
     public static function server(string $file): ToolSet
     {

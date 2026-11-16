@@ -1,0 +1,846 @@
+[
+ {
+  "name": "chercher-documents",
+  "title": "Chercher des documents",
+  "description": "Recherche des livres, DVD, revues et partitions par titre, auteur, sujet ou ISBN.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "texte": {
+     "type": "string",
+     "description": "Titre, auteur, sujet ou ISBN"
+    },
+    "type": {
+     "type": "string",
+     "description": "Livre, DVD, revue, partition"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fiche-document",
+  "title": "Fiche d'un document",
+  "description": "Renvoie la notice d'un document : auteur, éditeur, année, cote, résumé.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "document": {
+     "type": "string",
+     "description": "Identifiant du document"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ajouter-document",
+  "title": "Ajouter un document",
+  "description": "Crée la notice d'un nouveau document dans les collections du réseau.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "titre": {
+     "type": "string",
+     "description": "Titre"
+    },
+    "auteur": {
+     "type": "string",
+     "description": "Auteur"
+    },
+    "type": {
+     "type": "string",
+     "description": "Livre, DVD, revue, partition"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "modifier-document",
+  "title": "Modifier un document",
+  "description": "Corrige la notice d'un document : titre, auteur, cote, résumé.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "document": {
+     "type": "string",
+     "description": "Identifiant du document"
+    },
+    "champs": {
+     "type": "string",
+     "description": "Champs à changer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "retirer-document",
+  "title": "Retirer un document",
+  "description": "Retire un document usé ou obsolète des collections (désherbage).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "document": {
+     "type": "string",
+     "description": "Identifiant du document"
+    },
+    "motif": {
+     "type": "string",
+     "description": "Raison du retrait"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lister-exemplaires",
+  "title": "Exemplaires d'un document",
+  "description": "Liste les exemplaires d'un document, leur site et leur disponibilité.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "document": {
+     "type": "string",
+     "description": "Identifiant du document"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transferer-exemplaire",
+  "title": "Transférer un exemplaire",
+  "description": "Envoie un exemplaire vers une autre bibliothèque du réseau par la navette.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exemplaire": {
+     "type": "string",
+     "description": "Code-barres de l'exemplaire"
+    },
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque de destination"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "signaler-exemplaire",
+  "title": "Signaler un exemplaire abîmé ou perdu",
+  "description": "Déclare un exemplaire abîmé, incomplet ou perdu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exemplaire": {
+     "type": "string",
+     "description": "Code-barres de l'exemplaire"
+    },
+    "etat": {
+     "type": "string",
+     "description": "abîmé, incomplet ou perdu"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enregistrer-pret",
+  "title": "Enregistrer un prêt",
+  "description": "Prête un exemplaire à un lecteur, avec la date de retour prévue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    },
+    "exemplaire": {
+     "type": "string",
+     "description": "Code-barres de l'exemplaire"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enregistrer-retour",
+  "title": "Enregistrer un retour",
+  "description": "Enregistre le retour d'un exemplaire rendu par un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exemplaire": {
+     "type": "string",
+     "description": "Code-barres de l'exemplaire"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prolonger-pret",
+  "title": "Prolonger un prêt",
+  "description": "Repousse la date de retour d'un prêt en cours.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pret": {
+     "type": "string",
+     "description": "Identifiant du prêt"
+    },
+    "jours": {
+     "type": "string",
+     "description": "Nombre de jours"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lister-prets",
+  "title": "Prêts d'un lecteur",
+  "description": "Liste les prêts en cours d'un lecteur et leurs dates de retour.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lister-retards",
+  "title": "Prêts en retard",
+  "description": "Liste les prêts dont la date de retour est dépassée, sur tout le réseau ou un site.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "envoyer-relance",
+  "title": "Envoyer une relance",
+  "description": "Envoie au lecteur une lettre ou un courriel de relance pour un prêt en retard.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pret": {
+     "type": "string",
+     "description": "Identifiant du prêt"
+    },
+    "canal": {
+     "type": "string",
+     "description": "courrier ou courriel"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reserver-document",
+  "title": "Réserver un document",
+  "description": "Place une réservation sur un document déjà emprunté ; le lecteur est prévenu à son retour.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    },
+    "document": {
+     "type": "string",
+     "description": "Identifiant du document"
+    },
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque de retrait"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "annuler-reservation",
+  "title": "Annuler une réservation",
+  "description": "Supprime une réservation en attente.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "reservation": {
+     "type": "string",
+     "description": "Identifiant de la réservation"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lister-reservations",
+  "title": "Réservations en attente",
+  "description": "Liste les réservations en attente et celles prêtes à être retirées.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inscrire-lecteur",
+  "title": "Inscrire un lecteur",
+  "description": "Crée la fiche et la carte d'un nouveau lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "nom": {
+     "type": "string",
+     "description": "Nom"
+    },
+    "prenom": {
+     "type": "string",
+     "description": "Prénom"
+    },
+    "naissance": {
+     "type": "string",
+     "description": "Date de naissance"
+    },
+    "adresse": {
+     "type": "string",
+     "description": "Adresse"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fiche-lecteur",
+  "title": "Fiche d'un lecteur",
+  "description": "Renvoie les coordonnées, la carte et l'abonnement d'un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "chercher-lecteurs",
+  "title": "Chercher des lecteurs",
+  "description": "Trouve des lecteurs par nom, numéro de carte, courriel ou téléphone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "texte": {
+     "type": "string",
+     "description": "Nom, carte, courriel ou téléphone"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "modifier-lecteur",
+  "title": "Modifier un lecteur",
+  "description": "Met à jour l'adresse, le téléphone ou le courriel d'un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    },
+    "champs": {
+     "type": "string",
+     "description": "Champs à changer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "renouveler-abonnement",
+  "title": "Renouveler un abonnement",
+  "description": "Prolonge d'un an l'abonnement d'un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    },
+    "formule": {
+     "type": "string",
+     "description": "Tarif choisi"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "suspendre-lecteur",
+  "title": "Suspendre un lecteur",
+  "description": "Bloque la carte d'un lecteur : plus aucun prêt ni réservation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    },
+    "motif": {
+     "type": "string",
+     "description": "Raison"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "fusionner-lecteurs",
+  "title": "Fusionner deux lecteurs",
+  "description": "Réunit deux fiches de lecteur en doublon en une seule.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "garder": {
+     "type": "string",
+     "description": "Carte à garder"
+    },
+    "supprimer": {
+     "type": "string",
+     "description": "Carte à fondre"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lister-amendes",
+  "title": "Pénalités d'un lecteur",
+  "description": "Liste les pénalités de retard et les frais de remplacement dus par un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "encaisser-amende",
+  "title": "Encaisser une pénalité",
+  "description": "Enregistre le paiement d'une pénalité par un lecteur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "amende": {
+     "type": "string",
+     "description": "Identifiant de la pénalité"
+    },
+    "moyen": {
+     "type": "string",
+     "description": "Espèces, carte, chèque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "annuler-amende",
+  "title": "Annuler une pénalité",
+  "description": "Remet une pénalité à un lecteur, par geste de bonne volonté ou après une erreur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "amende": {
+     "type": "string",
+     "description": "Identifiant de la pénalité"
+    },
+    "motif": {
+     "type": "string",
+     "description": "Raison"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lister-animations",
+  "title": "Animations à venir",
+  "description": "Liste les ateliers, lectures, heures du conte et expositions programmés.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    },
+    "public": {
+     "type": "string",
+     "description": "Enfants, ados, adultes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "creer-animation",
+  "title": "Programmer une animation",
+  "description": "Programme un atelier, une lecture ou une rencontre, avec sa date et ses places.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "titre": {
+     "type": "string",
+     "description": "Titre"
+    },
+    "date": {
+     "type": "string",
+     "description": "Date et heure"
+    },
+    "places": {
+     "type": "string",
+     "description": "Nombre de places"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inscrire-animation",
+  "title": "Inscrire à une animation",
+  "description": "Inscrit un participant à un atelier ou une rencontre.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "animation": {
+     "type": "string",
+     "description": "Identifiant de l'animation"
+    },
+    "lecteur": {
+     "type": "string",
+     "description": "Numéro de carte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "annuler-animation",
+  "title": "Annuler une animation",
+  "description": "Annule une animation et prévient les inscrits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "animation": {
+     "type": "string",
+     "description": "Identifiant de l'animation"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lister-sites",
+  "title": "Bibliothèques du réseau",
+  "description": "Liste les bibliothèques du réseau avec leur adresse et leurs horaires d'ouverture.",
+  "inputSchema": {
+   "type": "object"
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "modifier-horaires",
+  "title": "Modifier les horaires",
+  "description": "Change les horaires d'ouverture habituels d'une bibliothèque.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    },
+    "horaires": {
+     "type": "string",
+     "description": "Nouveaux horaires"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fermeture-exceptionnelle",
+  "title": "Fermeture exceptionnelle",
+  "description": "Déclare une fermeture d'un site pour un jour donné et décale les retours prévus ce jour-là.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    },
+    "date": {
+     "type": "string",
+     "description": "Jour de fermeture"
+    },
+    "motif": {
+     "type": "string",
+     "description": "Raison"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "suggestions-lecteurs",
+  "title": "Suggestions des lecteurs",
+  "description": "Liste les titres que les lecteurs ont demandé à la bibliothèque d'acheter.",
+  "inputSchema": {
+   "type": "object"
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "proposer-acquisition",
+  "title": "Proposer une acquisition",
+  "description": "Ajoute un titre à la liste des achats à valider par le responsable des collections.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "titre": {
+     "type": "string",
+     "description": "Titre"
+    },
+    "auteur": {
+     "type": "string",
+     "description": "Auteur"
+    },
+    "budget": {
+     "type": "string",
+     "description": "Ligne budgétaire"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "statistiques-prets",
+  "title": "Statistiques de prêt",
+  "description": "Compte les prêts par période, par site ou par type de document.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "debut": {
+     "type": "string",
+     "description": "Début de la période"
+    },
+    "fin": {
+     "type": "string",
+     "description": "Fin de la période"
+    },
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "documents-populaires",
+  "title": "Documents les plus empruntés",
+  "description": "Classe les documents les plus empruntés sur une période.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "periode": {
+     "type": "string",
+     "description": "Période"
+    },
+    "type": {
+     "type": "string",
+     "description": "Type de document"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lister-agents",
+  "title": "Équipe des bibliothèques",
+  "description": "Liste les agents du réseau avec leur site et leur fonction.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "planning-agents",
+  "title": "Planning de service",
+  "description": "Montre qui tient l'accueil et les permanences, jour par jour.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site": {
+     "type": "string",
+     "description": "Bibliothèque"
+    },
+    "semaine": {
+     "type": "string",
+     "description": "Semaine"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

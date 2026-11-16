@@ -31,7 +31,9 @@ The benchmark says where the search still misses, in
   already gives the server's own words; a measured way to close the gap
   without a list built into the library is welcome.
 - **More fixture servers**, named in other styles and in other languages, with
-  their requests written before any tuning.
+  their requests written before any tuning. A French one (a network of public
+  libraries, kebab-case) is in; another script or a server with many more
+  tools would test what it does not.
 
 A change to the search comes with the benchmark before and after.
 

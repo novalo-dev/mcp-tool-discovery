@@ -102,7 +102,7 @@ A mode that fails the contract is not merged, however useful.
 
 The search is measured, not tuned by feel.
 
-- `composer benchmark` prints the scores on the three fixture servers. A change
+- `composer benchmark` prints the scores on the four fixture servers. A change
   must not lower them: `tests/Search/BenchmarkTest.php` holds the floors.
 - A change that raises it raises the floors in the same pull request, and
   updates the numbers in docs/SEARCH.md and the README.
