@@ -16,8 +16,10 @@ src/
   Protocol/              Revision, Shaper, Json: the exact shape of each revision
   Mode/
     DiscoveryMode.php    the contract of a mode
+    ToolFinder.php       the search answer the searching modes share
     Compact/             the compact pack
     Grouped/             the grouped pack
+    Gateway/             the gateway pack
   Search/                Analyzer, ToolIndex (BM25F), ToolSearch, SearchQuery, SearchOptions
     Cache/               IndexCache: in memory, in PHP files
     Learning/            LearningStore: in memory, in a JSON file

@@ -11,12 +11,10 @@ before starting something large, so two people do not build the same thing.
 
 ## Modes
 
-The compact and grouped modes are written. One more is wanted, a pack of its
-own in `src/Mode/Gateway/`, held to the same contract tests.
-[docs/MODES.md](docs/MODES.md) describes what it should do.
-
-- **Gateway**: a single tool that searches, describes and runs, for clients
-  that accept only one.
+The compact, grouped and gateway modes are written. A new mode is welcome as
+a pack of its own in `src/Mode/<Name>/`, held to the same contract tests;
+[docs/MODES.md](docs/MODES.md) says how to build one. What decides the next
+one is a client the three serve badly: open an issue that names it.
 
 ## Search
 

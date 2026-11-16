@@ -1,13 +1,13 @@
 # Modes
 
 A mode decides what a client sees in `tools/list` and how calls to the mode's
-own tools reach the host's tools. Three are planned, two are written:
+own tools reach the host's tools. Three are written:
 
 | Mode | Pack | State |
 |---|---|---|
 | Compact | `src/Mode/Compact/` | shipped |
 | Grouped | `src/Mode/Grouped/` | shipped |
-| Gateway | `src/Mode/Gateway/` | open to contribution |
+| Gateway | `src/Mode/Gateway/` | shipped |
 
 ---
 
@@ -121,20 +121,38 @@ the constructor. Pick a `prefix` if a host tool could carry a group's name:
 The mode does not search, so it never hands out a `search_id` and never
 teaches the search; the contract test checks that too.
 
-## Gateway (wanted)
+## Gateway
 
-A single tool that searches and runs, for clients that cap the number of tools
-very low or for small models.
+A single tool, `use_tools`, for clients that cap the number of tools very low
+and for small models. Every call names an `operation`:
 
-What it should do:
+| `operation` | Arguments | What it does |
+|---|---|---|
+| `search` | `action`, `object`, `description`, `query` | the compact search, answer for answer: up to `maxDescribed` tools with their `inputSchema`, `unmatched` and `vocabulary`, a `search_id` when the host learns; with no field, every visible tool by name |
+| `describe` | `names` | the tools a guide names, with their `inputSchema`; a hidden name comes back in `unknown` like a missing one |
+| `run` | `name`, `arguments`, `search_id` | runs one host tool through `$runner->run()`; a failed run carries the tool's parameters |
 
-- list one tool, with an `action` of `search`, `describe` or `run`;
-- search through `$runner->search()`, as the compact mode does, so the host's
-  settings, cache and learning apply;
-- keep changes visible to the client despite the single tool: the destructive
-  flag of the one tool, or a two-step run where the first call returns what
-  would change. Whatever the choice, the contract test
-  `testAToolThatRunsAChangeIsMarkedAsOne` must pass.
+```php
+new GatewayMode(
+    prefix: 'acme_',             // acme_use_tools
+    title: 'Outils',             // translated by you
+    changesApart: false,         // true: changes listed as themselves, the gateway only reads
+    groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the list a bare search gives
+);
+```
+
+One tool carries one set of annotations, and `destructiveHint` is the only
+lever a client offers to ask the person first. So the gateway is marked
+destructive as soon as the caller may run a change through it, and marked as
+a read when every tool it reaches only reads. A client that asks before every
+destructive call will then ask before searches too: a host that would rather
+avoid it sets `changesApart`. The changes are then listed as themselves, with
+their own annotations, the gateway only reads, and a change sent through
+`run` is refused before the gate is asked, with the name to call instead.
+
+Search and describe share their code with the compact search
+(`src/Mode/ToolFinder.php`), so a host that switches between the two modes
+gets the same tools for the same request.
 
 ---
 

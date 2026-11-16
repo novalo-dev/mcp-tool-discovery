@@ -1,12 +1,12 @@
 name: Mode
-description: Propose or take a mode (Grouped, Gateway, or another)
+description: Propose a new mode
 labels: [mode]
 body:
   - type: input
     id: name
     attributes:
       label: Mode
-      placeholder: Grouped
+      placeholder: Paged
     validations:
       required: true
   - type: textarea

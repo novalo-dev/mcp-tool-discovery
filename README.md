@@ -162,7 +162,7 @@ nothing else, and every pack is held to the same
 |---|---|---|
 | **Compact** | a search tool and two runners: three tools, whatever the size of the server | shipped |
 | **Grouped** | one tool per group of tools ("files", "calendar") listing its actions, and one for its changes | shipped |
-| **Gateway** | a single tool that searches and runs everything | open to contribution |
+| **Gateway** | a single tool that searches, describes and runs everything | shipped |
 
 A host tool called by its own name is accepted in every mode, through the same
 checks: a client holding a list from before the server switched modes keeps
@@ -229,9 +229,25 @@ new GroupedMode(
 
 ### Gateway
 
-Not written yet, and wanted. [docs/MODES.md](docs/MODES.md) describes what it
-should do and how to build a mode; the contract tests say what it must never
-do.
+One tool, `use_tools`, for clients that accept very few: every call says its
+`operation`, `search`, `describe` or `run`, and the search is the compact one.
+
+```php
+new GatewayMode(
+    prefix: 'acme_',                 // acme_use_tools
+    changesApart: true,              // changes listed as themselves; the gateway only reads
+);
+```
+
+```json
+{"operation": "search", "action": "change", "object": "ticket status"}
+{"operation": "run", "name": "acme_set_ticket_status", "arguments": {"ticket_id": "7", "status": "done"}}
+```
+
+The tool is marked destructive whenever a change can go through it, so the
+client asks first; with `changesApart` it only reads, and each change keeps
+its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
+choice.
 
 ---
 
@@ -303,7 +319,7 @@ explains.
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
 | [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with a complete example |
-| [docs/MODES.md](docs/MODES.md) | how a mode works, the modes wanted, writing one |
+| [docs/MODES.md](docs/MODES.md) | how a mode works, the three written, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |
 | [ROADMAP.md](ROADMAP.md) | the work wanted: modes, search, hosts |

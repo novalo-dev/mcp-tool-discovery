@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Mode\Grouped;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Protocol\Json;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -296,14 +297,8 @@ final class GroupedMode implements DiscoveryMode
         // A hidden or unknown action goes to the runner as it is, so its
         // answer is the runner's own and the gate is never asked about it.
         $result = $runner->run($action, $inner);
-        if ($tool !== null && $result->isError && $this->schemaOnError) {
-            $schema = json_encode($tool->inputSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-            if (is_string($schema)) {
-                $result = $result->withContent('Parameters of ' . $action . ': ' . $schema);
-            }
-        }
 
-        return $result;
+        return $tool !== null && $result->isError && $this->schemaOnError ? ToolFinder::withParameters($result, $tool) : $result;
     }
 
     private function runnerFor(Tool $tool): string
