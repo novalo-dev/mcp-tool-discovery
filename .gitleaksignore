@@ -10,3 +10,5 @@
 # another commit: the scan reads every branch.
 228f69ad2db093a8a6ea53652e709560a58e8652:docs/examples/http-server.php:curl-auth-header:23
 228f69ad2db093a8a6ea53652e709560a58e8652:docs/HOSTS.md:curl-auth-header:51
+# The same curl line in the docblock of the ReactPHP example server.
+777b33656a5ea624b76840443a7ec232845ee65b:docs/examples/react/server.php:curl-auth-header:24
