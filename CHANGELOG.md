@@ -76,6 +76,9 @@ becomes the next version's section when it is published.
   U+FFFD, in the text and in the structured content alike, so an answer that
   carries a host tool's output, a `run_write_batch` report included, can
   always be encoded and reaches the client.
+- `MemoryLearningStore` and `FileLearningStore` keep at most 20,000 counts
+  of a word or pair for a tool, the most used ones, so what a store holds and
+  what each search reads stay the same size however long it serves.
 
 ## 0.3.0 - 2026-11-16
 
