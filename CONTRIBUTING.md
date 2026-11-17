@@ -132,6 +132,13 @@ away from a class of the library fails rather than passing for a class of the
 host. Every relative link must lead to a file, and its `#anchor` to a heading
 of that file. A rename in `src/` fixes the docs in the same pull request.
 
+The README's quick start is run as well: `tests/Docs/QuickStartTest.php` puts
+its blocks in one script, with the least host code they name (a user, a tool
+registry, the decoded params), and runs it in its own process. The gate it
+shows must still fit `ToolGate`, and the blocks must answer `tools/list` and
+`tools/call` in order. A step added to the quick start runs with the others;
+one that needs more host code adds it to the test.
+
 ## Protocol revisions
 
 - The conformance suite reads the official schemas from the commit in

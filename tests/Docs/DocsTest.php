@@ -19,8 +19,9 @@ use PHPUnit\Framework\TestCase;
  * Keeps the documentation true to the code. Hosts copy the snippets of the
  * README and docs/ as they are: a renamed class, method or named argument
  * that the docs still show fails in their project, not in ours. The snippets
- * are read, never run, since they call host code (a user, a tool registry)
- * that does not exist here.
+ * are read, not run, since they call host code (a user, a tool registry)
+ * that does not exist here; QuickStartTest runs the one page a host copies
+ * first, with that host code given.
  */
 final class DocsTest extends TestCase
 {

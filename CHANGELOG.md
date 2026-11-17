@@ -8,6 +8,15 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **The README's quick start is run in CI.** `tests/Docs/QuickStartTest.php`
+  runs its blocks as one script, with only the host code they name around
+  them, and checks what they answer: the compact list, a visible tool run by
+  its name, a hidden one refused. Until now the snippets were only read, so a
+  gate that no longer fit `ToolGate`, or blocks that worked only one by one,
+  passed the docs tests and failed in the first project that copied them.
+
 ## 0.4.0 - 2026-11-17
 
 ### Added

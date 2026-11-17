@@ -129,7 +129,8 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 ```
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
-envelope, the transport and the session. [docs/HOSTS.md](docs/HOSTS.md) shows
+envelope, the transport and the session. These blocks run in CI as they are
+written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [docs/HOSTS.md](docs/HOSTS.md) shows
 complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
 HTTP server kept up in one ReactPHP process, the same as a Symfony application,
