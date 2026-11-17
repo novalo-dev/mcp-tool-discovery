@@ -1,0 +1,29 @@
+{
+    "name": "example/notes-symfony-server",
+    "description": "The notes server over HTTP in a Symfony application, with its tools shown through novalo/mcp-tool-discovery.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.1",
+        "novalo/mcp-tool-discovery": "*@dev",
+        "symfony/framework-bundle": "6.4.49"
+    },
+    "autoload": {
+        "psr-4": {
+            "Example\\Notes\\Symfony\\": "src/"
+        },
+        "files": [
+            "../notes.php",
+            "../http.php"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../.."
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}

@@ -179,6 +179,27 @@ abstract class ModeContractTestCase extends TestCase
         self::fail($name . ' runs changes but is not in the list');
     }
 
+    public function testArgumentsGivenAsAListNeverReachTheGate(): void
+    {
+        // A JSON array decodes to a PHP array as an object does: a host that
+        // only checks is_array() hands it on, and the gate must not see it.
+        $list = ['x'];
+        [$name, $arguments] = $this->callTo($this->tool(self::READ));
+        $calls = [[self::READ, $list]];
+        if (array_key_exists('arguments', $arguments)) {
+            $calls[] = [$name, ['arguments' => $list] + $arguments];
+        }
+
+        foreach ($calls as [$called, $given]) {
+            $gate = $this->gate();
+            $result = (new Discovery($this->mode(), $gate))->call($called, $given, $this->tools());
+
+            self::assertTrue($result->isError, $called);
+            self::assertSame([], $gate->authorized, $called);
+            self::assertSame([], $gate->called, $called);
+        }
+    }
+
     public function testTheSearchLearnsOnlyFromAnAllowedRunThatSucceeded(): void
     {
         $visible = $this->tools()->filter(static fn(Tool $tool): bool => $tool->name !== self::HIDDEN);

@@ -15,6 +15,7 @@ namespace Novalo\McpToolDiscovery\Tests\Conformance;
 
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
@@ -115,6 +116,13 @@ final class Conformance
             $checks[$label . ': hidden tool'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, ['operation' => 'run', 'name' => 'acme_list_users'], $tools, $revision)];
             $checks[$label . ': no operation'] = ['definition' => 'CallToolResult', 'value' => $gateway->callTool($own, [], $tools, $revision)];
         }
+
+        $direct = new Discovery(new DirectMode(), new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
+        $checks['direct: tools/list'] = ['definition' => 'ListToolsResult', 'value' => $direct->listTools($tools, $revision, 60000)];
+        $checks['direct: run a read'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_get_file', ['file_id' => '1'], $tools, $revision)];
+        $checks['direct: run a change'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_set_ticket_status', [], $tools, $revision)];
+        $checks['direct: refused by the host'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_deactivate_user', [], $tools, $revision)];
+        $checks['direct: hidden tool'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_list_users', [], $tools, $revision)];
 
         return $checks;
     }

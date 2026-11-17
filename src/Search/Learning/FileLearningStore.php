@@ -21,7 +21,7 @@ namespace Novalo\McpToolDiscovery\Search\Learning;
  */
 final class FileLearningStore implements LearningStore
 {
-    /** No pair counts beyond this, so the file stays small however long it lives. */
+    /** No count goes beyond this; Counts::LIMIT bounds how many counts the file holds. */
     private const CEILING = 1000;
 
     /** @var array<string, array<string, int>>|null */
@@ -52,9 +52,7 @@ final class FileLearningStore implements LearningStore
             }
             $text = stream_get_contents($handle);
             $counts = is_string($text) ? self::decode($text) : [];
-            foreach (array_unique($words) as $word) {
-                $counts[$word][$tool] = min(self::CEILING, ($counts[$word][$tool] ?? 0) + 1);
-            }
+            $counts = Counts::add($counts, $words, $tool, self::CEILING);
             ftruncate($handle, 0);
             rewind($handle);
             $json = json_encode($counts, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);

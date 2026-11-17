@@ -20,12 +20,23 @@
         <testsuite name="examples">
             <directory>tests/Examples</directory>
         </testsuite>
+        <testsuite name="docs">
+            <directory>tests/Docs</directory>
+        </testsuite>
         <testsuite name="conformance">
             <directory>tests/Conformance</directory>
         </testsuite>
         <!-- Needs composer install in docs/examples/sdk; CI runs it in its own job. -->
         <testsuite name="sdk">
             <directory>tests/Sdk</directory>
+        </testsuite>
+        <!-- Needs composer install in docs/examples/react; CI runs it in its own job. -->
+        <testsuite name="react">
+            <directory>tests/React</directory>
+        </testsuite>
+        <!-- Needs composer install in docs/examples/symfony; CI runs it in its own job. -->
+        <testsuite name="symfony">
+            <directory>tests/Symfony</directory>
         </testsuite>
     </testsuites>
     <source>

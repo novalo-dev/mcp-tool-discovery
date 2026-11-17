@@ -13,13 +13,15 @@ declare(strict_types=1);
 
 
 /*
- * Prints the scores of the search benchmark and writes the shields.io endpoint
- * file of the one that counts, the requests in fields, into build/badges/.
+ * Prints the scores of the search benchmark and what each mode's list costs
+ * on the same servers, and writes the shields.io endpoint file of the score
+ * that counts, the requests in fields, into build/badges/.
  */
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Novalo\McpToolDiscovery\Tests\Fixtures\Benchmark;
+use Novalo\McpToolDiscovery\Tests\Fixtures\ListCost;
 
 $labels = [
     'fields' => 'In fields, nothing learned',
@@ -34,6 +36,11 @@ foreach ($labels as $key => $label) {
 }
 foreach ($scores['fields']['misses'] as $miss) {
     echo '  missed ', $miss, "\n";
+}
+echo "\nBytes of JSON on ", ListCost::REVISION, ": each list, and one compact search answer:\n";
+printf("  %-10s %5s %8s %8s %8s %8s %8s\n", 'server', 'tools', 'all', 'compact', 'gateway', 'grouped', 'search');
+foreach (ListCost::run() as $server => $row) {
+    printf("  %-10s %5d %8d %8d %8d %8s %8d\n", $server, $row['tools'], $row['all'], $row['compact'], $row['gateway'], $row['grouped'] ?? '-', $row['search']);
 }
 $score = $scores['fields'];
 $dir = dirname(__DIR__) . '/build/badges';

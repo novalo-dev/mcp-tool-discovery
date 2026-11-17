@@ -1,0 +1,16 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The ReactPHP example, held to the level of the other examples. It is
+    # read with ReactPHP installed in this directory, which the main analysis
+    # does not have.
+    level: max
+    phpVersion: 80100
+    paths:
+        - server.php
+    scanFiles:
+        - ../notes.php
+        - ../http.php
+    bootstrapFiles:
+        - vendor/autoload.php

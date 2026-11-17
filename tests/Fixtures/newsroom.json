@@ -1,0 +1,838 @@
+[
+ {
+  "name": "list_articles",
+  "description": "Use this tool to list the articles that are currently published on the site, newest first. Each entry gives the article ID, its headline, the section it belongs to, its authors and the date and time it went live. Results are paginated: pass the cursor returned by the previous call to get the next page. Drafts, scheduled articles and archived articles are not included; use the dedicated tools for those.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "section": {
+     "type": "string",
+     "description": "Only return articles of this section, for example politics or sport"
+    },
+    "cursor": {
+     "type": "string",
+     "description": "Pagination cursor returned by a previous call"
+    },
+    "limit": {
+     "type": "string",
+     "description": "Maximum number of articles to return, between 1 and 100. Defaults to 20"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_article",
+  "description": "Use this tool to read one article in full when you already know its ID. Returns the headline, the standfirst, the body as Markdown, the section, the tags, the authors, the featured image and the publication status. Works for published, scheduled and archived articles. Returns an error if no article has this ID.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article to read"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "search_articles",
+  "description": "Use this tool to find articles by words that appear in their headline, standfirst or body, when you do not know the article ID. Returns the matching articles ranked by relevance, with a short extract around the words found. Searches published and archived articles; set include_drafts to also search drafts the caller can see.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Words to look for"
+    },
+    "include_drafts": {
+     "type": "string",
+     "description": "Also search drafts. Defaults to false"
+    },
+    "limit": {
+     "type": "string",
+     "description": "Maximum number of results, defaults to 10"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create_draft",
+  "description": "Use this tool to start a new article. It creates a draft that only the newsroom can see; nothing is published. Returns the ID of the new draft, which the other draft tools take. The caller becomes the first author of the draft.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "headline": {
+     "type": "string",
+     "description": "Headline of the article"
+    },
+    "section": {
+     "type": "string",
+     "description": "Section the article will appear in"
+    },
+    "body": {
+     "type": "string",
+     "description": "Body of the article as Markdown. May be left empty and written later"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "update_draft",
+  "description": "Use this tool to change the headline, the standfirst or the body of a draft that has not been published yet. Only the fields you pass are changed; the others are kept. Every call saves a new revision, so earlier versions can be restored. To change an article that is already live, unpublish it first or edit its revision.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the draft to change"
+    },
+    "headline": {
+     "type": "string",
+     "description": "New headline"
+    },
+    "standfirst": {
+     "type": "string",
+     "description": "New standfirst, the short paragraph under the headline"
+    },
+    "body": {
+     "type": "string",
+     "description": "New body as Markdown"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_draft",
+  "description": "Use this tool to throw away a draft that will never be published. The draft and all its revisions are deleted for good and cannot be restored. Published articles cannot be deleted with this tool; archive them instead.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the draft to delete"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "list_drafts",
+  "description": "Use this tool to list the drafts the newsroom is working on, with their headline, authors, last change and review state (writing, in review, changes requested, approved). Filter by author or by review state to see, for example, every draft waiting for an editor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "author_id": {
+     "type": "string",
+     "description": "Only return drafts of this author"
+    },
+    "state": {
+     "type": "string",
+     "description": "Only return drafts in this review state: writing, in_review, changes_requested or approved"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "submit_draft_for_review",
+  "description": "Use this tool when the author has finished writing and the draft should go to an editor. It moves the draft to the in review state and notifies the editors of its section. The draft can no longer be changed by its authors until an editor approves it or asks for changes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the draft to send to the editors"
+    },
+    "note": {
+     "type": "string",
+     "description": "Optional note for the editor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "approve_draft",
+  "description": "Use this tool as an editor to accept a draft that is in review. The draft becomes approved and can then be published right away or scheduled. Requires the editor role on the draft's section. Does not publish anything by itself.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the draft to approve"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "request_draft_changes",
+  "description": "Use this tool as an editor to send a draft in review back to its authors with comments on what to fix. The draft goes back to the changes requested state, its authors are notified and can edit it again before submitting it once more.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the draft to send back"
+    },
+    "comments": {
+     "type": "string",
+     "description": "What the authors should change"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publish_article",
+  "description": "Use this tool to put an approved draft live on the site immediately. The article gets its public URL and its publication date, appears on the home page of its section and in the feeds. Returns the public URL. Fails if the draft has not been approved by an editor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the approved draft to publish"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "schedule_article",
+  "description": "Use this tool to publish an approved draft automatically at a date and time in the future, for example to go live at 6 in the morning. Until then the article stays invisible to readers. The time is given in the newsroom's time zone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "draft_id": {
+     "type": "string",
+     "description": "ID of the approved draft"
+    },
+    "publish_at": {
+     "type": "string",
+     "description": "Date and time to publish, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unschedule_article",
+  "description": "Use this tool to cancel the scheduled publication of an article before it goes live. The article goes back to being an approved draft and keeps its content; nothing is deleted.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the scheduled article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpublish_article",
+  "description": "Use this tool to take a live article off the site, for example after a legal complaint or a serious error. Readers get a page saying the article is no longer available. The article is kept as a draft with all its revisions and can be published again later.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the published article"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Why it is taken down, kept in the history"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "archive_article",
+  "description": "Use this tool to move an old article to the archive. It stays readable at its URL but leaves the home pages, the feeds and the related articles boxes. Archived articles can still be found with search_articles.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article to archive"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_article_revisions",
+  "description": "Use this tool to see the history of an article or a draft: every saved revision with its number, the person who saved it and when. Use the revision numbers with compare_article_revisions or restore_article_revision.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article or draft"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "restore_article_revision",
+  "description": "Use this tool to roll an article or a draft back to one of its earlier revisions, for example after a bad edit. The content of that revision becomes the current one; it is saved as a new revision, so nothing in the history is lost.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article or draft"
+    },
+    "revision": {
+     "type": "string",
+     "description": "Number of the revision to bring back"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "compare_article_revisions",
+  "description": "Use this tool to see what changed between two revisions of the same article: the words added and removed in the headline, the standfirst and the body, as a diff.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article or draft"
+    },
+    "from": {
+     "type": "string",
+     "description": "Older revision number"
+    },
+    "to": {
+     "type": "string",
+     "description": "Newer revision number, the current one when left out"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_authors",
+  "description": "Use this tool to list the people who write for the site: staff journalists, freelancers and guest contributors, with their name, role, sections and whether their account is active.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "active": {
+     "type": "string",
+     "description": "Only return active authors when true"
+    },
+    "section": {
+     "type": "string",
+     "description": "Only return authors of this section"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_author",
+  "description": "Use this tool to read the profile of one author: name, biography, photo, contact email, social accounts, sections and the number of articles published.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "author_id": {
+     "type": "string",
+     "description": "ID of the author"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invite_author",
+  "description": "Use this tool to give a new journalist, freelancer or guest contributor access to the newsroom. It sends them an email invitation to create their account with the role and sections given.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address of the person to invite"
+    },
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    },
+    "role": {
+     "type": "string",
+     "description": "writer, editor or contributor"
+    },
+    "sections": {
+     "type": "string",
+     "description": "Sections they will write for"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "deactivate_author",
+  "description": "Use this tool when someone leaves the newsroom. Their account can no longer sign in; their published articles stay online with their byline. Can be undone by inviting them again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "author_id": {
+     "type": "string",
+     "description": "ID of the author to deactivate"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "assign_article_author",
+  "description": "Use this tool to change the byline of an article or a draft: add a co-author, replace an author or remove one. The authors given replace the current list.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article or draft"
+    },
+    "author_ids": {
+     "type": "string",
+     "description": "IDs of the authors, in byline order"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "upload_media",
+  "description": "Use this tool to add a photo, a video or an audio file to the media library so it can be used in articles. Returns the media ID. Images are resized automatically for the site.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": "string",
+     "description": "URL of the file to fetch"
+    },
+    "caption": {
+     "type": "string",
+     "description": "Caption shown under the media"
+    },
+    "credit": {
+     "type": "string",
+     "description": "Photographer or source to credit"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_media",
+  "description": "Use this tool to browse the media library: photos, videos and audio files with their caption, credit, size and the articles that use them. Filter by type or by words in the caption.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "description": "image, video or audio"
+    },
+    "text": {
+     "type": "string",
+     "description": "Words to find in the caption or credit"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_media",
+  "description": "Use this tool to remove a photo, video or audio file from the media library for good, for example when the rights have expired. Articles that used it show an empty space instead.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "media_id": {
+     "type": "string",
+     "description": "ID of the media to remove"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "update_media_caption",
+  "description": "Use this tool to change the caption, the alternative text or the credit of a photo or video already in the media library. The change shows in every article that uses it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "media_id": {
+     "type": "string",
+     "description": "ID of the media"
+    },
+    "caption": {
+     "type": "string",
+     "description": "New caption"
+    },
+    "alt_text": {
+     "type": "string",
+     "description": "New alternative text for screen readers"
+    },
+    "credit": {
+     "type": "string",
+     "description": "New credit"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_comments",
+  "description": "Use this tool to read the comments readers left under articles, newest first, with their author, the article and the moderation state (pending, approved, rejected). Filter on pending to see the moderation queue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Only return comments of this article"
+    },
+    "state": {
+     "type": "string",
+     "description": "pending, approved or rejected"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "approve_comment",
+  "description": "Use this tool to publish a reader comment that is waiting in the moderation queue, so it appears under the article.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "comment_id": {
+     "type": "string",
+     "description": "ID of the comment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reject_comment",
+  "description": "Use this tool to refuse a reader comment, for example spam, insults or off topic messages. It never appears under the article. Optionally block the reader from commenting again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "comment_id": {
+     "type": "string",
+     "description": "ID of the comment"
+    },
+    "block_reader": {
+     "type": "string",
+     "description": "Also stop this reader from commenting. Defaults to false"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "reply_to_comment",
+  "description": "Use this tool to answer a reader comment in the name of the newsroom. The reply appears under the comment, marked as coming from the staff.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "comment_id": {
+     "type": "string",
+     "description": "ID of the comment to answer"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text of the reply"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_tags",
+  "description": "Use this tool to list the tags used to classify articles by topic, place or person, with the number of articles carrying each one.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Only return tags containing these words"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create_tag",
+  "description": "Use this tool to add a new tag to the list of topics articles can be classified under.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name of the tag"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "merge_tags",
+  "description": "Use this tool to clean up duplicate tags, such as two spellings of the same name. Every article carrying the source tags gets the target tag instead, and the source tags are deleted.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "source_tags": {
+     "type": "string",
+     "description": "Tags to fold into the target"
+    },
+    "target_tag": {
+     "type": "string",
+     "description": "Tag to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "tag_article",
+  "description": "Use this tool to set the tags of an article or a draft. The tags given replace the current ones. Tags must already exist; create them with create_tag.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article or draft"
+    },
+    "tags": {
+     "type": "string",
+     "description": "Tags to set"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "send_newsletter",
+  "description": "Use this tool to send the newsletter by email to every subscriber of a list right now, with the articles chosen. It cannot be called back once sent.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "list": {
+     "type": "string",
+     "description": "Name of the mailing list"
+    },
+    "article_ids": {
+     "type": "string",
+     "description": "Articles to feature, in order"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject line of the email"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "schedule_newsletter",
+  "description": "Use this tool to prepare a newsletter now and have it emailed to a list of subscribers later, at a set date and time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "list": {
+     "type": "string",
+     "description": "Name of the mailing list"
+    },
+    "article_ids": {
+     "type": "string",
+     "description": "Articles to feature"
+    },
+    "send_at": {
+     "type": "string",
+     "description": "When to send, ISO 8601"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list_newsletter_subscribers",
+  "description": "Use this tool to see who receives a newsletter: the email addresses on a mailing list, when they signed up and whether they unsubscribed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "list": {
+     "type": "string",
+     "description": "Name of the mailing list"
+    },
+    "cursor": {
+     "type": "string",
+     "description": "Pagination cursor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_article_stats",
+  "description": "Use this tool to see how one article is doing with readers: page views, unique visitors, average reading time, share of readers who reached the end, and where they came from.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "ID of the article"
+    },
+    "period": {
+     "type": "string",
+     "description": "today, 7d or 30d"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_traffic_report",
+  "description": "Use this tool to see the audience of the whole site over a period: visits, page views, the most read articles and sections, and the share of traffic from search engines, social networks and the newsletter.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "period": {
+     "type": "string",
+     "description": "today, 7d, 30d or 365d"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

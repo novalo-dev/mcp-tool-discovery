@@ -6,3 +6,9 @@
 # tests send; it opens nothing outside that example.
 5e5d08524324f8c11ac792bc5f88e3e57348cda3:docs/examples/http-server.php:curl-auth-header:23
 5e5d08524324f8c11ac792bc5f88e3e57348cda3:docs/HOSTS.md:curl-auth-header:51
+# The same lines again, as the 0.3.0 release brought them onto main under
+# another commit: the scan reads every branch.
+228f69ad2db093a8a6ea53652e709560a58e8652:docs/examples/http-server.php:curl-auth-header:23
+228f69ad2db093a8a6ea53652e709560a58e8652:docs/HOSTS.md:curl-auth-header:51
+# The same curl line in the docblock of the ReactPHP example server.
+777b33656a5ea624b76840443a7ec232845ee65b:docs/examples/react/server.php:curl-auth-header:24

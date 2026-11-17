@@ -100,8 +100,9 @@ final class ToolsHandler implements RequestHandlerInterface
             $revision = Revision::fromString($agreed);
         } catch (UnsupportedRevision) {
             // An SDK newer than the library may agree on a revision the
-            // library does not shape yet: answer in the latest it does.
-            $revision = Revision::V2025_11_25;
+            // library does not shape yet: answer in the latest one it shapes
+            // that the SDK can also hold a session for.
+            $revision = Revision::latestWithHandshake();
         }
 
         if ($request instanceof CallToolRequest) {

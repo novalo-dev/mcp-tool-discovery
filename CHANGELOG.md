@@ -8,6 +8,112 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-17
+
+### Added
+
+- **An eighth benchmark server, written as many real servers are.** A
+  newsroom: 40 tools in snake_case with no title, so the name stands in for
+  one, and descriptions of 18 to 70 words that open with "Use this tool to"
+  and point at their neighbours. Every other fixture has short descriptions
+  and a title on every tool. Its 100 requests were written before any of
+  them was run, and nothing was tuned on it: 35 of its 50 test requests find
+  the right tool first in fields, 46 in the top 3, 30 as one sentence.
+  Learning from its train half costs it one request, as on the school. The
+  floors of `tests/Search/BenchmarkTest.php` move to the new counts on the
+  449 test requests (362 first, 414 in the top 3, 388 asked again), so they
+  still guard every request that passes today.
+- **A server in a Symfony application**, `docs/examples/symfony`: the HTTP
+  example on Symfony 6.4, the long-term release that runs on PHP 8.1. It shows
+  which of the library's parts are services of the container (`SearchSetup`
+  with its index cache, shared by every caller) and which must not be (the
+  gate and the `Discovery`, built by the controller in each request, since a
+  worker such as FrankenPHP keeps the container from one request to the
+  next). It answers from the same `docs/examples/http.php`, and the tests ask
+  it everything they ask the PHP-FPM server, plus one kernel serving callers
+  in turn. A CI job installs the pinned `symfony/framework-bundle` and runs
+  them; it is part of **CI passed**.
+- **A server that stays up, on ReactPHP**, `docs/examples/react/server.php`:
+  the HTTP example in one long-running process, as a ReactPHP, RoadRunner,
+  Swoole or FrankenPHP worker runs it. It shows what such a host keeps between
+  requests (one `MemoryIndexCache` in one shared `SearchSetup`) and what it
+  must not (the gate and the `Discovery`, built inside each request). Both
+  HTTP servers now answer from the same `docs/examples/http.php`, and the tests
+  ask the ReactPHP server everything they ask the PHP-FPM one, plus callers
+  taking turns in one process. A CI job installs the pinned `react/http` and
+  runs them; it is part of **CI passed**.
+- **Direct mode**, `src/Mode/Direct/DirectMode.php`: every tool the caller
+  may see, listed as itself, and no tool of the mode's own. For a server
+  small enough to list everything, and for a host that lets its users turn
+  the other modes off: `$settings->compact ? new CompactMode() : new
+  DirectMode()` keeps one path for `tools/list` and `tools/call`, where such
+  a host used to need a second one that had to filter with the gate and shape
+  each revision again on its own. Held to the mode contract and added to the
+  conformance checks.
+- **What each mode costs**, measured: `composer benchmark` now also prints
+  the bytes of JSON of each mode's list and of one compact search answer on
+  the six benchmark servers, and docs/MODES.md opens with "Choosing a mode",
+  that table and when to take each mode. On the server with 176 tools the
+  whole list is 60,640 bytes, the compact list 2,871 and the gateway list
+  1,845, whatever the number of tools. `tests/Search/ListCostTest.php`
+  guards those claims.
+- **`Revision::negotiate()`**, the revision to answer `initialize` with: the
+  client's own when the library shapes it, otherwise the latest revision with
+  a handshake, as the specification asks. It takes `protocolVersion` as the
+  client sent it, missing or not a string included, and never answers with
+  the stateless revision, which has no handshake. **`Revision::latestWithHandshake()`**
+  gives that fallback on its own. A host no longer names a revision of its
+  own to fall back to, so it moves on when the library learns a newer one;
+  the examples in docs/HOSTS.md use both.
+- **The docs are tested.** `tests/Docs/DocsTest.php` reads every PHP snippet
+  of the README and docs/ without running it: each must parse, and each class,
+  method, enum case and named argument of the library it names must exist,
+  with the case Composer's autoloader needs. Every relative link must lead to
+  a file and its anchor to a heading. A snippet a host copies can no longer
+  name a parameter the library renamed. Each class of the library a page
+  names comes with its `use` line, in that block or one above it, and a name
+  one typo or one case away from a class of the library (`new DirectMod()`,
+  `new toolSet()`) fails instead of passing for a class of the host. The
+  snippets of the grouped and gateway modes in the README, and those of
+  docs/MODES.md and docs/SEARCH.md, now show their `use` lines: copied as
+  they were, they stopped at "Class not found".
+
+### Changed
+
+- **Arguments sent as a JSON array never reach the gate.** `json_decode()`
+  turns a JSON array into a PHP array as it does an object, so a host that
+  checks `is_array()` and a mode that read `arguments` the same way handed a
+  gate `[0 => ...]` where it expects named arguments. Only the batch runner
+  refused that. `Discovery::call()` and `ToolRunner::run()` now answer
+  "arguments must be an object." with `isError` before the mode or the gate
+  sees anything, and the compact, grouped and gateway runners give the same
+  answer for the `arguments` they carry. Both methods document what they
+  really accept, `array<mixed>`, so static analysis no longer takes the check
+  for dead code. `ToolRunner::isObject()` is the one rule they share, for
+  modes written outside the library too; the empty array still stands for
+  `{}`. The mode contract tests check it for every mode.
+- **Grouped mode, a lighter list.** Each action used to be named up to four
+  times: in the read tool's description, in its `action` or `describe` enum,
+  and again in the change tool. It is now named twice, a line with its title
+  in the tool that runs it and that tool's `action` enum. The read tool no
+  longer repeats the changes, it names the change tool instead, and
+  `describe` takes plain strings (an unknown name still comes back in
+  `unknown`). A tool without a title is listed by its name alone rather than
+  "name: name". On the workspace benchmark server the grouped list goes from
+  15,444 to 14,314 bytes, and its eight group tools from 8,616 to 7,486.
+  Clients that relied on the `describe` enum to check names now get the
+  same answer from the call.
+
+### Security
+
+- `CallResult::json()` replaces each sequence that is not valid UTF-8 with
+  U+FFFD, in the text and in the structured content alike, so an answer that
+  carries a host tool's output, a `run_write_batch` report included, can
+  always be encoded and reaches the client.
+- `MemoryLearningStore` and `FileLearningStore` keep at most 20,000 counts
+  of a word or pair for a tool, the most used ones, so what a store holds and
+  what each search reads stay the same size however long it serves.
+
 ## 0.3.0 - 2026-11-16
 
 ### Added
@@ -108,6 +214,16 @@ becomes the next version's section when it is published.
   half is now 349 requests, and the floors in `BenchmarkTest` are the new
   counts (286 first, 321 in the top 3, 304 asked again); the badge moves from
   81% to 82%.
+- **A seventh benchmark server, in Greek.** The service desk of a town hall:
+  40 tools with English snake_case names (`parking_permit_renew`) and Greek
+  titles and descriptions, and 100 requests written before any of them was
+  run, about half typed without accents as many people type Greek. Nothing
+  in the search changed for it: 41 of its 50 test requests find the right
+  tool first in fields, 47 in the top 3; learning from its train half moves
+  none of them, and asked a second time 44 come first. Written with accents, 24 of 26 come first; without, 17 of 24. The
+  test half is now 399 requests, and the floors in `BenchmarkTest` are the
+  new counts (327 first, 368 in the top 3, 348 asked again); the badge stays
+  at 82%.
 
 ### Changed
 

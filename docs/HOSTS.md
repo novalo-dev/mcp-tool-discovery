@@ -4,9 +4,11 @@ The library has no transport, no session and no JSON-RPC envelope: the host
 keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
-over stdio and one over HTTP, and in one on the official PHP SDK. All three
-serve the same notes tools, kept with their gate in
-[examples/notes.php](examples/notes.php): only the transport differs.
+over stdio and one over HTTP, in the same HTTP server kept up in one process
+on ReactPHP, in a Symfony application, and in one on the official PHP SDK.
+All five serve the same notes
+tools, kept with their gate in [examples/notes.php](examples/notes.php): only
+the transport differs.
 
 ---
 
@@ -29,7 +31,7 @@ Its parts, in the order a host writes them:
 |---|---|---|
 | Tool definitions | `definitions()`, in `notes.php` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
-| The revision | `initialize` in `answer()`, through `negotiate()` | the client's revision when the library knows it, otherwise the latest handshake revision |
+| The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
@@ -43,9 +45,11 @@ a call with no name.
 [examples/http-server.php](examples/http-server.php) serves the same tools
 over the Streamable HTTP transport, the way most PHP applications run: one
 process per request, behind PHP-FPM or any web server. It answers every
-message with one JSON body and keeps no session. The tests run it behind PHP's
-built-in server and call it over HTTP
-([tests/Examples/HttpServerTest.php](../tests/Examples/HttpServerTest.php)).
+message with one JSON body and keeps no session. What it answers is in
+[examples/http.php](examples/http.php), one function from a request to its
+answer, which the ReactPHP and Symfony servers below call too. The tests run it behind
+PHP's built-in server and call it over HTTP
+([tests/Examples/HttpServerTestCase.php](../tests/Examples/HttpServerTestCase.php)).
 
 ```
 php -S 127.0.0.1:8080 docs/examples/http-server.php
@@ -67,6 +71,71 @@ The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
 another origin, which the specification asks a server to refuse. The cache
 directory must be one only the server writes to: the index files are run.
+
+---
+
+## A server that stays up, on ReactPHP
+
+[examples/react/server.php](examples/react/server.php) is the same HTTP server
+in one PHP process that serves every request, on
+[ReactPHP](https://reactphp.org)'s event loop. The same holds for a worker of
+RoadRunner, Swoole or FrankenPHP: the process outlives the request. It answers
+from the same [examples/http.php](examples/http.php), so a client cannot tell
+the two apart: the tests ask it everything they ask the PHP-FPM server
+([tests/React/ReactServerTest.php](../tests/React/ReactServerTest.php)). The
+example pins `react/http` in
+[examples/react/composer.json](examples/react/composer.json), and a CI job
+installs it there and runs those tests.
+
+```
+cd docs/examples/react && composer install && cd -
+php docs/examples/react/server.php
+```
+
+What changes from one process per request:
+
+| Part | In a process that stays up | Why |
+|---|---|---|
+| The caller | still a gate and a `Discovery` per request, built inside the handler | the process serves every caller in turn; a `Discovery` built once above the handler would answer each of them with the first caller's gate |
+| The search index | one `MemoryIndexCache`, in one `SearchSetup` shared by every request | built once per set of visible tools and kept in memory; its key is the tools the caller may see, so a reader never gets the index of an admin's tools |
+| The notes | one `Notes` in memory | the process keeps them; a real server keeps its database connection the same way |
+
+A learning store, if the host gives one, is shared the same way: the
+`SearchSetup` is built once, beside the cache.
+
+---
+
+## A server in a Symfony application
+
+[examples/symfony](examples/symfony) is the same HTTP server as a Symfony 6.4
+application: the library's parts are services of the container, the transport
+is one controller, [McpController](examples/symfony/src/McpController.php), and
+the Discovery is built for each request. It answers from the same
+[examples/http.php](examples/http.php), and the tests ask it everything they
+ask the PHP-FPM server, plus one kernel serving callers in turn, as a worker
+does ([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
+The example pins `symfony/framework-bundle` in
+[examples/symfony/composer.json](examples/symfony/composer.json), and a CI job
+installs it there and runs those tests.
+
+```
+cd docs/examples/symfony && composer install && cd -
+php -S 127.0.0.1:8080 docs/examples/symfony/public/app.php
+```
+
+The wiring is in [Kernel.php](examples/symfony/src/Kernel.php); a real
+application writes the same entries in `config/services.yaml`:
+
+| Part | In the container | Why |
+|---|---|---|
+| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
+| The notes | a shared service | they stand for the host's database, which the container already gives its services |
+| The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
+
+The caller here comes from the token, as in the other servers. In an
+application with the security bundle, the controller builds the gate from
+`Security::getUser()` instead: what the library needs is the same, a gate for
+this caller.
 
 ---
 
@@ -116,6 +185,10 @@ the `Discovery` from the caller of each request, as in the HTTP example.
 - **Errors in the right place.** A refused or failed tool comes back inside
   the result with `isError`, as the specification asks; JSON-RPC errors are
   for requests the host cannot read.
+- **Arguments as `json_decode()` gives them.** Check that `arguments` is an
+  array before calling `callTool()`, as every example does. A JSON array
+  passes that check too; the library refuses it with `isError` before your
+  gate sees it, so `authorize()` and `call()` always get named arguments.
 
 The stateless revision `2026-07-28` has no `initialize` handshake and no
 session at all, which suits one process per request. The HTTP example serves

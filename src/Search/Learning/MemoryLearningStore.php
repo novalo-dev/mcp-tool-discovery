@@ -28,8 +28,7 @@ final class MemoryLearningStore implements LearningStore
 
     public function record(array $words, string $tool): void
     {
-        foreach (array_unique($words) as $word) {
-            $this->counts[$word][$tool] = ($this->counts[$word][$tool] ?? 0) + 1;
-        }
+        // Bounded too: a process that stays up keeps the store as long as it runs.
+        $this->counts = Counts::add($this->counts, $words, $tool);
     }
 }

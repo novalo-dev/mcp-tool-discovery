@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Tests\Search;
 use Novalo\McpToolDiscovery\Search\Analyzer;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\Counts;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
@@ -282,6 +283,30 @@ final class ToolSearchTest extends TestCase
         (new FileLearningStore($file))->record(['ticket'], 'acme_get_ticket');
 
         self::assertSame(['ticket' => ['acme_get_ticket' => 2]], (new FileLearningStore($file))->load());
+        unlink($file);
+    }
+
+    public function testAStoreKeepsItsMostUsedCountsWithinItsLimit(): void
+    {
+        $file = self::temporary('learning') . '.json';
+        $words = array_map(static fn(int $i): string => 'word' . $i, range(1, Counts::LIMIT + 500));
+        // Run twice, so they outlast the words run once.
+        $often = ['often', 'often pair'];
+        foreach ([new MemoryLearningStore(), new FileLearningStore($file)] as $store) {
+            $store->record($often, 'acme_get_ticket');
+            $store->record($often, 'acme_get_ticket');
+            // In chunks, as runs of many searches would add them.
+            foreach (array_chunk($words, 136) as $chunk) {
+                $store->record($chunk, 'acme_get_ticket');
+            }
+            $store->record(['latest'], 'acme_get_ticket');
+
+            $counts = $store instanceof FileLearningStore ? (new FileLearningStore($file))->load() : $store->load();
+            self::assertLessThanOrEqual(Counts::LIMIT, array_sum(array_map('count', $counts)));
+            self::assertSame(2, $counts['often']['acme_get_ticket'] ?? null);
+            self::assertSame(2, $counts['often pair']['acme_get_ticket'] ?? null);
+            self::assertSame(1, $counts['latest']['acme_get_ticket'] ?? null);
+        }
         unlink($file);
     }
 

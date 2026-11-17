@@ -57,7 +57,7 @@ function answer(array $message, Discovery $discovery, ToolSet $tools, ?Revision 
 
     switch ($method) {
         case 'initialize':
-            $revision = negotiate($params['protocolVersion'] ?? null);
+            $revision = Revision::negotiate($params['protocolVersion'] ?? null);
 
             return ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
                 'protocolVersion' => $revision->value,
@@ -67,7 +67,7 @@ function answer(array $message, Discovery $discovery, ToolSet $tools, ?Revision 
         case 'ping':
             return ['jsonrpc' => '2.0', 'id' => $id, 'result' => new \stdClass()];
         case 'tools/list':
-            return ['jsonrpc' => '2.0', 'id' => $id, 'result' => $discovery->listTools($tools, $revision ?? Revision::V2025_11_25)];
+            return ['jsonrpc' => '2.0', 'id' => $id, 'result' => $discovery->listTools($tools, $revision ?? Revision::latestWithHandshake())];
         case 'tools/call':
             $name = $params['name'] ?? null;
             $arguments = $params['arguments'] ?? [];
@@ -76,7 +76,7 @@ function answer(array $message, Discovery $discovery, ToolSet $tools, ?Revision 
             }
 
             /** @var array<string, mixed> $arguments a JSON object decoded as an array */
-            return ['jsonrpc' => '2.0', 'id' => $id, 'result' => $discovery->callTool($name, $arguments, $tools, $revision ?? Revision::V2025_11_25)];
+            return ['jsonrpc' => '2.0', 'id' => $id, 'result' => $discovery->callTool($name, $arguments, $tools, $revision ?? Revision::latestWithHandshake())];
     }
 
     return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32601, 'message' => 'Method not found.']];

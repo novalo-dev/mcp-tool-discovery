@@ -5,6 +5,9 @@ reaches it through `ToolRunner::search()`, with the `SearchSetup` the host gave
 `Discovery`; it can also be used on its own:
 
 ```php
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\ToolSearch;
+
 $search = new ToolSearch($visibleTools);
 $found = $search->search(new SearchQuery(action: 'change', object: 'ticket status', description: 'move the ticket to done'));
 $found = $search->search('change the status of a ticket'); // free keywords still work
@@ -82,6 +85,8 @@ The library holds no business vocabulary. A host that knows its clients say
 "meeting" for a calendar event gives a map, and words to ignore if it wants:
 
 ```php
+use Novalo\McpToolDiscovery\Search\SearchOptions;
+
 new SearchOptions(synonyms: ['meeting' => 'calendar event', 'admin' => 'role'], stopWords: ['please']);
 ```
 
@@ -97,6 +102,10 @@ Building the index is most of the cost of a search. An `IndexCache`, given
 once in the `SearchSetup`, keeps it for every mode:
 
 ```php
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+
 new SearchSetup(cache: new MemoryIndexCache());        // a long-running server
 new SearchSetup(cache: new FileIndexCache($cacheDir)); // each request starts afresh
 ```
@@ -178,22 +187,24 @@ locked while it is written.
 
 ## The measures
 
-Six fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Eight fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
-(40 tools, `KlassenfahrtAbsagen`) and a cloud hosting panel (176 tools,
-`nimbo_detach_volume`). 697 requests, each written as one sentence and in
-fields, with the tool a person would expect.
+(40 tools, `KlassenfahrtAbsagen`), a cloud hosting panel (176 tools,
+`nimbo_detach_volume`), the service desk of a town hall written in Greek
+(40 tools, `parking_permit_renew`) and a newsroom with no titles and long
+descriptions (40 tools, `schedule_article`). 897 requests, each written as one
+sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 349 requests | Right tool first | Top 3 |
+| Test half, 449 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 286 | 321 |
-| The same request as one sentence | 155 | 213 |
-| In fields, after every train request was run once | 288 | 321 |
-| In fields, after the test requests were run once, then asked again | 304 | 327 |
+| The request in fields | 362 | 414 |
+| The same request as one sentence | 204 | 284 |
+| In fields, after every train request was run once | 363 | 414 |
+| In fields, after the test requests were run once, then asked again | 388 | 424 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -220,10 +231,36 @@ neighbour of the same object ("drop the old MySQL cluster" finds the tool that
 creates one, the word "cluster" being in both), and a few words the tools do
 not use ("machine" and "VM" where the tools say "server").
 
+The town hall is another script: Greek titles and descriptions, English
+snake_case names, so no word of a request ever meets a tool's name. Its 100
+requests were written before any of them was run, and about half of them are
+typed as many people type Greek, without the accents (`ακυρωσε` for
+`ακύρωσε`). Nothing was tuned on it: 41 of its 50 test requests find the
+right tool first in fields, 47 in the top 3. The accents are where it loses:
+24 of the 26 test requests written with them come first, 17 of the 24
+written without. A word typed without its accent is another word to the
+index, and only its trigrams away from the accent still meet the tool
+(`εκδηλωση` asked, `εκδήλωση` in the tool).
+
+The newsroom is written as many real servers are, and none of the others
+is: no tool has a title, so its name stands in for one, and each description
+runs 18 to 70 words, opens with "Use this tool to", and points at its
+neighbours ("unpublish it first", "use compare_article_revisions"). Its 100
+requests were written before any of them was run, and nothing was tuned on
+it: 35 of its 50 test requests find the right tool first in fields, 46 in the
+top 3, and 30 as one sentence, closer to the fields than on any other server,
+since long descriptions hold more of a sentence's words. What it misses is
+mostly words the tools do not use ("sign off" for approve, "journalist" for
+an author, "hide" for unpublish), and a word that a neighbour's description
+uses in passing: "versions" finds the tool that edits a draft, whose
+description says earlier versions can be restored, before the tool that
+lists them. Learning from its train half costs it one request (34 first),
+as on the school; the total still gains one.
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
-Learning by pairs of words loses one repeated request against learning word
-by word (304 against 305 first, 327 against 326 in the top 3) and wins 4 new
+Learning by pairs of words, measured before the town hall came in, loses
+one repeated request against learning word by word (304 against 305 first, 327 against 326 in the top 3) and wins 4 new
 ones (288 against 284): new requests are the ones that count.
 Stronger settings gained more on repeats and lost on new requests: they were
 not kept.

@@ -6,3 +6,8 @@
 /docs/examples/var/
 /docs/examples/sdk/vendor/
 /docs/examples/sdk/composer.lock
+/docs/examples/react/vendor/
+/docs/examples/react/composer.lock
+/docs/examples/symfony/vendor/
+/docs/examples/symfony/composer.lock
+/docs/examples/symfony/var/

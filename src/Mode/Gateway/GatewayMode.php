@@ -171,7 +171,7 @@ final class GatewayMode implements DiscoveryMode
         if (!is_string($name) || $name === '') {
             return CallResult::error('name is required: the exact name of a tool, as search gave it.');
         }
-        if (!is_array($inner)) {
+        if (!ToolRunner::isObject($inner)) {
             return CallResult::error('arguments must be an object.');
         }
         if ($this->owns($name)) {
@@ -184,7 +184,6 @@ final class GatewayMode implements DiscoveryMode
             return CallResult::error(sprintf('%s changes something: call it by its own name.', $name));
         }
         $searchId = $arguments['search_id'] ?? null;
-        /** @var array<string, mixed> $inner */
         // A hidden or unknown name goes to the runner as it is, so its answer
         // is the runner's own and the gate is never asked about it.
         $result = $runner->run($name, $inner, is_string($searchId) ? $searchId : null);

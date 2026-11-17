@@ -40,9 +40,11 @@ Every pull request runs:
 |---|---|---|
 | CI | Coding standard, static analysis, hygiene | PER-CS 2.0, PHPStan level max on `src/`, `bin/` and `docs/examples/`, level 6 on `tests/`, the hygiene of files and commit messages |
 | CI | PHP 8.1+ compatibility | PHPCompatibility reads every construct, function and class against each PHP from 8.1 up |
-| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples and conformance suites (the `sdk` suite runs in its own job) |
+| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples, docs and conformance suites (the `sdk`, `react` and `symfony` suites run in their own jobs) |
 | CI | What Composer installs | the package holds `src/` and the licence, not the tests |
 | CI | Example on the official PHP SDK | installs `mcp/sdk` at the version `docs/examples/sdk/composer.json` pins, PHPStan level max on the example, and the `sdk` test suite; not part of **CI passed** while the SDK is below 1.0 |
+| CI | Example on ReactPHP | installs `react/http` at the version `docs/examples/react/composer.json` pins, PHPStan level max on the example, and the `react` test suite; part of **CI passed**, since ReactPHP is stable and pinned |
+| CI | Example on Symfony | installs `symfony/framework-bundle` at the version `docs/examples/symfony/composer.json` pins, PHPStan level max on the example and level 6 on its test, and the `symfony` test suite; part of **CI passed**, since Symfony 6.4 is a long-term release and pinned |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
 | Security | Dependencies, Secrets, Semgrep, Psalm taint analysis | `composer audit`, Gitleaks over the whole history, Semgrep rules for PHP and secrets, and Psalm following what a client sends (`tests/Security/entry.php`) to a file, a query, a command or an output |
 
@@ -79,7 +81,7 @@ whatever the matrix becomes), **PHP 8.1+ compatibility**, **Semgrep**,
 A mode is the most useful contribution and the most guarded one, because it
 stands between a client and a server's tools.
 
-1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and how the three
+1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and how the four
    written ones make their choices.
 2. **Create the pack** in `src/Mode/<Name>/`, with a class that implements
    `DiscoveryMode`. Keep everything the mode needs in its folder, and
@@ -105,8 +107,10 @@ A mode that fails the contract is not merged, however useful.
 
 The search is measured, not tuned by feel.
 
-- `composer benchmark` prints the scores on the six fixture servers. A change
-  must not lower them: `tests/Search/BenchmarkTest.php` holds the floors.
+- `composer benchmark` prints the scores on the six fixture servers, and what
+  each mode's list costs on them. A change must not lower the scores:
+  `tests/Search/BenchmarkTest.php` holds the floors. A change to a mode's
+  descriptions refreshes the table of docs/MODES.md from that output.
 - A change that raises it raises the floors in the same pull request, and
   updates the numbers in docs/SEARCH.md and the README.
 - New fixture queries go in `tests/Fixtures/queries.json`, written **before**
@@ -116,6 +120,17 @@ The search is measured, not tuned by feel.
 - The library holds no list of words and assumes no naming convention: no stop
   words, no verbs, no prefix to strip. A word of a business ("meeting",
   "admin") belongs in the host's synonyms, not in the library.
+
+## Changing the docs
+
+Hosts copy the snippets of the README and docs/ as they stand.
+`tests/Docs/DocsTest.php` reads every PHP snippet without running it: it must
+parse, and every class, method, enum case and named argument of the library it
+names must exist, with the same case. A class of the library is imported by a
+`use` line in its block or a block above it on the page, and a name one typo
+away from a class of the library fails rather than passing for a class of the
+host. Every relative link must lead to a file, and its `#anchor` to a heading
+of that file. A rename in `src/` fixes the docs in the same pull request.
 
 ## Protocol revisions
 

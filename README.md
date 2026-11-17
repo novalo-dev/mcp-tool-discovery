@@ -117,7 +117,9 @@ use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 
 $discovery = new Discovery(new CompactMode(), new MyGate($user, $myTools));
-$revision = Revision::fromString($negotiatedProtocolVersion);
+
+// initialize: answer with $revision->value as protocolVersion, keep it for the session
+$revision = Revision::negotiate($params['protocolVersion'] ?? null);
 
 // tools/list
 $result = $discovery->listTools($tools, $revision, ttlMs: 300000);
@@ -128,8 +130,10 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
 envelope, the transport and the session. [docs/HOSTS.md](docs/HOSTS.md) shows
-two complete servers written by hand, one over stdio and one over HTTP with a
-gate built for each request, that the tests run as a client would.
+complete servers that the tests run as a client would: two written by hand,
+one over stdio and one over HTTP with a gate built for each request, the same
+HTTP server kept up in one ReactPHP process, the same as a Symfony application,
+and one on the official PHP SDK.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:
@@ -163,10 +167,13 @@ nothing else, and every pack is held to the same
 | **Compact** | a search tool and two runners: three tools, whatever the size of the server | shipped |
 | **Grouped** | one tool per group of tools ("files", "calendar") listing its actions, and one for its changes | shipped |
 | **Gateway** | a single tool that searches, describes and runs everything | shipped |
+| **Direct** | every tool as itself, as a server without the library lists it | shipped |
 
 A host tool called by its own name is accepted in every mode, through the same
 checks: a client holding a list from before the server switched modes keeps
-working.
+working. [Choosing a mode](docs/MODES.md#choosing-a-mode) gives what each
+list costs on the benchmark servers: on the one with 176 tools, 60,640 bytes
+for every tool as itself, 2,871 for the compact list.
 
 ### Compact
 
@@ -213,6 +220,8 @@ declare, one tool named after it that runs its reads and describes its
 actions, and `<group>_change`, destructive, for its changes.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+
 new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '', // '' lists the tool as itself
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title
@@ -233,6 +242,8 @@ One tool, `use_tools`, for clients that accept very few: every call says its
 `operation`, `search`, `describe` or `run`, and the search is the compact one.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+
 new GatewayMode(
     prefix: 'acme_',                 // acme_use_tools
     changesApart: true,              // changes listed as themselves; the gateway only reads
@@ -248,6 +259,20 @@ The tool is marked destructive whenever a change can go through it, so the
 client asks first; with `changesApart` it only reads, and each change keeps
 its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
 choice.
+
+### Direct
+
+Every tool the caller may see, as itself, and no tool of the mode's own. For
+a server small enough to list everything, or a setting that lets the server's
+users turn the other modes off, without a second path for `tools/list` and
+`tools/call` that skips your gate's `visible()` or the shaping per revision:
+
+```php
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+
+$mode = $settings->compact ? new CompactMode() : new DirectMode();
+$discovery = new Discovery($mode, new MyGate($user, $myTools));
+```
 
 ---
 
@@ -277,19 +302,21 @@ client gives its request **in fields**, and each field is scored on its own:
   with it lifts that tool for those pairs of words, within a cap. Only words
   the tools use are kept.
 
-697 requests over six fictional servers, a workspace (snake_case), a
+897 requests over eight fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
-written in German (PascalCase) and a cloud hosting panel with 176 tools.
+written in German (PascalCase), a cloud hosting panel with 176 tools, the
+service desk of a town hall written in Greek and a newsroom whose tools have
+no title and long descriptions, as many real servers write them.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 349 requests | Right tool first | Right tool in the top 3 |
+| Test half, 449 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **286** | **321** |
-| The same request as one sentence | 155 | 213 |
-| In fields, after learning from the other half | 288 | 321 |
-| In fields, asked a second time | 304 | 327 |
+| The request in fields | **362** | **414** |
+| The same request as one sentence | 204 | 284 |
+| In fields, after learning from the other half | 363 | 414 |
+| In fields, asked a second time | 388 | 424 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
@@ -320,8 +347,8 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP and the official PHP SDK |
-| [docs/MODES.md](docs/MODES.md) | how a mode works, the three written, writing one |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application and the official PHP SDK |
+| [docs/MODES.md](docs/MODES.md) | choosing a mode, what each costs, how a mode works, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |
 | [ROADMAP.md](ROADMAP.md) | the work wanted: modes, search, hosts |

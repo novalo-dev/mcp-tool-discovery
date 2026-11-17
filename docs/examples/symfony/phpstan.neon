@@ -1,0 +1,17 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The Symfony example, held to the level of the other examples. It is
+    # read with Symfony installed in this directory, which the main analysis
+    # does not have.
+    level: max
+    phpVersion: 80100
+    paths:
+        - src
+        - public/app.php
+    scanFiles:
+        - ../notes.php
+        - ../http.php
+    bootstrapFiles:
+        - vendor/autoload.php

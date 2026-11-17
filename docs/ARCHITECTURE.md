@@ -20,6 +20,7 @@ src/
     Compact/             the compact pack
     Grouped/             the grouped pack
     Gateway/             the gateway pack
+    Direct/              the direct pack: every tool as itself
   Search/                Analyzer, ToolIndex (BM25F), ToolSearch, SearchQuery, SearchOptions
     Cache/               IndexCache: in memory, in PHP files
     Learning/            LearningStore: in memory, in a JSON file
@@ -106,8 +107,11 @@ published as the README badges.
 tool with no parameter would otherwise send `"properties": []`, which every
 revision rejects.
 
-The host keeps what belongs to the session: the version negotiation, the
-JSON-RPC envelope, notifications, and the cache lifetime it passes as `ttlMs`.
+The host keeps what belongs to the session: the handshake, the JSON-RPC
+envelope, notifications, and the cache lifetime it passes as `ttlMs`. Which
+revision to answer `initialize` with depends on what the library shapes, so
+`Revision::negotiate()` gives it: the client's own when the library knows it,
+otherwise the latest with a handshake.
 The default is no caching and a `private` scope, since a list filtered by the
 caller's rights is never public.
 

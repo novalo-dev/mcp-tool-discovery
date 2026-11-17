@@ -74,7 +74,7 @@ final class ToolRunner
     }
 
     /**
-     * @param array<string, mixed> $arguments
+     * @param array<mixed> $arguments named arguments; a list is refused
      * @param string|null $searchId the id of the search that found the tool, if the caller kept it
      */
     public function run(string $name, array $arguments, ?string $searchId = null): CallResult
@@ -84,6 +84,12 @@ final class ToolRunner
             // The same answer for a tool that does not exist and one the
             // caller may not see, so the error never reveals the second.
             return CallResult::error(sprintf('Unknown tool: %s.', self::printable($name)));
+        }
+        if (!self::isObject($arguments)) {
+            // Checked here as well as in Discovery and in each mode, so a mode
+            // written outside the library cannot hand a gate a list either:
+            // no gate should have to guess what one means.
+            return CallResult::error('arguments must be an object.');
         }
         $refusal = $this->gate->authorize($tool, $arguments);
         if ($refusal !== null) {
@@ -104,6 +110,21 @@ final class ToolRunner
     {
         // Once per request: a search and the run after it share one index.
         return $this->search ??= $this->searchSetup->searchFor($this->visible);
+    }
+
+    /**
+     * Whether a value is the arguments of a tool: what json_decode(..., true)
+     * makes of a JSON object.
+     *
+     * A JSON array decodes to an array too, and a host that only checks
+     * is_array() would hand a gate `[0 => ...]` where it expects named
+     * arguments. The empty array stands for `{}`, since both decode to it.
+     *
+     * @phpstan-assert-if-true array<string, mixed> $value
+     */
+    public static function isObject(mixed $value): bool
+    {
+        return is_array($value) && ($value === [] || !array_is_list($value));
     }
 
     /**

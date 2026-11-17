@@ -11,10 +11,10 @@ before starting something large, so two people do not build the same thing.
 
 ## Modes
 
-The compact, grouped and gateway modes are written. A new mode is welcome as
+The compact, grouped, gateway and direct modes are written. A new mode is welcome as
 a pack of its own in `src/Mode/<Name>/`, held to the same contract tests;
 [docs/MODES.md](docs/MODES.md) says how to build one. What decides the next
-one is a client the three serve badly: open an issue that names it.
+one is a client the four serve badly: open an issue that names it.
 
 ## Search
 
@@ -29,16 +29,23 @@ The benchmark says where the search still misses, in
 - **More fixture servers**, named in other styles and in other languages, with
   their requests written before any tuning. A French one (a network of public
   libraries, kebab-case), a German one (the office of a school,
-  PascalCase) and one with 176 tools (a cloud hosting panel) are in; another
-  script would test what they do not.
+  PascalCase), one with 176 tools (a cloud hosting panel), a Greek one
+  (the service desk of a town hall, written in another script) and one
+  written as many real servers are, with no titles and long descriptions (a
+  newsroom) are in.
+- **Accents.** On the Greek server, a request typed without its accents
+  finds the right tool first far less often than one written with them. A
+  way to fold them with no table built into the library and no extension
+  required is welcome.
 
 A change to the search comes with the benchmark before and after.
 
 ## Hosts
 
 - Examples on other hosts, beside the servers written by hand over stdio and
-  HTTP and the one on the official PHP SDK in [docs/HOSTS.md](docs/HOSTS.md):
-  a framework bundle, an async server.
+  HTTP, the one kept up on ReactPHP, the Symfony application and the one on
+  the official PHP SDK in
+  [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.
 

@@ -1,0 +1,874 @@
+[
+ {
+  "name": "citizens_search",
+  "title": "Αναζήτηση δημοτών",
+  "description": "Βρίσκει δημότες με επώνυμο, όνομα πατρός, ΑΦΜ ή αριθμό δημοτολογίου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "eponymo": {
+     "type": "string",
+     "description": "Επώνυμο ή μέρος του"
+    },
+    "afm": {
+     "type": "string",
+     "description": "ΑΦΜ, 9 ψηφία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "citizen_record",
+  "title": "Καρτέλα δημότη",
+  "description": "Δείχνει την καρτέλα ενός δημότη: διεύθυνση, τηλέφωνα, μέλη οικογένειας και ιστορικό αιτήσεων.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "citizen_update_contact",
+  "title": "Ενημέρωση στοιχείων επικοινωνίας",
+  "description": "Αλλάζει τη διεύθυνση, το τηλέφωνο ή το email ενός δημότη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    },
+    "tilefono": {
+     "type": "string",
+     "description": "Νέο τηλέφωνο"
+    },
+    "email": {
+     "type": "string",
+     "description": "Νέο email"
+    },
+    "dieythynsi": {
+     "type": "string",
+     "description": "Νέα διεύθυνση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "certificates_list",
+  "title": "Αιτήσεις πιστοποιητικών",
+  "description": "Λίστα με τις αιτήσεις πιστοποιητικών, φιλτραρισμένη ανά κατάσταση ή ημερομηνία.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "katastasi": {
+     "type": "string",
+     "description": "Σε εκκρεμότητα, εκδόθηκε ή ακυρώθηκε"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "certificate_issue",
+  "title": "Έκδοση πιστοποιητικού",
+  "description": "Εκδίδει πιστοποιητικό οικογενειακής κατάστασης, εγγυτέρων συγγενών ή μόνιμης κατοικίας για έναν δημότη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    },
+    "typos": {
+     "type": "string",
+     "description": "Είδος πιστοποιητικού"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "certificate_cancel",
+  "title": "Ακύρωση πιστοποιητικού",
+  "description": "Ακυρώνει ένα πιστοποιητικό που εκδόθηκε κατά λάθος· δεν μπορεί να χρησιμοποιηθεί πια.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate_id": {
+     "type": "string",
+     "description": "Αριθμός πιστοποιητικού"
+    },
+    "aitiologia": {
+     "type": "string",
+     "description": "Λόγος ακύρωσης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "certificate_download",
+  "title": "Λήψη πιστοποιητικού",
+  "description": "Δίνει το PDF ενός πιστοποιητικού που έχει ήδη εκδοθεί, με ψηφιακή υπογραφή.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate_id": {
+     "type": "string",
+     "description": "Αριθμός πιστοποιητικού"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointments_list",
+  "title": "Ραντεβού της ημέρας",
+  "description": "Δείχνει τα ραντεβού του γκισέ για μια ημέρα ή μια υπηρεσία.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "imerominia": {
+     "type": "string",
+     "description": "Ημερομηνία, κενό για σήμερα"
+    },
+    "ypiresia": {
+     "type": "string",
+     "description": "Υπηρεσία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_book",
+  "title": "Κλείσιμο ραντεβού",
+  "description": "Κλείνει ραντεβού για έναν δημότη σε μια υπηρεσία του δήμου, σε ελεύθερη ώρα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    },
+    "ypiresia": {
+     "type": "string",
+     "description": "Υπηρεσία"
+    },
+    "ora": {
+     "type": "string",
+     "description": "Ημερομηνία και ώρα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_move",
+  "title": "Μετάθεση ραντεβού",
+  "description": "Μεταφέρει ένα ραντεβού σε άλλη ημέρα ή ώρα και ειδοποιεί τον δημότη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "Αριθμός ραντεβού"
+    },
+    "nea_ora": {
+     "type": "string",
+     "description": "Νέα ημερομηνία και ώρα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_cancel",
+  "title": "Ακύρωση ραντεβού",
+  "description": "Ακυρώνει ένα ραντεβού και ελευθερώνει την ώρα για άλλον.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "Αριθμός ραντεβού"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "reports_list",
+  "title": "Αναφορές προβλημάτων",
+  "description": "Λίστα με τις αναφορές των δημοτών για λακκούβες, σβηστές λάμπες, σπασμένα πεζοδρόμια, ανά γειτονιά ή κατάσταση.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "geitonia": {
+     "type": "string",
+     "description": "Γειτονιά"
+    },
+    "katastasi": {
+     "type": "string",
+     "description": "Ανοιχτή, σε εξέλιξη ή κλειστή"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_create",
+  "title": "Καταχώριση αναφοράς",
+  "description": "Καταγράφει ένα νέο πρόβλημα στον δρόμο ή σε δημόσιο χώρο, με διεύθυνση και φωτογραφία.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "perigrafi": {
+     "type": "string",
+     "description": "Τι συμβαίνει"
+    },
+    "dieythynsi": {
+     "type": "string",
+     "description": "Πού"
+    },
+    "foto": {
+     "type": "string",
+     "description": "Φωτογραφία, προαιρετικά"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_assign",
+  "title": "Ανάθεση αναφοράς",
+  "description": "Αναθέτει μια αναφορά σε συνεργείο της τεχνικής υπηρεσίας για επισκευή.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "report_id": {
+     "type": "string",
+     "description": "Αριθμός αναφοράς"
+    },
+    "synergeio": {
+     "type": "string",
+     "description": "Συνεργείο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_close",
+  "title": "Κλείσιμο αναφοράς",
+  "description": "Κλείνει μια αναφορά όταν το πρόβλημα διορθώθηκε και ενημερώνει όποιον τη δήλωσε.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "report_id": {
+     "type": "string",
+     "description": "Αριθμός αναφοράς"
+    },
+    "simeiosi": {
+     "type": "string",
+     "description": "Τι έγινε"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_comment",
+  "title": "Σχόλιο σε αναφορά",
+  "description": "Προσθέτει σημείωση ή απάντηση σε μια αναφορά, ορατή στον δημότη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "report_id": {
+     "type": "string",
+     "description": "Αριθμός αναφοράς"
+    },
+    "keimeno": {
+     "type": "string",
+     "description": "Κείμενο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bulky_pickup_schedule",
+  "title": "Παραλαβή ογκωδών",
+  "description": "Προγραμματίζει την παραλαβή ογκωδών αντικειμένων (έπιπλα, στρώματα, κλαδιά) από το πεζοδρόμιο ενός σπιτιού.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "dieythynsi": {
+     "type": "string",
+     "description": "Διεύθυνση"
+    },
+    "antikeimena": {
+     "type": "string",
+     "description": "Τι θα βγει"
+    },
+    "imerominia": {
+     "type": "string",
+     "description": "Ημέρα παραλαβής"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "collection_schedule",
+  "title": "Πρόγραμμα αποκομιδής",
+  "description": "Δείχνει ποιες ημέρες περνά το απορριμματοφόρο και η ανακύκλωση σε έναν δρόμο.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "odos": {
+     "type": "string",
+     "description": "Οδός"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bin_request",
+  "title": "Αίτηση κάδου",
+  "description": "Ζητά νέο κάδο απορριμμάτων ή ανακύκλωσης, ή αντικατάσταση χαλασμένου, σε μια διεύθυνση.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "dieythynsi": {
+     "type": "string",
+     "description": "Διεύθυνση"
+    },
+    "eidos": {
+     "type": "string",
+     "description": "Σύμμεικτα, μπλε ανακύκλωση ή κομποστοποίηση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parking_permit_issue",
+  "title": "Έκδοση κάρτας στάθμευσης",
+  "description": "Εκδίδει κάρτα στάθμευσης κατοίκου για ένα όχημα, στη ζώνη της κατοικίας.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    },
+    "pinakida": {
+     "type": "string",
+     "description": "Αριθμός κυκλοφορίας"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parking_permit_renew",
+  "title": "Ανανέωση κάρτας στάθμευσης",
+  "description": "Ανανεώνει για έναν χρόνο μια κάρτα στάθμευσης κατοίκου που λήγει.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "permit_id": {
+     "type": "string",
+     "description": "Αριθμός κάρτας"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parking_permit_revoke",
+  "title": "Ανάκληση κάρτας στάθμευσης",
+  "description": "Ανακαλεί μια κάρτα στάθμευσης, για παράδειγμα όταν ο κάτοικος μετακόμισε.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "permit_id": {
+     "type": "string",
+     "description": "Αριθμός κάρτας"
+    },
+    "logos": {
+     "type": "string",
+     "description": "Λόγος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "parking_fines_list",
+  "title": "Κλήσεις στάθμευσης",
+  "description": "Λίστα με τις κλήσεις της δημοτικής αστυνομίας για ένα όχημα, πληρωμένες ή όχι.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pinakida": {
+     "type": "string",
+     "description": "Αριθμός κυκλοφορίας"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parking_fine_appeal",
+  "title": "Ένσταση για κλήση",
+  "description": "Καταχωρεί ένσταση του δημότη για μια κλήση στάθμευσης, με τους λόγους και δικαιολογητικά.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "fine_id": {
+     "type": "string",
+     "description": "Αριθμός κλήσης"
+    },
+    "logoi": {
+     "type": "string",
+     "description": "Λόγοι ένστασης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "debts_list",
+  "title": "Οφειλές δημότη",
+  "description": "Δείχνει τι χρωστά ένας δημότης στον δήμο: δημοτικά τέλη, πρόστιμα, τέλη ύδρευσης.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "afm": {
+     "type": "string",
+     "description": "ΑΦΜ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payment_record",
+  "title": "Καταχώριση πληρωμής",
+  "description": "Καταγράφει μια πληρωμή στο ταμείο του δήμου και εξοφλεί την αντίστοιχη οφειλή.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "afm": {
+     "type": "string",
+     "description": "ΑΦΜ"
+    },
+    "poso": {
+     "type": "string",
+     "description": "Ποσό σε ευρώ"
+    },
+    "ofeili_id": {
+     "type": "string",
+     "description": "Οφειλή που εξοφλείται"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "installments_plan",
+  "title": "Ρύθμιση σε δόσεις",
+  "description": "Μοιράζει τις οφειλές ενός δημότη σε μηνιαίες δόσεις, έως 48.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "afm": {
+     "type": "string",
+     "description": "ΑΦΜ"
+    },
+    "doseis": {
+     "type": "string",
+     "description": "Αριθμός δόσεων"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "halls_list",
+  "title": "Δημοτικοί χώροι",
+  "description": "Λίστα με τις αίθουσες, τα γήπεδα και τα πολιτιστικά κέντρα του δήμου, με χωρητικότητα και διαθεσιμότητα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "eidos": {
+     "type": "string",
+     "description": "Αίθουσα, γήπεδο, θέατρο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hall_reserve",
+  "title": "Κράτηση χώρου",
+  "description": "Κρατά μια αίθουσα ή ένα γήπεδο του δήμου για σύλλογο, σχολείο ή ιδιώτη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hall_id": {
+     "type": "string",
+     "description": "Χώρος"
+    },
+    "apo": {
+     "type": "string",
+     "description": "Από"
+    },
+    "eos": {
+     "type": "string",
+     "description": "Έως"
+    },
+    "foreas": {
+     "type": "string",
+     "description": "Για ποιον"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hall_reservation_cancel",
+  "title": "Ακύρωση κράτησης χώρου",
+  "description": "Ακυρώνει μια κράτηση αίθουσας ή γηπέδου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "reservation_id": {
+     "type": "string",
+     "description": "Αριθμός κράτησης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "events_list",
+  "title": "Εκδηλώσεις",
+  "description": "Λίστα με τις εκδηλώσεις του δήμου: συναυλίες, παζάρια, θέατρο, πανηγύρια.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "mina": {
+     "type": "string",
+     "description": "Μήνας"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "event_create",
+  "title": "Νέα εκδήλωση",
+  "description": "Δημιουργεί μια εκδήλωση ως πρόχειρο, με τόπο, ημερομηνία και περιγραφή.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "titlos": {
+     "type": "string",
+     "description": "Τίτλος"
+    },
+    "topos": {
+     "type": "string",
+     "description": "Τόπος"
+    },
+    "imerominia": {
+     "type": "string",
+     "description": "Ημερομηνία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "event_publish",
+  "title": "Δημοσίευση εκδήλωσης",
+  "description": "Δημοσιεύει μια πρόχειρη εκδήλωση στην ιστοσελίδα και στο ημερολόγιο του δήμου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event_id": {
+     "type": "string",
+     "description": "Αριθμός εκδήλωσης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "event_cancel",
+  "title": "Ακύρωση εκδήλωσης",
+  "description": "Ακυρώνει μια εκδήλωση και ανεβάζει ανακοίνωση για την ακύρωση.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event_id": {
+     "type": "string",
+     "description": "Αριθμός εκδήλωσης"
+    },
+    "logos": {
+     "type": "string",
+     "description": "Λόγος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "program_enroll",
+  "title": "Εγγραφή σε πρόγραμμα",
+  "description": "Εγγράφει δημότη σε δημοτικό πρόγραμμα: κολύμβηση, γυμναστική για ηλικιωμένους, θερινή κατασκήνωση, εικαστικά.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "citizen_id": {
+     "type": "string",
+     "description": "Αριθμός δημοτολογίου"
+    },
+    "programma": {
+     "type": "string",
+     "description": "Πρόγραμμα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "council_meetings_list",
+  "title": "Συνεδριάσεις δημοτικού συμβουλίου",
+  "description": "Λίστα με τις συνεδριάσεις του δημοτικού συμβουλίου και την ημερήσια διάταξη καθεμιάς.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "etos": {
+     "type": "string",
+     "description": "Έτος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "council_decision_publish",
+  "title": "Ανάρτηση απόφασης",
+  "description": "Αναρτά μια απόφαση του δημοτικού συμβουλίου στη Διαύγεια με τον αριθμό της.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meeting_id": {
+     "type": "string",
+     "description": "Συνεδρίαση"
+    },
+    "arithmos": {
+     "type": "string",
+     "description": "Αριθμός απόφασης"
+    },
+    "pdf": {
+     "type": "string",
+     "description": "Το έγγραφο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notice_send",
+  "title": "Αποστολή ενημέρωσης",
+  "description": "Στέλνει SMS ή email σε δημότες μιας γειτονιάς ή σε όλους, για διακοπή νερού, έργα ή έκτακτα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "geitonia": {
+     "type": "string",
+     "description": "Γειτονιά, κενό για όλους"
+    },
+    "keimeno": {
+     "type": "string",
+     "description": "Μήνυμα"
+    },
+    "kanali": {
+     "type": "string",
+     "description": "SMS ή email"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sidewalk_permit_request",
+  "title": "Αίτηση κατάληψης πεζοδρομίου",
+  "description": "Καταχωρεί αίτηση για τραπεζοκαθίσματα ή σκαλωσιά σε πεζοδρόμιο ή πλατεία.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "afm": {
+     "type": "string",
+     "description": "ΑΦΜ"
+    },
+    "dieythynsi": {
+     "type": "string",
+     "description": "Διεύθυνση"
+    },
+    "tetragonika": {
+     "type": "string",
+     "description": "Τετραγωνικά μέτρα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sidewalk_permit_approve",
+  "title": "Έγκριση κατάληψης πεζοδρομίου",
+  "description": "Εγκρίνει μια αίτηση κατάληψης κοινόχρηστου χώρου και υπολογίζει το τέλος.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Αριθμός αίτησης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

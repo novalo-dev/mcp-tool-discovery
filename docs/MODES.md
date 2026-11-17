@@ -1,19 +1,73 @@
 # Modes
 
 A mode decides what a client sees in `tools/list` and how calls to the mode's
-own tools reach the host's tools. Three are written:
+own tools reach the host's tools. Four are written:
 
 | Mode | Pack | State |
 |---|---|---|
 | Compact | `src/Mode/Compact/` | shipped |
 | Grouped | `src/Mode/Grouped/` | shipped |
 | Gateway | `src/Mode/Gateway/` | shipped |
+| Direct | `src/Mode/Direct/` | shipped |
+
+---
+
+## Choosing a mode
+
+A client sends the list of tools to the model with every request, so the list
+is the cost that repeats. A search answer enters the conversation once, when
+the client looks for a tool. Measured on the benchmark servers, in bytes of
+JSON on `2025-11-25` (`composer benchmark` prints this table, and
+[ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
+
+| Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
+|---|---|---|---|---|---|---|
+| workspace | 50 | 16,147 | 2,871 | 1,845 | 14,314 | 1,125 |
+| platform | 40 | 12,829 | 2,871 | 1,845 | - | 862 |
+| people | 40 | 12,814 | 2,871 | 1,845 | - | 874 |
+| library | 40 | 14,550 | 2,871 | 1,845 | - | 1,069 |
+| school | 40 | 15,096 | 2,871 | 1,845 | - | 1,076 |
+| hosting | 176 | 60,640 | 2,871 | 1,845 | - | 1,345 |
+| city | 40 | 19,334 | 2,871 | 1,845 | - | 1,428 |
+| newsroom | 40 | 20,067 | 2,871 | 1,845 | - | 1,677 |
+
+The search is the mean over the test half of the benchmark requests, text
+content only: the structured copy carries the same data. For English JSON a
+token is about four bytes. The fixture tools are short, about 300 bytes each,
+except the newsroom's, about 500 bytes, written as many real servers write
+them; tools with longer descriptions and schemas widen every gap. Only the
+workspace declares groups, in
+[tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
+tools stay outside them, listed as themselves.
+
+- **Compact** is the default. Its list is the same size whatever the server,
+  under a quarter of the whole list from 40 tools, and the list with one
+  search stays under half of it. Each change keeps the confirmation of a
+  destructive tool.
+- **Gateway** is the smallest list, for a client that caps its tools very low
+  or a small model that handles one tool better than three. Its single tool
+  is destructive as soon as a change goes through it, so a client that asks
+  before each destructive call asks before searches too, unless the host sets
+  `changesApart`.
+- **Grouped** shows the map of the server without a search, for a client that
+  searches badly and a server whose tools fall into a few clear groups. It
+  leaves the schemas out but names every action, so its list grows with the
+  server. On the workspace its eight tools take 7,486 bytes where the 28
+  actions they stand for would take 9,299: on short tools it saves about a
+  fifth, more as the schemas grow.
+- **Direct** lists every tool as itself, the first column. It suits a server
+  with a few tools, where a search would cost more than it saves, and the
+  host that lets its users turn the other modes off.
 
 ---
 
 ## The contract
 
 ```php
+use Novalo\McpToolDiscovery\Gate\CallResult;
+use Novalo\McpToolDiscovery\Gate\ToolRunner;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
+
 interface DiscoveryMode
 {
     public function name(): string;
@@ -29,7 +83,10 @@ interface DiscoveryMode
   `call()`, and every other name straight to the host tool, through the same
   checks.
 - `call()` reaches host tools only through `$runner->run()`, which refuses a
-  tool outside the visible set and asks the host's `authorize()` first.
+  tool outside the visible set and arguments that are not an object, and asks
+  the host's `authorize()` first. Check the arguments a mode reads from its
+  own call with `ToolRunner::isObject()`, the same rule: a JSON array decodes
+  to a PHP array too.
 - A mode that searches calls `$runner->search()`, never a `ToolSearch` of its
   own: the host's settings, cache and learning store come with it. A mode
   that hands out a `search_id` passes it back to `$runner->run()`, which
@@ -86,6 +143,9 @@ client sees the map of the server without searching, in tens of tools rather
 than hundreds.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+use Novalo\McpToolDiscovery\Tool\Tool;
+
 new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '',
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title, in list order
@@ -98,8 +158,15 @@ Each declared group that holds at least one visible tool becomes:
 
 | Tool | What it does | Annotations |
 |---|---|---|
-| `<group>` | runs one of the group's reads (`action`, `arguments`), or describes any of its actions, reads or changes, with their `inputSchema` (`describe`: a list of names); its description lists every action in one line | reads only |
+| `<group>` | runs one of the group's reads (`action`, `arguments`), or describes any of its actions, reads or changes, with their `inputSchema` (`describe`: a list of names); its description lists each of its reads in one line, and says which tool runs the changes | reads only |
 | `<group>_change` | runs one of the group's changes (`action`, `arguments`); listed only when the group has a change the caller may see | destructive |
+
+Each action is named twice in the list and no more: once in a line with its
+title, in the tool that runs it, so the model knows what it does, and once in
+that tool's `action` enum, so a client can check the call. `describe` takes
+plain names: the list already shows them all, and an unknown or hidden name
+comes back in its `unknown` list. A tool without a title is listed by its
+name alone.
 
 Why a read tool and a change tool per group: a group mixes reads and changes,
 and `destructiveHint` is the only lever a client offers to ask the person
@@ -133,6 +200,8 @@ and for small models. Every call names an `operation`:
 | `run` | `name`, `arguments`, `search_id` | runs one host tool through `$runner->run()`; a failed run carries the tool's parameters |
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+
 new GatewayMode(
     prefix: 'acme_',             // acme_use_tools
     title: 'Outils',             // translated by you
@@ -153,6 +222,27 @@ their own annotations, the gateway only reads, and a change sent through
 Search and describe share their code with the compact search
 (`src/Mode/ToolFinder.php`), so a host that switches between the two modes
 gets the same tools for the same request.
+
+## Direct
+
+Every visible tool, listed as itself and in the host's order, and no tool of
+the mode's own: `owns()` is false for every name, so each call goes straight
+to `$runner->run()`, the path every mode already gives a host tool called by
+its name.
+
+```php
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+
+$mode = $settings->compact ? new CompactMode() : new DirectMode();
+```
+
+What the mode adds over a `tools/list` handler written without the library is
+everything else `Discovery` does: a tool the gate hides is neither listed nor
+run, `authorize()` is asked before each call, and the answers are shaped for
+the client's revision. A host that offers the choice keeps one path for both
+settings, and its cache and learning store wait, unused, for the day it
+switches back. The mode does not search, so it hands out no `search_id`.
 
 ---
 
