@@ -187,22 +187,23 @@ locked while it is written.
 
 ## The measures
 
-Six fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Seven fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
-(40 tools, `KlassenfahrtAbsagen`) and a cloud hosting panel (176 tools,
-`nimbo_detach_volume`). 697 requests, each written as one sentence and in
-fields, with the tool a person would expect.
+(40 tools, `KlassenfahrtAbsagen`), a cloud hosting panel (176 tools,
+`nimbo_detach_volume`) and the service desk of a town hall written in Greek
+(40 tools, `parking_permit_renew`). 797 requests, each written as one
+sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 349 requests | Right tool first | Top 3 |
+| Test half, 399 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 286 | 321 |
-| The same request as one sentence | 155 | 213 |
-| In fields, after every train request was run once | 288 | 321 |
-| In fields, after the test requests were run once, then asked again | 304 | 327 |
+| The request in fields | 327 | 368 |
+| The same request as one sentence | 174 | 241 |
+| In fields, after every train request was run once | 329 | 368 |
+| In fields, after the test requests were run once, then asked again | 348 | 375 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -229,10 +230,21 @@ neighbour of the same object ("drop the old MySQL cluster" finds the tool that
 creates one, the word "cluster" being in both), and a few words the tools do
 not use ("machine" and "VM" where the tools say "server").
 
+The town hall is another script: Greek titles and descriptions, English
+snake_case names, so no word of a request ever meets a tool's name. Its 100
+requests were written before any of them was run, and about half of them are
+typed as many people type Greek, without the accents (`ακυρωσε` for
+`ακύρωσε`). Nothing was tuned on it: 41 of its 50 test requests find the
+right tool first in fields, 47 in the top 3. The accents are where it loses:
+24 of the 26 test requests written with them come first, 17 of the 24
+written without. A word typed without its accent is another word to the
+index, and only its trigrams away from the accent still meet the tool
+(`εκδηλωση` asked, `εκδήλωση` in the tool).
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
-Learning by pairs of words loses one repeated request against learning word
-by word (304 against 305 first, 327 against 326 in the top 3) and wins 4 new
+Learning by pairs of words, measured before the town hall came in, loses
+one repeated request against learning word by word (304 against 305 first, 327 against 326 in the top 3) and wins 4 new
 ones (288 against 284): new requests are the ones that count.
 Stronger settings gained more on repeats and lost on new requests: they were
 not kept.

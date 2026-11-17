@@ -29,8 +29,12 @@ The benchmark says where the search still misses, in
 - **More fixture servers**, named in other styles and in other languages, with
   their requests written before any tuning. A French one (a network of public
   libraries, kebab-case), a German one (the office of a school,
-  PascalCase) and one with 176 tools (a cloud hosting panel) are in; another
-  script would test what they do not.
+  PascalCase), one with 176 tools (a cloud hosting panel) and a Greek one
+  (the service desk of a town hall, written in another script) are in.
+- **Accents.** On the Greek server, a request typed without its accents
+  finds the right tool first far less often than one written with them. A
+  way to fold them with no table built into the library and no extension
+  required is welcome.
 
 A change to the search comes with the benchmark before and after.
 

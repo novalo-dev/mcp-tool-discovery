@@ -167,6 +167,16 @@ becomes the next version's section when it is published.
   half is now 349 requests, and the floors in `BenchmarkTest` are the new
   counts (286 first, 321 in the top 3, 304 asked again); the badge moves from
   81% to 82%.
+- **A seventh benchmark server, in Greek.** The service desk of a town hall:
+  40 tools with English snake_case names (`parking_permit_renew`) and Greek
+  titles and descriptions, and 100 requests written before any of them was
+  run, about half typed without accents as many people type Greek. Nothing
+  in the search changed for it: 41 of its 50 test requests find the right
+  tool first in fields, 47 in the top 3; learning from its train half moves
+  none of them, and asked a second time 44 come first. Written with accents, 24 of 26 come first; without, 17 of 24. The
+  test half is now 399 requests, and the floors in `BenchmarkTest` are the
+  new counts (327 first, 368 in the top 3, 348 asked again); the badge stays
+  at 82%.
 
 ### Changed
 
