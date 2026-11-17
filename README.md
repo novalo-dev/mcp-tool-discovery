@@ -166,6 +166,7 @@ nothing else, and every pack is held to the same
 | **Compact** | a search tool and two runners: three tools, whatever the size of the server | shipped |
 | **Grouped** | one tool per group of tools ("files", "calendar") listing its actions, and one for its changes | shipped |
 | **Gateway** | a single tool that searches, describes and runs everything | shipped |
+| **Direct** | every tool as itself, as a server without the library lists it | shipped |
 
 A host tool called by its own name is accepted in every mode, through the same
 checks: a client holding a list from before the server switched modes keeps
@@ -253,6 +254,20 @@ The tool is marked destructive whenever a change can go through it, so the
 client asks first; with `changesApart` it only reads, and each change keeps
 its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
 choice.
+
+### Direct
+
+Every tool the caller may see, as itself, and no tool of the mode's own. For
+a server small enough to list everything, or a setting that lets the server's
+users turn the other modes off, without a second path for `tools/list` and
+`tools/call` that skips your gate's `visible()` or the shaping per revision:
+
+```php
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+
+$mode = $settings->compact ? new CompactMode() : new DirectMode();
+$discovery = new Discovery($mode, new MyGate($user, $myTools));
+```
 
 ---
 

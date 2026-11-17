@@ -20,6 +20,7 @@ src/
     Compact/             the compact pack
     Grouped/             the grouped pack
     Gateway/             the gateway pack
+    Direct/              the direct pack: every tool as itself
   Search/                Analyzer, ToolIndex (BM25F), ToolSearch, SearchQuery, SearchOptions
     Cache/               IndexCache: in memory, in PHP files
     Learning/            LearningStore: in memory, in a JSON file

@@ -1,13 +1,14 @@
 # Modes
 
 A mode decides what a client sees in `tools/list` and how calls to the mode's
-own tools reach the host's tools. Three are written:
+own tools reach the host's tools. Four are written:
 
 | Mode | Pack | State |
 |---|---|---|
 | Compact | `src/Mode/Compact/` | shipped |
 | Grouped | `src/Mode/Grouped/` | shipped |
 | Gateway | `src/Mode/Gateway/` | shipped |
+| Direct | `src/Mode/Direct/` | shipped |
 
 ---
 
@@ -19,7 +20,7 @@ the client looks for a tool. Measured on the benchmark servers, in bytes of
 JSON on `2025-11-25` (`composer benchmark` prints this table, and
 [ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
 
-| Server | Tools | Every tool as itself | Compact | Gateway | Grouped | One compact search |
+| Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
 |---|---|---|---|---|---|---|
 | workspace | 50 | 16,147 | 2,871 | 1,845 | 14,314 | 1,125 |
 | platform | 40 | 12,829 | 2,871 | 1,845 | - | 862 |
@@ -51,6 +52,9 @@ tools stay outside them, listed as themselves.
   server. On the workspace its eight tools take 7,486 bytes where the 28
   actions they stand for would take 9,299: on short tools it saves about a
   fifth, more as the schemas grow.
+- **Direct** lists every tool as itself, the first column. It suits a server
+  with a few tools, where a search would cost more than it saves, and the
+  host that lets its users turn the other modes off.
 
 ---
 
@@ -203,6 +207,24 @@ their own annotations, the gateway only reads, and a change sent through
 Search and describe share their code with the compact search
 (`src/Mode/ToolFinder.php`), so a host that switches between the two modes
 gets the same tools for the same request.
+
+## Direct
+
+Every visible tool, listed as itself and in the host's order, and no tool of
+the mode's own: `owns()` is false for every name, so each call goes straight
+to `$runner->run()`, the path every mode already gives a host tool called by
+its name.
+
+```php
+$mode = $settings->compact ? new CompactMode() : new DirectMode();
+```
+
+What the mode adds over a `tools/list` handler written without the library is
+everything else `Discovery` does: a tool the gate hides is neither listed nor
+run, `authorize()` is asked before each call, and the answers are shaped for
+the client's revision. A host that offers the choice keeps one path for both
+settings, and its cache and learning store wait, unused, for the day it
+switches back. The mode does not search, so it hands out no `search_id`.
 
 ---
 

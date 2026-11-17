@@ -11,10 +11,10 @@ before starting something large, so two people do not build the same thing.
 
 ## Modes
 
-The compact, grouped and gateway modes are written. A new mode is welcome as
+The compact, grouped, gateway and direct modes are written. A new mode is welcome as
 a pack of its own in `src/Mode/<Name>/`, held to the same contract tests;
 [docs/MODES.md](docs/MODES.md) says how to build one. What decides the next
-one is a client the three serve badly: open an issue that names it.
+one is a client the four serve badly: open an issue that names it.
 
 ## Search
 

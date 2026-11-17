@@ -10,6 +10,14 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Direct mode**, `src/Mode/Direct/DirectMode.php`: every tool the caller
+  may see, listed as itself, and no tool of the mode's own. For a server
+  small enough to list everything, and for a host that lets its users turn
+  the other modes off: `$settings->compact ? new CompactMode() : new
+  DirectMode()` keeps one path for `tools/list` and `tools/call`, where such
+  a host used to need a second one that had to filter with the gate and shape
+  each revision again on its own. Held to the mode contract and added to the
+  conformance checks.
 - **What each mode costs**, measured: `composer benchmark` now also prints
   the bytes of JSON of each mode's list and of one compact search answer on
   the six benchmark servers, and docs/MODES.md opens with "Choosing a mode",

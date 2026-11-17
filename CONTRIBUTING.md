@@ -79,7 +79,7 @@ whatever the matrix becomes), **PHP 8.1+ compatibility**, **Semgrep**,
 A mode is the most useful contribution and the most guarded one, because it
 stands between a client and a server's tools.
 
-1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and how the three
+1. **Read** [docs/MODES.md](docs/MODES.md): what a mode is, and how the four
    written ones make their choices.
 2. **Create the pack** in `src/Mode/<Name>/`, with a class that implements
    `DiscoveryMode`. Keep everything the mode needs in its folder, and
