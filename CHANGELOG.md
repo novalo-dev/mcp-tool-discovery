@@ -38,7 +38,13 @@ becomes the next version's section when it is published.
   method, enum case and named argument of the library it names must exist,
   with the case Composer's autoloader needs. Every relative link must lead to
   a file and its anchor to a heading. A snippet a host copies can no longer
-  name a parameter the library renamed.
+  name a parameter the library renamed. Each class of the library a page
+  names comes with its `use` line, in that block or one above it, and a name
+  one typo or one case away from a class of the library (`new DirectMod()`,
+  `new toolSet()`) fails instead of passing for a class of the host. The
+  snippets of the grouped and gateway modes in the README, and those of
+  docs/MODES.md and docs/SEARCH.md, now show their `use` lines: copied as
+  they were, they stopped at "Class not found".
 
 ### Changed
 

@@ -219,6 +219,8 @@ declare, one tool named after it that runs its reads and describes its
 actions, and `<group>_change`, destructive, for its changes.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+
 new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '', // '' lists the tool as itself
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title
@@ -239,6 +241,8 @@ One tool, `use_tools`, for clients that accept very few: every call says its
 `operation`, `search`, `describe` or `run`, and the search is the compact one.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+
 new GatewayMode(
     prefix: 'acme_',                 // acme_use_tools
     changesApart: true,              // changes listed as themselves; the gateway only reads

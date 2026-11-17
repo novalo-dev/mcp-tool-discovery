@@ -5,6 +5,9 @@ reaches it through `ToolRunner::search()`, with the `SearchSetup` the host gave
 `Discovery`; it can also be used on its own:
 
 ```php
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\ToolSearch;
+
 $search = new ToolSearch($visibleTools);
 $found = $search->search(new SearchQuery(action: 'change', object: 'ticket status', description: 'move the ticket to done'));
 $found = $search->search('change the status of a ticket'); // free keywords still work
@@ -82,6 +85,8 @@ The library holds no business vocabulary. A host that knows its clients say
 "meeting" for a calendar event gives a map, and words to ignore if it wants:
 
 ```php
+use Novalo\McpToolDiscovery\Search\SearchOptions;
+
 new SearchOptions(synonyms: ['meeting' => 'calendar event', 'admin' => 'role'], stopWords: ['please']);
 ```
 
@@ -97,6 +102,10 @@ Building the index is most of the cost of a search. An `IndexCache`, given
 once in the `SearchSetup`, keeps it for every mode:
 
 ```php
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+
 new SearchSetup(cache: new MemoryIndexCache());        // a long-running server
 new SearchSetup(cache: new FileIndexCache($cacheDir)); // each request starts afresh
 ```

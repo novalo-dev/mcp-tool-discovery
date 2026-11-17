@@ -100,6 +100,91 @@ final class DocsTest extends TestCase
         self::assertSame([], $wrong);
     }
 
+    public function testEveryLibraryClassASnippetNamesIsImportedOnItsPage(): void
+    {
+        $classes = self::libraryClasses();
+        $wrong = [];
+
+        foreach (self::snippetsByFile() as $file => $blocks) {
+            // A reader copies a page from the top: a `use` line shown once
+            // serves every block below it, but not the blocks above.
+            $imported = [];
+            $declared = self::declaredOn($blocks);
+            foreach ($blocks as $i => $code) {
+                $tokens = self::tokens($code);
+                foreach ($tokens as $k => $token) {
+                    if (!\is_array($token)) {
+                        continue;
+                    }
+                    if (T_USE === $token[0]) {
+                        $name = self::next($tokens, $k);
+                        if (null !== $name && \is_array($name[1]) && T_NAME_QUALIFIED === $name[1][0]) {
+                            $imported[self::alias($tokens, $name[0])] = true;
+                        }
+
+                        continue;
+                    }
+                    if (T_STRING !== $token[0] || !isset($classes[$token[1]]) || isset($imported[$token[1]]) || isset($declared[$token[1]])
+                        || !self::isClassPosition($tokens, $k)) {
+                        continue;
+                    }
+                    // Once per page: the first block that needs the line is
+                    // where it goes.
+                    $wrong[] = $file . ' snippet ' . ($i + 1) . ': ' . $token[1] . ' without use ' . $classes[$token[1]];
+                    $imported[$token[1]] = true;
+                }
+            }
+        }
+
+        self::assertSame([], $wrong);
+    }
+
+    public function testNoSnippetNamesAClassTheLibraryAlmostHas(): void
+    {
+        $classes = self::libraryClasses();
+        $lower = [];
+        foreach (array_keys($classes) as $short) {
+            $lower[strtolower($short)] = $short;
+        }
+        $wrong = [];
+
+        foreach (self::snippetsByFile() as $file => $blocks) {
+            $declared = self::declaredOn($blocks);
+            foreach ($blocks as $i => $code) {
+                $where = $file . ' snippet ' . ($i + 1);
+                $tokens = self::tokens($code);
+                foreach ($tokens as $k => $token) {
+                    if (!\is_array($token)) {
+                        continue;
+                    }
+                    // A full name in the code itself, as `new \Novalo\...\X()`.
+                    if (\in_array($token[0], [T_NAME_QUALIFIED, T_NAME_FULLY_QUALIFIED], true) && str_starts_with(ltrim($token[1], '\\'), self::NS)) {
+                        $previous = self::previous($tokens, $k);
+                        if ((null === $previous || !\is_array($previous[1]) || T_USE !== $previous[1][0]) && !\in_array(ltrim($token[1], '\\'), $classes, true)) {
+                            $wrong[] = $where . ': no class ' . ltrim($token[1], '\\');
+                        }
+
+                        continue;
+                    }
+                    if (T_STRING !== $token[0] || isset($classes[$token[1]]) || isset($declared[$token[1]]) || !self::isClassPosition($tokens, $k)
+                        || class_exists($token[1]) || interface_exists($token[1])) {
+                        continue;
+                    }
+                    // The host's own classes (MyGate, User) are far from every
+                    // name of the library; a typo or a wrong case is close to
+                    // one. PHP would forgive the case once the class is
+                    // loaded, but the autoloader would not find its file.
+                    $near = $lower[strtolower($token[1])] ?? self::nearest($token[1], array_keys($classes));
+                    if (null !== $near) {
+                        $wrong[] = $where . ': ' . $token[1] . ' is not a class of the library, ' . $near . ' is';
+                    }
+                }
+            }
+        }
+
+        self::assertSame([], $wrong);
+    }
+
     public function testEveryRelativeLinkLeadsToAFileAndItsHeading(): void
     {
         $root = self::root();
@@ -192,6 +277,105 @@ final class DocsTest extends TestCase
         }
 
         return $wrong;
+    }
+
+    /**
+     * Whether the name at $k stands for a class: built, extended, checked,
+     * reached with `::` or used as a type, rather than a method, a constant
+     * or a function called by its name.
+     *
+     * @param list<array{int, string, int}|string> $tokens
+     */
+    private static function isClassPosition(array $tokens, int $k): bool
+    {
+        // The types PHP itself names, which no library class may take.
+        if (\is_array($tokens[$k]) && \in_array(strtolower($tokens[$k][1]), ['array', 'bool', 'callable', 'false', 'float', 'int', 'iterable', 'mixed', 'never', 'null', 'object', 'parent', 'self', 'static', 'string', 'true', 'void'], true)) {
+            return false;
+        }
+        $before = self::previous($tokens, $k);
+        $after = self::next($tokens, $k);
+        if (null !== $before && \is_array($before[1]) && \in_array($before[1][0], [T_OBJECT_OPERATOR, T_NULLSAFE_OBJECT_OPERATOR, T_DOUBLE_COLON, T_FUNCTION, T_CONST], true)) {
+            return false;
+        }
+        if (null !== $before && \is_array($before[1]) && \in_array($before[1][0], [T_NEW, T_INSTANCEOF, T_EXTENDS, T_IMPLEMENTS], true)) {
+            return true;
+        }
+        if (null !== $after && \is_array($after[1]) && \in_array($after[1][0], [T_DOUBLE_COLON, T_VARIABLE, T_ELLIPSIS], true)) {
+            return true;
+        }
+        // A return type: `): ToolSet`.
+        $close = null !== $before && ':' === $before[1] ? self::previous($tokens, $before[0]) : null;
+
+        return null !== $close && ')' === $close[1];
+    }
+
+    /**
+     * The short names a page gives a meaning of its own: the classes it
+     * declares, and the ones it imports from another package, which may
+     * share a short name with a class of the library.
+     *
+     * @param list<string> $blocks
+     *
+     * @return array<string, true>
+     */
+    private static function declaredOn(array $blocks): array
+    {
+        $names = [];
+        foreach ($blocks as $code) {
+            $tokens = self::tokens($code);
+            foreach ($tokens as $k => $token) {
+                if (!\is_array($token)) {
+                    continue;
+                }
+                $name = self::next($tokens, $k);
+                if (null === $name || !\is_array($name[1])) {
+                    continue;
+                }
+                if (\in_array($token[0], [T_CLASS, T_INTERFACE, T_ENUM, T_TRAIT], true) && T_STRING === $name[1][0]) {
+                    $names[$name[1][1]] = true;
+                } elseif (T_USE === $token[0] && T_NAME_QUALIFIED === $name[1][0] && !str_starts_with($name[1][1], self::NS)) {
+                    $names[self::alias($tokens, $name[0])] = true;
+                }
+            }
+        }
+
+        return $names;
+    }
+
+    /**
+     * The short name a `use` line at $k gives: its alias, or its last part.
+     *
+     * @param list<array{int, string, int}|string> $tokens
+     */
+    private static function alias(array $tokens, int $k): string
+    {
+        $as = self::next($tokens, $k);
+        $alias = null !== $as && \is_array($as[1]) && T_AS === $as[1][0] ? self::next($tokens, $as[0]) : null;
+        if (null !== $alias && \is_array($alias[1]) && T_STRING === $alias[1][0]) {
+            return $alias[1][1];
+        }
+        $name = \is_array($tokens[$k]) ? $tokens[$k][1] : '';
+        $last = strrpos($name, '\\');
+
+        return false === $last ? $name : substr($name, $last + 1);
+    }
+
+    /**
+     * The class of the library a name is one typo from, if any. Short names
+     * get one edit, longer ones two, so that `Tool` does not swallow every
+     * four-letter class of a host.
+     *
+     * @param list<string> $library
+     */
+    private static function nearest(string $name, array $library): ?string
+    {
+        foreach ($library as $short) {
+            if (levenshtein(strtolower($name), strtolower($short)) <= (\strlen($short) <= 5 ? 1 : 2)) {
+                return $short;
+            }
+        }
+
+        return null;
     }
 
     /**

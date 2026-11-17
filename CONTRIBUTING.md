@@ -124,9 +124,11 @@ The search is measured, not tuned by feel.
 Hosts copy the snippets of the README and docs/ as they stand.
 `tests/Docs/DocsTest.php` reads every PHP snippet without running it: it must
 parse, and every class, method, enum case and named argument of the library it
-names must exist, with the same case. Every relative link must lead to a file,
-and its `#anchor` to a heading of that file. A rename in `src/` fixes the docs
-in the same pull request.
+names must exist, with the same case. A class of the library is imported by a
+`use` line in its block or a block above it on the page, and a name one typo
+away from a class of the library fails rather than passing for a class of the
+host. Every relative link must lead to a file, and its `#anchor` to a heading
+of that file. A rename in `src/` fixes the docs in the same pull request.
 
 ## Protocol revisions
 

@@ -61,6 +61,10 @@ tools stay outside them, listed as themselves.
 ## The contract
 
 ```php
+use Novalo\McpToolDiscovery\Gate\CallResult;
+use Novalo\McpToolDiscovery\Gate\ToolRunner;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
+
 interface DiscoveryMode
 {
     public function name(): string;
@@ -133,6 +137,9 @@ client sees the map of the server without searching, in tens of tools rather
 than hundreds.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+use Novalo\McpToolDiscovery\Tool\Tool;
+
 new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '',
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title, in list order
@@ -187,6 +194,8 @@ and for small models. Every call names an `operation`:
 | `run` | `name`, `arguments`, `search_id` | runs one host tool through `$runner->run()`; a failed run carries the tool's parameters |
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+
 new GatewayMode(
     prefix: 'acme_',             // acme_use_tools
     title: 'Outils',             // translated by you
@@ -216,6 +225,9 @@ to `$runner->run()`, the path every mode already gives a host tool called by
 its name.
 
 ```php
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+
 $mode = $settings->compact ? new CompactMode() : new DirectMode();
 ```
 
