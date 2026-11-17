@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.4.0 - 2026-11-17
+
 ### Added
 
 - **An eighth benchmark server, written as many real servers are.** A
@@ -40,7 +42,6 @@ becomes the next version's section when it is published.
   ask the ReactPHP server everything they ask the PHP-FPM one, plus callers
   taking turns in one process. A CI job installs the pinned `react/http` and
   runs them; it is part of **CI passed**.
-
 - **Direct mode**, `src/Mode/Direct/DirectMode.php`: every tool the caller
   may see, listed as itself, and no tool of the mode's own. For a server
   small enough to list everything, and for a host that lets its users turn
