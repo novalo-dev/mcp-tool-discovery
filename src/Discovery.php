@@ -60,7 +60,8 @@ final class Discovery
      * assistant holding a list from before the host switched modes keeps
      * working, and the call meets the same checks as through the mode.
      *
-     * @param array<string, mixed> $arguments
+     * @param array<mixed> $arguments as json_decode(..., true) gives them;
+     *        a list, which a JSON array decodes to, is refused
      *
      * @return array<string, mixed>
      */
@@ -72,10 +73,16 @@ final class Discovery
     /**
      * The same call, before it is shaped, for hosts that build their own answer.
      *
-     * @param array<string, mixed> $arguments
+     * @param array<mixed> $arguments as json_decode(..., true) gives them
      */
     public function call(string $name, array $arguments, ToolSet $tools): CallResult
     {
+        if (!ToolRunner::isObject($arguments)) {
+            // Before the mode as well as the gate: a host that checks
+            // is_array() lets a JSON array through, and neither should have
+            // to tell it from named arguments.
+            return CallResult::error('arguments must be an object.');
+        }
         $runner = new ToolRunner($this->visible($tools), $this->gate, $this->search);
 
         return $this->mode->owns($name) ? $this->mode->call($name, $arguments, $runner) : $runner->run($name, $arguments);

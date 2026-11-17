@@ -79,6 +79,18 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **Arguments sent as a JSON array never reach the gate.** `json_decode()`
+  turns a JSON array into a PHP array as it does an object, so a host that
+  checks `is_array()` and a mode that read `arguments` the same way handed a
+  gate `[0 => ...]` where it expects named arguments. Only the batch runner
+  refused that. `Discovery::call()` and `ToolRunner::run()` now answer
+  "arguments must be an object." with `isError` before the mode or the gate
+  sees anything, and the compact, grouped and gateway runners give the same
+  answer for the `arguments` they carry. Both methods document what they
+  really accept, `array<mixed>`, so static analysis no longer takes the check
+  for dead code. `ToolRunner::isObject()` is the one rule they share, for
+  modes written outside the library too; the empty array still stands for
+  `{}`. The mode contract tests check it for every mode.
 - **Grouped mode, a lighter list.** Each action used to be named up to four
   times: in the read tool's description, in its `action` or `describe` enum,
   and again in the change tool. It is now named twice, a line with its title

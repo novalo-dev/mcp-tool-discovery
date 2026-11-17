@@ -292,7 +292,7 @@ final class GroupedMode implements DiscoveryMode
         if (!is_string($action) || $action === '') {
             return CallResult::error('action is required: the name of one of the actions this tool lists.');
         }
-        if (!is_array($inner)) {
+        if (!ToolRunner::isObject($inner)) {
             return CallResult::error('arguments must be an object.');
         }
         $tool = $runner->visible()->get($action);
@@ -305,7 +305,6 @@ final class GroupedMode implements DiscoveryMode
                 return CallResult::error(sprintf('%s is not an action of this tool: run it with %s.', $action, $this->runnerFor($tool)));
             }
         }
-        /** @var array<string, mixed> $inner */
         // A hidden or unknown action goes to the runner as it is, so its
         // answer is the runner's own and the gate is never asked about it.
         $result = $runner->run($action, $inner);

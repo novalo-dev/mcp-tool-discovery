@@ -287,7 +287,7 @@ final class CompactMode implements DiscoveryMode
         if (!is_string($name) || $name === '') {
             return CallResult::error('name is required: the exact name of a tool, as the search gave it.');
         }
-        if (!is_array($inner)) {
+        if (!ToolRunner::isObject($inner)) {
             return CallResult::error('arguments must be an object.');
         }
         if ($this->owns($name)) {
@@ -298,7 +298,6 @@ final class CompactMode implements DiscoveryMode
             return CallResult::error(sprintf('%s %s: run it with %s.', $name, $writes ? 'only reads' : 'changes something', $this->runnerFor($tool)));
         }
         $searchId = $arguments['search_id'] ?? null;
-        /** @var array<string, mixed> $inner */
         $result = $runner->run($name, $inner, is_string($searchId) ? $searchId : null);
 
         return $tool !== null && $result->isError && $this->schemaOnError ? ToolFinder::withParameters($result, $tool) : $result;
@@ -323,7 +322,7 @@ final class CompactMode implements DiscoveryMode
             return CallResult::error(sprintf('At most %d items in one call; nothing was run. Split the list.', $this->batchLimit));
         }
         foreach ($items as $index => $item) {
-            if (!is_array($item) || ($item !== [] && array_is_list($item))) {
+            if (!ToolRunner::isObject($item)) {
                 return CallResult::error(sprintf('Item %d is not an object; nothing was run.', $index));
             }
         }

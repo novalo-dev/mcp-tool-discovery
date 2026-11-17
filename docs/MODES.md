@@ -83,7 +83,10 @@ interface DiscoveryMode
   `call()`, and every other name straight to the host tool, through the same
   checks.
 - `call()` reaches host tools only through `$runner->run()`, which refuses a
-  tool outside the visible set and asks the host's `authorize()` first.
+  tool outside the visible set and arguments that are not an object, and asks
+  the host's `authorize()` first. Check the arguments a mode reads from its
+  own call with `ToolRunner::isObject()`, the same rule: a JSON array decodes
+  to a PHP array too.
 - A mode that searches calls `$runner->search()`, never a `ToolSearch` of its
   own: the host's settings, cache and learning store come with it. A mode
   that hands out a `search_id` passes it back to `$runner->run()`, which

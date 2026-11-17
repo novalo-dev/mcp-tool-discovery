@@ -185,6 +185,10 @@ the `Discovery` from the caller of each request, as in the HTTP example.
 - **Errors in the right place.** A refused or failed tool comes back inside
   the result with `isError`, as the specification asks; JSON-RPC errors are
   for requests the host cannot read.
+- **Arguments as `json_decode()` gives them.** Check that `arguments` is an
+  array before calling `callTool()`, as every example does. A JSON array
+  passes that check too; the library refuses it with `isError` before your
+  gate sees it, so `authorize()` and `call()` always get named arguments.
 
 The stateless revision `2026-07-28` has no `initialize` handshake and no
 session at all, which suits one process per request. The HTTP example serves
