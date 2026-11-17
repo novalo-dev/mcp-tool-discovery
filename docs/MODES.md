@@ -29,11 +29,13 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | school | 40 | 15,096 | 2,871 | 1,845 | - | 1,076 |
 | hosting | 176 | 60,640 | 2,871 | 1,845 | - | 1,345 |
 | city | 40 | 19,334 | 2,871 | 1,845 | - | 1,428 |
+| newsroom | 40 | 20,067 | 2,871 | 1,845 | - | 1,677 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
-token is about four bytes. The fixture tools are short, about 300 bytes each;
-tools with longer descriptions and schemas widen every gap. Only the
+token is about four bytes. The fixture tools are short, about 300 bytes each,
+except the newsroom's, about 500 bytes, written as many real servers write
+them; tools with longer descriptions and schemas widen every gap. Only the
 workspace declares groups, in
 [tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
 tools stay outside them, listed as themselves.

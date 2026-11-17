@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **An eighth benchmark server, written as many real servers are.** A
+  newsroom: 40 tools in snake_case with no title, so the name stands in for
+  one, and descriptions of 18 to 70 words that open with "Use this tool to"
+  and point at their neighbours. Every other fixture has short descriptions
+  and a title on every tool. Its 100 requests were written before any of
+  them was run, and nothing was tuned on it: 35 of its 50 test requests find
+  the right tool first in fields, 46 in the top 3, 30 as one sentence.
+  Learning from its train half costs it one request, as on the school. The
+  floors of `tests/Search/BenchmarkTest.php` move to the new counts on the
+  449 test requests (362 first, 414 in the top 3, 388 asked again), so they
+  still guard every request that passes today.
 - **A server that stays up, on ReactPHP**, `docs/examples/react/server.php`:
   the HTTP example in one long-running process, as a ReactPHP, RoadRunner,
   Swoole or FrankenPHP worker runs it. It shows what such a host keeps between

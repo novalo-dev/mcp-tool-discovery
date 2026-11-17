@@ -22,8 +22,9 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 797 requests over seven servers named in five styles,
- * one of them in French, one in German, one in Greek and one with 176 tools.
+ * The search benchmark: 897 requests over eight servers named in five styles,
+ * one of them in French, one in German, one in Greek, one with 176 tools and
+ * one whose tools have no title and long descriptions.
  *
  * Each request is written twice, as one sentence (query) and in fields
  * (action, object, description), with the tool a person would expect. Half
@@ -38,7 +39,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom'];
 
     /**
      * Four measures on the test half:

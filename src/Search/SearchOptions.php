@@ -17,8 +17,9 @@ namespace Novalo\McpToolDiscovery\Search;
  * The settings of a tool search.
  *
  * The defaults were chosen on 150 queries over three servers named in three
- * styles, then checked on 150 others kept aside and on four more servers,
- * in French, in German, in Greek and one with 176 tools, written afterwards:
+ * styles, then checked on 150 others kept aside and on five more servers,
+ * in French, in German, in Greek, one with 176 tools and one with long
+ * descriptions and no titles, written afterwards:
  * see docs/SEARCH.md. Change them
  * with a benchmark of your own, not by feel.
  */

@@ -78,8 +78,9 @@ final class RecordingGate implements ToolGate
      * operations, dotted names), library (a network of public libraries,
      * written in French, kebab-case names), school (the office of a
      * school, written in German, PascalCase names), hosting (a cloud
-     * hosting panel, 176 tools, snake_case names) or city (the service desk
-     * of a town hall, written in Greek, English snake_case names).
+     * hosting panel, 176 tools, snake_case names), city (the service desk
+     * of a town hall, written in Greek, English snake_case names) or
+     * newsroom (no titles, long descriptions, snake_case names).
      */
     public static function server(string $file): ToolSet
     {
