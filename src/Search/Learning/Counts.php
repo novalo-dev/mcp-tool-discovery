@@ -66,7 +66,7 @@ final class Counts
         $entries = [];
         foreach ($counts as $word => $tools) {
             foreach ($tools as $tool => $runs) {
-                $entries[] = [$runs, (string) $word, (string) $tool];
+                $entries[] = [$runs, $word, $tool];
             }
         }
         // usort is stable since PHP 8.0: equal counts keep the store's order.
