@@ -193,6 +193,42 @@ final class CompactBatchTest extends TestCase
         }
     }
 
+    public function testABatchReportsItsItemsWhenAToolAnswersWithBrokenText(): void
+    {
+        // A host tool that cuts its answer by bytes, in the middle of "é".
+        $gate = new class implements ToolGate {
+            public int $runs = 0;
+
+            public function visible(Tool $tool): bool
+            {
+                return true;
+            }
+
+            public function authorize(Tool $tool, array $arguments): ?CallResult
+            {
+                return null;
+            }
+
+            public function call(Tool $tool, array $arguments): CallResult
+            {
+                ++$this->runs;
+                $cut = substr('Set to résolu', 0, 9);
+
+                return new CallResult([['type' => 'text', 'text' => $cut]], false, ['status' => $cut]);
+            }
+        };
+
+        $result = self::batch(['name' => self::TOOL, 'items' => self::tickets('1', '2')], $gate);
+        $answer = self::answer($result);
+
+        self::assertSame(2, $gate->runs);
+        self::assertFalse($result->isError);
+        self::assertSame(2, $answer['succeeded']);
+        self::assertIsString($result->content[0]['text'] ?? null);
+        self::assertSame("Set to r\u{FFFD}", json_decode($result->content[0]['text'], true, 512, JSON_THROW_ON_ERROR)['results'][1]['structuredContent']['status']);
+        self::assertSame(1, preg_match('//u', json_encode($answer, JSON_THROW_ON_ERROR)));
+    }
+
     public function testAFailedItemAddsTheToolsParametersOnce(): void
     {
         $result = self::batch(['name' => self::TOOL, 'items' => self::tickets('1', '2')], self::gate(['1', '2']));

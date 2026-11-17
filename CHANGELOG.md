@@ -46,6 +46,13 @@ becomes the next version's section when it is published.
   Clients that relied on the `describe` enum to check names now get the
   same answer from the call.
 
+### Security
+
+- `CallResult::json()` replaces each sequence that is not valid UTF-8 with
+  U+FFFD, in the text and in the structured content alike, so an answer that
+  carries a host tool's output, a `run_write_batch` report included, can
+  always be encoded and reaches the client.
+
 ## 0.3.0 - 2026-11-16
 
 ### Added
