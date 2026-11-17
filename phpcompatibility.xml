@@ -12,6 +12,7 @@
     <file>tests</file>
     <file>docs/examples</file>
     <exclude-pattern>docs/examples/sdk/vendor/*</exclude-pattern>
+    <exclude-pattern>docs/examples/react/vendor/*</exclude-pattern>
     <arg name="extensions" value="php"/>
     <config name="testVersion" value="8.1-"/>
 

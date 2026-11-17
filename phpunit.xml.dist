@@ -30,6 +30,10 @@
         <testsuite name="sdk">
             <directory>tests/Sdk</directory>
         </testsuite>
+        <!-- Needs composer install in docs/examples/react; CI runs it in its own job. -->
+        <testsuite name="react">
+            <directory>tests/React</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

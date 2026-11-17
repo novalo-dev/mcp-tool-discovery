@@ -41,8 +41,8 @@ A change to the search comes with the benchmark before and after.
 ## Hosts
 
 - Examples on other hosts, beside the servers written by hand over stdio and
-  HTTP and the one on the official PHP SDK in [docs/HOSTS.md](docs/HOSTS.md):
-  a framework bundle, an async server.
+  HTTP, the one kept up on ReactPHP and the one on the official PHP SDK in
+  [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.
 

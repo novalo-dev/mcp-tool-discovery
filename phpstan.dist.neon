@@ -12,6 +12,7 @@ parameters:
         - bin
         - docs/examples
     excludePaths:
-        # Read with the SDK installed, by its own job: without it, every
-        # class of mcp/sdk is unknown here.
+        # Read with the SDK or ReactPHP installed, by their own jobs: without
+        # them, every class of mcp/sdk or react/http is unknown here.
         - docs/examples/sdk
+        - docs/examples/react

@@ -4,9 +4,10 @@ The library has no transport, no session and no JSON-RPC envelope: the host
 keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
-over stdio and one over HTTP, and in one on the official PHP SDK. All three
-serve the same notes tools, kept with their gate in
-[examples/notes.php](examples/notes.php): only the transport differs.
+over stdio and one over HTTP, in the same HTTP server kept up in one process
+on ReactPHP, and in one on the official PHP SDK. All four serve the same notes
+tools, kept with their gate in [examples/notes.php](examples/notes.php): only
+the transport differs.
 
 ---
 
@@ -43,9 +44,11 @@ a call with no name.
 [examples/http-server.php](examples/http-server.php) serves the same tools
 over the Streamable HTTP transport, the way most PHP applications run: one
 process per request, behind PHP-FPM or any web server. It answers every
-message with one JSON body and keeps no session. The tests run it behind PHP's
-built-in server and call it over HTTP
-([tests/Examples/HttpServerTest.php](../tests/Examples/HttpServerTest.php)).
+message with one JSON body and keeps no session. What it answers is in
+[examples/http.php](examples/http.php), one function from a request to its
+answer, which the ReactPHP server below calls too. The tests run it behind
+PHP's built-in server and call it over HTTP
+([tests/Examples/HttpServerTestCase.php](../tests/Examples/HttpServerTestCase.php)).
 
 ```
 php -S 127.0.0.1:8080 docs/examples/http-server.php
@@ -67,6 +70,37 @@ The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
 another origin, which the specification asks a server to refuse. The cache
 directory must be one only the server writes to: the index files are run.
+
+---
+
+## A server that stays up, on ReactPHP
+
+[examples/react/server.php](examples/react/server.php) is the same HTTP server
+in one PHP process that serves every request, on
+[ReactPHP](https://reactphp.org)'s event loop. The same holds for a worker of
+RoadRunner, Swoole or FrankenPHP: the process outlives the request. It answers
+from the same [examples/http.php](examples/http.php), so a client cannot tell
+the two apart: the tests ask it everything they ask the PHP-FPM server
+([tests/React/ReactServerTest.php](../tests/React/ReactServerTest.php)). The
+example pins `react/http` in
+[examples/react/composer.json](examples/react/composer.json), and a CI job
+installs it there and runs those tests.
+
+```
+cd docs/examples/react && composer install && cd -
+php docs/examples/react/server.php
+```
+
+What changes from one process per request:
+
+| Part | In a process that stays up | Why |
+|---|---|---|
+| The caller | still a gate and a `Discovery` per request, built inside the handler | the process serves every caller in turn; a `Discovery` built once above the handler would answer each of them with the first caller's gate |
+| The search index | one `MemoryIndexCache`, in one `SearchSetup` shared by every request | built once per set of visible tools and kept in memory; its key is the tools the caller may see, so a reader never gets the index of an admin's tools |
+| The notes | one `Notes` in memory | the process keeps them; a real server keeps its database connection the same way |
+
+A learning store, if the host gives one, is shared the same way: the
+`SearchSetup` is built once, beside the cache.
 
 ---
 

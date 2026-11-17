@@ -10,6 +10,16 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A server that stays up, on ReactPHP**, `docs/examples/react/server.php`:
+  the HTTP example in one long-running process, as a ReactPHP, RoadRunner,
+  Swoole or FrankenPHP worker runs it. It shows what such a host keeps between
+  requests (one `MemoryIndexCache` in one shared `SearchSetup`) and what it
+  must not (the gate and the `Discovery`, built inside each request). Both
+  HTTP servers now answer from the same `docs/examples/http.php`, and the tests
+  ask the ReactPHP server everything they ask the PHP-FPM one, plus callers
+  taking turns in one process. A CI job installs the pinned `react/http` and
+  runs them; it is part of **CI passed**.
+
 - **Direct mode**, `src/Mode/Direct/DirectMode.php`: every tool the caller
   may see, listed as itself, and no tool of the mode's own. For a server
   small enough to list everything, and for a host that lets its users turn

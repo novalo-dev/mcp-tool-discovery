@@ -14,9 +14,9 @@ declare(strict_types=1);
 /*
  * What the example servers share: the notes tools, where the notes are kept,
  * and the gate. Only the transport differs between
- * docs/examples/stdio-server.php, docs/examples/http-server.php and
- * docs/examples/sdk/server.php, which is the part a host writes itself or
- * takes from an SDK.
+ * docs/examples/stdio-server.php, docs/examples/http-server.php,
+ * docs/examples/react/server.php and docs/examples/sdk/server.php, which is
+ * the part a host writes itself or takes from an SDK.
  */
 
 namespace Example\Notes;
@@ -66,9 +66,10 @@ function definitions(): array
 }
 
 /**
- * Where the notes are kept. In memory for a process that lives as long as its
- * client, as over stdio; in a file when each request is a process of its own,
- * as over HTTP, or the note added by one request is gone at the next.
+ * Where the notes are kept. In memory for a process that outlives each
+ * request, as over stdio or on ReactPHP; in a file when each request is a
+ * process of its own, as behind PHP-FPM, or the note added by one request is
+ * gone at the next.
  */
 final class Notes
 {
