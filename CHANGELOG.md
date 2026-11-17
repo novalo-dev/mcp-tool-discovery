@@ -18,6 +18,20 @@ becomes the next version's section when it is published.
   1,845, whatever the number of tools. `tests/Search/ListCostTest.php`
   guards those claims.
 
+### Changed
+
+- **Grouped mode, a lighter list.** Each action used to be named up to four
+  times: in the read tool's description, in its `action` or `describe` enum,
+  and again in the change tool. It is now named twice, a line with its title
+  in the tool that runs it and that tool's `action` enum. The read tool no
+  longer repeats the changes, it names the change tool instead, and
+  `describe` takes plain strings (an unknown name still comes back in
+  `unknown`). A tool without a title is listed by its name alone rather than
+  "name: name". On the workspace benchmark server the grouped list goes from
+  15,444 to 14,314 bytes, and its eight group tools from 8,616 to 7,486.
+  Clients that relied on the `describe` enum to check names now get the
+  same answer from the call.
+
 ## 0.3.0 - 2026-11-16
 
 ### Added

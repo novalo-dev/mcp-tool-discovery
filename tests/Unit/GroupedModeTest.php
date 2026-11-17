@@ -19,6 +19,7 @@ use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Tests\Fixtures\Groups;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Novalo\McpToolDiscovery\Tool\Tool;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
 use PHPUnit\Framework\TestCase;
 
 final class GroupedModeTest extends TestCase
@@ -80,10 +81,45 @@ final class GroupedModeTest extends TestCase
         $users = self::listed()['users'];
 
         self::assertStringContainsString('- acme_get_user: ', $users->description());
-        self::assertStringContainsString('Changes, run with users_change:', $users->description());
-        self::assertStringContainsString('- acme_deactivate_user: ', $users->description());
+        self::assertStringContainsString('users_change', $users->description(), 'the read tool says where the changes are');
         self::assertStringNotContainsString('acme_list_users', (string) json_encode($users->toArray()));
         self::assertSame(['acme_get_user', 'acme_search_users'], $users->inputSchema()['properties']['action']['enum'] ?? null);
+        self::assertStringContainsString('- acme_deactivate_user: ', self::listed()['users_change']->description());
+    }
+
+    public function testTheListNamesEachActionTwiceOnceWithItsTitleAndOnceInTheEnumThatRunsIt(): void
+    {
+        $listed = self::listed();
+        $json = '';
+        foreach (array_keys(Groups::TITLES) as $group) {
+            $json .= json_encode($listed[$group]->toArray()) . json_encode($listed[$group . GroupedMode::CHANGE_SUFFIX]->toArray());
+        }
+
+        foreach (RecordingGate::fixtureTools() as $tool) {
+            if (Groups::of($tool) === '' || $tool->name === 'acme_list_users') {
+                continue;
+            }
+            // The quotes keep acme_get_file from counting inside acme_get_file_link.
+            self::assertSame(1, substr_count($json, '- ' . $tool->name . ': '), $tool->name);
+            self::assertSame(1, substr_count($json, '"' . $tool->name . '"'), $tool->name);
+        }
+        self::assertSame(['type' => 'string'], $listed['files']->inputSchema()['properties']['describe']['items'] ?? null);
+    }
+
+    public function testAnActionWithoutATitleIsListedByItsNameAlone(): void
+    {
+        $tools = RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => Groups::of($tool) === 'files');
+        $untitled = [];
+        foreach ($tools as $tool) {
+            $definition = $tool->toArray();
+            unset($definition['title']);
+            $untitled[] = Tool::fromArray($definition);
+        }
+
+        $listed = Groups::mode()->listTools(ToolSet::of($untitled));
+
+        self::assertStringContainsString("\n- acme_get_file\n", $listed[0]->description() . "\n");
+        self::assertStringNotContainsString('acme_get_file: acme_get_file', $listed[0]->description());
     }
 
     public function testAGroupWithNothingVisibleIsLeftOut(): void

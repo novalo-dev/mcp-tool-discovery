@@ -166,15 +166,24 @@ final class GroupedMode implements DiscoveryMode
     private function readTool(string $group, string $title, array $reads, array $changes): Tool
     {
         $name = $this->prefix . $group;
-        $lines = [sprintf('%s. Runs the actions of this group that only read: give action and its arguments. To read the parameters of any action of the group first, give describe with the action names instead.', $title)];
+        $change = $name . self::CHANGE_SUFFIX;
+        // Each action is named twice in the list, no more: once with its title
+        // here or in the change tool, so the assistant knows what it does, and
+        // once in the enum of the tool that runs it, so a client can check the
+        // call. The changes are not repeated here and describe has no enum of
+        // its own: both would only copy names the list already shows, and
+        // describe answers an unknown name in its own list anyway.
+        $lines = [];
         if ($reads !== []) {
-            $lines[] = 'Reads:';
+            $lines[] = sprintf('%s. Runs one action of this group that only reads: give action and its arguments.', $title);
             $lines = [...$lines, ...array_map([self::class, 'line'], $reads)];
+        } else {
+            $lines[] = sprintf('%s.', $title);
         }
         if ($changes !== []) {
-            $lines[] = sprintf('Changes, run with %s:', $name . self::CHANGE_SUFFIX);
-            $lines = [...$lines, ...array_map([self::class, 'line'], $changes)];
+            $lines[] = sprintf('The changes of this group run with %s, which lists them.', $change);
         }
+        $lines[] = 'To read the parameters of any action of the group first, read or change, give describe with its name.';
         $properties = [];
         if ($reads !== []) {
             $properties['action'] = ['type' => 'string', 'enum' => self::names($reads), 'description' => 'The read to run.'];
@@ -182,8 +191,8 @@ final class GroupedMode implements DiscoveryMode
         }
         $properties['describe'] = [
             'type' => 'array',
-            'items' => ['type' => 'string', 'enum' => self::names([...$reads, ...$changes])],
-            'description' => sprintf('Actions of this group, reads or changes, to describe in full with their inputSchema; nothing runs. Up to %d.', $this->maxDescribed),
+            'items' => ['type' => 'string'],
+            'description' => sprintf('Names of actions of this group, reads or changes, to describe in full with their inputSchema; nothing runs. Up to %d.', $this->maxDescribed),
         ];
 
         return Tool::fromArray([
@@ -226,7 +235,10 @@ final class GroupedMode implements DiscoveryMode
 
     private static function line(Tool $tool): string
     {
-        return '- ' . $tool->name . ': ' . $tool->title();
+        $title = $tool->title();
+
+        // A tool without a title would otherwise read "- name: name".
+        return $title === $tool->name ? '- ' . $tool->name : '- ' . $tool->name . ': ' . $title;
     }
 
     /**

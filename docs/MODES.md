@@ -21,7 +21,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 
 | Server | Tools | Every tool as itself | Compact | Gateway | Grouped | One compact search |
 |---|---|---|---|---|---|---|
-| workspace | 50 | 16,147 | 2,871 | 1,845 | 15,444 | 1,125 |
+| workspace | 50 | 16,147 | 2,871 | 1,845 | 14,314 | 1,125 |
 | platform | 40 | 12,829 | 2,871 | 1,845 | - | 862 |
 | people | 40 | 12,814 | 2,871 | 1,845 | - | 874 |
 | library | 40 | 14,550 | 2,871 | 1,845 | - | 1,069 |
@@ -48,7 +48,9 @@ tools stay outside them, listed as themselves.
 - **Grouped** shows the map of the server without a search, for a client that
   searches badly and a server whose tools fall into a few clear groups. It
   leaves the schemas out but names every action, so its list grows with the
-  server: on short tools it saves little, as the workspace shows.
+  server. On the workspace its eight tools take 7,486 bytes where the 28
+  actions they stand for would take 9,299: on short tools it saves about a
+  fifth, more as the schemas grow.
 
 ---
 
@@ -139,8 +141,15 @@ Each declared group that holds at least one visible tool becomes:
 
 | Tool | What it does | Annotations |
 |---|---|---|
-| `<group>` | runs one of the group's reads (`action`, `arguments`), or describes any of its actions, reads or changes, with their `inputSchema` (`describe`: a list of names); its description lists every action in one line | reads only |
+| `<group>` | runs one of the group's reads (`action`, `arguments`), or describes any of its actions, reads or changes, with their `inputSchema` (`describe`: a list of names); its description lists each of its reads in one line, and says which tool runs the changes | reads only |
 | `<group>_change` | runs one of the group's changes (`action`, `arguments`); listed only when the group has a change the caller may see | destructive |
+
+Each action is named twice in the list and no more: once in a line with its
+title, in the tool that runs it, so the model knows what it does, and once in
+that tool's `action` enum, so a client can check the call. `describe` takes
+plain names: the list already shows them all, and an unknown or hidden name
+comes back in its `unknown` list. A tool without a title is listed by its
+name alone.
 
 Why a read tool and a change tool per group: a group mixes reads and changes,
 and `destructiveHint` is the only lever a client offers to ask the person
