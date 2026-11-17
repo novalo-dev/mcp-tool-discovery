@@ -154,7 +154,7 @@ if ($stated !== null || $method === 'server/discover') {
 } else {
     if ($method === 'initialize') {
         reply(200, ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
-            'protocolVersion' => negotiate($params['protocolVersion'] ?? null)->value,
+            'protocolVersion' => Revision::negotiate($params['protocolVersion'] ?? null)->value,
             'capabilities' => ['tools' => new \stdClass()],
             'serverInfo' => ['name' => 'notes', 'version' => '1.0.0'],
         ]]);

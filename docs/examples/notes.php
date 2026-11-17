@@ -13,18 +13,16 @@ declare(strict_types=1);
 
 /*
  * What the example servers share: the notes tools, where the notes are kept,
- * the gate, and how a server picks the revision at `initialize`. Only the
- * transport differs between docs/examples/stdio-server.php,
- * docs/examples/http-server.php and docs/examples/sdk/server.php, which is the
- * part a host writes itself or takes from an SDK.
+ * and the gate. Only the transport differs between
+ * docs/examples/stdio-server.php, docs/examples/http-server.php and
+ * docs/examples/sdk/server.php, which is the part a host writes itself or
+ * takes from an SDK.
  */
 
 namespace Example\Notes;
 
-use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
-use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Tool\Tool;
 
 /**
@@ -190,20 +188,4 @@ final class NotesGate implements ToolGate
 
         return CallResult::error('Unknown tool.');
     }
-}
-
-/**
- * The revision a server answers `initialize` with: the client's if the library
- * shapes answers for it, otherwise the latest handshake revision, as the
- * specification asks of a server that does not support the client's.
- */
-function negotiate(mixed $protocolVersion): Revision
-{
-    try {
-        $revision = Revision::fromString(is_string($protocolVersion) ? $protocolVersion : '');
-    } catch (UnsupportedRevision) {
-        return Revision::V2025_11_25;
-    }
-
-    return $revision->isStateless() ? Revision::V2025_11_25 : $revision;
 }

@@ -38,6 +38,46 @@ enum Revision: string
     }
 
     /**
+     * The latest revision that opens with an `initialize` handshake.
+     *
+     * Read from the cases rather than named, so that a host falling back to it
+     * moves on by itself when the library learns a newer handshake revision,
+     * instead of keeping the one its author copied.
+     */
+    public static function latestWithHandshake(): self
+    {
+        $latest = self::V2024_11_05;
+        foreach (self::cases() as $revision) {
+            if (!$revision->isStateless()) {
+                $latest = $revision;
+            }
+        }
+
+        return $latest;
+    }
+
+    /**
+     * The revision to answer an `initialize` request with.
+     *
+     * The specification asks a server for the client's own revision when it
+     * supports it, and otherwise for another it supports, preferably its
+     * latest. Which revisions can be answered is what this library shapes,
+     * so the rule lives here once instead of in every host. The stateless
+     * revision is never the answer: it has no handshake, so a client asking
+     * for it in `initialize` gets the latest revision that has one.
+     *
+     * It takes whatever the client sent: `protocolVersion` comes from JSON and
+     * may be missing or not a string, which the rule answers the same way as
+     * an unknown revision.
+     */
+    public static function negotiate(mixed $requested): self
+    {
+        $revision = is_string($requested) ? self::tryFrom($requested) : null;
+
+        return $revision === null || $revision->isStateless() ? self::latestWithHandshake() : $revision;
+    }
+
+    /**
      * @throws UnsupportedRevision
      */
     public static function fromString(string $revision): self

@@ -29,7 +29,7 @@ Its parts, in the order a host writes them:
 |---|---|---|
 | Tool definitions | `definitions()`, in `notes.php` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
-| The revision | `initialize` in `answer()`, through `negotiate()` | the client's revision when the library knows it, otherwise the latest handshake revision |
+| The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 
 Everything else in the file is the host's: reading lines, answering `ping`,

@@ -16,9 +16,10 @@ namespace Novalo\McpToolDiscovery\Exception;
 /**
  * A protocol revision this library does not know how to shape answers for.
  *
- * The host decides what to do with it - usually answer with the revision it
- * prefers, as the MCP version negotiation allows - so this is an exception it
- * catches, not a silent fallback that would hide a new revision.
+ * The host decides what to do with it, so this is an exception it catches,
+ * not a silent fallback that would hide a new revision. At `initialize` the
+ * specification already says what to do, and Revision::negotiate() does it
+ * without throwing.
  */
 final class UnsupportedRevision extends \InvalidArgumentException
 {

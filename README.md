@@ -117,7 +117,9 @@ use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 
 $discovery = new Discovery(new CompactMode(), new MyGate($user, $myTools));
-$revision = Revision::fromString($negotiatedProtocolVersion);
+
+// initialize: answer with $revision->value as protocolVersion, keep it for the session
+$revision = Revision::negotiate($params['protocolVersion'] ?? null);
 
 // tools/list
 $result = $discovery->listTools($tools, $revision, ttlMs: 300000);

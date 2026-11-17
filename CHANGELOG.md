@@ -17,6 +17,14 @@ becomes the next version's section when it is published.
   whole list is 60,640 bytes, the compact list 2,871 and the gateway list
   1,845, whatever the number of tools. `tests/Search/ListCostTest.php`
   guards those claims.
+- **`Revision::negotiate()`**, the revision to answer `initialize` with: the
+  client's own when the library shapes it, otherwise the latest revision with
+  a handshake, as the specification asks. It takes `protocolVersion` as the
+  client sent it, missing or not a string included, and never answers with
+  the stateless revision, which has no handshake. **`Revision::latestWithHandshake()`**
+  gives that fallback on its own. A host no longer names a revision of its
+  own to fall back to, so it moves on when the library learns a newer one;
+  the examples in docs/HOSTS.md use both.
 
 ### Changed
 
