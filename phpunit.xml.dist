@@ -20,6 +20,9 @@
         <testsuite name="examples">
             <directory>tests/Examples</directory>
         </testsuite>
+        <testsuite name="docs">
+            <directory>tests/Docs</directory>
+        </testsuite>
         <testsuite name="conformance">
             <directory>tests/Conformance</directory>
         </testsuite>

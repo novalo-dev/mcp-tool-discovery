@@ -25,6 +25,12 @@ becomes the next version's section when it is published.
   gives that fallback on its own. A host no longer names a revision of its
   own to fall back to, so it moves on when the library learns a newer one;
   the examples in docs/HOSTS.md use both.
+- **The docs are tested.** `tests/Docs/DocsTest.php` reads every PHP snippet
+  of the README and docs/ without running it: each must parse, and each class,
+  method, enum case and named argument of the library it names must exist,
+  with the case Composer's autoloader needs. Every relative link must lead to
+  a file and its anchor to a heading. A snippet a host copies can no longer
+  name a parameter the library renamed.
 
 ### Changed
 

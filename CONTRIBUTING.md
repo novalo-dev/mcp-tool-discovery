@@ -40,7 +40,7 @@ Every pull request runs:
 |---|---|---|
 | CI | Coding standard, static analysis, hygiene | PER-CS 2.0, PHPStan level max on `src/`, `bin/` and `docs/examples/`, level 6 on `tests/`, the hygiene of files and commit messages |
 | CI | PHP 8.1+ compatibility | PHPCompatibility reads every construct, function and class against each PHP from 8.1 up |
-| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples and conformance suites (the `sdk` suite runs in its own job) |
+| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples, docs and conformance suites (the `sdk` suite runs in its own job) |
 | CI | What Composer installs | the package holds `src/` and the licence, not the tests |
 | CI | Example on the official PHP SDK | installs `mcp/sdk` at the version `docs/examples/sdk/composer.json` pins, PHPStan level max on the example, and the `sdk` test suite; not part of **CI passed** while the SDK is below 1.0 |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
@@ -118,6 +118,15 @@ The search is measured, not tuned by feel.
 - The library holds no list of words and assumes no naming convention: no stop
   words, no verbs, no prefix to strip. A word of a business ("meeting",
   "admin") belongs in the host's synonyms, not in the library.
+
+## Changing the docs
+
+Hosts copy the snippets of the README and docs/ as they stand.
+`tests/Docs/DocsTest.php` reads every PHP snippet without running it: it must
+parse, and every class, method, enum case and named argument of the library it
+names must exist, with the same case. Every relative link must lead to a file,
+and its `#anchor` to a heading of that file. A rename in `src/` fixes the docs
+in the same pull request.
 
 ## Protocol revisions
 
