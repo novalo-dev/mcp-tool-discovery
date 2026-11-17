@@ -15,8 +15,9 @@ declare(strict_types=1);
  * What the example servers share: the notes tools, where the notes are kept,
  * and the gate. Only the transport differs between
  * docs/examples/stdio-server.php, docs/examples/http-server.php,
- * docs/examples/react/server.php and docs/examples/sdk/server.php, which is
- * the part a host writes itself or takes from an SDK.
+ * docs/examples/react/server.php, docs/examples/symfony and
+ * docs/examples/sdk/server.php, which is the part a host writes itself or
+ * takes from an SDK or a framework.
  */
 
 namespace Example\Notes;

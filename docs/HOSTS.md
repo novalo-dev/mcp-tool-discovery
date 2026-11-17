@@ -5,7 +5,8 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, and in one on the official PHP SDK. All four serve the same notes
+on ReactPHP, in a Symfony application, and in one on the official PHP SDK.
+All five serve the same notes
 tools, kept with their gate in [examples/notes.php](examples/notes.php): only
 the transport differs.
 
@@ -46,7 +47,7 @@ over the Streamable HTTP transport, the way most PHP applications run: one
 process per request, behind PHP-FPM or any web server. It answers every
 message with one JSON body and keeps no session. What it answers is in
 [examples/http.php](examples/http.php), one function from a request to its
-answer, which the ReactPHP server below calls too. The tests run it behind
+answer, which the ReactPHP and Symfony servers below call too. The tests run it behind
 PHP's built-in server and call it over HTTP
 ([tests/Examples/HttpServerTestCase.php](../tests/Examples/HttpServerTestCase.php)).
 
@@ -101,6 +102,40 @@ What changes from one process per request:
 
 A learning store, if the host gives one, is shared the same way: the
 `SearchSetup` is built once, beside the cache.
+
+---
+
+## A server in a Symfony application
+
+[examples/symfony](examples/symfony) is the same HTTP server as a Symfony 6.4
+application: the library's parts are services of the container, the transport
+is one controller, [McpController](examples/symfony/src/McpController.php), and
+the Discovery is built for each request. It answers from the same
+[examples/http.php](examples/http.php), and the tests ask it everything they
+ask the PHP-FPM server, plus one kernel serving callers in turn, as a worker
+does ([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
+The example pins `symfony/framework-bundle` in
+[examples/symfony/composer.json](examples/symfony/composer.json), and a CI job
+installs it there and runs those tests.
+
+```
+cd docs/examples/symfony && composer install && cd -
+php -S 127.0.0.1:8080 docs/examples/symfony/public/app.php
+```
+
+The wiring is in [Kernel.php](examples/symfony/src/Kernel.php); a real
+application writes the same entries in `config/services.yaml`:
+
+| Part | In the container | Why |
+|---|---|---|
+| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
+| The notes | a shared service | they stand for the host's database, which the container already gives its services |
+| The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
+
+The caller here comes from the token, as in the other servers. In an
+application with the security bundle, the controller builds the gate from
+`Security::getUser()` instead: what the library needs is the same, a gate for
+this caller.
 
 ---
 

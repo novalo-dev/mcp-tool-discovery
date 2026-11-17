@@ -1,0 +1,11 @@
+parameters:
+    # The test of the Symfony example, at the level of the other tests,
+    # read with Symfony installed in this directory and PHPUnit in the
+    # library's own vendor.
+    level: 6
+    phpVersion: 80100
+    paths:
+        - ../../../tests/Symfony
+    bootstrapFiles:
+        - ../../../vendor/autoload.php
+        - vendor/autoload.php

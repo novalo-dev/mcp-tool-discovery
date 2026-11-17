@@ -14,7 +14,8 @@ declare(strict_types=1);
 /*
  * The Streamable HTTP side of the notes server, with no server around it:
  * one request in, one answer out. http-server.php runs it once per process,
- * behind PHP-FPM; react/server.php runs it for every request of a process
+ * behind PHP-FPM; symfony/src/McpController.php runs it inside a Symfony
+ * application; react/server.php runs it for every request of a process
  * that stays up. Kept here once, so the two servers cannot answer a client
  * differently: only what lives between requests changes.
  *

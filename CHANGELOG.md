@@ -21,6 +21,16 @@ becomes the next version's section when it is published.
   floors of `tests/Search/BenchmarkTest.php` move to the new counts on the
   449 test requests (362 first, 414 in the top 3, 388 asked again), so they
   still guard every request that passes today.
+- **A server in a Symfony application**, `docs/examples/symfony`: the HTTP
+  example on Symfony 6.4, the long-term release that runs on PHP 8.1. It shows
+  which of the library's parts are services of the container (`SearchSetup`
+  with its index cache, shared by every caller) and which must not be (the
+  gate and the `Discovery`, built by the controller in each request, since a
+  worker such as FrankenPHP keeps the container from one request to the
+  next). It answers from the same `docs/examples/http.php`, and the tests ask
+  it everything they ask the PHP-FPM server, plus one kernel serving callers
+  in turn. A CI job installs the pinned `symfony/framework-bundle` and runs
+  them; it is part of **CI passed**.
 - **A server that stays up, on ReactPHP**, `docs/examples/react/server.php`:
   the HTTP example in one long-running process, as a ReactPHP, RoadRunner,
   Swoole or FrankenPHP worker runs it. It shows what such a host keeps between

@@ -22,9 +22,9 @@ $header = <<<'TEXT'
 
 $finder = (new PhpCsFixer\Finder())
     ->in([__DIR__ . '/src', __DIR__ . '/tests', __DIR__ . '/bin', __DIR__ . '/docs/examples'])
-    // What Composer installs for the SDK and ReactPHP examples is not ours
-    // to format.
-    ->exclude(['sdk/vendor', 'react/vendor'])
+    // What Composer installs for the SDK, ReactPHP and Symfony examples is
+    // not ours to format, nor the cache Symfony compiles.
+    ->exclude(['sdk/vendor', 'react/vendor', 'symfony/vendor', 'symfony/var'])
     ->append([__FILE__]);
 
 return (new PhpCsFixer\Config())
