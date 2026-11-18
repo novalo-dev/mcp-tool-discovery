@@ -45,6 +45,17 @@ becomes the next version's section when it is published.
   gate that no longer fit `ToolGate`, or blocks that worked only one by one,
   passed the docs tests and failed in the first project that copied them.
 
+### Changed
+
+- **The HTTP examples leave the caller to the server.** `answerHttp()` in
+  docs/examples/http.php no longer reads the bearer token: it takes a
+  closure that gives the `Discovery` of the caller, or null for a request
+  that names no one (still answered 401, before the body is read). The token
+  is read by `roleOf()`, which the PHP-FPM, ReactPHP and Symfony servers
+  call. A host that copied `answerHttp()` and authenticates in its framework
+  (a firewall, a middleware) no longer has the token checked a second time
+  against the example's list.
+
 ### Fixed
 
 - **docs/SEARCH.md gives the current scores at the top of the page.** It

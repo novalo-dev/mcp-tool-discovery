@@ -62,7 +62,7 @@ What changes from stdio:
 
 | Part | Over HTTP | Why |
 |---|---|---|
-| The caller | the `Authorization` header of each request | the gate is built for the caller this request names, so a `Discovery` lives for one request |
+| The caller | the `Authorization` header of each request, read by `roleOf()` | the gate is built for the caller this request names, so a `Discovery` lives for one request |
 | The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version`. In the stateless revision each request names it in `_meta` instead | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
 | The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
 | The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
@@ -71,6 +71,11 @@ The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
 another origin, which the specification asks a server to refuse. The cache
 directory must be one only the server writes to: the index files are run.
+
+`answerHttp()` never reads the token itself: it asks the server for the
+`Discovery` of the caller, and answers 401 when there is none. Reading the
+token is the server's part, in `roleOf()`, so a framework that already knows
+who calls builds the gate from its own user instead.
 
 ---
 
@@ -132,10 +137,11 @@ application writes the same entries in `config/services.yaml`:
 | The notes | a shared service | they stand for the host's database, which the container already gives its services |
 | The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
 
-The caller here comes from the token, as in the other servers. In an
-application with the security bundle, the controller builds the gate from
-`Security::getUser()` instead: what the library needs is the same, a gate for
-this caller.
+The caller here comes from the token, read by `roleOf()` as in the other
+servers. In an application with the security bundle, the firewall has already
+found the caller, and the closure the controller hands `answerHttp()` builds
+the gate from `Security::getUser()` instead: what the library needs is the
+same, a gate for this caller.
 
 ---
 

@@ -180,6 +180,9 @@ abstract class HttpServerTestCase extends TestCase
     {
         self::assertSame(401, self::post(['method' => 'tools/list'], null)[0]);
         self::assertSame(401, self::post(['method' => 'tools/list'], 'not-a-token')[0]);
+        // The caller is asked for before the body is read: a request that
+        // names no one learns nothing of how its body would be parsed.
+        self::assertSame(401, self::request('POST', 'not json', [])[0]);
         self::assertSame(202, self::post(['method' => 'notifications/initialized', 'notification' => true], self::READER)[0]);
         self::assertSame(-32601, self::post(['method' => 'resources/list'], self::READER)[1]['error']['code'] ?? null);
         self::assertSame(-32602, self::post(['method' => 'tools/call', 'params' => ['arguments' => []]], self::READER)[1]['error']['code'] ?? null);
