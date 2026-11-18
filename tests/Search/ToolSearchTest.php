@@ -84,6 +84,25 @@ final class ToolSearchTest extends TestCase
         self::assertSame(['ticket', 'status'], $analyzer->words('ticket status'), 'spaced scripts unchanged');
     }
 
+    public function testThaiIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ยก', 'กเ', 'เลิ', 'ลิก', 'ยกเลิก'], $analyzer->words('ยกเลิก'), 'a vowel or tone mark stays on its consonant, the run is kept');
+        self::assertSame(['ยกเลิก'], $analyzer->tokens('ยกเลิก'), 'the caller is shown the word it wrote');
+        self::assertSame(['ตู้เบอร์'], $analyzer->tokens('ตู้เบอร์12'), 'numbers apart, still left out');
+        self::assertSame(['ตู้'], $analyzer->words('ตู้'), 'one cluster, one term');
+    }
+
+    public function testASentenceInThaiFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('arena'));
+
+        // Both found another tool first while a sentence met tools by its trigrams only.
+        self::assertSame('lockers_list', $search->search('ตอนนี้ตู้ล็อกเกอร์ว่างกี่ตู้')[0]->name ?? null);
+        self::assertSame('staff_shifts', $search->search('พรุ่งนี้ใครเข้ากะหน้าเคาน์เตอร์')[0]->name ?? null);
+    }
+
     public function testAMarkStaysInItsWord(): void
     {
         $analyzer = new Analyzer();

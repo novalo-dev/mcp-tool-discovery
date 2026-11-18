@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 441 times
-out of 549 in fields, and 253 times as one sentence.
+On the benchmark below, the same requests find the right tool first 478 times
+out of 599 in fields, and 284 times as one sentence.
 
 ## How a tool is scored
 
@@ -81,6 +81,16 @@ decades (the bigrams of Lucene's CJK analyzer): "帮我报修" gives `帮我`, `
 still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修"
 when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
 synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
+
+**Thai is cut into pairs of what is seen.** It is written without spaces
+too, but its vowels and tone marks are marks, so a pair of code points would
+hold a consonant and the vowel it carries, a fragment that means nothing. A
+run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
+consonant with its marks): "ยกเลิก" (to cancel) gives `ยก`, `กเ`, `เลิ`,
+`ลิก`. Unlike Chinese, the whole run is kept beside its pairs, and its
+trigrams with it: on the train half of the sports centre, keeping it found
+as many tools first, with fewer tools returned. Lao, Khmer and Burmese are
+written the same way and are not measured yet, so they are read as before.
 
 **No stemmer, on purpose.** A Porter stemmer was measured and made the search
 worse: folding "categories" to "categori" erases the sign that a plural query
@@ -202,7 +212,7 @@ locked while it is written.
 
 ## The measures
 
-Ten fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Eleven fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -210,18 +220,19 @@ French (40 tools, `prolonger-pret`), the office of a school written in German
 `nimbo_detach_volume`), the service desk of a town hall written in Greek
 (40 tools, `parking_permit_renew`), a newsroom with no titles and long
 descriptions (40 tools, `schedule_article`), the office of a residential
-estate written in Chinese (40 tools, `repair_assign`) and a bus depot
-written in Hindi (40 tools, `pass_renew`). 1097 requests, each written as one
+estate written in Chinese (40 tools, `repair_assign`), a bus depot
+written in Hindi (40 tools, `pass_renew`) and a sports centre written in Thai
+(40 tools, `court_book`). 1197 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 549 requests | Right tool first | Top 3 |
+| Test half, 599 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 441 | 504 |
-| The same request as one sentence | 253 | 351 |
-| In fields, after every train request was run once | 442 | 504 |
-| In fields, after the test requests were run once, then asked again | 472 | 517 |
+| The request in fields | 478 | 552 |
+| The same request as one sentence | 284 | 392 |
+| In fields, after every train request was run once | 479 | 552 |
+| In fields, after the test requests were run once, then asked again | 516 | 565 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -302,6 +313,22 @@ tools returned in fields and three as one sentence; the nine other servers
 do not move by one request. Dropping the marks instead, so that a word with
 its vowels and one without would meet, lost on train (38 first in fields,
 against 42): with the vowels gone, too many words become the same.
+
+The sports centre is written in Thai, with English snake_case names: a
+script with no spaces between words and vowels written as marks. Its 100
+requests were written before any of them was run, as front desk staff talk
+("ช่วยจองสนามแบดพรุ่งนี้หกโมงเย็น", book a badminton court for tomorrow at
+six). A sentence used to be one word that met tools by its trigrams only, and
+it did better than Chinese did: 34 of its 50 test requests found the right
+tool first in fields (47 in the top 3) and 30 as one sentence (41). Cut into
+pairs of grapheme clusters, chosen on its train half, 37 come first in fields
+(48 in the top 3) and 31 as one sentence (41), with about three tools
+returned instead of two and a half; asked a second time, the whole test half
+gains 10 first. The ten other servers do not move by one request. On train,
+pairs of code points (43 first in fields, 35 as one sentence, against 44 and
+39) and triples of clusters (43 and 39) lost. What it still misses is mostly
+a list beside its single tool ("มีอุปกรณ์อะไรให้ยืมบ้าง", what equipment can
+be lent, finds the tool that takes it back first).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

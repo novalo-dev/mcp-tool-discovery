@@ -44,7 +44,7 @@ final class ToolIndex
      * changes, so an old cache entry is rebuilt rather than compared with
      * terms it never held.
      */
-    private const FORMAT = 4;
+    private const FORMAT = 5;
 
     /**
      * @param list<int|string> $ids the documents, in index order

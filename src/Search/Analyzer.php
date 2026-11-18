@@ -31,6 +31,13 @@ final class Analyzer
      */
     private const UNSPACED = '(?:(?=\p{L})[\p{Han}\p{Hiragana}\p{Katakana}])';
 
+    /**
+     * Thai, also written without spaces between words, but whose vowels and
+     * tone marks are marks: its runs are cut into pairs of characters as
+     * they are seen (grapheme clusters), not into pairs of code points.
+     */
+    private const THAI = '\p{Thai}';
+
     /** @var array<string, true> */
     private readonly array $stopWords;
 
@@ -46,7 +53,8 @@ final class Analyzer
 
     /**
      * The terms the index compares: the tokens of the text, with each run of
-     * Han or kana cut into overlapping pairs of characters.
+     * Han or kana cut into overlapping pairs of characters, and each run of
+     * Thai into pairs of grapheme clusters (see thai()).
      *
      * Chinese and Japanese are written without spaces, so a whole sentence is
      * one token and would only ever meet a tool by its trigrams, while most of
@@ -78,8 +86,8 @@ final class Analyzer
      *
      * snake_case, kebab-case, dotted names and camelCase are split, so a tool
      * named set_ticket_status or setTicketStatus matches "ticket status". A
-     * run of Han or kana is a token of its own, apart from the letters and
-     * digits around it ("5栋101").
+     * run of Han, kana or Thai is a token of its own, apart from the letters
+     * and digits around it ("5栋101").
      *
      * @return list<string>
      */
@@ -97,7 +105,7 @@ final class Analyzer
         // Hebrew their vowel points, and decomposed text (NFD) every accent:
         // splitting on them cut "सर्वर" into "सर" and "वर", one word into
         // fragments that meet unrelated tools.
-        $parts = preg_split('/[^\p{L}\p{M}\p{N}]+|(' . self::UNSPACED . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split('/[^\p{L}\p{M}\p{N}]+|(' . self::UNSPACED . '+|' . self::THAI . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $words = [];
         foreach ($parts === false ? [] : $parts as $part) {
             // A number is an identifier ("ticket 12"), never a word that tells
@@ -112,12 +120,15 @@ final class Analyzer
 
     /**
      * The terms of one token: itself, or its pairs of characters when it is a
-     * run of Han or kana longer than one character.
+     * run of Han or kana longer than one character, or a run of Thai.
      *
      * @return list<string>
      */
     public static function terms(string $token): array
     {
+        if (preg_match('/^' . self::THAI . '+$/u', $token) === 1) {
+            return self::thai($token);
+        }
         if (preg_match('/^' . self::UNSPACED . '{2,}$/u', $token) !== 1) {
             return [$token];
         }
@@ -131,6 +142,33 @@ final class Analyzer
         }
 
         return $pairs;
+    }
+
+    /**
+     * The terms of a run of Thai: its overlapping pairs of grapheme clusters,
+     * and the run itself.
+     *
+     * A pair of code points would pair a consonant with the vowel or tone
+     * mark it carries, a fragment that means nothing; a cluster is a
+     * consonant with its marks, as \X has always matched in PCRE. The run is
+     * kept beside its pairs, unlike Chinese: its trigrams were what found
+     * Thai tools before, and measured on the train half of the sports centre,
+     * keeping it found as many tools first with fewer tools returned.
+     *
+     * @return list<string>
+     */
+    private static function thai(string $token): array
+    {
+        if (preg_match_all('/\X/u', $token, $clusters) === false || count($clusters[0]) < 3) {
+            return [$token];
+        }
+        $terms = [];
+        for ($i = 0, $last = count($clusters[0]) - 1; $i < $last; ++$i) {
+            $terms[] = $clusters[0][$i] . $clusters[0][$i + 1];
+        }
+        $terms[] = $token;
+
+        return $terms;
     }
 
     /**

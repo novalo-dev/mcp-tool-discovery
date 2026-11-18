@@ -10,6 +10,18 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Thai is searched by pairs of what is seen.** It is written without
+  spaces, so a sentence was one word that met tools only by its trigrams. A
+  run of Thai is now cut into overlapping pairs of grapheme clusters (a
+  consonant with its vowel and tone marks), and the run is kept beside them;
+  a run of Thai is also a token apart from the digits around it. On a new
+  benchmark server written in Thai (40 tools, 100 requests written before
+  any run), the test half goes from 34 to 37 first in fields (47 to 48 in
+  the top 3) and from 30 to 31 as one sentence; asked a second time, the
+  whole test half gains 10 first. The ten other servers do not move. The
+  saved index format changes, so an index in `FileIndexCache` is rebuilt
+  once.
+
 - **Chinese and Japanese are searched by pairs of characters.** They are
   written without spaces, so a sentence was one word that met tools only by
   its trigrams, and a two-character word ("报修") never met them at all. A

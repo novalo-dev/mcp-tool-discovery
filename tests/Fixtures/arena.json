@@ -1,0 +1,804 @@
+[
+ {
+  "name": "courts_list",
+  "title": "สนามทั้งหมด",
+  "description": "แสดงรายการสนามทั้งหมดในศูนย์กีฬา พร้อมประเภทกีฬาและสถานะการใช้งาน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "court_book",
+  "title": "จองสนาม",
+  "description": "จองสนามตามวันและเวลาที่ต้องการให้สมาชิกหนึ่งคน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "court_id": {
+     "type": "string"
+    },
+    "member_id": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "court_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "court_booking_cancel",
+  "title": "ยกเลิกการจองสนาม",
+  "description": "ยกเลิกการจองสนามที่มีอยู่ และคืนช่วงเวลาให้คนอื่นจองได้",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "court_bookings_list",
+  "title": "รายการจองสนาม",
+  "description": "แสดงการจองสนามทั้งหมดของวันที่เลือก",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "date"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "court_close",
+  "title": "ปิดสนามชั่วคราว",
+  "description": "ปิดสนามไม่ให้จองได้ชั่วคราว เช่น ระหว่างซ่อมพื้นหรือทาสีใหม่",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "court_id": {
+     "type": "string"
+    },
+    "until": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "court_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "members_list",
+  "title": "รายชื่อสมาชิก",
+  "description": "แสดงสมาชิกทั้งหมดของศูนย์กีฬา พร้อมประเภทบัตรและวันหมดอายุ",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_register",
+  "title": "สมัครสมาชิกใหม่",
+  "description": "ลงทะเบียนสมาชิกใหม่ด้วยชื่อ เบอร์โทรศัพท์ และประเภทบัตร",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "card_type": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_renew",
+  "title": "ต่ออายุสมาชิก",
+  "description": "ต่ออายุบัตรสมาชิกออกไปอีกหนึ่งเดือนหรือหนึ่งปี",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member_id": {
+     "type": "string"
+    },
+    "period": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "member_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_suspend",
+  "title": "ระงับสมาชิก",
+  "description": "ระงับบัตรสมาชิกชั่วคราว สมาชิกจะเข้าศูนย์และจองสนามไม่ได้",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member_id": {
+     "type": "string"
+    },
+    "reason": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "member_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "member_get",
+  "title": "ข้อมูลสมาชิก",
+  "description": "แสดงข้อมูลของสมาชิกหนึ่งคน ประวัติการเข้าใช้และการจอง",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "member_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "classes_list",
+  "title": "ตารางคลาส",
+  "description": "แสดงคลาสออกกำลังกายทั้งหมดของสัปดาห์ เช่น โยคะ แอโรบิก ว่ายน้ำ",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "week"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "class_create",
+  "title": "เพิ่มคลาสใหม่",
+  "description": "สร้างคลาสออกกำลังกายใหม่ กำหนดวัน เวลา ห้อง และครูผู้สอน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    },
+    "room": {
+     "type": "string"
+    },
+    "coach_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "class_cancel",
+  "title": "ยกเลิกคลาส",
+  "description": "ยกเลิกคลาสหนึ่งครั้ง และแจ้งผู้ที่ลงชื่อไว้ทุกคน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "class_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "class_enroll",
+  "title": "ลงชื่อเข้าคลาส",
+  "description": "ลงชื่อสมาชิกเข้าคลาสที่ยังมีที่ว่าง",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string"
+    },
+    "member_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "class_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "class_attendees",
+  "title": "รายชื่อผู้เข้าคลาส",
+  "description": "แสดงสมาชิกที่ลงชื่อเข้าคลาสหนึ่งครั้ง",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "class_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "coaches_list",
+  "title": "รายชื่อโค้ช",
+  "description": "แสดงโค้ชและครูฝึกทั้งหมด พร้อมกีฬาที่สอน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "coach_schedule",
+  "title": "ตารางงานโค้ช",
+  "description": "แสดงตารางสอนและเวลาว่างของโค้ชหนึ่งคน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "coach_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "coach_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "coach_assign",
+  "title": "มอบหมายโค้ช",
+  "description": "มอบหมายโค้ชให้สอนคลาส หรือฝึกส่วนตัวให้สมาชิก",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "coach_id": {
+     "type": "string"
+    },
+    "class_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "coach_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lockers_list",
+  "title": "ตู้ล็อกเกอร์",
+  "description": "แสดงตู้ล็อกเกอร์ทั้งหมด ว่างหรือมีคนใช้อยู่",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "locker_rent",
+  "title": "เช่าตู้ล็อกเกอร์",
+  "description": "ให้สมาชิกเช่าตู้ล็อกเกอร์รายเดือน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "locker_id": {
+     "type": "string"
+    },
+    "member_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "locker_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "locker_release",
+  "title": "คืนตู้ล็อกเกอร์",
+  "description": "ยกเลิกการเช่าตู้ และทำให้ตู้กลับมาว่าง",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "locker_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "locker_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "equipment_list",
+  "title": "อุปกรณ์กีฬา",
+  "description": "แสดงอุปกรณ์ที่ให้ยืม เช่น ไม้แบด ลูกบอล ไม้ปิงปอง และจำนวนที่เหลือ",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_lend",
+  "title": "ยืมอุปกรณ์",
+  "description": "บันทึกการยืมอุปกรณ์กีฬาให้สมาชิก",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string"
+    },
+    "member_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_return",
+  "title": "คืนอุปกรณ์",
+  "description": "บันทึกการคืนอุปกรณ์ที่ยืมไป และสภาพของอุปกรณ์",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string"
+    },
+    "condition": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_report_broken",
+  "title": "แจ้งอุปกรณ์ชำรุด",
+  "description": "แจ้งว่าอุปกรณ์ชิ้นหนึ่งเสียหรือชำรุด และนำออกจากการให้ยืม",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "item_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repairs_list",
+  "title": "งานซ่อม",
+  "description": "แสดงงานซ่อมบำรุงทั้งหมดของอาคารและสนาม",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_request",
+  "title": "แจ้งซ่อม",
+  "description": "แจ้งซ่อมไฟ แอร์ ห้องน้ำ หรือพื้นสนาม",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "place"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_close",
+  "title": "ปิดงานซ่อม",
+  "description": "บันทึกว่างานซ่อมเสร็จเรียบร้อยแล้ว",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repair_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "repair_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pool_status",
+  "title": "สถานะสระว่ายน้ำ",
+  "description": "แสดงอุณหภูมิน้ำ ค่าคลอรีน และจำนวนคนในสระตอนนี้",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pool_close",
+  "title": "ปิดสระว่ายน้ำ",
+  "description": "ปิดสระว่ายน้ำชั่วคราว เช่น เมื่อฝนตกหนักหรือต้องเปลี่ยนน้ำ",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "until": {
+     "type": "string"
+    },
+    "reason": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "until"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "events_list",
+  "title": "กิจกรรมและการแข่งขัน",
+  "description": "แสดงการแข่งขันและกิจกรรมที่จะจัดในศูนย์",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "event_create",
+  "title": "จัดการแข่งขัน",
+  "description": "สร้างการแข่งขันหรือกิจกรรมใหม่ และเปิดรับสมัครทีมหรือผู้เล่น",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string"
+    },
+    "sport": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "event_register",
+  "title": "สมัครแข่งขัน",
+  "description": "สมัครทีมหรือผู้เล่นเข้าร่วมการแข่งขัน",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event_id": {
+     "type": "string"
+    },
+    "team": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "event_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "visits_today",
+  "title": "ผู้เข้าใช้วันนี้",
+  "description": "แสดงจำนวนและรายชื่อคนที่สแกนบัตรเข้าศูนย์วันนี้",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_list",
+  "title": "อัตราค่าบริการ",
+  "description": "แสดงอัตราค่าบริการ ค่าสนาม ค่าสมาชิก และค่าเช่าตู้",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fee_update",
+  "title": "แก้ไขค่าบริการ",
+  "description": "เปลี่ยนอัตราค่าบริการของสนามหรือบัตรสมาชิก",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "fee_id": {
+     "type": "string"
+    },
+    "amount": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "fee_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payments_list",
+  "title": "การชำระเงิน",
+  "description": "แสดงการชำระเงินทั้งหมด ทั้งเงินสดและโอน ของช่วงวันที่เลือก",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string"
+    },
+    "to": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "from"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "receipt_issue",
+  "title": "ออกใบเสร็จ",
+  "description": "ออกใบเสร็จรับเงินให้สมาชิก สำหรับการชำระเงินหนึ่งครั้ง",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "payment_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "announcement_post",
+  "title": "ประกาศข่าว",
+  "description": "ส่งประกาศถึงสมาชิกทุกคน ทางแอปและอีเมล",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "body": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_shifts",
+  "title": "กะพนักงาน",
+  "description": "แสดงตารางกะของพนักงานต้อนรับและเจ้าหน้าที่ดูแลสระ",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "week"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]
