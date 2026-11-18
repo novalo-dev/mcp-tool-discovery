@@ -22,18 +22,18 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 
 | Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
 |---|---|---|---|---|---|---|
-| workspace | 50 | 16,147 | 2,871 | 1,845 | 14,314 | 1,125 |
-| platform | 40 | 12,829 | 2,871 | 1,845 | - | 862 |
-| people | 40 | 12,814 | 2,871 | 1,845 | - | 874 |
-| library | 40 | 14,550 | 2,871 | 1,845 | - | 1,069 |
-| school | 40 | 15,096 | 2,871 | 1,845 | - | 1,076 |
-| hosting | 176 | 60,640 | 2,871 | 1,845 | - | 1,345 |
-| city | 40 | 19,334 | 2,871 | 1,845 | - | 1,428 |
-| newsroom | 40 | 20,067 | 2,871 | 1,845 | - | 1,677 |
-| estate | 40 | 12,284 | 2,871 | 1,845 | - | 813 |
-| depot | 40 | 17,134 | 2,871 | 1,845 | - | 1,375 |
-| arena | 40 | 15,693 | 2,871 | 1,845 | - | 1,460 |
-| academy | 40 | 12,433 | 2,871 | 1,845 | - | 765 |
+| workspace | 50 | 16,147 | 2,871 | 1,839 | 14,314 | 1,125 |
+| platform | 40 | 12,829 | 2,871 | 1,839 | - | 862 |
+| people | 40 | 12,814 | 2,871 | 1,839 | - | 874 |
+| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,069 |
+| school | 40 | 15,096 | 2,871 | 1,839 | - | 1,076 |
+| hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,345 |
+| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,428 |
+| newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,677 |
+| estate | 40 | 12,284 | 2,871 | 1,839 | - | 813 |
+| depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,375 |
+| arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,460 |
+| academy | 40 | 12,433 | 2,871 | 1,839 | - | 765 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
@@ -199,7 +199,7 @@ and for small models. Every call names an `operation`:
 
 | `operation` | Arguments | What it does |
 |---|---|---|
-| `search` | `action`, `object`, `description`, `query` | the compact search, answer for answer: up to `maxDescribed` tools with their `inputSchema`, `unmatched` and `vocabulary`, a `search_id` when the host learns; with no field, every visible tool by name |
+| `search` | `action`, `object`, `description`, `query` | the compact search, answer for answer: up to `maxDescribed` tools with their `inputSchema`, `unmatched` and `vocabulary`, a `search_id` when the host learns; with no field, every visible tool by name; each tool that changes something carries `"changes": true` |
 | `describe` | `names` | the tools a guide names, with their `inputSchema`; a hidden name comes back in `unknown` like a missing one |
 | `run` | `name`, `arguments`, `search_id` | runs one host tool through `$runner->run()`; a failed run carries the tool's parameters |
 
@@ -222,6 +222,15 @@ destructive call will then ask before searches too: a host that would rather
 avoid it sets `changesApart`. The changes are then listed as themselves, with
 their own annotations, the gateway only reads, and a change sent through
 `run` is refused before the gate is asked, with the name to call instead.
+
+Without `changesApart`, every tool a search finds names the gateway in
+`run_with`, so nothing there tells a read from a change, and the model could
+not know which calls to confirm with the person, which the gateway's
+description asks of it. So each tool that changes something comes with
+`"changes": true`, in a search, a description and the bare list alike. Reads
+carry nothing, so a server that only reads pays nothing for it; with
+`changesApart`, `run_with` already names each change, and the mark is left
+out.
 
 Search and describe share their code with the compact search
 (`src/Mode/ToolFinder.php`), so a host that switches between the two modes

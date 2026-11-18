@@ -42,12 +42,14 @@ final class ToolFinder
      * @param int $maxDescribed the most tools one answer describes in full
      * @param (callable(Tool): string)|null $groupOf the group a tool belongs to, for the list an empty request gives
      * @param string $retry what to tell the caller when nothing matches, after "Nothing matches."
+     * @param bool $markChanges mark each tool that changes something with "changes": true, for a mode whose run_with does not tell reads and changes apart
      */
     public function __construct(
         callable $runWith,
         private readonly int $maxDescribed,
         ?callable $groupOf = null,
         private readonly string $retry = 'Say it again with words from vocabulary, or call with no argument for every tool you may use.',
+        private readonly bool $markChanges = false,
     ) {
         $this->runWith = \Closure::fromCallable($runWith);
         $this->groupOf = $groupOf === null ? null : \Closure::fromCallable($groupOf);
@@ -107,10 +109,7 @@ final class ToolFinder
             }
         }
 
-        $answer = ['tools' => array_values(array_map(fn(Tool $tool): array => [
-            'name' => $tool->name,
-            'title' => $tool->title(),
-            'run_with' => ($this->runWith)($tool),
+        $answer = ['tools' => array_values(array_map(fn(Tool $tool): array => $this->entry($tool) + [
             'description' => $tool->description(),
             'inputSchema' => Json::schema($tool->inputSchema()),
         ], $found))];
@@ -153,7 +152,7 @@ final class ToolFinder
      */
     private function everyTool(ToolSet $visible): array
     {
-        $entry = fn(Tool $tool): array => ['name' => $tool->name, 'title' => $tool->title(), 'run_with' => ($this->runWith)($tool)];
+        $entry = $this->entry(...);
         if ($this->groupOf === null) {
             return array_map($entry, $visible->all());
         }
@@ -169,6 +168,24 @@ final class ToolFinder
         }
 
         return array_map(static fn(string $group): array => ['group' => $group, 'tools' => $members[$group]], $order);
+    }
+
+    /**
+     * What names a tool in every answer, short or full.
+     *
+     * @return array<string, mixed>
+     */
+    private function entry(Tool $tool): array
+    {
+        $entry = ['name' => $tool->name, 'title' => $tool->title(), 'run_with' => ($this->runWith)($tool)];
+        // Only on changes, so a server that only reads pays nothing: the
+        // model is asked to confirm each change with the person, and through
+        // a single tool nothing else tells it which tools change something.
+        if ($this->markChanges && !$tool->readsOnly()) {
+            $entry['changes'] = true;
+        }
+
+        return $entry;
     }
 
     /**

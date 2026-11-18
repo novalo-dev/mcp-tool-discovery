@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The gateway marks each tool that changes something.** Through the
+  gateway alone, every tool a search, a description or the bare list gives
+  answers to the same `run_with`, `use_tools`, so nothing told the model
+  which calls change something, while the gateway's description asked it to
+  confirm those with the person. Each such tool now carries
+  `"changes": true`; reads carry nothing, so a server that only reads pays
+  nothing, and with `changesApart`, where `run_with` already names each
+  change, the mark is left out. The compact and grouped modes do not change:
+  their `run_with` already tells the two apart. The gateway's list is 6
+  bytes shorter. `ToolFinder` takes a last, optional `$markChanges`.
+
 - **Korean is searched by pairs of syllables.** Korean glues to each word
   the particles that mark its role, so "레슨을" (the lesson, as object) never
   met a tool that writes "레슨". Each Korean word is now cut into overlapping

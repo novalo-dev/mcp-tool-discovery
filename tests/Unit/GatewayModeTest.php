@@ -108,6 +108,33 @@ final class GatewayModeTest extends TestCase
         self::assertSame('acme_set_ticket_status', $apart[0]['run_with']);
     }
 
+    public function testEveryToolThatChangesSomethingIsMarkedSoTheModelKnowsWhatToConfirm(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $found = self::answer(self::call(['operation' => 'search', 'action' => 'change', 'object' => 'ticket status']))['tools'];
+        $every = self::answer(self::call(['operation' => 'search']))['tools'];
+        self::assertIsArray($found);
+        self::assertIsArray($every);
+        $marked = 0;
+        foreach ([...$found, ...$every] as $entry) {
+            self::assertIsArray($entry);
+            self::assertIsString($entry['name']);
+            $tool = $tools->get($entry['name']);
+            self::assertNotNull($tool);
+            // Only changes carry the mark: a read pays nothing for it.
+            self::assertSame($tool->readsOnly() ? null : true, $entry['changes'] ?? null, $entry['name']);
+            $marked += isset($entry['changes']) ? 1 : 0;
+        }
+        self::assertGreaterThan(0, $marked);
+        self::assertStringContainsString('a tool marked changes.', self::listed(new GatewayMode())[0]->description());
+
+        // Where run_with already tells the change apart, the mark would only
+        // repeat it.
+        $apart = self::answer(self::call(['operation' => 'search', 'action' => 'change', 'object' => 'ticket status'], new GatewayMode(changesApart: true)))['tools'];
+        self::assertIsArray($apart);
+        self::assertSame([], array_filter($apart, static fn($entry): bool => is_array($entry) && isset($entry['changes'])));
+    }
+
     public function testTheSearchAnswersLikeTheCompactSearch(): void
     {
         $arguments = ['action' => 'list', 'object' => 'backups', 'description' => 'every backup of last week'];

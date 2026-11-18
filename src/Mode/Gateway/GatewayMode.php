@@ -66,6 +66,9 @@ final class GatewayMode implements DiscoveryMode
             $maxDescribed,
             $groupOf,
             sprintf('Say it again with words from vocabulary, or call %s with operation search and nothing else for every tool you may use.', $this->toolName),
+            // With the changes apart, run_with already names the change; through
+            // the gateway alone, every tool answers to the same run_with.
+            !$changesApart,
         );
     }
 
@@ -108,7 +111,7 @@ final class GatewayMode implements DiscoveryMode
     {
         $runs = $this->changesApart
             ? 'run (name and arguments) runs a tool that only reads; a tool that changes something is in your tool list, call it by its own name.'
-            : 'run (name and arguments) runs one of them' . ($runsChanges ? '; when it changes something, ask the person before the call.' : '.');
+            : 'run (name and arguments) runs one of them' . ($runsChanges ? '; ask the person before running a tool marked changes.' : '.');
 
         return Tool::fromArray([
             'name' => $this->toolName,

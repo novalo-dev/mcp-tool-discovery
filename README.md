@@ -257,8 +257,9 @@ $mode = new GatewayMode(
 ```
 
 The tool is marked destructive whenever a change can go through it, so the
-client asks first; with `changesApart` it only reads, and each change keeps
-its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
+client asks first, and each tool a search finds that changes something says
+`"changes": true`, so the model knows which calls to confirm; with
+`changesApart` it only reads, and each change keeps its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
 choice.
 
 ### Direct
