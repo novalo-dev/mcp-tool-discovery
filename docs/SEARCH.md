@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 402 times
-out of 499 in fields, and 230 times as one sentence.
+On the benchmark below, the same requests find the right tool first 441 times
+out of 549 in fields, and 253 times as one sentence.
 
 ## How a tool is scored
 
@@ -61,6 +61,10 @@ answer.
 The Analyzer splits snake_case, kebab-case, dots and camelCase, lowercases
 (every script with mbstring, ASCII without it), keeps letters of any language
 and leaves out numbers: "ticket 1042" is about a ticket, not about 1042.
+A mark stays in the word it sits in: Hindi, Thai, Tamil and the other
+Brahmic scripts write most vowels as marks ("सर्वर" holds three), Arabic and
+Hebrew their vowel points, and text in decomposed form (NFD) every accent.
+Unicode says which characters are marks; the library holds no list.
 
 Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
 `atu`, `tus`, `us `. Trigram matches count at 0.6 of word matches. They let
@@ -198,25 +202,26 @@ locked while it is written.
 
 ## The measures
 
-Nine fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Ten fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
 (40 tools, `KlassenfahrtAbsagen`), a cloud hosting panel (176 tools,
 `nimbo_detach_volume`), the service desk of a town hall written in Greek
-(40 tools, `parking_permit_renew`) a newsroom with no titles and long
-descriptions (40 tools, `schedule_article`) and the office of a residential
-estate written in Chinese (40 tools, `repair_assign`). 997 requests, each written as one
+(40 tools, `parking_permit_renew`), a newsroom with no titles and long
+descriptions (40 tools, `schedule_article`), the office of a residential
+estate written in Chinese (40 tools, `repair_assign`) and a bus depot
+written in Hindi (40 tools, `pass_renew`). 1097 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 499 requests | Right tool first | Top 3 |
+| Test half, 549 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 402 | 459 |
-| The same request as one sentence | 230 | 318 |
-| In fields, after every train request was run once | 403 | 459 |
-| In fields, after the test requests were run once, then asked again | 430 | 471 |
+| The request in fields | 441 | 504 |
+| The same request as one sentence | 253 | 351 |
+| In fields, after every train request was run once | 442 | 504 |
+| In fields, after the test requests were run once, then asked again | 472 | 517 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -283,6 +288,20 @@ dropping the trigrams of the pairs (the same scores, more tools returned).
 What it still misses is mostly words the tools do not use ("撤回" for to take
 down a notice, "值班" for a shift) and a list beside its single tool
 ("查看报修状态" finds the list of repairs first).
+
+The depot is written in Hindi, with English snake_case names: a script
+spaced like English, but whose vowels are marks. Its 100 requests were
+written before any of them was run, as staff at a depot talk, with the
+English words Hindi has taken in ("ट्रिप", "कैंसिल"). Until marks were kept
+in their words, every vowel cut a word in two, and the fragments ("सर" out
+of "सर्वर") met unrelated tools: 36 of its 50 test requests found the right
+tool first in fields and 15 as one sentence, with nearly four tools returned
+in fields and five as one sentence. Kept whole, 39 come first in fields (45
+in the top 3) and 23 as one sentence (33 in the top 3), with about two
+tools returned in fields and three as one sentence; the nine other servers
+do not move by one request. Dropping the marks instead, so that a word with
+its vowels and one without would meet, lost on train (38 first in fields,
+against 42): with the vowels gone, too many words become the same.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

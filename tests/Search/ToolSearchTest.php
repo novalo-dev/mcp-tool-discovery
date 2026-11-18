@@ -84,6 +84,25 @@ final class ToolSearchTest extends TestCase
         self::assertSame(['ticket', 'status'], $analyzer->words('ticket status'), 'spaced scripts unchanged');
     }
 
+    public function testAMarkStaysInItsWord(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['सर्वर', 'बंद', 'करें'], $analyzer->tokens('सर्वर बंद करें'), 'Devanagari vowel signs and virama');
+        self::assertSame(['ยกเลิก'], $analyzer->tokens('ยกเลิก'), 'Thai vowels and tone marks');
+        self::assertSame(["re\u{301}sume\u{301}"], $analyzer->tokens("re\u{301}sume\u{301}"), 'decomposed accents');
+        self::assertSame(['सर्वर'], $analyzer->words('सर्वर'), 'one term, no fragment');
+    }
+
+    public function testAWordWithMarksFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('depot'));
+
+        // Both found the wrong tool first while each vowel cut a word in two.
+        self::assertSame('route_get', $search->search('जयपुर-अजमेर रूट के सारे स्टॉप बताओ')[0]->name ?? null);
+        self::assertSame('bus_retire', $search->search('15 साल पुरानी बस 042 को बेड़े से निकाल दो')[0]->name ?? null);
+    }
+
     public function testASentenceWithoutSpacesFindsItsTool(): void
     {
         $search = new ToolSearch(RecordingGate::server('estate'));

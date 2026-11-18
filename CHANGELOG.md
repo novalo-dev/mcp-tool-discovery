@@ -58,6 +58,19 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **Hindi, Thai, Arabic and every script that writes vowels as marks are
+  searched by whole words.** The Analyzer split words on any character that
+  was not a letter or a digit, and a mark (a Devanagari vowel sign, a Thai
+  tone mark, an Arabic vowel point, an accent in decomposed text) is
+  neither, so "सर्वर" became "सर" and "वर", fragments that met unrelated
+  tools. Marks now stay in their word. On a new benchmark server written in
+  Hindi (40 tools, 100 requests written before any run), the test half goes
+  from 36 to 39 first in fields and from 15 to 23 as one sentence, and a
+  search returns about half as many tools; the nine other servers do not
+  move. The saved index format changes, so an index in `FileIndexCache` is
+  rebuilt once; what a learning store holds for these scripts was kept as
+  fragments and no longer lifts anything.
+
 - **docs/SEARCH.md gives the current scores at the top of the page.** It
   still said 202 of 250 requests found first in fields and 94 as one
   sentence, from a benchmark of fewer servers; it now gives the scores the

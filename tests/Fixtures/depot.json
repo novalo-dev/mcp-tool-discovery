@@ -1,0 +1,762 @@
+[
+ {
+  "name": "routes_list",
+  "title": "रूट की सूची",
+  "description": "डिपो से चलने वाले सभी बस रूट, उनके स्टॉप और दूरी के साथ दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "route_get",
+  "title": "रूट का विवरण",
+  "description": "एक रूट के सारे स्टॉप, समय-सारणी और किराया दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route_id": {
+     "type": "string",
+     "description": "रूट नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "route_create",
+  "title": "नया रूट जोड़ें",
+  "description": "दो शहरों के बीच नया बस रूट उसके स्टॉप के साथ बनाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "कहाँ से"
+    },
+    "to": {
+     "type": "string",
+     "description": "कहाँ तक"
+    },
+    "stops": {
+     "type": "string",
+     "description": "बीच के स्टॉप"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "route_close",
+  "title": "रूट बंद करें",
+  "description": "किसी रूट पर बसें चलाना बंद करता है; पुरानी यात्राएँ इतिहास में रहती हैं।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route_id": {
+     "type": "string",
+     "description": "रूट नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "trips_list",
+  "title": "आज की यात्राएँ",
+  "description": "किसी दिन की सभी यात्राएँ (ट्रिप), बस, चालक और रवाना होने के समय के साथ।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "तारीख"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "trip_schedule",
+  "title": "यात्रा तय करें",
+  "description": "किसी रूट पर नई यात्रा का दिन और समय तय करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route_id": {
+     "type": "string",
+     "description": "रूट नंबर"
+    },
+    "departure": {
+     "type": "string",
+     "description": "रवाना होने का समय"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "trip_reschedule",
+  "title": "यात्रा का समय बदलें",
+  "description": "पहले से तय यात्रा का रवाना होने का समय बदलता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    },
+    "departure": {
+     "type": "string",
+     "description": "नया समय"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "trip_cancel",
+  "title": "यात्रा रद्द करें",
+  "description": "तय यात्रा रद्द करता है और आरक्षित यात्रियों को सूचना भेजता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    },
+    "reason": {
+     "type": "string",
+     "description": "कारण"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "buses_list",
+  "title": "बसों की सूची",
+  "description": "डिपो की सारी बसें, उनका नंबर, प्रकार (साधारण, एसी, स्लीपर) और हालत।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bus_get",
+  "title": "बस का विवरण",
+  "description": "एक बस का पंजीकरण नंबर, सीटें, बीमा और फिटनेस प्रमाणपत्र की तारीख।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bus_add",
+  "title": "बस जोड़ें",
+  "description": "डिपो के बेड़े में नई बस दर्ज करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "पंजीकरण नंबर"
+    },
+    "type": {
+     "type": "string",
+     "description": "बस का प्रकार"
+    },
+    "seats": {
+     "type": "string",
+     "description": "सीटें"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bus_retire",
+  "title": "बस हटाएँ",
+  "description": "पुरानी बस को बेड़े से हटाता है; वह किसी यात्रा पर नहीं लगेगी।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "drivers_list",
+  "title": "चालकों की सूची",
+  "description": "सभी चालक और परिचालक (कंडक्टर), उनकी ड्यूटी और छुट्टी के साथ।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "driver_assign",
+  "title": "चालक लगाएँ",
+  "description": "किसी यात्रा पर चालक या परिचालक की ड्यूटी लगाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    },
+    "staff_id": {
+     "type": "string",
+     "description": "कर्मचारी"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "driver_unassign",
+  "title": "ड्यूटी से हटाएँ",
+  "description": "किसी यात्रा से चालक या परिचालक की ड्यूटी हटाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    },
+    "staff_id": {
+     "type": "string",
+     "description": "कर्मचारी"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "driver_leave_approve",
+  "title": "छुट्टी मंज़ूर करें",
+  "description": "चालक या परिचालक की छुट्टी की अर्ज़ी मंज़ूर करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "अर्ज़ी नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "maintenance_list",
+  "title": "मरम्मत की सूची",
+  "description": "वर्कशॉप में खड़ी बसें और उनकी बाकी मरम्मत।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "maintenance_schedule",
+  "title": "सर्विसिंग तय करें",
+  "description": "किसी बस की सर्विसिंग या मरम्मत वर्कशॉप में तय करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    },
+    "date": {
+     "type": "string",
+     "description": "तारीख"
+    },
+    "work": {
+     "type": "string",
+     "description": "क्या काम होना है"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "maintenance_complete",
+  "title": "मरम्मत पूरी करें",
+  "description": "मरम्मत पूरी होने पर बस को फिर से चलने लायक दर्ज करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "मरम्मत नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "breakdown_report",
+  "title": "बस खराब होने की सूचना",
+  "description": "रास्ते में बस खराब होने की सूचना दर्ज करता है और बदली बस भेजने को कहता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    },
+    "place": {
+     "type": "string",
+     "description": "जगह"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel_log",
+  "title": "डीज़ल दर्ज करें",
+  "description": "किसी बस में भरे गए डीज़ल या सीएनजी की मात्रा और रकम दर्ज करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    },
+    "litres": {
+     "type": "string",
+     "description": "लीटर"
+    },
+    "amount": {
+     "type": "string",
+     "description": "रकम"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel_report",
+  "title": "ईंधन की रिपोर्ट",
+  "description": "महीने भर में हर बस की ईंधन खपत और औसत दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "महीना"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seats_available",
+  "title": "खाली सीटें",
+  "description": "किसी यात्रा में कितनी सीटें खाली हैं, यह दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking_create",
+  "title": "सीट बुक करें",
+  "description": "किसी यात्रा में यात्री के लिए सीट आरक्षित करता है और टिकट नंबर देता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "यात्रा नंबर"
+    },
+    "passenger": {
+     "type": "string",
+     "description": "यात्री का नाम"
+    },
+    "seat": {
+     "type": "string",
+     "description": "सीट"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking_cancel",
+  "title": "टिकट रद्द करें",
+  "description": "आरक्षित टिकट रद्द करता है और नियम के अनुसार पैसे लौटाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pnr": {
+     "type": "string",
+     "description": "टिकट नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "booking_get",
+  "title": "टिकट की स्थिति",
+  "description": "टिकट नंबर (पीएनआर) से आरक्षण की स्थिति और सीट नंबर दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pnr": {
+     "type": "string",
+     "description": "टिकट नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pass_issue",
+  "title": "पास बनाएँ",
+  "description": "विद्यार्थी, वरिष्ठ नागरिक या मासिक यात्रा पास जारी करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "holder": {
+     "type": "string",
+     "description": "पास धारक"
+    },
+    "category": {
+     "type": "string",
+     "description": "श्रेणी"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pass_renew",
+  "title": "पास का नवीनीकरण",
+  "description": "खत्म हो रहे पास की अवधि अगले महीने या साल तक बढ़ाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pass_id": {
+     "type": "string",
+     "description": "पास नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pass_cancel",
+  "title": "पास रद्द करें",
+  "description": "खोया हुआ या गलत पास रद्द करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pass_id": {
+     "type": "string",
+     "description": "पास नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "passes_list",
+  "title": "पासों की सूची",
+  "description": "जारी किए गए सभी पास, उनकी श्रेणी और खत्म होने की तारीख।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fares_list",
+  "title": "किराया सूची",
+  "description": "हर रूट और बस के प्रकार का किराया दिखाता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fare_update",
+  "title": "किराया बदलें",
+  "description": "किसी रूट या बस प्रकार का किराया बदलता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route_id": {
+     "type": "string",
+     "description": "रूट नंबर"
+    },
+    "amount": {
+     "type": "string",
+     "description": "नया किराया"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_register",
+  "title": "शिकायत दर्ज करें",
+  "description": "यात्री की शिकायत (देरी, बदतमीज़ी, गंदगी) दर्ज करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "शिकायत"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaints_list",
+  "title": "शिकायतों की सूची",
+  "description": "दर्ज की गई शिकायतें और उनकी स्थिति।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_reply",
+  "title": "शिकायत का जवाब",
+  "description": "शिकायत करने वाले यात्री को जवाब भेजता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "शिकायत नंबर"
+    },
+    "message": {
+     "type": "string",
+     "description": "जवाब"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_close",
+  "title": "शिकायत बंद करें",
+  "description": "निपटाई गई शिकायत को बंद करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "शिकायत नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_item_register",
+  "title": "खोया सामान दर्ज करें",
+  "description": "बस में मिले या खोए सामान की जानकारी दर्ज करता है।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "description": {
+     "type": "string",
+     "description": "सामान"
+    },
+    "bus_id": {
+     "type": "string",
+     "description": "बस नंबर"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_items_list",
+  "title": "खोए सामान की सूची",
+  "description": "बसों में मिला सामान जो अभी तक किसी ने नहीं लिया।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "revenue_report",
+  "title": "कमाई की रिपोर्ट",
+  "description": "दिन या महीने में टिकट और पास से हुई कमाई, रूट के हिसाब से।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "period": {
+     "type": "string",
+     "description": "दिन या महीना"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "announcement_publish",
+  "title": "सूचना जारी करें",
+  "description": "यात्रियों के लिए सूचना जारी करता है, जैसे हड़ताल, रूट में बदलाव या त्योहार की विशेष बसें।",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "सूचना"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

@@ -92,7 +92,12 @@ final class Analyzer
         // without it, strtolower() lowers ASCII, which covers the English
         // most tool lists are written in.
         $lower = function_exists('mb_strtolower') ? mb_strtolower($split, 'UTF-8') : strtolower($split);
-        $parts = preg_split('/[^\p{L}\p{N}]+|(' . self::UNSPACED . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        // Marks belong to the word they sit in. Devanagari, Thai, Tamil and
+        // the other Brahmic scripts write most vowels as marks, Arabic and
+        // Hebrew their vowel points, and decomposed text (NFD) every accent:
+        // splitting on them cut "सर्वर" into "सर" and "वर", one word into
+        // fragments that meet unrelated tools.
+        $parts = preg_split('/[^\p{L}\p{M}\p{N}]+|(' . self::UNSPACED . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $words = [];
         foreach ($parts === false ? [] : $parts as $part) {
             // A number is an identifier ("ticket 12"), never a word that tells

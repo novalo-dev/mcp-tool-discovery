@@ -31,8 +31,8 @@ final class BenchmarkTest extends TestCase
     {
         $scores = Benchmark::run();
 
-        self::assertGreaterThanOrEqual(402, $scores['fields']['first'], implode("\n", $scores['fields']['misses']));
-        self::assertGreaterThanOrEqual(459, $scores['fields']['top3'], implode("\n", $scores['fields']['misses']));
+        self::assertGreaterThanOrEqual(441, $scores['fields']['first'], implode("\n", $scores['fields']['misses']));
+        self::assertGreaterThanOrEqual(504, $scores['fields']['top3'], implode("\n", $scores['fields']['misses']));
     }
 
     public function testLearningHelpsAndNeverHurts(): void
@@ -41,7 +41,7 @@ final class BenchmarkTest extends TestCase
 
         self::assertGreaterThanOrEqual($scores['fields']['first'], $scores['learnedUnseen']['first'], 'what was learned must not push new requests away');
         self::assertGreaterThanOrEqual($scores['fields']['top3'], $scores['learnedUnseen']['top3']);
-        self::assertGreaterThanOrEqual(430, $scores['learnedAgain']['first'], implode("\n", $scores['learnedAgain']['misses']));
+        self::assertGreaterThanOrEqual(472, $scores['learnedAgain']['first'], implode("\n", $scores['learnedAgain']['misses']));
     }
 
     public function testFieldsBeatOneSentence(): void

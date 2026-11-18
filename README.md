@@ -304,22 +304,23 @@ client gives its request **in fields**, and each field is scored on its own:
   with it lifts that tool for those pairs of words, within a cap. Only words
   the tools use are kept.
 
-997 requests over nine fictional servers, a workspace (snake_case), a
+1097 requests over ten fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
 service desk of a town hall written in Greek, a newsroom whose tools have
-no title and long descriptions, as many real servers write them, and the
-office of a residential estate written in Chinese.
+no title and long descriptions, as many real servers write them, the
+office of a residential estate written in Chinese, and a bus depot written
+in Hindi.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 499 requests | Right tool first | Right tool in the top 3 |
+| Test half, 549 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **402** | **459** |
-| The same request as one sentence | 230 | 318 |
-| In fields, after learning from the other half | 403 | 459 |
-| In fields, asked a second time | 430 | 471 |
+| The request in fields | **441** | **504** |
+| The same request as one sentence | 253 | 351 |
+| In fields, after learning from the other half | 442 | 504 |
+| In fields, asked a second time | 472 | 517 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
