@@ -99,6 +99,7 @@ final class ToolSearch
         }
         $known = [];
         $unmatched = [];
+        $learns = $this->learning !== null && $this->options->learningWeight > 0;
         foreach (array_unique($tokens) as $token) {
             $terms = array_values(array_filter(Analyzer::terms($token), fn(string $term): bool => $this->index->has($term)));
             array_push($known, ...$terms);
@@ -106,6 +107,14 @@ final class ToolSearch
             // characters cut out of its sentence, which it could not reuse.
             if ($terms === []) {
                 $unmatched[] = $token;
+                // What is learned is keyed by the tool word closest to it,
+                // so a verb written another way still pairs with its object
+                // (see ToolIndex::nearest()). Only when learning, since
+                // finding it reads every word of the index.
+                $nearest = $learns ? $this->index->nearest($token) : null;
+                if ($nearest !== null) {
+                    $known[] = $nearest;
+                }
             }
         }
         $known = array_values(array_unique($known));

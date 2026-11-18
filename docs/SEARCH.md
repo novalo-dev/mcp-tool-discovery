@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 515 times
-out of 649 in fields, and 320 times as one sentence.
+On the benchmark below, the same requests find the right tool first 547 times
+out of 699 in fields, and 343 times as one sentence.
 
 ## How a tool is scored
 
@@ -182,7 +182,8 @@ which tool answered which words. It is wired in the core, in `ToolRunner`, so
 every mode learns the same way and none can skip the checks:
 
 1. A search returns a `search_id`: the words of the request that the tools
-   use, and only those.
+   use, and only those. A word they do not use stands for the tool word
+   closest to it, when one is close enough (below).
 2. The client runs the tool it chose with that `search_id`.
 3. If the run succeeds, each of those words, and each pair of them, counts
    one more run for that tool.
@@ -205,7 +206,8 @@ long request costs at most 120 keys.
 
 The limits are the point:
 
-- **Only words the tools use are kept**, checked again when the run comes back,
+- **Only words the tools use are kept** (a word they do not use, as the tool
+  word closest to it), checked again when the run comes back,
   so a store never holds a name, an address or anything a person typed beyond
   the server's own vocabulary.
 - **It reorders, it never adds**: a tool the request does not describe is never
@@ -215,6 +217,28 @@ The limits are the point:
   tool for words it already holds, within the cap.
 - **One store per server**: two servers with different tools need two stores.
 
+A word written another way is learned as the tool word closest to it.
+The word that tells two neighbours apart is often the verb, and a request
+rarely writes it as the tool does: "أرسل" (send!) where the tool says "يرسل"
+(it sends), "prêter" where it says "prêt", "approving" for "approve". It
+found the tool by its trigrams, but it was left out of what was learned, so
+a search only taught its object, which the neighbours share: on the Arabic
+workshop, approving an estimate then lifted the approval for the next request
+to send one, and learning from the train half cost two test requests their
+first place. Each such word is now kept as the indexed word whose trigrams
+are most alike (a Dice coefficient of 0.3 at least), so the store still
+holds only the tools' words, and the object is paired with what is done to
+it again. Learned from the other half, the test half gains 3 first places
+(546 to 549) and loses none; asked again, two more come first and one
+fewer (594 against 593). On the train half, in
+two folds, learning from one fold to the other went from 7 lost first places
+to 4. The threshold was chosen on those folds: 0.2 to 0.5 all gained, 0.2
+by one request asked again; 0.3 was kept, the stricter, so fewer words are
+taken for a tool word they only half resemble. Finding the closest word reads
+every word of the index, so it is only done when the host learns, and only
+for words the tools do not use: on the hosting server, it adds about half a
+millisecond to such a search.
+
 `MemoryLearningStore` lasts the process; `FileLearningStore` keeps a JSON file,
 locked while it is written.
 
@@ -222,7 +246,7 @@ locked while it is written.
 
 ## The measures
 
-Twelve fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -232,18 +256,19 @@ French (40 tools, `prolonger-pret`), the office of a school written in German
 descriptions (40 tools, `schedule_article`), the office of a residential
 estate written in Chinese (40 tools, `repair_assign`), a bus depot
 written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
-(40 tools, `court_book`) and a music school written in Korean (40 tools,
-`lesson_move`). 1297 requests, each written as one
+(40 tools, `court_book`), a music school written in Korean (40 tools,
+`lesson_move`) and a car repair workshop written in Arabic (40 tools,
+`estimate_send`). 1397 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 649 requests | Right tool first | Top 3 |
+| Test half, 699 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 515 | 596 |
-| The same request as one sentence | 320 | 433 |
-| In fields, after every train request was run once | 516 | 596 |
-| In fields, after the test requests were run once, then asked again | 557 | 610 |
+| The request in fields | 547 | 635 |
+| The same request as one sentence | 343 | 465 |
+| In fields, after every train request was run once | 549 | 636 |
+| In fields, after the test requests were run once, then asked again | 594 | 649 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -357,6 +382,25 @@ misses is mostly a word the tools do not use ("연주회", a concert, where the
 tools write "발표회", a recital) and a list beside its single tool
 ("바이올린 몇 대 남았어", how many violins are left, finds the tool that lends
 one first).
+
+The workshop is written in Arabic, with English snake_case names: a script
+spaced like English, whose words carry the article and other letters glued to
+them ("الموعد", the appointment, where the tool writes "موعد"), and whose
+verbs change shape ("أرسل", send!, against "إرسال", sending). Its 100 requests
+were written before any of them was run, as staff at the desk talk, partly in
+Gulf dialect ("وش السيارات اللي نشتغل عليها حاليا"). Nothing in the search was
+changed for it: 32 of its 50 test requests find the right tool first in fields
+(39 in the top 3) and 23 as one sentence (32), the trigrams doing what the
+glued letters undo. Cutting each Arabic word into pairs of letters, as Korean
+is, won on its train half (46 first in fields against 43, 44 as one sentence
+against 39, the word kept beside its pairs) and lost on its test half (30
+first in fields against 32), with more tools returned (3.3 against 2.6): it
+was not kept, nor pairs alone (31 first), nor pairs kept apart from words of
+two letters (30). Fifty requests are few, and the train half chose a variant
+the test half did not confirm; trigrams stay. What it misses is mostly words
+the tools do not use ("زبون" for a customer, where the tools say "عميل";
+"التسعيرة" for an estimate) and neighbours of one object (cancelling a
+booking finds the tool that books one).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

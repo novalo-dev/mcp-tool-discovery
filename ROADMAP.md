@@ -35,7 +35,8 @@ The benchmark says where the search still misses, in
   newsroom), a Chinese one, written without spaces (the office of a
   residential estate), a Hindi one, whose vowels are marks (a bus depot)
   a Thai one, written without spaces and with marks (a sports centre) and
-  a Korean one, whose words carry their particles (a music school) are in. Lao, Khmer and Burmese, written the same way, are not measured
+  a Korean one, whose words carry their particles (a music school) and an
+  Arabic one, whose words carry the article (a car repair workshop) are in. Lao, Khmer and Burmese, written the same way, are not measured
   yet.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A

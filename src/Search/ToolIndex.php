@@ -47,6 +47,21 @@ final class ToolIndex
     private const FORMAT = 6;
 
     /**
+     * How alike a word the tools do not use and a word they do must be to be
+     * taken for it when learning: the Dice coefficient of their trigrams.
+     * Chosen on the train half; see nearest().
+     */
+    private const NEAREST = 0.3;
+
+    /**
+     * The trigrams of each indexed word, built the first time nearest() needs
+     * them: only a search that learns does, so the cache never holds them.
+     *
+     * @var array<string, array<string, true>>|null
+     */
+    private ?array $wordGrams = null;
+
+    /**
      * @param list<int|string> $ids the documents, in index order
      * @param array<array-key, array<int|string, float>> $words per word, per document holding it: its
      *        weighted frequency, the fields' weights and lengths already applied
@@ -187,6 +202,45 @@ final class ToolIndex
     public function has(string $word): bool
     {
         return isset($this->words[$word]);
+    }
+
+    /**
+     * The indexed word most alike a word no document holds, by their
+     * trigrams, or null when none is alike enough.
+     *
+     * Learning keeps only the words the tools use, but the word that tells
+     * two neighbours apart is often the one a request writes differently:
+     * the verb ("أرسل", send!, where the tool says "يرسل", it sends), a
+     * conjugation ("prêter" against "prêt"). It found the tool by its
+     * trigrams, yet was left out of what was learned, so a search only taught
+     * the object it names, which the neighbours share, and lifted them for
+     * the next request about that object. Taking the tool word it is closest
+     * to keeps the store within the tools' vocabulary and pairs the object
+     * with what is done to it again. Ties keep the first word indexed.
+     */
+    public function nearest(string $word): ?string
+    {
+        $grams = array_fill_keys(Analyzer::trigrams($word), true);
+        if ($grams === []) {
+            return null;
+        }
+        if ($this->wordGrams === null) {
+            $this->wordGrams = [];
+            foreach (array_keys($this->words) as $indexed) {
+                $this->wordGrams[(string) $indexed] = array_fill_keys(Analyzer::trigrams((string) $indexed), true);
+            }
+        }
+        $nearest = null;
+        $best = self::NEAREST;
+        foreach ($this->wordGrams as $indexed => $indexedGrams) {
+            $dice = 2 * count(array_intersect_key($grams, $indexedGrams)) / (count($grams) + count($indexedGrams));
+            if ($dice > $best || ($nearest === null && $dice === $best)) {
+                $nearest = (string) $indexed;
+                $best = $dice;
+            }
+        }
+
+        return $nearest;
     }
 
     /**

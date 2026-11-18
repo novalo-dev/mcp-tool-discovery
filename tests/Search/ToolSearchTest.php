@@ -373,6 +373,25 @@ final class ToolSearchTest extends TestCase
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
     }
 
+    public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'approve_estimate', 'title' => 'Approve an estimate', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'send_estimate', 'title' => 'Send an estimate', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(new SearchQuery('approving', 'estimate'))->searchId, 'approve_estimate');
+        }
+
+        // "approving" is no word of the tools, but it is close to "approve":
+        // learned as "estimate" alone, it would lift the approval for every
+        // request about an estimate, sending one too.
+        self::assertArrayHasKey('approve estimate', $store->load());
+        self::assertSame('send_estimate', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('sending', 'estimate')))[0]);
+    }
+
     public function testTheFileStoreKeepsWhatWasLearned(): void
     {
         $file = self::temporary('learning') . '.json';

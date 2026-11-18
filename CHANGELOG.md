@@ -117,6 +117,22 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **Learning pairs a verb written another way with its object again.**
+  Learning kept only the words of a request that the tools use, and the one
+  that tells two neighbours apart is often the verb, which a request rarely
+  writes as the tool does ("approving" for "approve", "أرسل" for "يرسل"). It
+  found the tool by its trigrams but was left out of what was learned, so a
+  search taught only its object, and lifted the wrong neighbour for the next
+  request about that object. Such a word is now kept as the tool word closest
+  to it by trigrams (a Dice coefficient of 0.3 at least), so a store still
+  holds nothing but the tools' words. On the benchmark, learning from the
+  other half gains 3 test requests and loses none; a new server written in
+  Arabic (a car repair workshop, 40 tools, 100 requests written before any
+  run) lost 2 to learning before and now loses none. The closest word is only
+  looked for when the host learns, and only for words the tools do not use:
+  about half a millisecond on 176 tools. Nothing changes without a
+  `LearningStore`, and a store filled before keeps working.
+
 - **Hindi, Thai, Arabic and every script that writes vowels as marks are
   searched by whole words.** The Analyzer split words on any character that
   was not a letter or a digit, and a mark (a Devanagari vowel sign, a Thai

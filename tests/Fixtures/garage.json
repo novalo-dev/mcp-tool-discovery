@@ -1,0 +1,861 @@
+[
+ {
+  "name": "customers_list",
+  "title": "قائمة العملاء",
+  "description": "يعرض جميع عملاء الورشة مع أرقام هواتفهم وعدد سياراتهم.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_get",
+  "title": "بيانات عميل",
+  "description": "يعرض اسم العميل وهاتفه وعنوانه والسيارات المسجلة باسمه.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    }
+   },
+   "required": [
+    "customer_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_add",
+  "title": "تسجيل عميل جديد",
+  "description": "يضيف عميلا جديدا إلى سجل الورشة بالاسم ورقم الهاتف.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "الاسم"
+    },
+    "phone": {
+     "type": "string",
+     "description": "رقم الهاتف"
+    }
+   },
+   "required": [
+    "name",
+    "phone"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_update",
+  "title": "تعديل بيانات عميل",
+  "description": "يغير رقم هاتف العميل أو عنوانه أو بريده الإلكتروني.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    },
+    "phone": {
+     "type": "string",
+     "description": "رقم الهاتف الجديد"
+    }
+   },
+   "required": [
+    "customer_id",
+    "phone"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_delete",
+  "title": "حذف عميل",
+  "description": "يحذف العميل وبياناته من سجل الورشة نهائيا.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    }
+   },
+   "required": [
+    "customer_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "vehicles_list",
+  "title": "قائمة السيارات",
+  "description": "يعرض السيارات المسجلة في الورشة مع رقم اللوحة والطراز وسنة الصنع.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehicle_get",
+  "title": "بطاقة سيارة",
+  "description": "يعرض تفاصيل سيارة واحدة: رقم اللوحة ورقم الهيكل والممشى وآخر صيانة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plate": {
+     "type": "string",
+     "description": "رقم اللوحة"
+    }
+   },
+   "required": [
+    "plate"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehicle_add",
+  "title": "إضافة سيارة",
+  "description": "يسجل سيارة جديدة لعميل برقم اللوحة والطراز.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    },
+    "plate": {
+     "type": "string",
+     "description": "رقم اللوحة"
+    },
+    "model": {
+     "type": "string",
+     "description": "الطراز"
+    }
+   },
+   "required": [
+    "customer_id",
+    "plate",
+    "model"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehicle_history",
+  "title": "سجل صيانة سيارة",
+  "description": "يعرض كل الإصلاحات والصيانات التي أجريت على سيارة منذ دخولها الورشة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plate": {
+     "type": "string",
+     "description": "رقم اللوحة"
+    }
+   },
+   "required": [
+    "plate"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointments_list",
+  "title": "جدول المواعيد",
+  "description": "يعرض مواعيد الورشة ليوم أو أسبوع مع اسم العميل ونوع الخدمة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "اليوم"
+    }
+   },
+   "required": [
+    "date"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_book",
+  "title": "حجز موعد",
+  "description": "يحجز موعدا لسيارة في يوم وساعة محددين لنوع خدمة معين.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plate": {
+     "type": "string",
+     "description": "رقم اللوحة"
+    },
+    "date": {
+     "type": "string",
+     "description": "اليوم والساعة"
+    },
+    "service": {
+     "type": "string",
+     "description": "نوع الخدمة"
+    }
+   },
+   "required": [
+    "plate",
+    "date",
+    "service"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_move",
+  "title": "تأجيل موعد",
+  "description": "ينقل موعدا محجوزا إلى يوم أو ساعة أخرى.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "رقم الموعد"
+    },
+    "date": {
+     "type": "string",
+     "description": "الموعد الجديد"
+    }
+   },
+   "required": [
+    "appointment_id",
+    "date"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_cancel",
+  "title": "إلغاء موعد",
+  "description": "يلغي موعدا محجوزا ويحرر الوقت في الجدول.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "رقم الموعد"
+    }
+   },
+   "required": [
+    "appointment_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "appointment_remind",
+  "title": "تذكير بموعد",
+  "description": "يرسل رسالة نصية إلى العميل تذكره بموعده القادم.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "رقم الموعد"
+    }
+   },
+   "required": [
+    "appointment_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "jobs_list",
+  "title": "أوامر الإصلاح المفتوحة",
+  "description": "يعرض أوامر الإصلاح الجارية مع حالتها والفني المسؤول.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_open",
+  "title": "فتح أمر إصلاح",
+  "description": "يفتح أمر إصلاح جديدا لسيارة دخلت الورشة مع وصف العطل.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plate": {
+     "type": "string",
+     "description": "رقم اللوحة"
+    },
+    "problem": {
+     "type": "string",
+     "description": "وصف العطل"
+    }
+   },
+   "required": [
+    "plate",
+    "problem"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_get",
+  "title": "تفاصيل أمر إصلاح",
+  "description": "يعرض الأعمال والقطع والساعات المسجلة على أمر إصلاح.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_assign",
+  "title": "تكليف فني",
+  "description": "يسند أمر إصلاح إلى فني من فنيي الورشة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    },
+    "mechanic_id": {
+     "type": "string",
+     "description": "الفني"
+    }
+   },
+   "required": [
+    "job_id",
+    "mechanic_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_add_task",
+  "title": "إضافة عمل إلى أمر الإصلاح",
+  "description": "يضيف عملا أو فحصا جديدا إلى أمر إصلاح مفتوح.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    },
+    "task": {
+     "type": "string",
+     "description": "العمل"
+    }
+   },
+   "required": [
+    "job_id",
+    "task"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_status",
+  "title": "تغيير حالة أمر الإصلاح",
+  "description": "يغير حالة أمر الإصلاح: قيد الفحص، بانتظار القطع، قيد العمل، جاهز.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    },
+    "status": {
+     "type": "string",
+     "description": "الحالة"
+    }
+   },
+   "required": [
+    "job_id",
+    "status"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "job_close",
+  "title": "إغلاق أمر إصلاح",
+  "description": "يغلق أمر الإصلاح بعد انتهاء العمل وتجهيز السيارة للتسليم.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inspection_report",
+  "title": "تقرير الفحص",
+  "description": "يعرض نتيجة فحص السيارة: الفرامل والإطارات والزيت والبطارية.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inspection_record",
+  "title": "تسجيل نتيجة فحص",
+  "description": "يسجل ملاحظات الفني بعد فحص السيارة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    },
+    "notes": {
+     "type": "string",
+     "description": "الملاحظات"
+    }
+   },
+   "required": [
+    "job_id",
+    "notes"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "estimate_create",
+  "title": "إعداد عرض سعر",
+  "description": "يحسب تكلفة الإصلاح المتوقعة من القطع وساعات العمل قبل البدء.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "estimate_send",
+  "title": "إرسال عرض السعر",
+  "description": "يرسل عرض السعر إلى العميل ليوافق عليه.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "estimate_id": {
+     "type": "string",
+     "description": "رقم عرض السعر"
+    }
+   },
+   "required": [
+    "estimate_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "estimate_approve",
+  "title": "اعتماد عرض السعر",
+  "description": "يسجل موافقة العميل على عرض السعر ليبدأ العمل.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "estimate_id": {
+     "type": "string",
+     "description": "رقم عرض السعر"
+    }
+   },
+   "required": [
+    "estimate_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parts_list",
+  "title": "مخزن القطع",
+  "description": "يعرض قطع الغيار الموجودة في المخزن وكمياتها.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "part_find",
+  "title": "البحث عن قطعة",
+  "description": "يبحث عن قطعة غيار بالاسم أو الرقم أو طراز السيارة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "اسم القطعة أو رقمها"
+    }
+   },
+   "required": [
+    "text"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "part_reserve",
+  "title": "حجز قطعة لأمر إصلاح",
+  "description": "يخصص قطعة من المخزن لأمر إصلاح حتى لا تستعمل في سيارة أخرى.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "part_id": {
+     "type": "string",
+     "description": "القطعة"
+    },
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "part_id",
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "part_return",
+  "title": "إرجاع قطعة إلى المخزن",
+  "description": "يعيد قطعة لم تستعمل من أمر الإصلاح إلى المخزن.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "part_id": {
+     "type": "string",
+     "description": "القطعة"
+    },
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "part_id",
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invoice_create",
+  "title": "إصدار فاتورة",
+  "description": "يصدر فاتورة أمر الإصلاح بالقطع وساعات العمل والضريبة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invoice_void",
+  "title": "إلغاء فاتورة",
+  "description": "يلغي فاتورة صدرت بالخطأ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "رقم الفاتورة"
+    }
+   },
+   "required": [
+    "invoice_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "payment_record",
+  "title": "تسجيل دفعة",
+  "description": "يسجل مبلغا دفعه العميل نقدا أو بالبطاقة على فاتورة.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "رقم الفاتورة"
+    },
+    "amount": {
+     "type": "string",
+     "description": "المبلغ"
+    }
+   },
+   "required": [
+    "invoice_id",
+    "amount"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invoices_unpaid",
+  "title": "الفواتير غير المدفوعة",
+  "description": "يعرض الفواتير التي لم يسددها العملاء بعد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mechanics_list",
+  "title": "قائمة الفنيين",
+  "description": "يعرض فنيي الورشة وتخصصاتهم وعدد أوامر الإصلاح المسندة إلى كل واحد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mechanic_schedule",
+  "title": "مناوبات الفنيين",
+  "description": "يعرض أيام عمل كل فني وساعاته وإجازاته.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "الأسبوع"
+    }
+   },
+   "required": [
+    "week"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bay_status",
+  "title": "حالة الرافعات",
+  "description": "يعرض رافعات الورشة وأماكن العمل: مشغولة أو فارغة وأي سيارة عليها.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehicle_handover",
+  "title": "تسليم السيارة",
+  "description": "يسجل تسليم السيارة إلى صاحبها مع الممشى وتوقيعه.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "رقم أمر الإصلاح"
+    }
+   },
+   "required": [
+    "job_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "courtesy_car_lend",
+  "title": "إعارة سيارة بديلة",
+  "description": "يعطي العميل سيارة بديلة طوال مدة الإصلاح.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    }
+   },
+   "required": [
+    "customer_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "courtesy_car_return",
+  "title": "استلام السيارة البديلة",
+  "description": "يسجل رجوع السيارة البديلة وكمية الوقود في خزانها.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "رقم العميل"
+    }
+   },
+   "required": [
+    "customer_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]
