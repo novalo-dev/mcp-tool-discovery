@@ -71,7 +71,7 @@ final class ToolSearch
             ];
         }
         $this->position = array_flip(array_keys($documents));
-        $this->index = self::index($documents, $options, $this->analyzer, $cache);
+        $this->index = self::index($documents, $options, $this->analyzer, $cache, $learning !== null && $options->learningWeight > 0);
     }
 
     /**
@@ -258,18 +258,22 @@ final class ToolSearch
     /**
      * @param array<string, array<string, string>> $documents
      */
-    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache): ToolIndex
+    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache, bool $learns): ToolIndex
     {
+        // Without a cache nothing is kept for the next request: what learning
+        // reads is then built only if a search meets a word the tools lack.
         if ($cache === null) {
             return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
         }
         // The key covers every text indexed, so it changes with any tool and
-        // differs between callers who see different tools.
-        $key = hash('xxh128', serialize($documents) . $options->indexKey());
+        // differs between callers who see different tools. It also says
+        // whether the index holds what learning reads, so a host that learns
+        // never gets one without it from a cache it shares.
+        $key = hash('xxh128', serialize($documents) . $options->indexKey() . ($learns ? ' learns' : ''));
         $saved = $cache->get($key);
         $index = $saved === null ? null : ToolIndex::fromArray($saved, $analyzer);
         if ($index === null) {
-            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
+            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, $learns);
             $cache->set($key, $index->toArray());
         }
 

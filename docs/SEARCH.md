@@ -234,10 +234,17 @@ fewer (594 against 593). On the train half, in
 two folds, learning from one fold to the other went from 7 lost first places
 to 4. The threshold was chosen on those folds: 0.2 to 0.5 all gained, 0.2
 by one request asked again; 0.3 was kept, the stricter, so fewer words are
-taken for a tool word they only half resemble. Finding the closest word reads
-every word of the index, so it is only done when the host learns, and only
-for words the tools do not use: on the hosting server, it adds about half a
-millisecond to such a search.
+taken for a tool word they only half resemble. The closest word is only
+looked for when the host learns, and only for words the tools do not use. It
+reads the trigrams of the tool words inverted, each pointing to the words
+that hold it, so only the words sharing a trigram are compared. With an
+`IndexCache`, they are built with the index of a host that learns and kept
+with it (its saved index is about a quarter larger; a host that does not
+learn keeps the same). Cutting every tool word again at each request made a
+search that learns over 176 tools take more than 6 ms, ten times the search
+itself; it now takes about 0.6 ms against 0.4 ms, and 1.9 ms against 1.8 ms
+over 706 tools, the closest word being the same for each of the 15 944 words
+of the benchmark's requests.
 
 `MemoryLearningStore` lasts the process; `FileLearningStore` keeps a JSON file,
 locked while it is written.

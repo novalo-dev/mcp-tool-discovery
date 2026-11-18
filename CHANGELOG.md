@@ -150,9 +150,14 @@ becomes the next version's section when it is published.
   other half gains 3 test requests and loses none; a new server written in
   Arabic (a car repair workshop, 40 tools, 100 requests written before any
   run) lost 2 to learning before and now loses none. The closest word is only
-  looked for when the host learns, and only for words the tools do not use:
-  about half a millisecond on 176 tools. Nothing changes without a
-  `LearningStore`, and a store filled before keeps working.
+  looked for when the host learns, and only for words the tools do not use.
+  With an `IndexCache`, the trigrams of the tool words it compares are kept
+  with the index of a host that learns, inverted, so only the words sharing
+  a trigram are visited: a search that learns over 176 tools takes about
+  0.6 ms instead of 0.4 ms, where cutting every tool word again at each
+  request took more than 6 ms. The cache of such a host is about a quarter
+  larger; that of a host that does not learn is unchanged. Nothing changes
+  without a `LearningStore`, and a store filled before keeps working.
 
 - **Hindi, Thai, Arabic and every script that writes vowels as marks are
   searched by whole words.** The Analyzer split words on any character that

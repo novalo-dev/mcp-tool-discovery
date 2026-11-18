@@ -54,19 +54,19 @@ final class ToolIndex
     private const NEAREST = 0.3;
 
     /**
-     * The trigrams of each indexed word, built the first time nearest() needs
-     * them: only a search that learns does, so the cache never holds them.
-     * Keyed like $words: PHP turns a word made only of digits into an int key.
+     * The words of the index in index order, built the first time nearest()
+     * needs them, since only a search that learns does.
      *
-     * @var array<array-key, array<string, true>>|null
+     * @var list<string>|null
      */
-    private ?array $wordGrams = null;
+    private ?array $wordList = null;
 
     /**
      * @param list<int|string> $ids the documents, in index order
      * @param array<array-key, array<int|string, float>> $words per word, per document holding it: its
      *        weighted frequency, the fields' weights and lengths already applied
      * @param array<array-key, array<int|string, float>> $grams the same for trigrams
+     * @param array{array<array-key, list<int>>, list<int>}|null $nearby see invert(); null until nearest() needs it
      *
      * Keys are array-key, not string: PHP turns a key such as "123", a trigram
      * of a word with digits, into an integer, and looks it up the same way.
@@ -77,14 +77,16 @@ final class ToolIndex
         private readonly array $words,
         private readonly array $grams,
         private readonly float $trigramWeight,
+        private ?array $nearby = null,
     ) {}
 
     /**
      * @param iterable<int|string, array<string, string>> $documents id => field => text
      * @param array<string, float> $weights field => weight; a field missing here is not indexed
      * @param float $trigramWeight how much trigram matches count against whole-word matches
+     * @param bool $nearby whether nearest() will be asked, so what it reads is built now and kept with the index
      */
-    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6): self
+    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6, bool $nearby = false): self
     {
         $counts = [];
         $totals = [];
@@ -122,7 +124,38 @@ final class ToolIndex
             }
         }
 
-        return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight);
+        // Built here, from the trigrams already cut, and kept by the cache:
+        // working them out again at each request cost a search that learns
+        // ten times the search itself. Only for a host that learns, so the
+        // cache of one that does not stays as small as it was.
+        $inverted = $nearby ? self::invert($words, $trigrams) : null;
+
+        return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight, $inverted);
+    }
+
+    /**
+     * The trigrams of each word, inverted: per trigram, the position of each
+     * word holding it, and per position, how many distinct trigrams the word
+     * has. Positions follow the index order of the words.
+     *
+     * @param array<array-key, mixed> $words
+     * @param array<array-key, list<string>> $trigrams the trigrams already cut, per word
+     *
+     * @return array{array<array-key, list<int>>, list<int>}
+     */
+    private static function invert(array $words, array $trigrams = []): array
+    {
+        $wordsByGram = [];
+        $gramCounts = [];
+        foreach (array_keys($words) as $position => $word) {
+            $wordGrams = array_unique($trigrams[$word] ?? Analyzer::trigrams((string) $word));
+            $gramCounts[] = count($wordGrams);
+            foreach ($wordGrams as $gram) {
+                $wordsByGram[$gram][] = $position;
+            }
+        }
+
+        return [$wordsByGram, $gramCounts];
     }
 
     /**
@@ -218,30 +251,41 @@ final class ToolIndex
      * the next request about that object. Taking the tool word it is closest
      * to keeps the store within the tools' vocabulary and pairs the object
      * with what is done to it again. Ties keep the first word indexed.
+     *
+     * Only the words sharing a trigram with it are visited, through the
+     * inverted trigrams built with the index: a word sharing none is not
+     * alike at all.
      */
     public function nearest(string $word): ?string
     {
-        $grams = array_fill_keys(Analyzer::trigrams($word), true);
+        $grams = array_unique(Analyzer::trigrams($word));
         if ($grams === []) {
             return null;
         }
-        if ($this->wordGrams === null) {
-            $this->wordGrams = [];
-            foreach (array_keys($this->words) as $indexed) {
-                $this->wordGrams[$indexed] = array_fill_keys(Analyzer::trigrams((string) $indexed), true);
+        [$wordsByGram, $gramCounts] = $this->nearby ??= self::invert($this->words);
+        $shared = [];
+        foreach ($grams as $gram) {
+            foreach ($wordsByGram[$gram] ?? [] as $position) {
+                $shared[$position] = ($shared[$position] ?? 0) + 1;
             }
         }
         $nearest = null;
         $best = self::NEAREST;
-        foreach ($this->wordGrams as $indexed => $indexedGrams) {
-            $dice = 2 * count(array_intersect_key($grams, $indexedGrams)) / (count($grams) + count($indexedGrams));
-            if ($dice > $best || ($nearest === null && $dice === $best)) {
-                $nearest = (string) $indexed;
+        foreach ($shared as $position => $count) {
+            $dice = 2 * $count / (count($grams) + ($gramCounts[$position] ?? 0));
+            // The lower position on a tie, whatever order the trigrams of
+            // the word visited them in.
+            if ($dice > $best || ($dice === $best && ($nearest === null || $position < $nearest))) {
+                $nearest = $position;
                 $best = $dice;
             }
         }
+        if ($nearest === null) {
+            return null;
+        }
+        $this->wordList ??= array_map('strval', array_keys($this->words));
 
-        return $nearest;
+        return $this->wordList[$nearest] ?? null;
     }
 
     /**
@@ -267,6 +311,7 @@ final class ToolIndex
             'words' => $this->words,
             'grams' => $this->grams,
             'trigramWeight' => $this->trigramWeight,
+            'nearby' => $this->nearby,
         ];
     }
 
@@ -295,7 +340,11 @@ final class ToolIndex
         $words = $saved['words'];
         /** @var array<array-key, array<int|string, float>> $grams */
         $grams = $saved['grams'];
-
-        return new self($analyzer, $ids, $words, $grams, (float) $saved['trigramWeight']);
+        $nearby = $saved['nearby'] ?? null;
+        if ($nearby !== null && !(is_array($nearby) && is_array($nearby[0] ?? null) && is_array($nearby[1] ?? null))) {
+            return null;
+        }
+        /** @var array{array<array-key, list<int>>, list<int>}|null $nearby */
+        return new self($analyzer, $ids, $words, $grams, (float) $saved['trigramWeight'], $nearby);
     }
 }

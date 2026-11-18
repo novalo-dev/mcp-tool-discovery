@@ -311,6 +311,31 @@ final class ToolSearchTest extends TestCase
         }
     }
 
+    public function testTheClosestWordIsTheSameHoweverTheIndexWasMade(): void
+    {
+        $documents = [];
+        foreach (RecordingGate::fixtureTools() as $name => $tool) {
+            $documents[$name] = ['name' => $name, 'title' => $tool->title(), 'description' => $tool->description()];
+        }
+        $weights = ['name' => 1.0, 'title' => 2.0, 'description' => 1.0];
+        $plain = ToolIndex::build($documents, $weights);
+        $learning = ToolIndex::build($documents, $weights, nearby: true);
+        $restored = ToolIndex::fromArray($learning->toArray());
+
+        // Kept with the index only for a host that learns, so the cache of
+        // one that does not stays as small as it was.
+        self::assertNull($plain->toArray()['nearby']);
+        self::assertNotNull($learning->toArray()['nearby']);
+        self::assertNotNull($restored);
+        foreach (['tickets', 'statuss', 'deploying', 'rollbak', 'zzzz', '42x', 'ticket'] as $word) {
+            $nearest = $plain->nearest($word);
+            self::assertSame($nearest, $learning->nearest($word), $word);
+            self::assertSame($nearest, $restored->nearest($word), $word);
+        }
+        self::assertSame('rollback', $plain->nearest('rollbak'));
+        self::assertNull($plain->nearest('zzzz'));
+    }
+
     public function testLearningLiftsTheToolThatWorked(): void
     {
         $tools = RecordingGate::fixtureTools();
