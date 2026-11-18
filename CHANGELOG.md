@@ -10,6 +10,20 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Laravel application among the host examples.** docs/examples/laravel
+  serves the notes server over HTTP in Laravel 13: an `mcp` guard added with
+  `Auth::viaRequest()` finds the caller from the bearer token, an ability of
+  Laravel's gate decides which tools they see (`AbilityGate::visible()` asks
+  `allows()` for the caller), the route sits outside the `web` group, and the
+  controller builds the gate and the `Discovery` for each request from the
+  shared singletons. It answers from the same docs/examples/http.php, and its
+  test asks it all the other HTTP servers are asked, plus one application
+  serving callers in turn, as Octane does. docs/HOSTS.md says why a worker
+  must forget the guards between two requests: a guard keeps the user it
+  found, and without that a request with no token was served as the last
+  caller. A CI job, part of **CI passed**, installs the pinned
+  `laravel/framework` 13.43.0 on PHP 8.3 and runs PHPStan and the tests.
+
 - **Thai is searched by pairs of what is seen.** It is written without
   spaces, so a sentence was one word that met tools only by its trigrams. A
   run of Thai is now cut into overlapping pairs of grapheme clusters (a

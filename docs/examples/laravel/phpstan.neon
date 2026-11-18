@@ -1,0 +1,19 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The Laravel example, held to the level of the other examples. It is
+    # read with Laravel installed in this directory, which the main analysis
+    # does not have.
+    level: max
+    phpVersion: 80300
+    paths:
+        - app
+        - bootstrap/app.php
+        - config
+        - public/app.php
+    scanFiles:
+        - ../notes.php
+        - ../http.php
+    bootstrapFiles:
+        - vendor/autoload.php

@@ -9,3 +9,5 @@ parameters:
         # Read with Symfony installed, by its own job: without it, the
         # kernel and the request of the test are unknown here.
         - tests/Symfony
+        # The same for Laravel.
+        - tests/Laravel

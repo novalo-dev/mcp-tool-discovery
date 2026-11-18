@@ -40,11 +40,12 @@ Every pull request runs:
 |---|---|---|
 | CI | Coding standard, static analysis, hygiene | PER-CS 2.0, PHPStan level max on `src/`, `bin/` and `docs/examples/`, level 6 on `tests/`, the hygiene of files and commit messages |
 | CI | PHP 8.1+ compatibility | PHPCompatibility reads every construct, function and class against each PHP from 8.1 up |
-| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples, docs and conformance suites (the `sdk`, `react` and `symfony` suites run in their own jobs) |
+| CI | Tests on PHP 8.1 to 8.5 | PHPUnit: unit, contract, search, examples, docs and conformance suites (the `sdk`, `react`, `symfony` and `laravel` suites run in their own jobs) |
 | CI | What Composer installs | the package holds `src/` and the licence, not the tests |
 | CI | Example on the official PHP SDK | installs `mcp/sdk` at the version `docs/examples/sdk/composer.json` pins, PHPStan level max on the example, and the `sdk` test suite; not part of **CI passed** while the SDK is below 1.0 |
 | CI | Example on ReactPHP | installs `react/http` at the version `docs/examples/react/composer.json` pins, PHPStan level max on the example, and the `react` test suite; part of **CI passed**, since ReactPHP is stable and pinned |
 | CI | Example on Symfony | installs `symfony/framework-bundle` at the version `docs/examples/symfony/composer.json` pins, PHPStan level max on the example and level 6 on its test, and the `symfony` test suite; part of **CI passed**, since Symfony 6.4 is a long-term release and pinned |
+| CI | Example on Laravel | installs `laravel/framework` at the version `docs/examples/laravel/composer.json` pins, on PHP 8.3, PHPStan level max on the example and level 6 on its test, and the `laravel` test suite; part of **CI passed**, since the version is pinned |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
 | Security | Dependencies, Secrets, Semgrep, Psalm taint analysis | `composer audit`, Gitleaks over the whole history, Semgrep rules for PHP and secrets, and Psalm following what a client sends (`tests/Security/entry.php`) to a file, a query, a command or an output |
 
