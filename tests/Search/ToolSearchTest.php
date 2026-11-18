@@ -103,6 +103,25 @@ final class ToolSearchTest extends TestCase
         self::assertSame('staff_shifts', $search->search('พรุ่งนี้ใครเข้ากะหน้าเคาน์เตอร์')[0]->name ?? null);
     }
 
+    public function testAKoreanWordIsCutInPairs(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['레슨', '슨을'], $analyzer->words('레슨을'), 'the word with its particle meets the bare word');
+        self::assertSame(['레슨을', '취소해'], $analyzer->tokens('레슨을 취소해'), 'the caller is shown the words it wrote');
+        self::assertSame(['레슨'], $analyzer->words('레슨'), 'two syllables, one pair');
+        self::assertSame(['줘'], $analyzer->words('줘'), 'one syllable, one term');
+    }
+
+    public function testASentenceInKoreanFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('academy'));
+
+        // Both found another tool first while a word was compared with its particles.
+        self::assertSame('recital_cancel', $search->search('이번 발표회는 취소해 줘')[0]->name ?? null);
+        self::assertSame('instrument_lend', $search->search('하준이에게 첼로를 빌려 줘')[0]->name ?? null);
+    }
+
     public function testAMarkStaysInItsWord(): void
     {
         $analyzer = new Analyzer();

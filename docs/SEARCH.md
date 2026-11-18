@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 478 times
-out of 599 in fields, and 284 times as one sentence.
+On the benchmark below, the same requests find the right tool first 515 times
+out of 649 in fields, and 320 times as one sentence.
 
 ## How a tool is scored
 
@@ -91,6 +91,16 @@ consonant with its marks): "ยกเลิก" (to cancel) gives `ยก`, `ก
 trigrams with it: on the train half of the sports centre, keeping it found
 as many tools first, with fewer tools returned. Lao, Khmer and Burmese are
 written the same way and are not measured yet, so they are read as before.
+
+**A Korean word is cut into pairs.** Korean puts spaces between words, but
+glues to each word the particles that mark its role: "레슨을 취소해 줘"
+(cancel the lesson) holds "레슨을", the lesson as object, never "레슨", the
+word the tool writes, and a word of two syllables gives too few trigrams to
+meet it. Each word of Hangul is cut into overlapping pairs of syllables, as
+Lucene's CJK analyzer does: "레슨을" gives `레슨` and `슨을`. Unlike Thai, the
+word is not kept beside its pairs: on the train half of the music school,
+keeping it found fewer tools first (38 against 39 in fields) and returned
+more. As for Chinese, the caller is shown the words it wrote, not the pairs.
 
 **No stemmer, on purpose.** A Porter stemmer was measured and made the search
 worse: folding "categories" to "categori" erases the sign that a plural query
@@ -212,7 +222,7 @@ locked while it is written.
 
 ## The measures
 
-Eleven fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twelve fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -221,18 +231,19 @@ French (40 tools, `prolonger-pret`), the office of a school written in German
 (40 tools, `parking_permit_renew`), a newsroom with no titles and long
 descriptions (40 tools, `schedule_article`), the office of a residential
 estate written in Chinese (40 tools, `repair_assign`), a bus depot
-written in Hindi (40 tools, `pass_renew`) and a sports centre written in Thai
-(40 tools, `court_book`). 1197 requests, each written as one
+written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
+(40 tools, `court_book`) and a music school written in Korean (40 tools,
+`lesson_move`). 1297 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 599 requests | Right tool first | Top 3 |
+| Test half, 649 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 478 | 552 |
-| The same request as one sentence | 284 | 392 |
-| In fields, after every train request was run once | 479 | 552 |
-| In fields, after the test requests were run once, then asked again | 516 | 565 |
+| The request in fields | 515 | 596 |
+| The same request as one sentence | 320 | 433 |
+| In fields, after every train request was run once | 516 | 596 |
+| In fields, after the test requests were run once, then asked again | 557 | 610 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -329,6 +340,23 @@ pairs of code points (43 first in fields, 35 as one sentence, against 44 and
 39) and triples of clusters (43 and 39) lost. What it still misses is mostly
 a list beside its single tool ("มีอุปกรณ์อะไรให้ยืมบ้าง", what equipment can
 be lent, finds the tool that takes it back first).
+
+The music school is written in Korean, with English snake_case names: a
+script spaced like English, whose words carry their particles. Its 100
+requests were written before any of them was run, as staff at the front
+desk talk ("하준이에게 첼로를 빌려 줘", lend Hajun a cello). With each word
+compared whole, 36 of its 50 test requests found the right tool first in
+fields (40 in the top 3) and 34 as one sentence (41), and learning from the
+train half lost one request from the top 3. Cut into pairs of syllables,
+chosen on its train half, 37 come first in fields (44 in the top 3) and 36
+as one sentence (41), with fewer tools returned (1.9 against 2.0 in fields,
+1.9 against 2.4 as one sentence), and learning loses nothing. The eleven
+other servers do not move by one request. On train, triples of syllables
+with the word kept lost (37 first in fields, against 39). What it still
+misses is mostly a word the tools do not use ("연주회", a concert, where the
+tools write "발표회", a recital) and a list beside its single tool
+("바이올린 몇 대 남았어", how many violins are left, finds the tool that lends
+one first).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

@@ -34,8 +34,8 @@ The benchmark says where the search still misses, in
   written as many real servers are, with no titles and long descriptions (a
   newsroom), a Chinese one, written without spaces (the office of a
   residential estate), a Hindi one, whose vowels are marks (a bus depot)
-  and a Thai one, written without spaces and with marks (a sports centre)
-  are in. Lao, Khmer and Burmese, written the same way, are not measured
+  a Thai one, written without spaces and with marks (a sports centre) and
+  a Korean one, whose words carry their particles (a music school) are in. Lao, Khmer and Burmese, written the same way, are not measured
   yet.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A

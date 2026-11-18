@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Korean is searched by pairs of syllables.** Korean glues to each word
+  the particles that mark its role, so "레슨을" (the lesson, as object) never
+  met a tool that writes "레슨". Each Korean word is now cut into overlapping
+  pairs of syllables, as Lucene's CJK analyzer does; the caller is still
+  shown the words it wrote. On a new benchmark server written in Korean (40
+  tools, 100 requests written before any run), the test half goes from 36
+  to 37 first in fields (40 to 44 in the top 3) and from 34 to 36 as one
+  sentence, with fewer tools returned; the eleven other servers do not move.
+  The saved index format changes, so an index in `FileIndexCache` is rebuilt
+  once.
+
 - **A Laravel application among the host examples.** docs/examples/laravel
   serves the notes server over HTTP in Laravel 13: an `mcp` guard added with
   `Auth::viaRequest()` finds the caller from the bearer token, an ability of

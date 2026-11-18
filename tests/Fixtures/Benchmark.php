@@ -22,20 +22,21 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 1197 requests over eleven servers named in five
+ * The search benchmark: 1297 requests over twelve servers named in five
  * styles, one of them in French, one in German, one in Greek, one in Chinese,
- * one in Hindi, one in Thai, one with 176 tools and one whose tools have no
- * title and long descriptions.
+ * one in Hindi, one in Thai, one in Korean, one with 176 tools and one whose
+ * tools have no title and long descriptions.
  *
  * Each request is written twice, as one sentence (query) and in fields
  * (action, object, description), with the tool a person would expect. Half
  * of them (train) were used to choose the settings; the other half (test)
  * was kept aside and is the score that counts. The library, school, hosting,
- * city, newsroom, estate, depot and arena servers came after the settings
- * were chosen, so none of their halves shaped them; the train half of estate
- * only chose how a sentence without spaces is cut into terms, that of depot
- * whether a mark is kept in its word or dropped, and that of arena how Thai
- * is cut into pairs.
+ * city, newsroom, estate, depot, arena and academy servers came after the
+ * settings were chosen, so none of their halves shaped them; the train half
+ * of estate only chose how a sentence without spaces is cut into terms, that
+ * of depot whether a mark is kept in its word or dropped, that of arena how
+ * Thai is cut into pairs, and that of academy whether a Korean word keeps
+ * itself beside its pairs.
  *
  * Shared by the test that guards the floors and by bin/benchmark.php, which
  * prints the score and writes its badge, so both measure the same thing.
@@ -43,7 +44,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy'];
 
     /**
      * Four measures on the test half:

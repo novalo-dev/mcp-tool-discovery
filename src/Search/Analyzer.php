@@ -38,6 +38,13 @@ final class Analyzer
      */
     private const THAI = '\p{Thai}';
 
+    /**
+     * A Hangul letter. Korean puts spaces between words, but glues to each
+     * word the particles that mark its role ("레슨을", the lesson as object):
+     * the word a tool writes ("레슨") is then never a token of the request.
+     */
+    private const HANGUL = '\p{Hangul}';
+
     /** @var array<string, true> */
     private readonly array $stopWords;
 
@@ -53,15 +60,20 @@ final class Analyzer
 
     /**
      * The terms the index compares: the tokens of the text, with each run of
-     * Han or kana cut into overlapping pairs of characters, and each run of
-     * Thai into pairs of grapheme clusters (see thai()).
+     * Han or kana and each Korean word cut into overlapping pairs of
+     * characters, and each run of Thai into pairs of grapheme clusters (see
+     * thai()).
      *
      * Chinese and Japanese are written without spaces, so a whole sentence is
      * one token and would only ever meet a tool by its trigrams, while most of
      * their words are two characters long and give no trigram of their own.
      * Pairs of characters are what CJK search has indexed for decades (the
      * bigrams of Lucene's CJK analyzer): they need no dictionary, and the
-     * scripts come from Unicode, not from a list in the library.
+     * scripts come from Unicode, not from a list in the library. That analyzer
+     * pairs Hangul too, and for the same reason it is done here: a Korean word
+     * carries its particles, and its pairs meet the bare word of the tool
+     * where the word itself would not. Korean keeps its spaces, so each word
+     * is paired on its own.
      *
      * @return list<string>
      */
@@ -120,7 +132,8 @@ final class Analyzer
 
     /**
      * The terms of one token: itself, or its pairs of characters when it is a
-     * run of Han or kana longer than one character, or a run of Thai.
+     * run of Han or kana or a Korean word longer than one character, or a run
+     * of Thai.
      *
      * @return list<string>
      */
@@ -129,7 +142,10 @@ final class Analyzer
         if (preg_match('/^' . self::THAI . '+$/u', $token) === 1) {
             return self::thai($token);
         }
-        if (preg_match('/^' . self::UNSPACED . '{2,}$/u', $token) !== 1) {
+        // A Korean word gives its pairs only, as Chinese does: measured on the
+        // train half of the music school, keeping the word beside them found
+        // fewer tools first and returned more.
+        if (preg_match('/^(?:' . self::UNSPACED . '{2,}|' . self::HANGUL . '{2,})$/u', $token) !== 1) {
             return [$token];
         }
         $characters = preg_split('//u', $token, -1, PREG_SPLIT_NO_EMPTY);
