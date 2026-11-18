@@ -30,7 +30,7 @@ Its parts, in the order a host writes them:
 | Part | In the example | What it holds |
 |---|---|---|
 | Tool definitions | `definitions()`, in `notes.php` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
-| The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
+| The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony example reuses behind its own gate |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 
@@ -75,7 +75,8 @@ directory must be one only the server writes to: the index files are run.
 `answerHttp()` never reads the token itself: it asks the server for the
 `Discovery` of the caller, and answers 401 when there is none. Reading the
 token is the server's part, in `roleOf()`, so a framework that already knows
-who calls builds the gate from its own user instead.
+who calls builds the gate from its own user instead, as the Symfony example
+below does.
 
 ---
 
@@ -113,15 +114,18 @@ A learning store, if the host gives one, is shared the same way: the
 ## A server in a Symfony application
 
 [examples/symfony](examples/symfony) is the same HTTP server as a Symfony 6.4
-application: the library's parts are services of the container, the transport
-is one controller, [McpController](examples/symfony/src/McpController.php), and
-the Discovery is built for each request. It answers from the same
+application with the security bundle: a firewall finds the caller, a voter
+decides which tools they see, the library's parts are services of the
+container, the transport is one controller,
+[McpController](examples/symfony/src/McpController.php), and the Discovery is
+built for each request. It answers from the same
 [examples/http.php](examples/http.php), and the tests ask it everything they
 ask the PHP-FPM server, plus one kernel serving callers in turn, as a worker
-does ([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
-The example pins `symfony/framework-bundle` in
+does, with a request that names no one between two that do
+([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
+The example pins `symfony/framework-bundle` and `symfony/security-bundle` in
 [examples/symfony/composer.json](examples/symfony/composer.json), and a CI job
-installs it there and runs those tests.
+installs them there and runs those tests.
 
 ```
 cd docs/examples/symfony && composer install && cd -
@@ -129,19 +133,22 @@ php -S 127.0.0.1:8080 docs/examples/symfony/public/app.php
 ```
 
 The wiring is in [Kernel.php](examples/symfony/src/Kernel.php); a real
-application writes the same entries in `config/services.yaml`:
+application writes the same entries in `config/packages/security.yaml` and
+`config/services.yaml`:
 
-| Part | In the container | Why |
+| Part | In the application | Why |
 |---|---|---|
+| The caller | a stateless firewall on `/mcp` with `access_token`, whose [TokenHandler](examples/symfony/src/TokenHandler.php) names a user | the controller never reads the token; a request with no token reaches it with no user and is answered 401 |
+| Who sees a tool | [ToolVoter](examples/symfony/src/ToolVoter.php), asked through `isGranted()` by [SecurityGate](examples/symfony/src/SecurityGate.php)'s `visible()` | the permission lives where the application keeps every other one, and the role hierarchy applies to tools too |
+| What a call may carry and does | `NotesTools`, in `notes.php`, the same rules `NotesGate` uses | only the decision of who sees what is Symfony's; the tools keep their own checks |
 | `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
 | The notes | a shared service | they stand for the host's database, which the container already gives its services |
 | The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
 
-The caller here comes from the token, read by `roleOf()` as in the other
-servers. In an application with the security bundle, the firewall has already
-found the caller, and the closure the controller hands `answerHttp()` builds
-the gate from `Security::getUser()` instead: what the library needs is the
-same, a gate for this caller.
+A token the firewall does not know is answered 401 by Symfony itself, before
+the controller, so such a request gets 401 even where the other servers would
+first answer 403 for its `Origin` or 405 for its method. It learns nothing
+either way.
 
 ---
 

@@ -47,12 +47,23 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **The Symfony example uses the security bundle.** A stateless firewall
+  with `access_token` finds the caller, and a voter decides which tools they
+  see: `SecurityGate::visible()` asks `isGranted()`, so the role hierarchy
+  and the application's other voters apply to tools as to anything else. The
+  controller no longer reads the token, and a request with no token reaches
+  it with no user and is answered 401. What each tool checks in its
+  arguments and does moved from `NotesGate` to `NotesTools` in
+  docs/examples/notes.php, so a gate of the host's framework reuses it;
+  `NotesGate` keeps its constructor. The example pins
+  `symfony/security-bundle` 6.4.49, and its test now serves a request with no
+  token between two callers on one kernel, as a worker does.
+
 - **The HTTP examples leave the caller to the server.** `answerHttp()` in
   docs/examples/http.php no longer reads the bearer token: it takes a
   closure that gives the `Discovery` of the caller, or null for a request
   that names no one (still answered 401, before the body is read). The token
-  is read by `roleOf()`, which the PHP-FPM, ReactPHP and Symfony servers
-  call. A host that copied `answerHttp()` and authenticates in its framework
+  is read by `roleOf()`, which the PHP-FPM and ReactPHP servers call. A host that copied `answerHttp()` and authenticates in its framework
   (a firewall, a middleware) no longer has the token checked a second time
   against the example's list.
 

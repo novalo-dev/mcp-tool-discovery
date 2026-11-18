@@ -139,7 +139,12 @@ final class Notes
  */
 final class NotesGate implements ToolGate
 {
-    public function __construct(private readonly string $role, private readonly Notes $notes) {}
+    private readonly NotesTools $tools;
+
+    public function __construct(private readonly string $role, Notes $notes)
+    {
+        $this->tools = new NotesTools($notes);
+    }
 
     // A tool the caller could never run is not shown at all: here only an
     // admin may delete, so anyone else never learns the tool exists.
@@ -148,7 +153,32 @@ final class NotesGate implements ToolGate
         return $tool->name !== 'notes_delete' || $this->role === 'admin';
     }
 
-    // Checked again with the arguments, at call time: the listing never saw them.
+    public function authorize(Tool $tool, array $arguments): ?CallResult
+    {
+        return $this->tools->authorize($tool, $arguments);
+    }
+
+    public function call(Tool $tool, array $arguments): CallResult
+    {
+        return $this->tools->call($tool, $arguments);
+    }
+}
+
+/**
+ * What each tool checks in its arguments and does, whoever the caller is.
+ * Apart from the gate, so a host whose framework decides who sees what (the
+ * Symfony example, with a voter) keeps these rules and writes only that
+ * decision.
+ */
+final class NotesTools
+{
+    public function __construct(private readonly Notes $notes) {}
+
+    /**
+     * Checked again with the arguments, at call time: the listing never saw them.
+     *
+     * @param array<string, mixed> $arguments
+     */
     public function authorize(Tool $tool, array $arguments): ?CallResult
     {
         if ($tool->name === 'notes_add' && strlen(is_string($arguments['text'] ?? null) ? $arguments['text'] : '') > 500) {
@@ -158,6 +188,9 @@ final class NotesGate implements ToolGate
         return null;
     }
 
+    /**
+     * @param array<string, mixed> $arguments
+     */
     public function call(Tool $tool, array $arguments): CallResult
     {
         $id = is_int($arguments['id'] ?? null) ? $arguments['id'] : 0;
