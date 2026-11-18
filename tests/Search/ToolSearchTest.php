@@ -70,6 +70,103 @@ final class ToolSearchTest extends TestCase
         self::assertSame([], Analyzer::trigrams(''));
     }
 
+    public function testTextWrittenWithoutSpacesIsCutInPairs(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['帮我', '我报', '报修'], $analyzer->words('帮我报修'));
+        self::assertSame(['帮我报修'], $analyzer->tokens('帮我报修'), 'the caller is shown the word it wrote');
+        self::assertSame(['派工', '维修'], $analyzer->words('派工、维修。'), 'no pair holds a punctuation mark');
+        self::assertSame(['栋', '有快', '快递', '递吗'], $analyzer->words('5栋101有快递吗'), 'numbers apart, still left out');
+        self::assertSame(['报'], $analyzer->words('报'));
+        self::assertSame(['カー', 'ード'], $analyzer->words('カード'), 'kana too');
+        self::assertSame(['登记', '记一'], (new Analyzer(['一下']))->words('登记一下'), 'a host stop word can be a pair');
+        self::assertSame(['ticket', 'status'], $analyzer->words('ticket status'), 'spaced scripts unchanged');
+    }
+
+    public function testThaiIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ยก', 'กเ', 'เลิ', 'ลิก', 'ยกเลิก'], $analyzer->words('ยกเลิก'), 'a vowel or tone mark stays on its consonant, the run is kept');
+        self::assertSame(['ยกเลิก'], $analyzer->tokens('ยกเลิก'), 'the caller is shown the word it wrote');
+        self::assertSame(['ตู้เบอร์'], $analyzer->tokens('ตู้เบอร์12'), 'numbers apart, still left out');
+        self::assertSame(['ตู้'], $analyzer->words('ตู้'), 'one cluster, one term');
+    }
+
+    public function testASentenceInThaiFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('arena'));
+
+        // Both found another tool first while a sentence met tools by its trigrams only.
+        self::assertSame('lockers_list', $search->search('ตอนนี้ตู้ล็อกเกอร์ว่างกี่ตู้')[0]->name ?? null);
+        self::assertSame('staff_shifts', $search->search('พรุ่งนี้ใครเข้ากะหน้าเคาน์เตอร์')[0]->name ?? null);
+    }
+
+    public function testAKoreanWordIsCutInPairs(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['레슨', '슨을'], $analyzer->words('레슨을'), 'the word with its particle meets the bare word');
+        self::assertSame(['레슨을', '취소해'], $analyzer->tokens('레슨을 취소해'), 'the caller is shown the words it wrote');
+        self::assertSame(['레슨'], $analyzer->words('레슨'), 'two syllables, one pair');
+        self::assertSame(['줘'], $analyzer->words('줘'), 'one syllable, one term');
+    }
+
+    public function testASentenceInKoreanFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('academy'));
+
+        // Both found another tool first while a word was compared with its particles.
+        self::assertSame('recital_cancel', $search->search('이번 발표회는 취소해 줘')[0]->name ?? null);
+        self::assertSame('instrument_lend', $search->search('하준이에게 첼로를 빌려 줘')[0]->name ?? null);
+    }
+
+    public function testAMarkStaysInItsWord(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['सर्वर', 'बंद', 'करें'], $analyzer->tokens('सर्वर बंद करें'), 'Devanagari vowel signs and virama');
+        self::assertSame(['ยกเลิก'], $analyzer->tokens('ยกเลิก'), 'Thai vowels and tone marks');
+        self::assertSame(["re\u{301}sume\u{301}"], $analyzer->tokens("re\u{301}sume\u{301}"), 'decomposed accents');
+        self::assertSame(['सर्वर'], $analyzer->words('सर्वर'), 'one term, no fragment');
+    }
+
+    public function testAWordWithMarksFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('depot'));
+
+        // Both found the wrong tool first while each vowel cut a word in two.
+        self::assertSame('route_get', $search->search('जयपुर-अजमेर रूट के सारे स्टॉप बताओ')[0]->name ?? null);
+        self::assertSame('bus_retire', $search->search('15 साल पुरानी बस 042 को बेड़े से निकाल दो')[0]->name ?? null);
+    }
+
+    public function testASentenceWithoutSpacesFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('estate'));
+
+        self::assertSame('repair_rate', $search->search('我要评价刚才的维修')[0]->name ?? null);
+        self::assertSame('notice_publish', $search->search('明晚停电要告诉全楼')[0]->name ?? null);
+
+        $result = $search->find(SearchQuery::text('彩虹独角兽 hello'));
+        self::assertSame([], $result->tools);
+        self::assertSame(['彩虹独角兽', 'hello'], $result->unmatched, 'whole words, not the pairs cut out of them');
+
+        $vocabulary = $search->vocabulary(50);
+        self::assertContains('报修单列表', $vocabulary, 'a title the caller can write again');
+        self::assertNotContains('单列', $vocabulary);
+    }
+
+    public function testAHostSynonymMeetsAPairInsideASentence(): void
+    {
+        $tools = RecordingGate::server('estate');
+        $plain = self::names((new ToolSearch($tools))->search('派单给张师傅'));
+        $host = self::names((new ToolSearch($tools, new SearchOptions(synonyms: ['派单' => '派工'])))->search('派单给张师傅'));
+
+        self::assertNotSame($plain, $host, 'the synonym was added');
+        self::assertSame(['repair_assign'], $host);
+    }
+
     public function testTheFieldsOfAQueryFindTheRightTool(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());
@@ -214,6 +311,31 @@ final class ToolSearchTest extends TestCase
         }
     }
 
+    public function testTheClosestWordIsTheSameHoweverTheIndexWasMade(): void
+    {
+        $documents = [];
+        foreach (RecordingGate::fixtureTools() as $name => $tool) {
+            $documents[$name] = ['name' => $name, 'title' => $tool->title(), 'description' => $tool->description()];
+        }
+        $weights = ['name' => 1.0, 'title' => 2.0, 'description' => 1.0];
+        $plain = ToolIndex::build($documents, $weights);
+        $learning = ToolIndex::build($documents, $weights, nearby: true);
+        $restored = ToolIndex::fromArray($learning->toArray());
+
+        // Kept with the index only for a host that learns, so the cache of
+        // one that does not stays as small as it was.
+        self::assertNull($plain->toArray()['nearby']);
+        self::assertNotNull($learning->toArray()['nearby']);
+        self::assertNotNull($restored);
+        foreach (['tickets', 'statuss', 'deploying', 'rollbak', 'zzzz', '42x', 'ticket'] as $word) {
+            $nearest = $plain->nearest($word);
+            self::assertSame($nearest, $learning->nearest($word), $word);
+            self::assertSame($nearest, $restored->nearest($word), $word);
+        }
+        self::assertSame('rollback', $plain->nearest('rollbak'));
+        self::assertNull($plain->nearest('zzzz'));
+    }
+
     public function testLearningLiftsTheToolThatWorked(): void
     {
         $tools = RecordingGate::fixtureTools();
@@ -274,6 +396,25 @@ final class ToolSearchTest extends TestCase
         // assign one.
         self::assertSame(self::names((new ToolSearch($tools))->search($assign)), self::names((new ToolSearch($tools, learning: $store))->search($assign)));
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
+    }
+
+    public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'approve_estimate', 'title' => 'Approve an estimate', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'send_estimate', 'title' => 'Send an estimate', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(new SearchQuery('approving', 'estimate'))->searchId, 'approve_estimate');
+        }
+
+        // "approving" is no word of the tools, but it is close to "approve":
+        // learned as "estimate" alone, it would lift the approval for every
+        // request about an estimate, sending one too.
+        self::assertArrayHasKey('approve estimate', $store->load());
+        self::assertSame('send_estimate', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('sending', 'estimate')))[0]);
     }
 
     public function testTheFileStoreKeepsWhatWasLearned(): void

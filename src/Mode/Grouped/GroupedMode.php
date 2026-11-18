@@ -156,7 +156,7 @@ final class GroupedMode implements DiscoveryMode
 
     private function groupOf(Tool $tool): string
     {
-        return ($this->groupOf)($tool);
+        return ToolFinder::group(($this->groupOf)($tool), $tool);
     }
 
     /**

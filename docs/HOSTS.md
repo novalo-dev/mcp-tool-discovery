@@ -5,8 +5,8 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, and in one on the official PHP SDK.
-All five serve the same notes
+on ReactPHP, in a Symfony application, in a Laravel application, and in one
+on the official PHP SDK. All six serve the same notes
 tools, kept with their gate in [examples/notes.php](examples/notes.php): only
 the transport differs.
 
@@ -30,7 +30,7 @@ Its parts, in the order a host writes them:
 | Part | In the example | What it holds |
 |---|---|---|
 | Tool definitions | `definitions()`, in `notes.php` | the MCP Tool arrays the server already had; `ToolSet::of()` takes them unchanged |
-| The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it |
+| The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony and Laravel examples reuse behind their own gates |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 
@@ -62,7 +62,7 @@ What changes from stdio:
 
 | Part | Over HTTP | Why |
 |---|---|---|
-| The caller | the `Authorization` header of each request | the gate is built for the caller this request names, so a `Discovery` lives for one request |
+| The caller | the `Authorization` header of each request, read by `roleOf()` | the gate is built for the caller this request names, so a `Discovery` lives for one request |
 | The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version`. In the stateless revision each request names it in `_meta` instead | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
 | The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
 | The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
@@ -71,6 +71,12 @@ The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
 another origin, which the specification asks a server to refuse. The cache
 directory must be one only the server writes to: the index files are run.
+
+`answerHttp()` never reads the token itself: it asks the server for the
+`Discovery` of the caller, and answers 401 when there is none. Reading the
+token is the server's part, in `roleOf()`, so a framework that already knows
+who calls builds the gate from its own user instead, as the Symfony example
+below does.
 
 ---
 
@@ -108,15 +114,18 @@ A learning store, if the host gives one, is shared the same way: the
 ## A server in a Symfony application
 
 [examples/symfony](examples/symfony) is the same HTTP server as a Symfony 6.4
-application: the library's parts are services of the container, the transport
-is one controller, [McpController](examples/symfony/src/McpController.php), and
-the Discovery is built for each request. It answers from the same
+application with the security bundle: a firewall finds the caller, a voter
+decides which tools they see, the library's parts are services of the
+container, the transport is one controller,
+[McpController](examples/symfony/src/McpController.php), and the Discovery is
+built for each request. It answers from the same
 [examples/http.php](examples/http.php), and the tests ask it everything they
 ask the PHP-FPM server, plus one kernel serving callers in turn, as a worker
-does ([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
-The example pins `symfony/framework-bundle` in
+does, with a request that names no one between two that do
+([tests/Symfony/SymfonyServerTest.php](../tests/Symfony/SymfonyServerTest.php)).
+The example pins `symfony/framework-bundle` and `symfony/security-bundle` in
 [examples/symfony/composer.json](examples/symfony/composer.json), and a CI job
-installs it there and runs those tests.
+installs them there and runs those tests.
 
 ```
 cd docs/examples/symfony && composer install && cd -
@@ -124,18 +133,65 @@ php -S 127.0.0.1:8080 docs/examples/symfony/public/app.php
 ```
 
 The wiring is in [Kernel.php](examples/symfony/src/Kernel.php); a real
-application writes the same entries in `config/services.yaml`:
+application writes the same entries in `config/packages/security.yaml` and
+`config/services.yaml`:
 
-| Part | In the container | Why |
+| Part | In the application | Why |
 |---|---|---|
+| The caller | a stateless firewall on `/mcp` with `access_token`, whose [TokenHandler](examples/symfony/src/TokenHandler.php) names a user | the controller never reads the token; a request with no token reaches it with no user and is answered 401 |
+| Who sees a tool | [ToolVoter](examples/symfony/src/ToolVoter.php), asked through `isGranted()` by [SecurityGate](examples/symfony/src/SecurityGate.php)'s `visible()` | the permission lives where the application keeps every other one, and the role hierarchy applies to tools too |
+| What a call may carry and does | `NotesTools`, in `notes.php`, the same rules `NotesGate` uses | only the decision of who sees what is Symfony's; the tools keep their own checks |
 | `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
 | The notes | a shared service | they stand for the host's database, which the container already gives its services |
 | The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
 
-The caller here comes from the token, as in the other servers. In an
-application with the security bundle, the controller builds the gate from
-`Security::getUser()` instead: what the library needs is the same, a gate for
-this caller.
+A token the firewall does not know is answered 401 by Symfony itself, before
+the controller, so such a request gets 401 even where the other servers would
+first answer 403 for its `Origin` or 405 for its method. It learns nothing
+either way.
+
+---
+
+## A server in a Laravel application
+
+[examples/laravel](examples/laravel) is the same HTTP server as a Laravel 13
+application: a guard finds the caller, an ability of Laravel's gate decides
+which tools they see, the library's parts are singletons of the container,
+the transport is one controller,
+[McpController](examples/laravel/app/McpController.php), and the Discovery is
+built for each request. It answers from the same
+[examples/http.php](examples/http.php), and the tests ask it everything they
+ask the PHP-FPM server, plus one application serving callers in turn, as
+Octane does, with a request that names no one between two that do
+([tests/Laravel/LaravelServerTest.php](../tests/Laravel/LaravelServerTest.php)).
+The example pins `laravel/framework` in
+[examples/laravel/composer.json](examples/laravel/composer.json), and a CI job
+installs it there and runs those tests. Laravel 13 needs PHP 8.3; the library
+itself still runs on 8.1.
+
+```
+cd docs/examples/laravel && composer install && cd -
+php -S 127.0.0.1:8080 docs/examples/laravel/public/app.php
+```
+
+The wiring is in [McpServiceProvider](examples/laravel/app/McpServiceProvider.php)
+and [bootstrap/app.php](examples/laravel/bootstrap/app.php); a real
+application puts the guard in its own `config/auth.php`, as
+[the example's](examples/laravel/config/auth.php) does:
+
+| Part | In the application | Why |
+|---|---|---|
+| The caller | an `mcp` guard on the `mcp-token` driver, added with `Auth::viaRequest()`, which reads `bearerToken()` and names a user | the controller never reads the token; a request with no token or an unknown one has no user, and is answered 401 |
+| Who sees a tool | the ability `see-mcp-tool`, defined on Laravel's gate and asked through `allows()` by [AbilityGate](examples/laravel/app/AbilityGate.php)'s `visible()`, for `forUser()` of the caller | the permission lives where the application keeps every other one, and a `Gate::before()` of the application applies to tools too |
+| The route | `Route::any('/mcp')`, outside the `web` group | the session, the cookies and the CSRF check of that group are for a browser; the controller answers 405 for the methods the transport does not take |
+| What a call may carry and does | `NotesTools`, in `notes.php` | only the decision of who sees what is Laravel's; the tools keep their own checks |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, the cache in the directory of `config('mcp.data')` | the same for every caller: the cache is keyed by the tools a caller may see |
+| The gate and the `Discovery` | not bound in the container: the controller builds them in each request | a singleton would hand one caller's gate to the next request Octane serves, where the container outlives the request |
+
+A guard keeps the user it found. Octane forgets the guards after each
+request; a worker that keeps one application without Octane must call
+`forgetGuards()` on the auth manager after each request too, as the test
+does, or the next request that names no one is served as the last caller.
 
 ---
 

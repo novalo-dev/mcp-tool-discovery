@@ -38,6 +38,10 @@
         <testsuite name="symfony">
             <directory>tests/Symfony</directory>
         </testsuite>
+        <!-- Needs composer install in docs/examples/laravel; CI runs it in its own job. -->
+        <testsuite name="laravel">
+            <directory>tests/Laravel</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

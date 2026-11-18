@@ -46,8 +46,8 @@ through the interface.
 ```
 tools/call  ->  Discovery::callTool(name, arguments, tools, revision)
                   |
-                  | visible = tools filtered by ToolGate::visible(),
-                  |           minus host tools named like the mode's own
+                  | a host tool named like one of the mode's own -> InvalidTool
+                  | visible = tools filtered by ToolGate::visible()
                   v
            mode->owns(name) ?
              yes -> mode->call(name, arguments, ToolRunner(visible, gate))

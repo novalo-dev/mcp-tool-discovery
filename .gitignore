@@ -11,3 +11,6 @@
 /docs/examples/symfony/vendor/
 /docs/examples/symfony/composer.lock
 /docs/examples/symfony/var/
+/docs/examples/laravel/vendor/
+/docs/examples/laravel/composer.lock
+/docs/examples/laravel/storage/

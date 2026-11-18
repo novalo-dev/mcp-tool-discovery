@@ -1,0 +1,29 @@
+{
+    "name": "example/notes-laravel-server",
+    "description": "The notes server over HTTP in a Laravel application, with its tools shown through novalo/mcp-tool-discovery.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "laravel/framework": "13.43.0",
+        "novalo/mcp-tool-discovery": "*@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Example\\Notes\\Laravel\\": "app/"
+        },
+        "files": [
+            "../notes.php",
+            "../http.php"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../.."
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}

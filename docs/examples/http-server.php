@@ -48,7 +48,11 @@ $header = static function (string $name) use ($server): ?string {
 // Each request is a new process, so nothing in memory reaches the next one:
 // the notes are kept in a file, and the index cache saves building the search
 // index again each time a client searches.
-$discovery = static function (string $role): Discovery {
+$discovery = static function () use ($header): ?Discovery {
+    $role = roleOf($header);
+    if ($role === null) {
+        return null;
+    }
     $data = getenv('MCP_NOTES_DATA');
     // A directory only this server writes to: the index cache runs its files.
     $data = is_string($data) && $data !== '' ? $data : __DIR__ . '/var';

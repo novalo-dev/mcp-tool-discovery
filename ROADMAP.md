@@ -32,7 +32,14 @@ The benchmark says where the search still misses, in
   PascalCase), one with 176 tools (a cloud hosting panel), a Greek one
   (the service desk of a town hall, written in another script) and one
   written as many real servers are, with no titles and long descriptions (a
-  newsroom) are in.
+  newsroom), a Chinese one, written without spaces (the office of a
+  residential estate), a Hindi one, whose vowels are marks (a bus depot)
+  a Thai one, written without spaces and with marks (a sports centre) and
+  a Korean one, whose words carry their particles (a music school) and an
+  Arabic one, whose words carry the article (a car repair workshop) and a
+  Russian one, whose words change their endings (the front desk of a hotel)
+  are in. Lao, Khmer and Burmese, written the same way, are not measured
+  yet.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension
@@ -43,8 +50,8 @@ A change to the search comes with the benchmark before and after.
 ## Hosts
 
 - Examples on other hosts, beside the servers written by hand over stdio and
-  HTTP, the one kept up on ReactPHP, the Symfony application and the one on
-  the official PHP SDK in
+  HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications
+  and the one on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.

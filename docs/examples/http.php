@@ -42,11 +42,28 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 const TOKENS = ['reader-token' => 'reader', 'admin-token' => 'admin'];
 
 /**
+ * The role the request's bearer token names, null when it names none.
+ *
+ * Kept apart from answerHttp(), so a host whose framework already knows the
+ * caller (a Symfony firewall, a middleware) builds the Discovery from that
+ * caller and never reads the header twice.
+ *
+ * @param callable(string): ?string $header a header of the request by its name, null when it has none
+ */
+function roleOf(callable $header): ?string
+{
+    $token = preg_match('/^Bearer (\S+)$/', $header('Authorization') ?? '', $match) === 1 ? $match[1] : '';
+
+    return TOKENS[$token] ?? null;
+}
+
+/**
  * The answer to one HTTP request: its status, its JSON body if it has one,
  * and its headers.
  *
- * @param callable(string): ?string   $header    a header of the request by its name, null when it has none
- * @param \Closure(string): Discovery $discovery the Discovery for the role a token names, built for this request alone
+ * @param callable(string): ?string $header    a header of the request by its name, null when it has none
+ * @param \Closure(): ?Discovery     $discovery the Discovery of the caller this request names, built for this
+ *                                             request alone; null when it names none, which is answered 401
  *
  * @return array{int, array<string, mixed>|null, array<string, string>}
  */
@@ -63,9 +80,12 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
     if ($method !== 'POST') {
         return [405, null, ['Allow' => 'POST']];
     }
-    $token = preg_match('/^Bearer (\S+)$/', $header('Authorization') ?? '', $match) === 1 ? $match[1] : '';
-    $role = TOKENS[$token] ?? null;
-    if ($role === null) {
+    // One Discovery per request, with the gate of the caller this request
+    // names, whether the process ends with the request or serves the next.
+    // Asked for before the body is read, so a caller who names no one learns
+    // nothing about what the server would make of it.
+    $discovery = $discovery();
+    if ($discovery === null) {
         return [401, null, ['WWW-Authenticate' => 'Bearer']];
     }
 
@@ -130,9 +150,6 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
     }
 
     $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
-    // One Discovery per request, with the gate of the caller this request
-    // names, whether the process ends with the request or serves the next.
-    $discovery = $discovery($role);
 
     if ($method === 'tools/call') {
         $name = $params['name'] ?? null;

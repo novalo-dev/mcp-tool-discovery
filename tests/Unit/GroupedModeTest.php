@@ -60,6 +60,18 @@ final class GroupedModeTest extends TestCase
         return $result->structuredContent;
     }
 
+    public function testAGroupOfThatMissesAToolNamesIt(): void
+    {
+        // A host map read with no fallback: the same message as the modes
+        // that search give, not a TypeError on a private method.
+        $missed = RecordingGate::fixtureTools()->all()[1]->name;
+        $groupOf = static fn(Tool $tool): ?string => $tool->name === $missed ? null : Groups::of($tool);
+
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('returned null for "' . $missed . '"');
+        (new GroupedMode($groupOf, Groups::TITLES))->listTools(RecordingGate::fixtureTools());
+    }
+
     public function testEachGroupIsAReadToolAndAChangeToolAndTheRestIsListedAsItself(): void
     {
         $listed = self::listed();

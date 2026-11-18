@@ -1,0 +1,894 @@
+[
+ {
+  "name": "BOOKING_SEARCH",
+  "title": "Поиск бронирований",
+  "description": "Ищет бронирования по фамилии гостя, датам заезда или номеру комнаты.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest": {
+     "type": "string",
+     "description": "Фамилия гостя"
+    },
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    },
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BOOKING_GET",
+  "title": "Карточка бронирования",
+  "description": "Показывает бронирование: гость, даты, номер, тариф, предоплата и пожелания.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BOOKING_CREATE",
+  "title": "Новое бронирование",
+  "description": "Создаёт бронирование номера на указанные даты для гостя.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest_id": {
+     "type": "string",
+     "description": "Идентификатор гостя"
+    },
+    "room_type": {
+     "type": "string",
+     "description": "Категория номера"
+    },
+    "check_in": {
+     "type": "string",
+     "description": "Дата заезда"
+    },
+    "check_out": {
+     "type": "string",
+     "description": "Дата выезда"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BOOKING_CHANGE_DATES",
+  "title": "Изменить даты бронирования",
+  "description": "Переносит заезд или выезд существующего бронирования на другие даты.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    },
+    "check_in": {
+     "type": "string",
+     "description": "Новая дата заезда"
+    },
+    "check_out": {
+     "type": "string",
+     "description": "Новая дата выезда"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BOOKING_CANCEL",
+  "title": "Отменить бронирование",
+  "description": "Отменяет бронирование и при необходимости возвращает предоплату по правилам тарифа.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Причина отмены"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "BOOKING_NO_SHOW",
+  "title": "Отметить неявку",
+  "description": "Помечает бронирование как неявку, если гость не приехал в день заезда.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CHECK_IN",
+  "title": "Заселить гостя",
+  "description": "Оформляет заезд: выдаёт ключ-карту и переводит бронирование в статус «проживает».",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    },
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CHECK_OUT",
+  "title": "Выселить гостя",
+  "description": "Оформляет выезд гостя, закрывает счёт и освобождает номер.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "STAY_EXTEND",
+  "title": "Продлить проживание",
+  "description": "Продлевает проживание гостя, который уже живёт в отеле, на несколько ночей.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "nights": {
+     "type": "integer",
+     "description": "Сколько ночей добавить"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_MOVE",
+  "title": "Переселить в другой номер",
+  "description": "Переводит проживающего гостя в другой номер, например из-за поломки или по его просьбе.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "new_room": {
+     "type": "string",
+     "description": "Новый номер комнаты"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_AVAILABILITY",
+  "title": "Свободные номера",
+  "description": "Показывает, какие номера свободны на заданные даты, по категориям.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    },
+    "room_type": {
+     "type": "string",
+     "description": "Категория номера"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_LIST",
+  "title": "Номерной фонд",
+  "description": "Список всех номеров отеля с этажом, категорией, числом мест и видом из окна.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "floor": {
+     "type": "integer",
+     "description": "Этаж"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_STATUS_SET",
+  "title": "Статус уборки номера",
+  "description": "Отмечает номер как грязный, убранный или проверенный горничной.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "status": {
+     "type": "string",
+     "description": "грязный, убран или проверен"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_BLOCK",
+  "title": "Закрыть номер на ремонт",
+  "description": "Снимает номер с продажи на период ремонта или обслуживания.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ROOM_UNBLOCK",
+  "title": "Вернуть номер в продажу",
+  "description": "Снова открывает для бронирования номер, закрытый на ремонт.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RATE_LIST",
+  "title": "Тарифы",
+  "description": "Список тарифов: цены за ночь по категориям, питание, условия отмены.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RATE_UPDATE",
+  "title": "Изменить цену тарифа",
+  "description": "Меняет цену за ночь для категории номеров на выбранные даты.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rate": {
+     "type": "string",
+     "description": "Тариф"
+    },
+    "price": {
+     "type": "number",
+     "description": "Цена за ночь"
+    },
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GUEST_SEARCH",
+  "title": "Поиск гостей",
+  "description": "Ищет гостей по фамилии, телефону или электронной почте.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Фамилия, телефон или почта"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GUEST_PROFILE",
+  "title": "Профиль гостя",
+  "description": "Показывает данные гостя: контакты, история проживаний, предпочтения и заметки.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest_id": {
+     "type": "string",
+     "description": "Идентификатор гостя"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GUEST_UPDATE",
+  "title": "Изменить данные гостя",
+  "description": "Обновляет телефон, почту, предпочтения или заметки в профиле гостя.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest_id": {
+     "type": "string",
+     "description": "Идентификатор гостя"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Телефон"
+    },
+    "email": {
+     "type": "string",
+     "description": "Почта"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Заметки"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GUEST_MERGE",
+  "title": "Объединить карточки гостей",
+  "description": "Сливает две карточки одного и того же гостя в одну.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "keep": {
+     "type": "string",
+     "description": "Карточка, которая остаётся"
+    },
+    "remove": {
+     "type": "string",
+     "description": "Карточка, которая исчезает"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "GUEST_BLACKLIST",
+  "title": "Внести в чёрный список",
+  "description": "Запрещает новые бронирования гостю, нарушившему правила проживания.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest_id": {
+     "type": "string",
+     "description": "Идентификатор гостя"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Причина"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "FOLIO_GET",
+  "title": "Счёт гостя",
+  "description": "Показывает счёт проживающего гостя: проживание, мини-бар, ресторан, услуги и оплаты.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "FOLIO_CHARGE",
+  "title": "Добавить начисление",
+  "description": "Добавляет в счёт гостя услугу: мини-бар, ужин, прачечную, парковку.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "item": {
+     "type": "string",
+     "description": "Услуга"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Сумма"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "PAYMENT_TAKE",
+  "title": "Принять оплату",
+  "description": "Проводит оплату картой или наличными по счёту гостя или предоплату бронирования.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Сумма"
+    },
+    "method": {
+     "type": "string",
+     "description": "карта или наличные"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "PAYMENT_REFUND",
+  "title": "Вернуть деньги",
+  "description": "Возвращает гостю оплату или её часть на карту.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "payment_id": {
+     "type": "string",
+     "description": "Платёж"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Сумма возврата"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "INVOICE_ISSUE",
+  "title": "Счёт для организации",
+  "description": "Выставляет счёт компании, которая оплачивает проживание своего сотрудника, с закрывающими документами.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "company": {
+     "type": "string",
+     "description": "Организация"
+    },
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронирования"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "HOUSEKEEPING_PLAN",
+  "title": "План уборки",
+  "description": "Показывает на сегодня, какие номера нужно убрать и какой горничной они назначены.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "HOUSEKEEPING_ASSIGN",
+  "title": "Назначить горничную",
+  "description": "Распределяет номера для уборки между горничными смены.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "maid": {
+     "type": "string",
+     "description": "Горничная"
+    },
+    "rooms": {
+     "type": "string",
+     "description": "Номера через запятую"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MAINTENANCE_REQUEST",
+  "title": "Заявка на ремонт",
+  "description": "Создаёт заявку инженерной службе: протечка, сломанный кондиционер, перегоревшая лампа.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "problem": {
+     "type": "string",
+     "description": "Что сломалось"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MAINTENANCE_LIST",
+  "title": "Заявки инженерам",
+  "description": "Список открытых и выполненных заявок инженерной службы по номерам.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "открыта или выполнена"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MAINTENANCE_CLOSE",
+  "title": "Закрыть заявку на ремонт",
+  "description": "Отмечает заявку инженерной службы как выполненную.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Заявка"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "LOST_FOUND_ADD",
+  "title": "Записать забытую вещь",
+  "description": "Регистрирует вещь, которую гость оставил в номере или в холле.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    },
+    "item": {
+     "type": "string",
+     "description": "Описание вещи"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "LOST_FOUND_SEARCH",
+  "title": "Бюро находок",
+  "description": "Ищет среди найденных вещей по описанию, дате или номеру комнаты.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item": {
+     "type": "string",
+     "description": "Описание вещи"
+    },
+    "room": {
+     "type": "string",
+     "description": "Номер комнаты, например 214"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "TRANSFER_ORDER",
+  "title": "Заказать трансфер",
+  "description": "Заказывает машину для гостя из аэропорта или с вокзала либо обратно.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "guest_id": {
+     "type": "string",
+     "description": "Идентификатор гостя"
+    },
+    "pickup": {
+     "type": "string",
+     "description": "Откуда забрать"
+    },
+    "time": {
+     "type": "string",
+     "description": "Время"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "HALL_BOOK",
+  "title": "Забронировать конференц-зал",
+  "description": "Бронирует конференц-зал или переговорную на дату и время для мероприятия.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hall": {
+     "type": "string",
+     "description": "Зал"
+    },
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    },
+    "time": {
+     "type": "string",
+     "description": "Время"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BREAKFAST_COUNT",
+  "title": "Завтраки на утро",
+  "description": "Считает, сколько гостей придёт на завтрак, с учётом тарифов с питанием.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "OCCUPANCY_REPORT",
+  "title": "Загрузка отеля",
+  "description": "Отчёт о загрузке: процент занятых номеров, средняя цена и выручка за период.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "REVIEW_LIST",
+  "title": "Отзывы гостей",
+  "description": "Список отзывов гостей с оценкой и текстом за период.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Начало периода, ГГГГ-ММ-ДД"
+    },
+    "to": {
+     "type": "string",
+     "description": "Конец периода, ГГГГ-ММ-ДД"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "REVIEW_REPLY",
+  "title": "Ответить на отзыв",
+  "description": "Публикует ответ отеля на отзыв гостя.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "review_id": {
+     "type": "string",
+     "description": "Отзыв"
+    },
+    "text": {
+     "type": "string",
+     "description": "Текст ответа"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

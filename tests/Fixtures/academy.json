@@ -1,0 +1,850 @@
+[
+ {
+  "name": "students_list",
+  "title": "원생 목록",
+  "description": "학원에 등록된 모든 원생과 담당 강사, 수강 과목을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_get",
+  "title": "원생 정보",
+  "description": "원생 한 명의 연락처, 보호자, 수강 과목과 남은 수업 횟수를 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "students_search",
+  "title": "원생 검색",
+  "description": "이름이나 전화번호로 원생을 찾습니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_register",
+  "title": "원생 등록",
+  "description": "새 원생을 등록하고 수강 과목과 담당 강사를 정합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "subject": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_update",
+  "title": "원생 정보 수정",
+  "description": "원생의 연락처나 보호자 정보를 바꿉니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "guardian": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_withdraw",
+  "title": "원생 퇴원 처리",
+  "description": "학원을 그만두는 원생의 수강을 끝내고 기록을 보관합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lessons_list",
+  "title": "수업 일정",
+  "description": "날짜별 개인 레슨과 그룹 수업 일정을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "date"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_book",
+  "title": "수업 예약",
+  "description": "원생과 강사, 연습실을 정해 레슨 시간을 잡습니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "teacher_id": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_move",
+  "title": "수업 시간 변경",
+  "description": "예약된 레슨을 다른 날짜나 시간으로 옮깁니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson_id": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "lesson_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_cancel",
+  "title": "수업 취소",
+  "description": "예약된 레슨을 취소하고 원생에게 알립니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "lesson_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "makeup_lesson_book",
+  "title": "보강 수업 예약",
+  "description": "빠진 수업을 대신할 보강 레슨을 잡습니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "attendance_mark",
+  "title": "출석 체크",
+  "description": "수업에 온 원생의 출석이나 결석을 기록합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson_id": {
+     "type": "string"
+    },
+    "student_id": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "lesson_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "attendance_list",
+  "title": "출결 기록",
+  "description": "원생별 출석, 결석, 지각 기록을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teachers_list",
+  "title": "강사 목록",
+  "description": "모든 강사와 가르치는 악기, 근무 요일을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teacher_get",
+  "title": "강사 정보",
+  "description": "강사 한 명의 연락처, 담당 원생, 주간 시간표를 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "teacher_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "teacher_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teacher_assign",
+  "title": "담당 강사 지정",
+  "description": "원생에게 담당 강사를 정하거나 바꿉니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "teacher_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teacher_hours",
+  "title": "강사 근무 시간",
+  "description": "강사별 이번 달 수업 시간 합계를 계산합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "teacher_id": {
+     "type": "string"
+    },
+    "month": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "teacher_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rooms_list",
+  "title": "연습실 현황",
+  "description": "연습실과 피아노실이 지금 비어 있는지 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "room_book",
+  "title": "연습실 예약",
+  "description": "원생이 혼자 연습할 연습실을 시간 단위로 빌립니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room_id": {
+     "type": "string"
+    },
+    "student_id": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "room_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "room_booking_cancel",
+  "title": "연습실 예약 취소",
+  "description": "연습실 예약을 취소합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "booking_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "instruments_list",
+  "title": "악기 목록",
+  "description": "대여할 수 있는 악기와 남은 수량, 상태를 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instrument_lend",
+  "title": "악기 대여",
+  "description": "원생에게 바이올린이나 기타 같은 악기를 빌려줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "instrument_id": {
+     "type": "string"
+    },
+    "student_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "instrument_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instrument_return",
+  "title": "악기 반납",
+  "description": "빌려 간 악기를 돌려받고 상태를 확인합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "loan_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "loan_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instrument_repair",
+  "title": "악기 수리 접수",
+  "description": "고장 나거나 줄이 끊어진 악기를 수리에 맡깁니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "instrument_id": {
+     "type": "string"
+    },
+    "problem": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "instrument_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recitals_list",
+  "title": "발표회 목록",
+  "description": "예정된 발표회와 연주회 날짜, 장소를 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recital_create",
+  "title": "발표회 만들기",
+  "description": "새 발표회를 날짜와 장소를 정해 만듭니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string"
+    },
+    "date": {
+     "type": "string"
+    },
+    "place": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "title"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recital_enroll",
+  "title": "발표회 참가 신청",
+  "description": "원생을 발표회 연주자로 등록하고 연주할 곡을 적습니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "recital_id": {
+     "type": "string"
+    },
+    "student_id": {
+     "type": "string"
+    },
+    "piece": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "recital_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recital_cancel",
+  "title": "발표회 취소",
+  "description": "예정된 발표회를 취소하고 참가자에게 알립니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "recital_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "recital_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "payments_list",
+  "title": "수강료 납부 내역",
+  "description": "원생별 수강료 납부와 미납 내역을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "month": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payment_record",
+  "title": "수강료 납부 등록",
+  "description": "원생이 낸 수강료를 현금이나 카드로 기록합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "amount": {
+     "type": "string"
+    },
+    "method": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payment_refund",
+  "title": "수강료 환불",
+  "description": "이미 낸 수강료의 일부나 전부를 돌려줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "payment_id": {
+     "type": "string"
+    },
+    "amount": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "receipt_issue",
+  "title": "영수증 발급",
+  "description": "수강료 납부 영수증을 만들어 보냅니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "payment_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "payment_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpaid_list",
+  "title": "미납자 목록",
+  "description": "이번 달 수강료를 아직 내지 않은 원생을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "month"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notice_send",
+  "title": "공지 보내기",
+  "description": "원생과 보호자에게 문자나 앱 알림으로 공지를 보냅니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "message": {
+     "type": "string"
+    },
+    "audience": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "message"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notices_list",
+  "title": "공지 목록",
+  "description": "지금까지 보낸 공지와 받은 사람 수를 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "level_test_book",
+  "title": "레벨 테스트 예약",
+  "description": "새로 상담 온 학생의 실력 평가 시간을 잡습니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "phone": {
+     "type": "string"
+    },
+    "start": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "progress_note_add",
+  "title": "진도 기록",
+  "description": "레슨에서 배운 곡과 진도, 숙제를 적어 둡니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson_id": {
+     "type": "string"
+    },
+    "note": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "lesson_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "progress_notes_list",
+  "title": "진도 기록 보기",
+  "description": "원생의 지난 레슨 진도와 숙제 기록을 보여 줍니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sheet_music_share",
+  "title": "악보 공유",
+  "description": "원생에게 악보 파일을 보냅니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student_id": {
+     "type": "string"
+    },
+    "file": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "student_id"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "monthly_report",
+  "title": "월간 운영 보고서",
+  "description": "이번 달 원생 수, 수업 수, 매출을 요약합니다.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "month"
+   ]
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

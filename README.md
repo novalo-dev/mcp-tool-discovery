@@ -129,11 +129,12 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 ```
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
-envelope, the transport and the session. [docs/HOSTS.md](docs/HOSTS.md) shows
+envelope, the transport and the session. These blocks run in CI as they are
+written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [docs/HOSTS.md](docs/HOSTS.md) shows
 complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
-HTTP server kept up in one ReactPHP process, the same as a Symfony application,
-and one on the official PHP SDK.
+HTTP server kept up in one ReactPHP process, the same as a Symfony application
+and as a Laravel one, and one on the official PHP SDK.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:
@@ -200,11 +201,11 @@ tool, a read or a refused item never runs because it came in a list. The
 answer reports each item, and one failure never hides the others.
 
 ```php
-new CompactMode(
+$mode = new CompactMode(
     prefix: 'acme_',                 // acme_search_tools, acme_run_read_tool, ...
     pinned: ['acme_ping'],           // host tools listed as themselves
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
-    groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
+    groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? 'other', // groups the no-argument list; every tool needs one
     batchLimit: 50,                  // adds run_write_batch, up to 50 items a call; 0 (default) leaves it out
 );
 ```
@@ -222,7 +223,7 @@ actions, and `<group>_change`, destructive, for its changes.
 ```php
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 
-new GroupedMode(
+$mode = new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '', // '' lists the tool as itself
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title
     prefix: 'acme_',                 // acme_files, acme_files_change, ...
@@ -244,7 +245,7 @@ One tool, `use_tools`, for clients that accept very few: every call says its
 ```php
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 
-new GatewayMode(
+$mode = new GatewayMode(
     prefix: 'acme_',                 // acme_use_tools
     changesApart: true,              // changes listed as themselves; the gateway only reads
 );
@@ -256,8 +257,9 @@ new GatewayMode(
 ```
 
 The tool is marked destructive whenever a change can go through it, so the
-client asks first; with `changesApart` it only reads, and each change keeps
-its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
+client asks first, and each tool a search finds that changes something says
+`"changes": true`, so the model knows which calls to confirm; with
+`changesApart` it only reads, and each change keeps its own annotations. [docs/MODES.md](docs/MODES.md#gateway) explains the
 choice.
 
 ### Direct
@@ -289,7 +291,9 @@ client gives its request **in fields**, and each field is scored on its own:
   tool, each with its weight. A rare word counts more than a common one, so a
   prefix or a verb every tool shares weighs almost nothing.
 - **Whole words and trigrams**, so `statuses` meets `status` and `categories`
-  meets `category` without a stemmer.
+  meets `category` without a stemmer. Chinese, Japanese and Thai, written
+  without spaces, are cut into pairs of characters, with no dictionary, and
+  so is each Korean word, which carries its particles.
 - **No list, no convention.** No stop words, no table of verbs, no prefix
   rule, in any language: snake_case, camelCase and dotted names are all read
   the same way. Synonyms are the host's, when it has some.
@@ -300,23 +304,28 @@ client gives its request **in fields**, and each field is scored on its own:
   one per set of visible tools.
 - **Learning, opt in.** A search returns a `search_id`; a run that succeeds
   with it lifts that tool for those pairs of words, within a cap. Only words
-  the tools use are kept.
+  the tools use are kept: a word written another way is kept as the tool
+  word closest to it.
 
-897 requests over eight fictional servers, a workspace (snake_case), a
+1497 requests over fourteen fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
-service desk of a town hall written in Greek and a newsroom whose tools have
-no title and long descriptions, as many real servers write them.
+service desk of a town hall written in Greek, a newsroom whose tools have
+no title and long descriptions, as many real servers write them, the
+office of a residential estate written in Chinese, a bus depot written
+in Hindi, a sports centre written in Thai, a music school written in
+Korean, a car repair workshop written in Arabic and the front desk of a
+hotel written in Russian (SCREAMING_SNAKE_CASE).
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 449 requests | Right tool first | Right tool in the top 3 |
+| Test half, 749 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **362** | **414** |
-| The same request as one sentence | 204 | 284 |
-| In fields, after learning from the other half | 363 | 414 |
-| In fields, asked a second time | 388 | 424 |
+| The request in fields | **584** | **682** |
+| The same request as one sentence | 366 | 494 |
+| In fields, after learning from the other half | 586 | 683 |
+| In fields, asked a second time | 637 | 698 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
@@ -347,7 +356,7 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application and the official PHP SDK |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application, a Laravel application and the official PHP SDK |
 | [docs/MODES.md](docs/MODES.md) | choosing a mode, what each costs, how a mode works, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |

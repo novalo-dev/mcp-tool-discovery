@@ -43,7 +43,9 @@ final class SymfonyServerTest extends HttpServerTestCase
 
     // A worker (FrankenPHP, RoadRunner, Swoole) keeps one kernel and its
     // container for every request it serves. The services are shared, so
-    // what one caller may see must come from the request, never from them.
+    // what one caller may see must come from the request, never from them,
+    // and a request with no token must not find the last caller still
+    // signed in.
     public function testOneKernelServingCallersInTurnGivesEachTheirOwnTools(): void
     {
         $_SERVER['MCP_NOTES_DATA'] = self::$data;
@@ -51,14 +53,18 @@ final class SymfonyServerTest extends HttpServerTestCase
         $search = (string) json_encode(['jsonrpc' => '2.0', 'id' => 1, 'method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['action' => 'delete', 'object' => 'note']]]);
 
         try {
-            foreach (['admin-token', 'reader-token', 'admin-token', 'reader-token'] as $token) {
-                $request = Request::create('/mcp', 'POST', server: [
-                    'HTTP_AUTHORIZATION' => 'Bearer ' . $token,
+            foreach (['admin-token', 'reader-token', 'admin-token', null, 'reader-token'] as $token) {
+                $request = Request::create('/mcp', 'POST', server: ($token === null ? [] : ['HTTP_AUTHORIZATION' => 'Bearer ' . $token]) + [
                     'HTTP_MCP_PROTOCOL_VERSION' => '2025-11-25',
                     'CONTENT_TYPE' => 'application/json',
                 ], content: $search);
                 $response = $kernel->handle($request);
                 $kernel->terminate($request, $response);
+                if ($token === null) {
+                    self::assertSame(401, $response->getStatusCode());
+
+                    continue;
+                }
 
                 $answer = json_decode((string) $response->getContent(), true);
                 self::assertIsArray($answer);

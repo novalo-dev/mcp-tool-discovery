@@ -22,16 +22,24 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 897 requests over eight servers named in five styles,
- * one of them in French, one in German, one in Greek, one with 176 tools and
- * one whose tools have no title and long descriptions.
+ * The search benchmark: 1497 requests over fourteen servers named in six
+ * styles, one of them in French, one in German, one in Greek, one in Chinese,
+ * one in Hindi, one in Thai, one in Korean, one in Arabic, one in Russian, one
+ * with 176 tools
+ * and one whose tools have no title and long descriptions.
  *
  * Each request is written twice, as one sentence (query) and in fields
  * (action, object, description), with the tool a person would expect. Half
  * of them (train) were used to choose the settings; the other half (test)
- * was kept aside and is the score that counts. The library, school, hosting
- * and city servers came after the settings were chosen, so none of their
- * halves shaped them.
+ * was kept aside and is the score that counts. The library, school, hosting,
+ * city, newsroom, estate, depot, arena, academy, garage and hotel servers came
+ * after the settings were chosen, so none of their halves shaped them; the train half
+ * of estate only chose how a sentence without spaces is cut into terms, that
+ * of depot whether a mark is kept in its word or dropped, that of arena how
+ * Thai is cut into pairs, that of academy whether a Korean word keeps
+ * itself beside its pairs, and that of garage whether Arabic is cut into
+ * pairs (it is not). The train half of every server but hotel chose how close
+ * a word the tools do not use must be to one they do to be learned as it.
  *
  * Shared by the test that guards the floors and by bin/benchmark.php, which
  * prints the score and writes its badge, so both measure the same thing.
@@ -39,7 +47,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel'];
 
     /**
      * Four measures on the test half:

@@ -14,10 +14,12 @@ declare(strict_types=1);
 namespace Example\Notes\Symfony;
 
 use Example\Notes\Notes;
+use Example\Notes\NotesTools;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
+use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -25,9 +27,9 @@ use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
 /**
- * The whole application: one bundle, two services, one route. A real
- * application keeps the same three entries in config/services.yaml and
- * config/routes.yaml.
+ * The whole application: two bundles, a firewall, a few services and one
+ * route. A real application keeps the same entries in
+ * config/packages/security.yaml, config/services.yaml and config/routes.yaml.
  */
 final class Kernel extends BaseKernel
 {
@@ -36,6 +38,7 @@ final class Kernel extends BaseKernel
     public function registerBundles(): iterable
     {
         yield new FrameworkBundle();
+        yield new SecurityBundle();
     }
 
     /**
@@ -61,6 +64,25 @@ final class Kernel extends BaseKernel
             'router' => ['utf8' => true],
         ]);
 
+        // The firewall knows the caller before the controller runs: the
+        // bearer token names a user, and the user's roles are what the
+        // voters read. Stateless, so no session carries a caller from one
+        // request to the next. A request with no token reaches the
+        // controller with no user, and is answered 401 there.
+        $container->extension('security', [
+            'providers' => ['mcp_users' => ['memory' => ['users' => [
+                'reader' => ['roles' => ['ROLE_USER']],
+                'admin' => ['roles' => ['ROLE_ADMIN']],
+            ]]]],
+            'role_hierarchy' => ['ROLE_ADMIN' => ['ROLE_USER']],
+            'firewalls' => ['mcp' => [
+                'pattern' => '^/mcp',
+                'stateless' => true,
+                'provider' => 'mcp_users',
+                'access_token' => ['token_handler' => TokenHandler::class],
+            ]],
+        ]);
+
         // Read when a service is built, not when the container is compiled,
         // so the compiled container in var/cache serves any directory.
         $container->parameters()->set('env(MCP_NOTES_DATA)', '%kernel.project_dir%/var/data');
@@ -72,6 +94,12 @@ final class Kernel extends BaseKernel
         $services->set(Notes::class)
             ->factory([self::class, 'notes'])
             ->args(['%env(MCP_NOTES_DATA)%']);
+        $services->set(NotesTools::class)
+            ->args([service(Notes::class)]);
+        $services->set(TokenHandler::class);
+        $services->set(ToolVoter::class)
+            ->args([service('security.access.decision_manager')])
+            ->tag('security.voter');
         $services->set(SearchSetup::class)
             ->args(['$cache' => service('mcp.index_cache')]);
         $services->set('mcp.index_cache', FileIndexCache::class)
@@ -82,7 +110,7 @@ final class Kernel extends BaseKernel
         // serves (FrankenPHP, RoadRunner, Swoole). The controller builds it
         // for each request from the shared parts above.
         $services->set(McpController::class)
-            ->args([service(Notes::class), service(SearchSetup::class)])
+            ->args([service('security.helper'), service(NotesTools::class), service(SearchSetup::class)])
             ->tag('controller.service_arguments');
     }
 

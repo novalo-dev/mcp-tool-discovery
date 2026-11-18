@@ -12,9 +12,10 @@ parameters:
         - bin
         - docs/examples
     excludePaths:
-        # Read with the SDK, ReactPHP or Symfony installed, by their own jobs:
-        # without them, every class of mcp/sdk, react/http or Symfony is
-        # unknown here.
+        # Read with the SDK, ReactPHP, Symfony or Laravel installed, by their
+        # own jobs: without them, every class of mcp/sdk, react/http, Symfony
+        # or Laravel is unknown here.
         - docs/examples/sdk
         - docs/examples/react
         - docs/examples/symfony
+        - docs/examples/laravel

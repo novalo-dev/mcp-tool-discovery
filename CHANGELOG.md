@@ -8,6 +8,193 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.5.0 - 2026-11-18
+
+### Added
+
+- **A Russian hotel on the search benchmark.** The front desk of a hotel,
+  40 tools named in SCREAMING_SNAKE_CASE with titles and descriptions in
+  Russian, many of them neighbours (book, move, cancel a booking; close a
+  room for repairs and open it again), and 100 requests written before any
+  run. Nothing in the search was changed for it: 37 of its 50 test requests
+  find the right tool first in fields (47 in the top 3) and learning from its
+  other half loses none, which it did before a word written another way was
+  learned as the closest tool word. The benchmark now counts 1497 requests
+  over fourteen servers; the test half gives 584 first in fields and 682 in
+  the top 3, and the floors of the benchmark test are raised with it.
+
+- **The gateway marks each tool that changes something.** Through the
+  gateway alone, every tool a search, a description or the bare list gives
+  answers to the same `run_with`, `use_tools`, so nothing told the model
+  which calls change something, while the gateway's description asked it to
+  confirm those with the person. Each such tool now carries
+  `"changes": true`; reads carry nothing, so a server that only reads pays
+  nothing, and with `changesApart`, where `run_with` already names each
+  change, the mark is left out. The compact and grouped modes do not change:
+  their `run_with` already tells the two apart. The gateway's list is 6
+  bytes shorter. `ToolFinder` takes a last, optional `$markChanges`.
+
+- **Korean is searched by pairs of syllables.** Korean glues to each word
+  the particles that mark its role, so "레슨을" (the lesson, as object) never
+  met a tool that writes "레슨". Each Korean word is now cut into overlapping
+  pairs of syllables, as Lucene's CJK analyzer does; the caller is still
+  shown the words it wrote. On a new benchmark server written in Korean (40
+  tools, 100 requests written before any run), the test half goes from 36
+  to 37 first in fields (40 to 44 in the top 3) and from 34 to 36 as one
+  sentence, with fewer tools returned; the eleven other servers do not move.
+  The saved index format changes, so an index in `FileIndexCache` is rebuilt
+  once.
+
+- **A Laravel application among the host examples.** docs/examples/laravel
+  serves the notes server over HTTP in Laravel 13: an `mcp` guard added with
+  `Auth::viaRequest()` finds the caller from the bearer token, an ability of
+  Laravel's gate decides which tools they see (`AbilityGate::visible()` asks
+  `allows()` for the caller), the route sits outside the `web` group, and the
+  controller builds the gate and the `Discovery` for each request from the
+  shared singletons. It answers from the same docs/examples/http.php, and its
+  test asks it all the other HTTP servers are asked, plus one application
+  serving callers in turn, as Octane does. docs/HOSTS.md says why a worker
+  must forget the guards between two requests: a guard keeps the user it
+  found, and without that a request with no token was served as the last
+  caller. A CI job, part of **CI passed**, installs the pinned
+  `laravel/framework` 13.43.0 on PHP 8.3 and runs PHPStan and the tests.
+
+- **Thai is searched by pairs of what is seen.** It is written without
+  spaces, so a sentence was one word that met tools only by its trigrams. A
+  run of Thai is now cut into overlapping pairs of grapheme clusters (a
+  consonant with its vowel and tone marks), and the run is kept beside them;
+  a run of Thai is also a token apart from the digits around it. On a new
+  benchmark server written in Thai (40 tools, 100 requests written before
+  any run), the test half goes from 34 to 37 first in fields (47 to 48 in
+  the top 3) and from 30 to 31 as one sentence; asked a second time, the
+  whole test half gains 10 first. The ten other servers do not move. The
+  saved index format changes, so an index in `FileIndexCache` is rebuilt
+  once.
+
+- **Chinese and Japanese are searched by pairs of characters.** They are
+  written without spaces, so a sentence was one word that met tools only by
+  its trigrams, and a two-character word ("报修") never met them at all. A
+  run of Han or kana is now cut into overlapping pairs, with no dictionary
+  and no list; other scripts are cut as before. On a new benchmark server
+  written in Chinese (40 tools, 100 requests written before any run), the
+  test half goes from 30 to 40 first in fields and from 17 to 26 as one
+  sentence (21 to 34 in the top 3); the eight other servers do not move.
+  `unmatched` and `vocabulary()` still give whole words, never the pairs, and
+  a host synonym can name a pair. `Analyzer::tokens()` gives the words as
+  written and `Analyzer::terms()` the terms of one of them. The saved index
+  format changes, so an index in `FileIndexCache` is rebuilt once; what a
+  learning store holds for Chinese or Japanese searches was kept by whole
+  sentence and no longer lifts anything.
+
+- **The scores the docs give are the ones the benchmark measures.**
+  `tests/Search/BenchmarkTest.php` now reads the test-half table of the
+  README and of docs/SEARCH.md, and the sentence that sums the fields up,
+  and fails when one of them differs from what the benchmark measures. A
+  change to the search can no longer leave a page behind.
+
+- **Every snippet that builds a mode is run in CI.**
+  `tests/Docs/ModeSnippetsTest.php` runs the mode snippets of the README and
+  of docs/MODES.md as a reader copies each page, then lists each mode's tools
+  on every revision and calls them with the arguments the modes take and the
+  JSON examples the docs show. It fails on a warning, on a hidden tool listed
+  or run, and on a mode that never reaches a tool.
+
+- **The README's quick start is run in CI.** `tests/Docs/QuickStartTest.php`
+  runs its blocks as one script, with only the host code they name around
+  them, and checks what they answer: the compact list, a visible tool run by
+  its name, a hidden one refused. Until now the snippets were only read, so a
+  gate that no longer fit `ToolGate`, or blocks that worked only one by one,
+  passed the docs tests and failed in the first project that copied them.
+
+### Changed
+
+- **A host tool named like one of the mode's tools now stops the host.**
+  `Discovery` used to leave such a tool out of every list and every call
+  without a word: a host tool `files` next to a grouped group `files`, or a
+  tool `search_tools` under the compact mode, simply vanished, for every
+  caller. `listTools()`, `callTool()` and `call()` now throw `InvalidTool`,
+  naming the tool and the mode, on the first request that meets it. The check
+  runs before the gate, so it reads the same for every caller and says
+  nothing about what one may see. A server with such a clash fails where it
+  silently lost a tool before: give the mode a `prefix` or rename the tool.
+
+- **The Symfony example uses the security bundle.** A stateless firewall
+  with `access_token` finds the caller, and a voter decides which tools they
+  see: `SecurityGate::visible()` asks `isGranted()`, so the role hierarchy
+  and the application's other voters apply to tools as to anything else. The
+  controller no longer reads the token, and a request with no token reaches
+  it with no user and is answered 401. What each tool checks in its
+  arguments and does moved from `NotesGate` to `NotesTools` in
+  docs/examples/notes.php, so a gate of the host's framework reuses it;
+  `NotesGate` keeps its constructor. The example pins
+  `symfony/security-bundle` 6.4.49, and its test now serves a request with no
+  token between two callers on one kernel, as a worker does.
+
+- **The HTTP examples leave the caller to the server.** `answerHttp()` in
+  docs/examples/http.php no longer reads the bearer token: it takes a
+  closure that gives the `Discovery` of the caller, or null for a request
+  that names no one (still answered 401, before the body is read). The token
+  is read by `roleOf()`, which the PHP-FPM and ReactPHP servers call. A
+  host that copied `answerHttp()` and authenticates in its framework (a
+  firewall, a middleware) no longer has the token checked a second time
+  against the example's list.
+
+### Fixed
+
+- **Learning pairs a verb written another way with its object again.**
+  Learning kept only the words of a request that the tools use, and the one
+  that tells two neighbours apart is often the verb, which a request rarely
+  writes as the tool does ("approving" for "approve", "أرسل" for "يرسل"). It
+  found the tool by its trigrams but was left out of what was learned, so a
+  search taught only its object, and lifted the wrong neighbour for the next
+  request about that object. Such a word is now kept as the tool word closest
+  to it by trigrams (a Dice coefficient of 0.3 at least), so a store still
+  holds nothing but the tools' words. On the benchmark, learning from the
+  other half gains 3 test requests and loses none; a new server written in
+  Arabic (a car repair workshop, 40 tools, 100 requests written before any
+  run) lost 2 to learning before and now loses none. The closest word is only
+  looked for when the host learns, and only for words the tools do not use.
+  With an `IndexCache`, the trigrams of the tool words it compares are kept
+  with the index of a host that learns, inverted, so only the words sharing
+  a trigram are visited: a search that learns over 176 tools takes about
+  0.6 ms instead of 0.4 ms, where cutting every tool word again at each
+  request took more than 6 ms. The cache of such a host is about a quarter
+  larger; that of a host that does not learn is unchanged. Nothing changes
+  without a `LearningStore`, and a store filled before keeps working.
+
+- **Hindi, Thai, Arabic and every script that writes vowels as marks are
+  searched by whole words.** The Analyzer split words on any character that
+  was not a letter or a digit, and a mark (a Devanagari vowel sign, a Thai
+  tone mark, an Arabic vowel point, an accent in decomposed text) is
+  neither, so "सर्वर" became "सर" and "वर", fragments that met unrelated
+  tools. Marks now stay in their word. On a new benchmark server written in
+  Hindi (40 tools, 100 requests written before any run), the test half goes
+  from 36 to 39 first in fields and from 15 to 23 as one sentence, and a
+  search returns about half as many tools; the nine other servers do not
+  move. The saved index format changes, so an index in `FileIndexCache` is
+  rebuilt once; what a learning store holds for these scripts was kept as
+  fragments and no longer lifts anything.
+
+- **docs/SEARCH.md gives the current scores at the top of the page.** It
+  still said 202 of 250 requests found first in fields and 94 as one
+  sentence, from a benchmark of fewer servers; it now gives the scores the
+  benchmark measures.
+
+- **The `groupOf` snippet of the compact and gateway modes no longer breaks
+  the search.** The README and docs/MODES.md showed
+  `fn (Tool $t) => $myGroups[$t->name]`: on a server with one tool outside
+  the map, a search with no argument raised a warning, then a `TypeError`
+  from inside the library. The snippets now fall back to a group of their
+  own (`?? 'other'`), and a `groupOf` that returns anything but a string now
+  throws an `UnexpectedValueException` that names the tool it missed.
+
+- **The grouped mode names the tool its `groupOf` missed, as the other modes
+  do.** A `groupOf` that returned null or anything but a string for one tool
+  stopped the list with a `TypeError` on a private method of `GroupedMode`,
+  which named neither the tool nor the callable. It now throws the same
+  `UnexpectedValueException` as the compact and gateway modes, with the name
+  of the tool.
+
 ## 0.4.0 - 2026-11-17
 
 ### Added

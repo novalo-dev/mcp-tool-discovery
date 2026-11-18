@@ -41,6 +41,7 @@ use React\Socket\SocketServer;
 
 use function Example\Notes\answerHttp;
 use function Example\Notes\encode;
+use function Example\Notes\roleOf;
 
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
@@ -54,13 +55,14 @@ $notes = new Notes();
 $search = new SearchSetup(cache: new MemoryIndexCache());
 
 $server = new HttpServer(static function (ServerRequestInterface $request) use ($notes, $search): Response {
+    $header = static fn(string $name): ?string => $request->hasHeader($name) ? $request->getHeaderLine($name) : null;
     [$status, $body, $headers] = answerHttp(
         $request->getMethod(),
-        static fn(string $name): ?string => $request->hasHeader($name) ? $request->getHeaderLine($name) : null,
+        $header,
         (string) $request->getBody(),
         // Built inside the request, never above it: a Discovery holds the
         // gate of one caller, and a process that stays up serves them all.
-        static fn(string $role): Discovery => new Discovery(
+        static fn(): ?Discovery => ($role = roleOf($header)) === null ? null : new Discovery(
             new CompactMode(prefix: 'notes_', batchLimit: 20),
             new NotesGate($role, $notes),
             $search,
