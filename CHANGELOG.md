@@ -10,6 +10,12 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The scores the docs give are the ones the benchmark measures.**
+  `tests/Search/BenchmarkTest.php` now reads the test-half table of the
+  README and of docs/SEARCH.md, and the sentence that sums the fields up,
+  and fails when one of them differs from what the benchmark measures. A
+  change to the search can no longer leave a page behind.
+
 - **Every snippet that builds a mode is run in CI.**
   `tests/Docs/ModeSnippetsTest.php` runs the mode snippets of the README and
   of docs/MODES.md as a reader copies each page, then lists each mode's tools
@@ -25,6 +31,10 @@ becomes the next version's section when it is published.
   passed the docs tests and failed in the first project that copied them.
 
 ### Fixed
+
+- **docs/SEARCH.md gives the current scores at the top of the page.** It
+  still said 202 of 250 requests found first in fields and 94 as one
+  sentence, from a benchmark of fewer servers; it is 362 of 449, and 204.
 
 - **The `groupOf` snippet of the compact and gateway modes no longer breaks
   the search.** The README and docs/MODES.md showed

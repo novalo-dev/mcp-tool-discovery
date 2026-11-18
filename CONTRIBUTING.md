@@ -147,6 +147,10 @@ modes take and the JSON examples of the section, on a server where two tools
 fall outside the host's groups and one is hidden. Nothing may reach stderr,
 the hidden tool must never be listed or run, and a visible one must run.
 
+The scores are held as well: `tests/Search/BenchmarkTest.php` fails when the
+test-half table of the README or of docs/SEARCH.md, or the sentence at the
+top of docs/SEARCH.md, differs from what the benchmark measures.
+
 ## Protocol revisions
 
 - The conformance suite reads the official schemas from the commit in

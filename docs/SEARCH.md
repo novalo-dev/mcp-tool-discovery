@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 202 times
-out of 250 in fields, and 94 times as one sentence.
+On the benchmark below, the same requests find the right tool first 362 times
+out of 449 in fields, and 204 times as one sentence.
 
 ## How a tool is scored
 
@@ -279,4 +279,5 @@ kind is what `vocabulary` and the host's synonyms are for.
   change, or the benchmark only measures what you tuned. Choose on `train`,
   judge on `test`.
 - Give the numbers before and after in the pull request, and update this page
-  and the README.
+  and the README: `BenchmarkTest` fails until their tables, and the sentence
+  that sums the fields up, give the scores the benchmark measures.
