@@ -56,8 +56,9 @@ final class ToolIndex
     /**
      * The trigrams of each indexed word, built the first time nearest() needs
      * them: only a search that learns does, so the cache never holds them.
+     * Keyed like $words: PHP turns a word made only of digits into an int key.
      *
-     * @var array<string, array<string, true>>|null
+     * @var array<array-key, array<string, true>>|null
      */
     private ?array $wordGrams = null;
 
@@ -227,7 +228,7 @@ final class ToolIndex
         if ($this->wordGrams === null) {
             $this->wordGrams = [];
             foreach (array_keys($this->words) as $indexed) {
-                $this->wordGrams[(string) $indexed] = array_fill_keys(Analyzer::trigrams((string) $indexed), true);
+                $this->wordGrams[$indexed] = array_fill_keys(Analyzer::trigrams((string) $indexed), true);
             }
         }
         $nearest = null;
