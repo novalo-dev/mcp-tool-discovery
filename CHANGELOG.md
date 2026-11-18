@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.5.0 - 2026-11-18
+
 ### Added
 
 - **A Russian hotel on the search benchmark.** The front desk of a hotel,
@@ -132,8 +134,9 @@ becomes the next version's section when it is published.
   docs/examples/http.php no longer reads the bearer token: it takes a
   closure that gives the `Discovery` of the caller, or null for a request
   that names no one (still answered 401, before the body is read). The token
-  is read by `roleOf()`, which the PHP-FPM and ReactPHP servers call. A host that copied `answerHttp()` and authenticates in its framework
-  (a firewall, a middleware) no longer has the token checked a second time
+  is read by `roleOf()`, which the PHP-FPM and ReactPHP servers call. A
+  host that copied `answerHttp()` and authenticates in its framework (a
+  firewall, a middleware) no longer has the token checked a second time
   against the example's list.
 
 ### Fixed
