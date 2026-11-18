@@ -172,7 +172,9 @@ final class GroupedMode implements DiscoveryMode
         // once in the enum of the tool that runs it, so a client can check the
         // call. The changes are not repeated here and describe has no enum of
         // its own: both would only copy names the list already shows, and
-        // describe answers an unknown name in its own list anyway.
+        // describe answers an unknown name in its own list anyway. How to
+        // describe an action is said once, by the describe property, rather
+        // than again in this description: a client sends both to the model.
         $lines = [];
         if ($reads !== []) {
             $lines[] = sprintf('%s. Runs one action of this group that only reads: give action and its arguments.', $title);
@@ -183,7 +185,6 @@ final class GroupedMode implements DiscoveryMode
         if ($changes !== []) {
             $lines[] = sprintf('The changes of this group run with %s, which lists them.', $change);
         }
-        $lines[] = 'To read the parameters of any action of the group first, read or change, give describe with its name.';
         $properties = [];
         if ($reads !== []) {
             $properties['action'] = ['type' => 'string', 'enum' => self::names($reads), 'description' => 'The read to run.'];
@@ -192,7 +193,7 @@ final class GroupedMode implements DiscoveryMode
         $properties['describe'] = [
             'type' => 'array',
             'items' => ['type' => 'string'],
-            'description' => sprintf('Names of actions of this group, reads or changes, to describe in full with their inputSchema; nothing runs. Up to %d.', $this->maxDescribed),
+            'description' => sprintf('Names of actions of this group, reads or changes, to describe in full with their inputSchema before running them; nothing runs. Up to %d.', $this->maxDescribed),
         ];
 
         return Tool::fromArray([

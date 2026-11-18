@@ -22,7 +22,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 
 | Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
 |---|---|---|---|---|---|---|
-| workspace | 50 | 16,147 | 2,871 | 1,839 | 14,314 | 1,125 |
+| workspace | 50 | 16,147 | 2,871 | 1,839 | 13,982 | 1,125 |
 | platform | 40 | 12,829 | 2,871 | 1,839 | - | 862 |
 | people | 40 | 12,814 | 2,871 | 1,839 | - | 874 |
 | library | 40 | 14,550 | 2,871 | 1,839 | - | 1,069 |
@@ -58,9 +58,9 @@ tools stay outside them, listed as themselves.
 - **Grouped** shows the map of the server without a search, for a client that
   searches badly and a server whose tools fall into a few clear groups. It
   leaves the schemas out but names every action, so its list grows with the
-  server. On the workspace its eight tools take 7,486 bytes where the 28
-  actions they stand for would take 9,299: on short tools it saves about a
-  fifth, more as the schemas grow.
+  server. On the workspace its eight tools take 7,154 bytes where the 28
+  actions they stand for would take 9,299: on short tools it saves almost a
+  quarter, more as the schemas grow.
 - **Direct** lists every tool as itself, the first column. It suits a server
   with a few tools, where a search would cost more than it saves, and the
   host that lets its users turn the other modes off.

@@ -8,6 +8,18 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Changed
+
+- **The grouped list says how to describe an action once, not twice.** Each
+  group's read tool told the model how to read an action's parameters in
+  its description, then again in the description of its `describe`
+  property, and a client sends both. The sentence in the description is
+  gone; the property says it, now with "before running them". Nothing else
+  changes: the same tools, the same schemas, the same answers. On the
+  workspace benchmark server the grouped list goes from 14,314 to 13,982
+  bytes, and its eight group tools from 7,486 to 7,154, almost a quarter
+  under the 9,299 of the actions they stand for.
+
 ## 0.5.0 - 2026-11-18
 
 ### Added
