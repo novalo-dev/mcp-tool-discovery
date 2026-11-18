@@ -139,6 +139,14 @@ shows must still fit `ToolGate`, and the blocks must answer `tools/list` and
 `tools/call` in order. A step added to the quick start runs with the others;
 one that needs more host code adds it to the test.
 
+So is every snippet that builds a mode, in the README's Modes section and in
+docs/MODES.md: `tests/Docs/ModeSnippetsTest.php` runs each page as one
+script, and each snippet must leave its mode in `$mode`. The test lists the
+mode's tools on every revision and calls each one with the arguments the
+modes take and the JSON examples of the section, on a server where two tools
+fall outside the host's groups and one is hidden. Nothing may reach stderr,
+the hidden tool must never be listed or run, and a visible one must run.
+
 ## Protocol revisions
 
 - The conformance suite reads the official schemas from the commit in

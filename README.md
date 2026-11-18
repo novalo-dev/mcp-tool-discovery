@@ -201,11 +201,11 @@ tool, a read or a refused item never runs because it came in a list. The
 answer reports each item, and one failure never hides the others.
 
 ```php
-new CompactMode(
+$mode = new CompactMode(
     prefix: 'acme_',                 // acme_search_tools, acme_run_read_tool, ...
     pinned: ['acme_ping'],           // host tools listed as themselves
     titles: ['search' => 'Rechercher les outils'], // titles, translated by you
-    groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the no-argument list
+    groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? 'other', // groups the no-argument list; every tool needs one
     batchLimit: 50,                  // adds run_write_batch, up to 50 items a call; 0 (default) leaves it out
 );
 ```
@@ -223,7 +223,7 @@ actions, and `<group>_change`, destructive, for its changes.
 ```php
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 
-new GroupedMode(
+$mode = new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '', // '' lists the tool as itself
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title
     prefix: 'acme_',                 // acme_files, acme_files_change, ...
@@ -245,7 +245,7 @@ One tool, `use_tools`, for clients that accept very few: every call says its
 ```php
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 
-new GatewayMode(
+$mode = new GatewayMode(
     prefix: 'acme_',                 // acme_use_tools
     changesApart: true,              // changes listed as themselves; the gateway only reads
 );

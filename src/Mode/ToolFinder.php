@@ -161,7 +161,7 @@ final class ToolFinder
         $order = [];
         $members = [];
         foreach ($visible as $tool) {
-            $group = ($this->groupOf)($tool);
+            $group = self::group(($this->groupOf)($tool), $tool);
             if (!isset($members[$group])) {
                 $order[] = $group;
             }
@@ -169,5 +169,20 @@ final class ToolFinder
         }
 
         return array_map(static fn(string $group): array => ['group' => $group, 'tools' => $members[$group]], $order);
+    }
+
+    /**
+     * The group the host gave, checked: its callable is typed in a docblock
+     * only, and a map read with no fallback returns null for the first tool
+     * it misses. That tool is named here, not in a TypeError deep in
+     * array_map().
+     */
+    private static function group(mixed $group, Tool $tool): string
+    {
+        if (!\is_string($group)) {
+            throw new \UnexpectedValueException(sprintf('groupOf must return a string for every tool; it returned %s for "%s".', get_debug_type($group), $tool->name));
+        }
+
+        return $group;
     }
 }

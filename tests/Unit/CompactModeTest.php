@@ -128,6 +128,17 @@ final class CompactModeTest extends TestCase
         self::assertArrayHasKey('group', $grouped['tools'][0]);
     }
 
+    public function testAGroupOfThatMissesAToolNamesIt(): void
+    {
+        // A host map read with no fallback, as the docs once showed it.
+        $missed = RecordingGate::fixtureTools()->all()[1]->name;
+        $groupOf = static fn(Tool $tool): ?string => $tool->name === $missed ? null : 'files';
+
+        $this->expectException(\UnexpectedValueException::class);
+        $this->expectExceptionMessage('returned null for "' . $missed . '"');
+        self::search([], new CompactMode(groupOf: $groupOf));
+    }
+
     public function testFreeKeywordsStillWork(): void
     {
         $answer = self::search(['query' => 'list backups']);

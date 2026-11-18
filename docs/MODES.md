@@ -146,7 +146,7 @@ than hundreds.
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Tool\Tool;
 
-new GroupedMode(
+$mode = new GroupedMode(
     groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? '',
     groups: ['files' => 'Files and folders', 'calendar' => 'Calendar'], // name => title, in list order
     prefix: 'acme_',                     // acme_files, acme_files_change, ...
@@ -202,11 +202,11 @@ and for small models. Every call names an `operation`:
 ```php
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 
-new GatewayMode(
+$mode = new GatewayMode(
     prefix: 'acme_',             // acme_use_tools
     title: 'Outils',             // translated by you
     changesApart: false,         // true: changes listed as themselves, the gateway only reads
-    groupOf: fn (Tool $t) => $myGroups[$t->name], // groups the list a bare search gives
+    groupOf: fn (Tool $t): string => $myGroups[$t->name] ?? 'other', // groups the list a bare search gives; every tool needs one
 );
 ```
 

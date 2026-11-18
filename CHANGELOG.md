@@ -10,12 +10,29 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Every snippet that builds a mode is run in CI.**
+  `tests/Docs/ModeSnippetsTest.php` runs the mode snippets of the README and
+  of docs/MODES.md as a reader copies each page, then lists each mode's tools
+  on every revision and calls them with the arguments the modes take and the
+  JSON examples the docs show. It fails on a warning, on a hidden tool listed
+  or run, and on a mode that never reaches a tool.
+
 - **The README's quick start is run in CI.** `tests/Docs/QuickStartTest.php`
   runs its blocks as one script, with only the host code they name around
   them, and checks what they answer: the compact list, a visible tool run by
   its name, a hidden one refused. Until now the snippets were only read, so a
   gate that no longer fit `ToolGate`, or blocks that worked only one by one,
   passed the docs tests and failed in the first project that copied them.
+
+### Fixed
+
+- **The `groupOf` snippet of the compact and gateway modes no longer breaks
+  the search.** The README and docs/MODES.md showed
+  `fn (Tool $t) => $myGroups[$t->name]`: on a server with one tool outside
+  the map, a search with no argument raised a warning, then a `TypeError`
+  from inside the library. The snippets now fall back to a group of their
+  own (`?? 'other'`), and a `groupOf` that returns anything but a string now
+  throws an `UnexpectedValueException` that names the tool it missed.
 
 ## 0.4.0 - 2026-11-17
 

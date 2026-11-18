@@ -21,7 +21,8 @@ use PHPUnit\Framework\TestCase;
  * that the docs still show fails in their project, not in ours. The snippets
  * are read, not run, since they call host code (a user, a tool registry)
  * that does not exist here; QuickStartTest runs the one page a host copies
- * first, with that host code given.
+ * first, with that host code given, and ModeSnippetsTest runs every snippet
+ * that builds a mode.
  */
 final class DocsTest extends TestCase
 {
