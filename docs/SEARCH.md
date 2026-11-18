@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 547 times
-out of 699 in fields, and 343 times as one sentence.
+On the benchmark below, the same requests find the right tool first 584 times
+out of 749 in fields, and 366 times as one sentence.
 
 ## How a tool is scored
 
@@ -246,7 +246,7 @@ locked while it is written.
 
 ## The measures
 
-Thirteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Fourteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -257,18 +257,19 @@ descriptions (40 tools, `schedule_article`), the office of a residential
 estate written in Chinese (40 tools, `repair_assign`), a bus depot
 written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 (40 tools, `court_book`), a music school written in Korean (40 tools,
-`lesson_move`) and a car repair workshop written in Arabic (40 tools,
-`estimate_send`). 1397 requests, each written as one
+`lesson_move`), a car repair workshop written in Arabic (40 tools,
+`estimate_send`) and the front desk of a hotel written in Russian (40 tools,
+`BOOKING_CHANGE_DATES`). 1497 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 699 requests | Right tool first | Top 3 |
+| Test half, 749 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 547 | 635 |
-| The same request as one sentence | 343 | 465 |
-| In fields, after every train request was run once | 549 | 636 |
-| In fields, after the test requests were run once, then asked again | 594 | 649 |
+| The request in fields | 584 | 682 |
+| The same request as one sentence | 366 | 494 |
+| In fields, after every train request was run once | 586 | 683 |
+| In fields, after the test requests were run once, then asked again | 637 | 698 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -401,6 +402,22 @@ the test half did not confirm; trigrams stay. What it misses is mostly words
 the tools do not use ("زبون" for a customer, where the tools say "عميل";
 "التسعيرة" for an estimate) and neighbours of one object (cancelling a
 booking finds the tool that books one).
+
+The hotel is written in Russian, with SCREAMING_SNAKE_CASE names: a
+script of its own whose words change their endings with their role
+("бронь", "брони", "бронью" for a booking) and whose verbs change shape
+("закрой", close!, against "Закрыть"). Its 100 requests were written before
+any of them was run, as staff at the desk talk, and nothing in the search was
+changed for it: 37 of its 50 test requests find the right tool first in fields
+(47 in the top 3) and 23 as one sentence (29), the trigrams catching the
+endings. It was written before the closest tool word was learned, and could
+not join until then: learning from its train half cost one test request its
+place in the top 3, a request whose only word the tools use was a
+preposition ("на"), learned elsewhere. With the closest word learned, its
+other words pair again, and learning loses nothing (37 and 47 both ways).
+What it misses is mostly neighbours of one object (opening a room again after
+repairs finds the tool that closes it) and words the tools do not use
+("такси" for the transfer).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

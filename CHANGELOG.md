@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Russian hotel on the search benchmark.** The front desk of a hotel,
+  40 tools named in SCREAMING_SNAKE_CASE with titles and descriptions in
+  Russian, many of them neighbours (book, move, cancel a booking; close a
+  room for repairs and open it again), and 100 requests written before any
+  run. Nothing in the search was changed for it: 37 of its 50 test requests
+  find the right tool first in fields (47 in the top 3) and learning from its
+  other half loses none, which it did before a word written another way was
+  learned as the closest tool word. The benchmark now counts 1497 requests
+  over fourteen servers; the test half gives 584 first in fields and 682 in
+  the top 3, and the floors of the benchmark test are raised with it.
+
 - **The gateway marks each tool that changes something.** Through the
   gateway alone, every tool a search, a description or the bare list gives
   answers to the same `run_with`, `use_tools`, so nothing told the model

@@ -36,7 +36,9 @@ The benchmark says where the search still misses, in
   residential estate), a Hindi one, whose vowels are marks (a bus depot)
   a Thai one, written without spaces and with marks (a sports centre) and
   a Korean one, whose words carry their particles (a music school) and an
-  Arabic one, whose words carry the article (a car repair workshop) are in. Lao, Khmer and Burmese, written the same way, are not measured
+  Arabic one, whose words carry the article (a car repair workshop) and a
+  Russian one, whose words change their endings (the front desk of a hotel)
+  are in. Lao, Khmer and Burmese, written the same way, are not measured
   yet.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A
