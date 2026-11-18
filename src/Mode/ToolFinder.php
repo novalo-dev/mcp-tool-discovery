@@ -192,9 +192,12 @@ final class ToolFinder
      * The group the host gave, checked: its callable is typed in a docblock
      * only, and a map read with no fallback returns null for the first tool
      * it misses. That tool is named here, not in a TypeError deep in
-     * array_map().
+     * array_map(). The grouped mode checks its own groupOf with it too, so
+     * every mode reports a wrong group the same way.
+     *
+     * @internal
      */
-    private static function group(mixed $group, Tool $tool): string
+    public static function group(mixed $group, Tool $tool): string
     {
         if (!\is_string($group)) {
             throw new \UnexpectedValueException(sprintf('groupOf must return a string for every tool; it returned %s for "%s".', get_debug_type($group), $tool->name));

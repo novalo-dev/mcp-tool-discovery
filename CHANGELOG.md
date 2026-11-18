@@ -159,6 +159,13 @@ becomes the next version's section when it is published.
   own (`?? 'other'`), and a `groupOf` that returns anything but a string now
   throws an `UnexpectedValueException` that names the tool it missed.
 
+- **The grouped mode names the tool its `groupOf` missed, as the other modes
+  do.** A `groupOf` that returned null or anything but a string for one tool
+  stopped the list with a `TypeError` on a private method of `GroupedMode`,
+  which named neither the tool nor the callable. It now throws the same
+  `UnexpectedValueException` as the compact and gateway modes, with the name
+  of the tool.
+
 ## 0.4.0 - 2026-11-17
 
 ### Added
