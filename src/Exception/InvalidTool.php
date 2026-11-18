@@ -16,9 +16,10 @@ namespace Novalo\McpToolDiscovery\Exception;
 /**
  * A tool definition the library cannot work with.
  *
- * Thrown while the host builds its tool set, never while a client calls: a
- * malformed definition is a bug of the host, and failing at build time keeps
- * it from surfacing later as a confusing answer to an assistant.
+ * Thrown while the host builds its tool set, or when the set first meets a
+ * mode whose own tools would hide one of it, whatever the client asks: a bad
+ * definition is a bug of the host, and failing loudly keeps it from surfacing
+ * later as a confusing answer to an assistant, or as a tool nobody can reach.
  */
 final class InvalidTool extends \InvalidArgumentException
 {

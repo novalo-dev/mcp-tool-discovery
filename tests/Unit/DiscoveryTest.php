@@ -14,9 +14,12 @@ declare(strict_types=1);
 namespace Novalo\McpToolDiscovery\Tests\Unit;
 
 use Novalo\McpToolDiscovery\Discovery;
+use Novalo\McpToolDiscovery\Exception\InvalidTool;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
+use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 use PHPUnit\Framework\TestCase;
 
@@ -50,18 +53,45 @@ final class DiscoveryTest extends TestCase
         self::assertTrue($result['isError']);
     }
 
-    public function testAHostToolNamedLikeAModeToolIsLeftOut(): void
+    public function testAHostToolNamedLikeAModeToolStopsTheHostRatherThanVanish(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'get_file', 'description' => 'One file.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]],
+            ['name' => 'files', 'description' => 'The host\'s own files tool.', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $grouped = new GroupedMode(static fn(Tool $tool): string => 'files', ['files' => 'Files']);
+        // Hidden from this caller, so the answer cannot depend on who asks.
+        $gate = new RecordingGate(['files']);
+        $discovery = new Discovery($grouped, $gate);
+
+        foreach ([
+            'list' => static fn() => $discovery->listTools($tools, Revision::latest()),
+            'call' => static fn() => $discovery->call('get_file', [], $tools),
+            'call of the mode' => static fn() => $discovery->callTool('files', ['action' => 'get_file'], $tools, Revision::latest()),
+        ] as $what => $request) {
+            try {
+                $request();
+                self::fail($what . ': the clash went unnoticed');
+            } catch (InvalidTool $error) {
+                self::assertStringContainsString('"files"', $error->getMessage(), $what);
+                self::assertStringContainsString('grouped', $error->getMessage(), $what);
+            }
+        }
+        self::assertSame([], $gate->called, 'nothing ran');
+
+        $prefixed = new GroupedMode(static fn(Tool $tool): string => 'files', ['files' => 'Files'], 'acme_');
+        self::assertFalse((new Discovery($prefixed, new RecordingGate()))->call('files', [], $tools)->isError, 'a prefix settles it');
+    }
+
+    public function testACompactRunnerNameTakenByTheHostIsNamed(): void
     {
         $tools = ToolSet::of([
             ['name' => CompactMode::SEARCH, 'description' => 'The host\'s own search.', 'inputSchema' => ['type' => 'object']],
-            ['name' => 'get_file', 'description' => 'One file.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]],
         ]);
-        $gate = new RecordingGate();
-        $result = (new Discovery(new CompactMode(), $gate))->call(CompactMode::SEARCH, [], $tools);
 
-        self::assertFalse($result->isError);
-        self::assertSame(['get_file'], array_column($result->structuredContent['tools'] ?? [], 'name'));
-        self::assertSame([], $gate->called, 'the host tool was not run instead of the search');
+        $this->expectException(InvalidTool::class);
+        $this->expectExceptionMessage('Tool "' . CompactMode::SEARCH . '": the compact mode');
+        (new Discovery(new CompactMode(), new RecordingGate()))->call(CompactMode::SEARCH, [], $tools);
     }
 
     public function testTheListIsShapedForTheRevision(): void

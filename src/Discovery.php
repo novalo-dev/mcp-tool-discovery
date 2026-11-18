@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Novalo\McpToolDiscovery;
 
+use Novalo\McpToolDiscovery\Exception\InvalidTool;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
@@ -47,6 +48,8 @@ final class Discovery
      * @param 'private'|'public' $cacheScope
      *
      * @return array<string, mixed>
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
      */
     public function listTools(ToolSet $tools, Revision $revision, int $ttlMs = 0, string $cacheScope = 'private'): array
     {
@@ -64,6 +67,8 @@ final class Discovery
      *        a list, which a JSON array decodes to, is refused
      *
      * @return array<string, mixed>
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
      */
     public function callTool(string $name, array $arguments, ToolSet $tools, Revision $revision): array
     {
@@ -74,6 +79,8 @@ final class Discovery
      * The same call, before it is shaped, for hosts that build their own answer.
      *
      * @param array<mixed> $arguments as json_decode(..., true) gives them
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
      */
     public function call(string $name, array $arguments, ToolSet $tools): CallResult
     {
@@ -90,8 +97,17 @@ final class Discovery
 
     private function visible(ToolSet $tools): ToolSet
     {
-        // A host tool under the name of one of the mode's own tools would be
-        // unreachable and ambiguous: it is left out rather than shadowed.
-        return $tools->filter(fn($tool): bool => !$this->mode->owns($tool->name) && $this->gate->visible($tool));
+        foreach ($tools as $tool) {
+            // A host tool under the name of one of the mode's own tools could
+            // never be reached. Leaving it out would hide it from every caller
+            // without a word, so the host learns of it on the first request.
+            // Checked before the gate, so the answer is the same for every
+            // caller and says nothing about what one of them may see.
+            if ($this->mode->owns($tool->name)) {
+                throw InvalidTool::because($tool->name, sprintf('the %s mode has a tool of its own under this name, so this one could never be called; give the mode a prefix or rename the tool.', $this->mode->name()));
+            }
+        }
+
+        return $tools->filter(fn($tool): bool => $this->gate->visible($tool));
     }
 }

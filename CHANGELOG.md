@@ -106,6 +106,16 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A host tool named like one of the mode's tools now stops the host.**
+  `Discovery` used to leave such a tool out of every list and every call
+  without a word: a host tool `files` next to a grouped group `files`, or a
+  tool `search_tools` under the compact mode, simply vanished, for every
+  caller. `listTools()`, `callTool()` and `call()` now throw `InvalidTool`,
+  naming the tool and the mode, on the first request that meets it. The check
+  runs before the gate, so it reads the same for every caller and says
+  nothing about what one may see. A server with such a clash fails where it
+  silently lost a tool before: give the mode a `prefix` or rename the tool.
+
 - **The Symfony example uses the security bundle.** A stateless firewall
   with `access_token` finds the caller, and a voter decides which tools they
   see: `SecurityGate::visible()` asks `isGranted()`, so the role hierarchy

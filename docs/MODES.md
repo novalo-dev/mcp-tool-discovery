@@ -189,7 +189,8 @@ its names without the list. A tool whose `groupOf` is not a declared group
 is also how a host pins a ping. A group whose names would not make a valid
 tool name, or that clashes with another group's change tool, is refused in
 the constructor. Pick a `prefix` if a host tool could carry a group's name:
-`Discovery` leaves such a host tool out rather than shadow it.
+`Discovery` throws `InvalidTool` on the first request that meets such a host
+tool, since it could never be called.
 
 The mode does not search, so it never hands out a `search_id` and never
 teaches the search; the contract test checks that too.
