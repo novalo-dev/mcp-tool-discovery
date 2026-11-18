@@ -32,7 +32,8 @@ The benchmark says where the search still misses, in
   PascalCase), one with 176 tools (a cloud hosting panel), a Greek one
   (the service desk of a town hall, written in another script) and one
   written as many real servers are, with no titles and long descriptions (a
-  newsroom) are in.
+  newsroom) and a Chinese one, written without spaces (the office of a
+  residential estate) are in.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension

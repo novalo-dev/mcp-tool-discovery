@@ -39,8 +39,12 @@ final class ToolIndex
     private const K1 = 1.2;
     private const B = 0.75;
 
-    /** Raised whenever the saved shape changes, so an old cache entry is rebuilt. */
-    private const FORMAT = 2;
+    /**
+     * Raised whenever the saved shape or the way text is cut into terms
+     * changes, so an old cache entry is rebuilt rather than compared with
+     * terms it never held.
+     */
+    private const FORMAT = 3;
 
     /**
      * @param list<int|string> $ids the documents, in index order

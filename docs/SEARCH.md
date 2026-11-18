@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 362 times
-out of 449 in fields, and 204 times as one sentence.
+On the benchmark below, the same requests find the right tool first 402 times
+out of 499 in fields, and 230 times as one sentence.
 
 ## How a tool is scored
 
@@ -66,6 +66,17 @@ Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
 `atu`, `tus`, `us `. Trigram matches count at 0.6 of word matches. They let
 "statuses" meet "status" and "categories" meet "category" with no rule of any
 language.
+
+**Chinese and Japanese are cut into pairs.** They are written without
+spaces, so a whole sentence would be one word, and most of their words are
+two characters long, too short to give a trigram of their own: "报修" (to
+report a repair) inside "帮我报修" would never meet the tool. A run of Han or
+kana is cut into overlapping pairs of characters, as CJK search has done for
+decades (the bigrams of Lucene's CJK analyzer): "帮我报修" gives `帮我`, `我报`,
+`报修`. No dictionary, no list: the scripts are Unicode's. The caller is
+still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修"
+when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
+synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
 
 **No stemmer, on purpose.** A Porter stemmer was measured and made the search
 worse: folding "categories" to "categori" erases the sign that a plural query
@@ -187,24 +198,25 @@ locked while it is written.
 
 ## The measures
 
-Eight fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Nine fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
 (40 tools, `KlassenfahrtAbsagen`), a cloud hosting panel (176 tools,
 `nimbo_detach_volume`), the service desk of a town hall written in Greek
-(40 tools, `parking_permit_renew`) and a newsroom with no titles and long
-descriptions (40 tools, `schedule_article`). 897 requests, each written as one
+(40 tools, `parking_permit_renew`) a newsroom with no titles and long
+descriptions (40 tools, `schedule_article`) and the office of a residential
+estate written in Chinese (40 tools, `repair_assign`). 997 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 449 requests | Right tool first | Top 3 |
+| Test half, 499 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 362 | 414 |
-| The same request as one sentence | 204 | 284 |
-| In fields, after every train request was run once | 363 | 414 |
-| In fields, after the test requests were run once, then asked again | 388 | 424 |
+| The request in fields | 402 | 459 |
+| The same request as one sentence | 230 | 318 |
+| In fields, after every train request was run once | 403 | 459 |
+| In fields, after the test requests were run once, then asked again | 430 | 471 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -256,6 +268,21 @@ uses in passing: "versions" finds the tool that edits a draft, whose
 description says earlier versions can be restored, before the tool that
 lists them. Learning from its train half costs it one request (34 first),
 as on the school; the total still gains one.
+
+The estate is written in Chinese, with English snake_case names: a script
+with no spaces between words. Its 100 requests were written before any of
+them was run, in the words of a building manager ("派单" for to assign, "工单"
+for a repair ticket, "出账" for to bill). Before the pairs of characters,
+30 of its 50 test requests found the right tool first in fields and 17 as one
+sentence, since a sentence was a single word that met tools by trigrams
+only. Cut into pairs, chosen on its train half, it finds 40 first in fields
+(45 in the top 3) and 26 as one sentence (34 in the top 3); the eight other
+servers did not move by one request. Two variants lost on train: keeping the
+whole run beside its pairs (30 first as one sentence, against 34), and
+dropping the trigrams of the pairs (the same scores, more tools returned).
+What it still misses is mostly words the tools do not use ("撤回" for to take
+down a notice, "值班" for a shift) and a list beside its single tool
+("查看报修状态" finds the list of repairs first).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

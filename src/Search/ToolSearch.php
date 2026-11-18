@@ -86,10 +86,10 @@ final class ToolSearch
     {
         $fields = $query->fields();
         $scores = [];
-        $words = [];
+        $tokens = [];
         foreach ($fields as $field => $text) {
             $text = $this->expand(self::bounded($text));
-            array_push($words, ...$this->analyzer->words($text));
+            array_push($tokens, ...$this->analyzer->tokens($text));
             $weight = $this->options->queryWeights[$field] ?? 1.0;
             foreach ($this->index->score($text) as $name => $score) {
                 // A cast would be undone: PHP keys "123" as an integer anyway, so
@@ -97,9 +97,18 @@ final class ToolSearch
                 $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;
             }
         }
-        $words = array_values(array_unique($words));
-        $known = array_values(array_filter($words, fn(string $word): bool => $this->index->has($word)));
-        $unmatched = array_values(array_diff($words, $known));
+        $known = [];
+        $unmatched = [];
+        foreach (array_unique($tokens) as $token) {
+            $terms = array_values(array_filter(Analyzer::terms($token), fn(string $term): bool => $this->index->has($term)));
+            array_push($known, ...$terms);
+            // The caller is told the words it wrote, never a pair of
+            // characters cut out of its sentence, which it could not reuse.
+            if ($terms === []) {
+                $unmatched[] = $token;
+            }
+        }
+        $known = array_values(array_unique($known));
         $searchId = $known === [] ? null : self::encode($known);
         if ($scores === []) {
             return new SearchResult([], $searchId, $unmatched);
@@ -165,7 +174,9 @@ final class ToolSearch
     {
         $count = [];
         foreach ($this->tools as $tool) {
-            foreach (array_unique($this->analyzer->words($tool->title())) as $word) {
+            // Whole tokens: a title in Chinese is offered as the caller can
+            // write it again, not as the pairs the index keeps.
+            foreach (array_unique($this->analyzer->tokens($tool->title())) as $word) {
                 $count[$word] = ($count[$word] ?? 0) + 1;
             }
         }
@@ -283,9 +294,11 @@ final class ToolSearch
         }
         $synonyms = array_change_key_case($this->options->synonyms, CASE_LOWER);
         $extra = [];
-        foreach ($this->analyzer->words($text) as $word) {
+        // The pairs too: in a sentence without spaces the host's word is
+        // never a token of its own, only a pair inside one.
+        foreach ([...$this->analyzer->tokens($text), ...$this->analyzer->words($text)] as $word) {
             if (isset($synonyms[$word])) {
-                $extra[] = $synonyms[$word];
+                $extra[$word] = $synonyms[$word];
             }
         }
 

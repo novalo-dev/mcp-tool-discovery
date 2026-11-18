@@ -10,6 +10,21 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Chinese and Japanese are searched by pairs of characters.** They are
+  written without spaces, so a sentence was one word that met tools only by
+  its trigrams, and a two-character word ("报修") never met them at all. A
+  run of Han or kana is now cut into overlapping pairs, with no dictionary
+  and no list; other scripts are cut as before. On a new benchmark server
+  written in Chinese (40 tools, 100 requests written before any run), the
+  test half goes from 30 to 40 first in fields and from 17 to 26 as one
+  sentence (21 to 34 in the top 3); the eight other servers do not move.
+  `unmatched` and `vocabulary()` still give whole words, never the pairs, and
+  a host synonym can name a pair. `Analyzer::tokens()` gives the words as
+  written and `Analyzer::terms()` the terms of one of them. The saved index
+  format changes, so an index in `FileIndexCache` is rebuilt once; what a
+  learning store holds for Chinese or Japanese searches was kept by whole
+  sentence and no longer lifts anything.
+
 - **The scores the docs give are the ones the benchmark measures.**
   `tests/Search/BenchmarkTest.php` now reads the test-half table of the
   README and of docs/SEARCH.md, and the sentence that sums the fields up,
@@ -34,7 +49,8 @@ becomes the next version's section when it is published.
 
 - **docs/SEARCH.md gives the current scores at the top of the page.** It
   still said 202 of 250 requests found first in fields and 94 as one
-  sentence, from a benchmark of fewer servers; it is 362 of 449, and 204.
+  sentence, from a benchmark of fewer servers; it now gives the scores the
+  benchmark measures.
 
 - **The `groupOf` snippet of the compact and gateway modes no longer breaks
   the search.** The README and docs/MODES.md showed

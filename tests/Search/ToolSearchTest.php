@@ -70,6 +70,46 @@ final class ToolSearchTest extends TestCase
         self::assertSame([], Analyzer::trigrams(''));
     }
 
+    public function testTextWrittenWithoutSpacesIsCutInPairs(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['帮我', '我报', '报修'], $analyzer->words('帮我报修'));
+        self::assertSame(['帮我报修'], $analyzer->tokens('帮我报修'), 'the caller is shown the word it wrote');
+        self::assertSame(['派工', '维修'], $analyzer->words('派工、维修。'), 'no pair holds a punctuation mark');
+        self::assertSame(['栋', '有快', '快递', '递吗'], $analyzer->words('5栋101有快递吗'), 'numbers apart, still left out');
+        self::assertSame(['报'], $analyzer->words('报'));
+        self::assertSame(['カー', 'ード'], $analyzer->words('カード'), 'kana too');
+        self::assertSame(['登记', '记一'], (new Analyzer(['一下']))->words('登记一下'), 'a host stop word can be a pair');
+        self::assertSame(['ticket', 'status'], $analyzer->words('ticket status'), 'spaced scripts unchanged');
+    }
+
+    public function testASentenceWithoutSpacesFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('estate'));
+
+        self::assertSame('repair_rate', $search->search('我要评价刚才的维修')[0]->name ?? null);
+        self::assertSame('notice_publish', $search->search('明晚停电要告诉全楼')[0]->name ?? null);
+
+        $result = $search->find(SearchQuery::text('彩虹独角兽 hello'));
+        self::assertSame([], $result->tools);
+        self::assertSame(['彩虹独角兽', 'hello'], $result->unmatched, 'whole words, not the pairs cut out of them');
+
+        $vocabulary = $search->vocabulary(50);
+        self::assertContains('报修单列表', $vocabulary, 'a title the caller can write again');
+        self::assertNotContains('单列', $vocabulary);
+    }
+
+    public function testAHostSynonymMeetsAPairInsideASentence(): void
+    {
+        $tools = RecordingGate::server('estate');
+        $plain = self::names((new ToolSearch($tools))->search('派单给张师傅'));
+        $host = self::names((new ToolSearch($tools, new SearchOptions(synonyms: ['派单' => '派工'])))->search('派单给张师傅'));
+
+        self::assertNotSame($plain, $host, 'the synonym was added');
+        self::assertSame(['repair_assign'], $host);
+    }
+
     public function testTheFieldsOfAQueryFindTheRightTool(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());
