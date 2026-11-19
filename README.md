@@ -324,8 +324,8 @@ score:
 |---|---|---|
 | The request in fields | **584** | **682** |
 | The same request as one sentence | 366 | 494 |
-| In fields, after learning from the other half | 586 | 683 |
-| In fields, asked a second time | 637 | 698 |
+| In fields, after learning from the other half | 587 | 683 |
+| In fields, asked a second time | 638 | 698 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

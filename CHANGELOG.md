@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **Learning no longer pairs the characters of one word.** A word of
+  Japanese, Chinese, Korean or Thai is cut into pairs of characters, and
+  learning paired those pairs with each other: they only said the object
+  again ("飼い主", owner), so a search for an owner's address lifted that tool
+  for every later request about an owner. Terms are now paired only across
+  tokens (the verb with its object) when a request has several, and a
+  sentence without spaces still keeps every pair. Requests in an alphabet
+  learn exactly as before. On the test half, after learning from the other
+  half, 587 requests find their tool first instead of 586, and 638 instead
+  of 637 when asked again; the floor of the benchmark moves to 638. The
+  `search_id` keeps the terms of each token together; an id from before
+  this reads as one token per word, and a learning store needs no change.
+
 - **The grouped list says how to describe an action once, not twice.** Each
   group's read tool told the model how to read an action's parameters in
   its description, then again in the description of its `describe`

@@ -204,6 +204,25 @@ for requests of one word, and learns the pairs from the next runs. The pairs
 of a request are taken from its first 16 words in alphabetical order, so a
 long request costs at most 120 keys.
 
+Two pairs of characters of one word are not a pair. Japanese, Chinese,
+Korean and Thai are cut into pairs of characters (above), so one word of a
+request gives several terms: "飼い主" (owner) gives "飼い" and "い主". Paired
+with each other, they only said the object again, and a search for an
+owner's address then lifted that tool for every request about an owner. When
+a request has several tokens (its fields, the words of a Korean sentence),
+only terms of different tokens are paired, so the verb still pairs with its
+object; a sentence without spaces is one token, and keeps every pair of its
+terms. A word of an alphabet is one term, so nothing changes for it. The
+rule was chosen on the train half of a Japanese veterinary clinic,
+in two folds: learning from one fold to the other cost 2 first places, and
+now costs none; pairing only terms that never share a token did better
+there than skipping only terms of one token alone (1 lost). The train half
+of the other servers does not move. On their test half, the sports centre
+gains one first place after learning from the other half (586 to 587 in
+all) and one asked again (637 to 638), with nothing lost. A `search_id` now keeps the
+terms of each token together; an id of single words, as before, reads as one
+token per word and learns as it did.
+
 The limits are the point:
 
 - **Only words the tools use are kept** (a word they do not use, as the tool
@@ -275,8 +294,8 @@ and gives the score.
 |---|---|---|
 | The request in fields | 584 | 682 |
 | The same request as one sentence | 366 | 494 |
-| In fields, after every train request was run once | 586 | 683 |
-| In fields, after the test requests were run once, then asked again | 637 | 698 |
+| In fields, after every train request was run once | 587 | 683 |
+| In fields, after the test requests were run once, then asked again | 638 | 698 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure

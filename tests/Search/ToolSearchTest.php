@@ -417,6 +417,27 @@ final class ToolSearchTest extends TestCase
         self::assertSame('send_estimate', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('sending', 'estimate')))[0]);
     }
 
+    public function testThePairsOfCharactersOfOneWordAreNotLearnedAsAPair(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'owner_show', 'title' => '飼い主の詳細', 'description' => '飼い主の住所を表示します。', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'owners_list', 'title' => '飼い主一覧', 'description' => '飼い主の一覧を表示します。', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(new SearchQuery('住所', '飼い主'))->searchId, 'owner_show');
+        }
+
+        // "飼い" and "い主" are both "飼い主" (owner): paired, they would lift
+        // the tool asked for an address for every request about an owner,
+        // listing them too. The verb and the object are still paired.
+        self::assertArrayNotHasKey('い主 飼い', $store->load());
+        self::assertArrayHasKey('住所 飼い', $store->load());
+        self::assertSame('owners_list', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('表示', '飼い主')))[0]);
+        self::assertSame('owner_show', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('住所', '飼い主')))[0]);
+    }
+
     public function testTheFileStoreKeepsWhatWasLearned(): void
     {
         $file = self::temporary('learning') . '.json';
