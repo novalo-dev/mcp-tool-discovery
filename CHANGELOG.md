@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The SDK example for tools already in its registry, in
+  `docs/examples/sdk/registry.php`.** A server written for the official PHP
+  SDK keeps its tools as it registered them, with `addTool()` or attribute
+  discovery. The library reads their definitions from the SDK's registry and
+  runs each one through the SDK's own `CallToolHandler`, so the schema the SDK
+  derived is still checked, results are formatted as before and a
+  `ToolCallException` is still the tool's error; arguments the schema refuses
+  come back as an error result the assistant can correct. A tool the gate
+  hides stays unknown even called by its own name. docs/HOSTS.md says what
+  changes from the first SDK example, and the `sdk` test suite runs both.
+
 - **A Japanese veterinary clinic on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Japanese, written without
   spaces in three scripts, many of them neighbours (book, move, cancel an

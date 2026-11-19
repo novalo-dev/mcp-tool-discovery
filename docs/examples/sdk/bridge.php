@@ -1,0 +1,83 @@
+<?php
+
+/*
+ * This file is part of novalo/mcp-tool-discovery.
+ *
+ * (c) Novalo <https://novalo.fr>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+declare(strict_types=1);
+
+/*
+ * What the two servers on the official MCP PHP SDK share: reading the
+ * revision and the arguments the SDK agreed on, and handing the library's
+ * answer back to it. docs/examples/sdk/server.php keeps its tools outside the
+ * SDK; docs/examples/sdk/registry.php keeps them in the SDK's registry.
+ */
+
+namespace Example\Notes\Sdk;
+
+use Mcp\Schema\JsonRpc\Request;
+use Mcp\Schema\JsonRpc\ResultInterface;
+use Mcp\Schema\Request\CallToolRequest;
+use Mcp\Server\RequestContext;
+use Mcp\Server\Session\SessionInterface;
+use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
+use Novalo\McpToolDiscovery\Protocol\Revision;
+
+/**
+ * A result the library already shaped for the revision. The SDK wants an
+ * object it can encode; in the stateless revision it keeps the resultType,
+ * ttlMs and cacheScope the answer already carries.
+ */
+final class Answer implements ResultInterface
+{
+    /**
+     * @param array<string, mixed> $result
+     */
+    public function __construct(private readonly array $result) {}
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->result;
+    }
+}
+
+/**
+ * The SDK has already agreed on the revision, through the handshake or the
+ * request's _meta in the stateless revision; the library cuts its answers to
+ * the same one.
+ */
+function revision(Request $request, SessionInterface $session): Revision
+{
+    $agreed = (new RequestContext($session, $request))->getProtocolVersion()->value;
+    try {
+        return Revision::fromString($agreed);
+    } catch (UnsupportedRevision) {
+        // An SDK newer than the library may agree on a revision the library
+        // does not shape yet: answer in the latest one it shapes that the
+        // SDK can also hold a session for.
+        return Revision::latestWithHandshake();
+    }
+}
+
+/**
+ * The SDK keeps nested JSON objects as stdClass, so the items of a batch would
+ * be refused as not objects; the library reads arguments as
+ * json_decode(..., true) gives them.
+ *
+ * @return array<string, mixed>
+ */
+function arguments(CallToolRequest $request): array
+{
+    $arguments = json_decode(json_encode($request->arguments, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+
+    /** @var array<string, mixed> a JSON object decoded as an array */
+    return is_array($arguments) ? $arguments : [];
+}

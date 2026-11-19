@@ -5,10 +5,10 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in one
-on the official PHP SDK. All six serve the same notes
-tools, kept with their gate in [examples/notes.php](examples/notes.php): only
-the transport differs.
+on ReactPHP, in a Symfony application, in a Laravel application, and in two
+on the official PHP SDK. All seven serve the same notes tools, kept with their
+gate in [examples/notes.php](examples/notes.php): only the transport differs,
+and the second SDK server keeps the tools in the SDK's own registry.
 
 ---
 
@@ -224,6 +224,38 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 
 Over the SDK's HTTP transport the handler stays the same; build the gate and
 the `Discovery` from the caller of each request, as in the HTTP example.
+
+### Tools already in the SDK's registry
+
+A server written for the SDK often has its tools there already, as handlers
+added with `addTool()` or found by attribute discovery.
+[examples/sdk/registry.php](examples/sdk/registry.php) keeps them as they are:
+the library reads their definitions from the registry and runs each one
+through the SDK's own `CallToolHandler`, so a tool found by search runs as a
+direct call would. Its arguments are checked against the schema the SDK
+derived, its return value is formatted by the SDK, and a `ToolCallException`
+becomes an error result. [tests/Sdk/SdkRegistryTest.php](../tests/Sdk/SdkRegistryTest.php)
+runs it in the same CI job.
+
+```
+php docs/examples/sdk/registry.php
+```
+
+What changes from the server above:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The registry | `new Registry()` given to `setRegistry()`, and the same `ReferenceHandler` to `setReferenceHandler()` | the handler reads the tools the SDK registered, and runs them with the handler that would have run them |
+| The tools | `RegistryInterface::getTools()`, each `Tool` encoded and read with `Tool::fromArray()` | the definitions the client would have seen, in the registry's order |
+| The gate | `RegistryGate`, built per request with its session | `call()` hands a `CallToolRequest` with the client's id and `_meta` to the SDK's `CallToolHandler`, which reads the revision from them; who sees which tool stays the host's rule |
+| The errors | an `Error` from the SDK becomes `CallResult::error()` | arguments the schema refuses are a protocol error for the SDK; through a mode they are the tool's answer, which the assistant reads and corrects |
+| The capability | detected by the SDK | the registry is not empty, so the SDK announces tools by itself |
+
+The handler answers every `tools/call`, so a tool the gate hides is unknown
+even when a client calls it by its own name. A tool that asks the client for
+input (`InputRequiredResult`) cannot run through a mode: the question and its
+answer travel between the SDK and the client, and the example answers it as
+an error.
 
 ---
 

@@ -15,8 +15,8 @@ declare(strict_types=1);
  * What the example servers share: the notes tools, where the notes are kept,
  * and the gate. Only the transport differs between
  * docs/examples/stdio-server.php, docs/examples/http-server.php,
- * docs/examples/react/server.php, docs/examples/symfony and
- * docs/examples/sdk/server.php, which is the part a host writes itself or
+ * docs/examples/react/server.php, docs/examples/symfony, docs/examples/laravel
+ * and docs/examples/sdk, which is the part a host writes itself or
  * takes from an SDK or a framework.
  */
 
@@ -98,6 +98,22 @@ final class Notes
     public function all(): array
     {
         return $this->notes;
+    }
+
+    /**
+     * Each note's id and the start of its text, as the list tool shows them.
+     *
+     * @return list<array{id: int, text: string}>
+     */
+    public function starts(): array
+    {
+        // Forty characters, not bytes: a cut inside a character would leave
+        // invalid UTF-8, and no answer could be encoded.
+        return array_map(
+            static fn(int $id, string $text): array => ['id' => $id, 'text' => preg_match('/^.{0,40}/su', $text, $start) === 1 ? $start[0] : ''],
+            array_keys($this->notes),
+            array_values($this->notes),
+        );
     }
 
     public function get(int $id): ?string
@@ -197,15 +213,7 @@ final class NotesTools
 
         switch ($tool->name) {
             case 'notes_list':
-                $notes = $this->notes->all();
-
-                // Forty characters, not bytes: a cut inside a character
-                // would leave invalid UTF-8, and no answer could be encoded.
-                return CallResult::json(['notes' => array_map(
-                    static fn(int $id, string $text): array => ['id' => $id, 'text' => preg_match('/^.{0,40}/su', $text, $start) === 1 ? $start[0] : ''],
-                    array_keys($notes),
-                    array_values($notes),
-                )]);
+                return CallResult::json(['notes' => $this->notes->starts()]);
             case 'notes_get':
                 $text = $this->notes->get($id);
 
