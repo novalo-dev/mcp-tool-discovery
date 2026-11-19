@@ -8,6 +8,18 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **A Japanese veterinary clinic on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Japanese, written without
+  spaces in three scripts, many of them neighbours (book, move, cancel an
+  appointment; prescribe, refill, cancel a prescription), and 100 requests
+  written before any of them was run. It is the first measure of the pairs
+  of characters on Japanese: 33 of its 50 test requests find the right tool
+  first in fields, 26 as one sentence, and learning loses nothing. The
+  benchmark now holds 1597 requests over fifteen servers; its floors move to
+  617 and 719 in fields and 674 asked again.
+
 ### Changed
 
 - **Learning no longer pairs the characters of one word.** A word of

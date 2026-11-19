@@ -307,7 +307,7 @@ client gives its request **in fields**, and each field is scored on its own:
   the tools use are kept: a word written another way is kept as the tool
   word closest to it.
 
-1497 requests over fourteen fictional servers, a workspace (snake_case), a
+1597 requests over fifteen fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -315,17 +315,18 @@ service desk of a town hall written in Greek, a newsroom whose tools have
 no title and long descriptions, as many real servers write them, the
 office of a residential estate written in Chinese, a bus depot written
 in Hindi, a sports centre written in Thai, a music school written in
-Korean, a car repair workshop written in Arabic and the front desk of a
-hotel written in Russian (SCREAMING_SNAKE_CASE).
+Korean, a car repair workshop written in Arabic, the front desk of a
+hotel written in Russian (SCREAMING_SNAKE_CASE) and a veterinary clinic
+written in Japanese.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 749 requests | Right tool first | Right tool in the top 3 |
+| Test half, 799 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **584** | **682** |
-| The same request as one sentence | 366 | 494 |
-| In fields, after learning from the other half | 587 | 683 |
-| In fields, asked a second time | 638 | 698 |
+| The request in fields | **617** | **719** |
+| The same request as one sentence | 392 | 529 |
+| In fields, after learning from the other half | 620 | 720 |
+| In fields, asked a second time | 674 | 738 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

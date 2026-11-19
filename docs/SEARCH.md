@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 584 times
-out of 749 in fields, and 366 times as one sentence.
+On the benchmark below, the same requests find the right tool first 617 times
+out of 799 in fields, and 392 times as one sentence.
 
 ## How a tool is scored
 
@@ -213,8 +213,8 @@ a request has several tokens (its fields, the words of a Korean sentence),
 only terms of different tokens are paired, so the verb still pairs with its
 object; a sentence without spaces is one token, and keeps every pair of its
 terms. A word of an alphabet is one term, so nothing changes for it. The
-rule was chosen on the train half of a Japanese veterinary clinic,
-in two folds: learning from one fold to the other cost 2 first places, and
+rule was chosen on the train half of the Japanese veterinary clinic
+(below), in two folds: learning from one fold to the other cost 2 first places, and
 now costs none; pairing only terms that never share a token did better
 there than skipping only terms of one token alone (1 lost). The train half
 of the other servers does not move. On their test half, the sports centre
@@ -272,7 +272,7 @@ locked while it is written.
 
 ## The measures
 
-Fourteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Fifteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -284,18 +284,19 @@ estate written in Chinese (40 tools, `repair_assign`), a bus depot
 written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 (40 tools, `court_book`), a music school written in Korean (40 tools,
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
-`estimate_send`) and the front desk of a hotel written in Russian (40 tools,
-`BOOKING_CHANGE_DATES`). 1497 requests, each written as one
+`estimate_send`), the front desk of a hotel written in Russian (40 tools,
+`BOOKING_CHANGE_DATES`) and a veterinary clinic written in Japanese (40
+tools, `appointment_move`). 1597 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 749 requests | Right tool first | Top 3 |
+| Test half, 799 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 584 | 682 |
-| The same request as one sentence | 366 | 494 |
-| In fields, after every train request was run once | 587 | 683 |
-| In fields, after the test requests were run once, then asked again | 638 | 698 |
+| The request in fields | 617 | 719 |
+| The same request as one sentence | 392 | 529 |
+| In fields, after every train request was run once | 620 | 720 |
+| In fields, after the test requests were run once, then asked again | 674 | 738 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -444,6 +445,22 @@ other words pair again, and learning loses nothing (37 and 47 both ways).
 What it misses is mostly neighbours of one object (opening a room again after
 repairs finds the tool that closes it) and words the tools do not use
 ("такси" for the transfer).
+
+The clinic is written in Japanese, kanji, hiragana and katakana with no
+spaces, behind snake_case names: a veterinary clinic whose tools are
+neighbours by design (book, move, cancel an appointment; prescribe, refill,
+cancel a prescription; admit and discharge). Its 100 requests were written
+before any of them was run, as staff at the desk talk, and the pairs of
+characters were never measured on Japanese before it. Nothing in the
+weights or the cut was changed for it: 33 of its 50 test requests find the
+right tool first in fields (37 in the top 3) and 26 as one sentence (35).
+It could not join at first: learning from its train half cost 3 test
+requests their first place, the pairs of characters of one word being
+learned as a pair (above); with terms paired across tokens only, learning
+loses nothing (33 and 37 both ways). What it misses is mostly words the
+tools do not use ("ツケ" for an unpaid bill, "補充" for ordering supplies) and
+neighbours of one object (moving an appointment finds the tool that cancels
+it).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
