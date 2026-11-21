@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Burmese rice mill on the search benchmark.** 40 tools named in
+  snake_case with titles and descriptions in Burmese, many of them neighbours
+  (receive, correct and cancel a delivery of paddy; pay a farmer and void the
+  payment; record and cancel a sale; grant and repay an advance; book and
+  cancel a truck), and 100 requests written before any of them was run, most
+  of them with no space at all. The benchmark now holds 1797 requests over
+  seventeen servers; its floors move to 685 and 803 in fields and 754 asked
+  again.
+
 - **A Khmer water supply office on the search benchmark.** 40 tools named in
   snake_case with titles and descriptions in Khmer, a script written without
   spaces between words and with stacked consonants, many of them neighbours
@@ -69,6 +78,17 @@ becomes the next version's section when it is published.
   617 and 719 in fields and 674 asked again.
 
 ### Changed
+
+- **Burmese is searched by pairs of what is seen, as Thai is.** A run of
+  Burmese was one token that met tools only by its trigrams. It is now cut
+  into overlapping pairs of grapheme clusters, the run kept beside them. On
+  the test half of the new rice mill, as many requests find the right tool
+  first in fields (36 of 50), 45 are in the top 3 against 42, fewer tools are
+  returned (2.36 against 2.42), and learning no longer loses a request; one
+  request as one sentence leaves the top 3. Chosen on its train half: 45
+  first against 43. Khmer, measured the same way on the water supply office,
+  stays read by its trigrams. The index format changes, so a cached index is
+  rebuilt once.
 
 - **The stdio examples keep their search index and learn.** The server
   written by hand over stdio and the two on the official PHP SDK built the

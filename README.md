@@ -293,8 +293,8 @@ client gives its request **in fields**, and each field is scored on its own:
   tool, each with its weight. A rare word counts more than a common one, so a
   prefix or a verb every tool shares weighs almost nothing.
 - **Whole words and trigrams**, so `statuses` meets `status` and `categories`
-  meets `category` without a stemmer. Chinese, Japanese and Thai, written
-  without spaces, are cut into pairs of characters, with no dictionary, and
+  meets `category` without a stemmer. Chinese, Japanese, Thai and Burmese,
+  written without spaces, are cut into pairs of characters, with no dictionary, and
   so is each Korean word, which carries its particles.
 - **No list, no convention.** No stop words, no table of verbs, no prefix
   rule, in any language: snake_case, camelCase and dotted names are all read
@@ -309,7 +309,7 @@ client gives its request **in fields**, and each field is scored on its own:
   the tools use are kept: a word written another way is kept as the tool
   word closest to it.
 
-1697 requests over sixteen fictional servers, a workspace (snake_case), a
+1797 requests over seventeen fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -319,16 +319,17 @@ office of a residential estate written in Chinese, a bus depot written
 in Hindi, a sports centre written in Thai, a music school written in
 Korean, a car repair workshop written in Arabic, the front desk of a
 hotel written in Russian (SCREAMING_SNAKE_CASE), a veterinary clinic
-written in Japanese and a water supply office written in Khmer.
+written in Japanese, a water supply office written in Khmer and a rice
+mill written in Burmese.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 849 requests | Right tool first | Right tool in the top 3 |
+| Test half, 899 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **649** | **758** |
-| The same request as one sentence | 424 | 571 |
-| In fields, after learning from the other half | 652 | 759 |
-| In fields, asked a second time | 710 | 782 |
+| The request in fields | **685** | **803** |
+| The same request as one sentence | 455 | 609 |
+| In fields, after learning from the other half | 688 | 803 |
+| In fields, asked a second time | 754 | 829 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

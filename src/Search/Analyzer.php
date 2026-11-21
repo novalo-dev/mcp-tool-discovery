@@ -32,11 +32,14 @@ final class Analyzer
     private const UNSPACED = '(?:(?=\p{L})[\p{Han}\p{Hiragana}\p{Katakana}])';
 
     /**
-     * Thai, also written without spaces between words, but whose vowels and
-     * tone marks are marks: its runs are cut into pairs of characters as
-     * they are seen (grapheme clusters), not into pairs of code points.
+     * Thai and Burmese, also written without spaces between words, but whose
+     * vowels and tone marks are marks: their runs are cut into pairs of
+     * characters as they are seen (grapheme clusters), not into pairs of
+     * code points. Khmer is written the same way, but on the train half of
+     * the water supply office pairs gained nothing (docs/SEARCH.md), so a run
+     * of Khmer stays one token met by its trigrams.
      */
-    private const THAI = '\p{Thai}';
+    private const CLUSTERED = '[\p{Thai}\p{Myanmar}]';
 
     /**
      * A Hangul letter. Korean puts spaces between words, but glues to each
@@ -61,8 +64,8 @@ final class Analyzer
     /**
      * The terms the index compares: the tokens of the text, with each run of
      * Han or kana and each Korean word cut into overlapping pairs of
-     * characters, and each run of Thai into pairs of grapheme clusters (see
-     * thai()).
+     * characters, and each run of Thai or Burmese into pairs of grapheme
+     * clusters (see clusters()).
      *
      * Chinese and Japanese are written without spaces, so a whole sentence is
      * one token and would only ever meet a tool by its trigrams, while most of
@@ -98,7 +101,7 @@ final class Analyzer
      *
      * snake_case, kebab-case, dotted names and camelCase are split, so a tool
      * named set_ticket_status or setTicketStatus matches "ticket status". A
-     * run of Han, kana or Thai is a token of its own, apart from the letters
+     * run of Han, kana, Thai or Burmese is a token of its own, apart from the letters
      * and digits around it ("5栋101").
      *
      * @return list<string>
@@ -117,7 +120,7 @@ final class Analyzer
         // Hebrew their vowel points, and decomposed text (NFD) every accent:
         // splitting on them cut "सर्वर" into "सर" and "वर", one word into
         // fragments that meet unrelated tools.
-        $parts = preg_split('/[^\p{L}\p{M}\p{N}]+|(' . self::UNSPACED . '+|' . self::THAI . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $parts = preg_split('/[^\p{L}\p{M}\p{N}]+|(' . self::UNSPACED . '+|' . self::CLUSTERED . '+)/u', $lower, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $words = [];
         foreach ($parts === false ? [] : $parts as $part) {
             // A number is an identifier ("ticket 12"), never a word that tells
@@ -133,14 +136,14 @@ final class Analyzer
     /**
      * The terms of one token: itself, or its pairs of characters when it is a
      * run of Han or kana or a Korean word longer than one character, or a run
-     * of Thai.
+     * of Thai or Burmese.
      *
      * @return list<string>
      */
     public static function terms(string $token): array
     {
-        if (preg_match('/^' . self::THAI . '+$/u', $token) === 1) {
-            return self::thai($token);
+        if (preg_match('/^' . self::CLUSTERED . '+$/u', $token) === 1) {
+            return self::clusters($token);
         }
         // A Korean word gives its pairs only, as Chinese does: measured on the
         // train half of the music school, keeping the word beside them found
@@ -161,19 +164,21 @@ final class Analyzer
     }
 
     /**
-     * The terms of a run of Thai: its overlapping pairs of grapheme clusters,
-     * and the run itself.
+     * The terms of a run of Thai or Burmese: its overlapping pairs of grapheme
+     * clusters, and the run itself.
      *
      * A pair of code points would pair a consonant with the vowel or tone
      * mark it carries, a fragment that means nothing; a cluster is a
      * consonant with its marks, as \X has always matched in PCRE. The run is
      * kept beside its pairs, unlike Chinese: its trigrams were what found
      * Thai tools before, and measured on the train half of the sports centre,
-     * keeping it found as many tools first with fewer tools returned.
+     * keeping it found as many tools first with fewer tools returned. On the
+     * train half of the rice mill, Burmese kept its run too: pairs alone found
+     * one tool first less and returned more.
      *
      * @return list<string>
      */
-    private static function thai(string $token): array
+    private static function clusters(string $token): array
     {
         if (preg_match_all('/\X/u', $token, $clusters) === false || count($clusters[0]) < 3) {
             return [$token];

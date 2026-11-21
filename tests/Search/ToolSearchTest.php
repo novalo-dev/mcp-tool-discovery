@@ -103,6 +103,23 @@ final class ToolSearchTest extends TestCase
         self::assertSame('staff_shifts', $search->search('พรุ่งนี้ใครเข้ากะหน้าเคาน์เตอร์')[0]->name ?? null);
     }
 
+    public function testBurmeseIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ပယ်', 'ယ်ဖျ', 'ဖျက်', 'ပယ်ဖျက်'], $analyzer->words('ပယ်ဖျက်'), 'a stacked consonant or a vowel stays on its consonant, the run is kept');
+        self::assertSame(['ပယ်ဖျက်'], $analyzer->tokens('ပယ်ဖျက်'), 'the caller is shown the word it wrote');
+    }
+
+    public function testASentenceInBurmeseFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('mill'));
+
+        // Both found another tool first while a run of Burmese met tools by its trigrams only.
+        self::assertSame('unpaid_receipts', $search->search('ဘယ်သူ့ကို စပါးဖိုးမပေးရသေးလဲ')[0]->name ?? null);
+        self::assertSame('truck_book', $search->search('ဗုဒ္ဓဟူးနေ့ ကွင်းကြီးရွာကစပါးသယ်ဖို့ ကားငှားပါ')[0]->name ?? null);
+    }
+
     public function testAKoreanWordIsCutInPairs(): void
     {
         $analyzer = new Analyzer();

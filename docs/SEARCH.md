@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 649 times
-out of 849 in fields, and 424 times as one sentence.
+On the benchmark below, the same requests find the right tool first 685 times
+out of 899 in fields, and 455 times as one sentence.
 
 ## How a tool is scored
 
@@ -82,8 +82,8 @@ still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修
 when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
 synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
 
-**Thai is cut into pairs of what is seen.** It is written without spaces
-too, but its vowels and tone marks are marks, so a pair of code points would
+**Thai and Burmese are cut into pairs of what is seen.** Thai is written
+without spaces too, but its vowels and tone marks are marks, so a pair of code points would
 hold a consonant and the vowel it carries, a fragment that means nothing. A
 run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
 consonant with its marks): "ยกเลิก" (to cancel) gives `ยก`, `กเ`, `เลิ`,
@@ -93,8 +93,11 @@ as many tools first, with fewer tools returned. Khmer is written the same
 way and is read as before, its runs met by their trigrams: on the train half
 of the water supply office (below), cutting it into pairs of clusters as Thai
 is found as many tools first, returned more, and learning lost one more
-request. Lao and Burmese are not measured yet, so they are read as before
-too.
+request. Burmese, measured on the rice mill (below), is cut as Thai is:
+on its train half, pairs kept beside the run found 45 of 50 tools first
+against 43, and 39 as one sentence against 36, with fewer tools returned
+(1.9 against 2.0); pairs alone found 44. Lao is not measured on the
+benchmark yet, so it is read as before.
 
 **A Korean word is cut into pairs.** Korean puts spaces between words, but
 glues to each word the particles that mark its role: "레슨을 취소해 줘"
@@ -209,7 +212,7 @@ of a request are taken from its first 16 words in alphabetical order, so a
 long request costs at most 120 keys.
 
 Two pairs of characters of one word are not a pair. Japanese, Chinese,
-Korean and Thai are cut into pairs of characters (above), so one word of a
+Korean, Thai and Burmese are cut into pairs of characters (above), so one word of a
 request gives several terms: "飼い主" (owner) gives "飼い" and "い主". Paired
 with each other, they only said the object again, and a search for an
 owner's address then lifted that tool for every request about an owner. When
@@ -276,7 +279,7 @@ locked while it is written.
 
 ## The measures
 
-Sixteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Seventeen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -290,18 +293,19 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
 `estimate_send`), the front desk of a hotel written in Russian (40 tools,
 `BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
-tools, `appointment_move`) and a water supply office written in Khmer (40
-tools, `outage_schedule`). 1697 requests, each written as one
+tools, `appointment_move`) a water supply office written in Khmer (40
+tools, `outage_schedule`) and a rice mill written in Burmese (40 tools,
+`paddy_receive`). 1797 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 849 requests | Right tool first | Top 3 |
+| Test half, 899 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 649 | 758 |
-| The same request as one sentence | 424 | 571 |
-| In fields, after every train request was run once | 652 | 759 |
-| In fields, after the test requests were run once, then asked again | 710 | 782 |
+| The request in fields | 685 | 803 |
+| The same request as one sentence | 455 | 609 |
+| In fields, after every train request was run once | 688 | 803 |
+| In fields, after the test requests were run once, then asked again | 754 | 829 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -486,6 +490,24 @@ code points 41. None was kept. What it misses is mostly neighbours of one
 object (cancelling an outage finds the tool that schedules one) and words the
 tools do not use ("ពាក្យសុំ", an application form, where the tools write
 "សំណើ", a request).
+
+The rice mill is written in Burmese, behind snake_case names, with spaces
+between phrases only, vowels and tones written as marks and consonants
+stacked with a virama. Its tools are neighbours by design (receive, correct
+and cancel a delivery of paddy; pay a farmer and void the payment; record and
+cancel a sale of rice; grant and repay an advance; book and cancel a truck).
+Its 100 requests were written before any of them was run, most of them as
+one run with no space at all. Its train half chose one thing, how Burmese is
+cut (above); no weight or cut changed for it. On its test half, read by its
+trigrams as before, 36 of 50 requests found the right tool first in fields
+and 42 in the top 3, with 2.42 tools returned, and learning lost one. Cut
+into pairs of clusters, 36 come first and 45 in the top 3, with 2.36 tools
+returned; 31 as one sentence (38 in the top 3, one less than before), and
+learning loses nothing (36 and 45 both ways). What it misses is mostly words
+the tools do not use ("တောင်သူ" for a farmer, where the tools write
+"လယ်သမား"; "ချေးငွေ", a loan, where they write "ကြိုတင်ငွေ", an advance)
+and neighbours of one object (selling rice finds the tool that cancels a
+sale).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

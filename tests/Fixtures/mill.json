@@ -1,0 +1,798 @@
+[
+ {
+  "name": "farmers_list",
+  "title": "လယ်သမားအားလုံး",
+  "description": "ဆန်စက်သို့ စပါးရောင်းသော လယ်သမားအားလုံး၏ စာရင်းကို ရွာနှင့်တကွ ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "village": {
+     "type": "string",
+     "description": "ရွာ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_get",
+  "title": "လယ်သမား အချက်အလက်",
+  "description": "လယ်သမားတစ်ဦး၏ အမည် ဖုန်းနံပါတ် ရွာ နှင့် ကြွေးကျန်ကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_add",
+  "title": "လယ်သမားအသစ် စာရင်းသွင်း",
+  "description": "လယ်သမားအသစ်ကို အမည် ဖုန်း နှင့် ရွာဖြင့် စာရင်းသွင်းသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "အမည်"
+    },
+    "phone": {
+     "type": "string",
+     "description": "ဖုန်း"
+    },
+    "village": {
+     "type": "string",
+     "description": "ရွာ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_update",
+  "title": "လယ်သမား အချက်အလက် ပြင်ဆင်",
+  "description": "လယ်သမား၏ ဖုန်းနံပါတ် ရွာ သို့မဟုတ် ဘဏ်အကောင့်ကို ပြောင်းသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    },
+    "phone": {
+     "type": "string",
+     "description": "ဖုန်းအသစ်"
+    },
+    "bank_account": {
+     "type": "string",
+     "description": "ဘဏ်အကောင့်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "paddy_receive",
+  "title": "စပါး လက်ခံ",
+  "description": "လယ်သမားယူလာသော စပါးကို ချိန်ပြီး တင်းအရေအတွက် နှင့် အစိုဓာတ်ကို မှတ်တမ်းတင်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    },
+    "baskets": {
+     "type": "number",
+     "description": "တင်း"
+    },
+    "moisture": {
+     "type": "number",
+     "description": "အစိုဓာတ် %"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "paddy_receipt_correct",
+  "title": "စပါးလက်ခံမှု ပြင်ဆင်",
+  "description": "မှားယွင်းမှတ်ထားသော စပါးအလေးချိန် သို့မဟုတ် အမျိုးအစားကို ပြင်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "receipt_id": {
+     "type": "string",
+     "description": "စပါးလက်ခံမှု အမှတ်"
+    },
+    "baskets": {
+     "type": "number",
+     "description": "မှန်ကန်သော တင်း"
+    },
+    "variety": {
+     "type": "string",
+     "description": "အမျိုးအစား"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "paddy_receipt_cancel",
+  "title": "စပါးလက်ခံမှု ပယ်ဖျက်",
+  "description": "နှစ်ခါမှတ်မိသော သို့မဟုတ် လူမှားမှတ်သော စပါးလက်ခံမှုကို ပယ်ဖျက်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "receipt_id": {
+     "type": "string",
+     "description": "စပါးလက်ခံမှု အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "paddy_receipts_list",
+  "title": "စပါးလက်ခံမှုများ",
+  "description": "ယနေ့ သို့မဟုတ် လယ်သမားတစ်ဦး၏ စပါးလက်ခံမှုများကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "ရက်စွဲ"
+    },
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "paddy_price_set",
+  "title": "စပါးဝယ်ဈေး သတ်မှတ်",
+  "description": "စပါးအမျိုးအစား တစ်ခုချင်းစီ၏ တစ်တင်းဝယ်ဈေးကို သတ်မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "variety": {
+     "type": "string",
+     "description": "အမျိုးအစား"
+    },
+    "price": {
+     "type": "number",
+     "description": "တစ်တင်း ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "paddy_prices",
+  "title": "ယနေ့ စပါးဈေး",
+  "description": "ယနေ့ စပါးဝယ်ဈေးများကို အမျိုးအစားအလိုက် ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "milling_start",
+  "title": "ဆန်ကြိတ်ခြင်း စတင်",
+  "description": "ဂိုဒေါင်မှ စပါးတစ်သုတ်ကို စက်ထဲထည့်ပြီး ကြိတ်ခွဲခြင်း စတင်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "baskets": {
+     "type": "number",
+     "description": "တင်း"
+    },
+    "variety": {
+     "type": "string",
+     "description": "အမျိုးအစား"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "milling_finish",
+  "title": "ဆန်ကြိတ်ပြီး",
+  "description": "စပါးတစ်သုတ် ကြိတ်ပြီးကြောင်း နှင့် ရရှိသော ဆန် ဖွဲ နှင့် ဆန်ကွဲ အလေးချိန်ကို မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "batch_id": {
+     "type": "string",
+     "description": "စပါးသုတ် အမှတ်"
+    },
+    "rice": {
+     "type": "number",
+     "description": "ဆန် အိတ်"
+    },
+    "bran": {
+     "type": "number",
+     "description": "ဖွဲ အိတ်"
+    },
+    "broken": {
+     "type": "number",
+     "description": "ဆန်ကွဲ အိတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "milling_batches_list",
+  "title": "ကြိတ်ခွဲမှု သုတ်များ",
+  "description": "ယနေ့ ကြိတ်နေဆဲ နှင့် ကြိတ်ပြီးသော စပါးသုတ်များကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "machine_breakdown_report",
+  "title": "စက်ချို့ယွင်းမှု တိုင်ကြား",
+  "description": "ကြိတ်စက် သို့မဟုတ် အခြောက်ခံစက် ပျက်ကြောင်း မှတ်တမ်းတင်ပြီး စက်ပြင်ဆရာကို အကြောင်းကြားသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "machine_id": {
+     "type": "string",
+     "description": "စက် အမှတ်"
+    },
+    "problem": {
+     "type": "string",
+     "description": "ပြဿနာ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "machine_repair_done",
+  "title": "စက်ပြင်ပြီး",
+  "description": "ပြင်ဆင်ပြီးသော စက်ကို ပြန်လည်အသုံးပြုနိုင်ကြောင်း မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "machine_id": {
+     "type": "string",
+     "description": "စက် အမှတ်"
+    },
+    "cost": {
+     "type": "number",
+     "description": "ပြင်ခ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "warehouse_stock",
+  "title": "ဂိုဒေါင် လက်ကျန်",
+  "description": "ဂိုဒေါင်ထဲရှိ စပါး ဆန် ဖွဲ နှင့် ဆန်ကွဲ လက်ကျန်ကို အိတ်အရေအတွက်ဖြင့် ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rice_sale_record",
+  "title": "ဆန်ရောင်းချမှု မှတ်တမ်း",
+  "description": "ကုန်သည်ထံ ရောင်းသော ဆန်အိတ်အရေအတွက် နှင့် ဈေးနှုန်းကို မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trader_id": {
+     "type": "string",
+     "description": "ကုန်သည် အမှတ်"
+    },
+    "bags": {
+     "type": "number",
+     "description": "အိတ်"
+    },
+    "price": {
+     "type": "number",
+     "description": "တစ်အိတ် ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rice_sale_cancel",
+  "title": "ဆန်ရောင်းချမှု ပယ်ဖျက်",
+  "description": "ကုန်သည် မယူတော့သော ဆန်ရောင်းချမှုကို ပယ်ဖျက်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sale_id": {
+     "type": "string",
+     "description": "ရောင်းချမှု အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "rice_sales_list",
+  "title": "ဆန်ရောင်းချမှုများ",
+  "description": "လအလိုက် ရောင်းခဲ့သော ဆန်များ နှင့် ဝင်ငွေကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "လ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "traders_list",
+  "title": "ကုန်သည်များ",
+  "description": "ဆန်ဝယ်သော ကုန်သည်များ နှင့် သူတို့ ပေးရန်ကျန်ငွေကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_payment_pay",
+  "title": "လယ်သမားကို ငွေချေ",
+  "description": "စပါးဖိုးငွေကို လယ်သမားထံ ငွေသားဖြင့် သို့မဟုတ် KPay ဖြင့် ပေးချေသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ငွေ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_payment_void",
+  "title": "ငွေချေမှု ပယ်ဖျက်",
+  "description": "မှားယွင်းပေးချေမိသော ငွေချေမှုကို ပယ်ဖျက်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "payment_id": {
+     "type": "string",
+     "description": "ငွေချေမှု အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "farmer_payments_list",
+  "title": "ငွေချေမှုများ",
+  "description": "လတစ်လအတွင်း လယ်သမားများထံ ပေးချေခဲ့သော ငွေများကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "လ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpaid_receipts",
+  "title": "ငွေမချေရသေးသော စပါး",
+  "description": "ငွေမချေရသေးသော စပါးလက်ခံမှုများ နှင့် ကျန်ငွေကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "trader_payment_receive",
+  "title": "ကုန်သည်ထံမှ ငွေလက်ခံ",
+  "description": "ကုန်သည်ပေးသော ဆန်ဖိုးငွေကို လက်ခံမှတ်တမ်းတင်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trader_id": {
+     "type": "string",
+     "description": "ကုန်သည် အမှတ်"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ငွေ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loan_grant",
+  "title": "ကြိုတင်ငွေ ထုတ်ပေး",
+  "description": "စိုက်ပျိုးရာသီမတိုင်မီ မျိုးစပါး သို့မဟုတ် မြေဩဇာဝယ်ရန် လယ်သမားကို ကြိုတင်ငွေ ထုတ်ပေးသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ငွေ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loan_repay",
+  "title": "ကြိုတင်ငွေ ပြန်ဆပ်",
+  "description": "လယ်သမား ပြန်ဆပ်သော ကြိုတင်ငွေကို မှတ်သည် သို့မဟုတ် စပါးဖိုးထဲမှ နှုတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer_id": {
+     "type": "string",
+     "description": "လယ်သမား အမှတ်"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ငွေ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loans_list",
+  "title": "ကြိုတင်ငွေ ကျန်ရှိမှု",
+  "description": "လယ်သမားများ ပြန်မဆပ်ရသေးသော ကြိုတင်ငွေများကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "truck_book",
+  "title": "ကား ငှား",
+  "description": "ရွာမှ စပါးသယ်ရန် သို့မဟုတ် ကုန်သည်ထံ ဆန်ပို့ရန် ထရပ်ကားကို ရက်နှင့်အချိန် သတ်မှတ်ငှားသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "နေရာ"
+    },
+    "at": {
+     "type": "string",
+     "description": "ရက် နှင့် အချိန်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "truck_booking_cancel",
+  "title": "ကားငှားမှု ပယ်ဖျက်",
+  "description": "ငှားထားသော ထရပ်ကားကို ပယ်ဖျက်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "ကားငှားမှု အမှတ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "trucks_schedule",
+  "title": "ကား အချိန်ဇယား",
+  "description": "ဤအပတ် ငှားထားသော ကားများ နှင့် သွားမည့်နေရာများကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_list",
+  "title": "ဝန်ထမ်းများ",
+  "description": "ဆန်စက်ဝန်ထမ်းအားလုံး နှင့် သူတို့တာဝန်ကို ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_hire",
+  "title": "ဝန်ထမ်းအသစ် ခန့်",
+  "description": "ဝန်ထမ်းအသစ်ကို အမည် ဖုန်း နှင့် နေ့စားလုပ်ခဖြင့် ခန့်အပ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "အမည်"
+    },
+    "phone": {
+     "type": "string",
+     "description": "ဖုန်း"
+    },
+    "daily_wage": {
+     "type": "number",
+     "description": "နေ့စား ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_attendance",
+  "title": "အလုပ်ဆင်း မှတ်တမ်း",
+  "description": "ယနေ့ အလုပ်ဆင်းသော ဝန်ထမ်းများကို မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff": {
+     "type": "array",
+     "description": "ဝန်ထမ်း အမှတ်များ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "wages_pay",
+  "title": "လုပ်ခ ပေး",
+  "description": "အပတ်စဉ် သို့မဟုတ် လစဉ် ဝန်ထမ်းလုပ်ခကို ပေးချေသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "ဝန်ထမ်း အမှတ်"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ငွေ ကျပ်"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "drying_start",
+  "title": "စပါး အခြောက်ခံ စတင်",
+  "description": "အစိုဓာတ်များသော စပါးကို အခြောက်ခံစက် သို့မဟုတ် ကွင်းပြင်တွင် အခြောက်ခံ စတင်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "baskets": {
+     "type": "number",
+     "description": "တင်း"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "moisture_check",
+  "title": "အစိုဓာတ် စစ်ဆေး",
+  "description": "စပါးတစ်သုတ်၏ အစိုဓာတ် ရာခိုင်နှုန်းကို တိုင်းပြီး မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "batch_id": {
+     "type": "string",
+     "description": "စပါးသုတ် အမှတ်"
+    },
+    "moisture": {
+     "type": "number",
+     "description": "အစိုဓာတ် %"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "season_report",
+  "title": "ရာသီ အစီရင်ခံစာ",
+  "description": "ယခုရာသီ ဝယ်ယူခဲ့သော စပါး နှင့် ကြိတ်ခဲ့သော ဆန် စုစုပေါင်းကို ရွာအလိုက် ပြသည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "season": {
+     "type": "string",
+     "description": "ရာသီ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "electricity_log",
+  "title": "လျှပ်စစ်မီး မှတ်တမ်း",
+  "description": "မီးပြတ်ချိန် နှင့် ဂျင်နရေတာ သုံးသော ဒီဇယ်ဆီကို မှတ်သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hours": {
+     "type": "number",
+     "description": "မီးပြတ် နာရီ"
+    },
+    "diesel": {
+     "type": "number",
+     "description": "ဒီဇယ် ဂါလံ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "message_send",
+  "title": "သတင်း ပို့",
+  "description": "လယ်သမားအားလုံး သို့မဟုတ် ရွာတစ်ရွာသို့ Viber သို့မဟုတ် SMS ဖြင့် သတင်းပို့သည်။",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "စာ"
+    },
+    "village": {
+     "type": "string",
+     "description": "ရွာ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

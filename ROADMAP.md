@@ -40,8 +40,9 @@ The benchmark says where the search still misses, in
   Russian one, whose words change their endings (the front desk of a hotel)
   and a Japanese one, which mixes three scripts with no spaces (a
   veterinary clinic) and a Khmer one, written without spaces and with
-  stacked consonants (a water supply office) are in. Lao and Burmese,
-  written the same way, are not measured yet.
+  stacked consonants (a water supply office) and a Burmese one, cut into
+  pairs of clusters as Thai is (a rice mill) are in. Lao, written the same
+  way, is not measured yet.
 - **Accents.** On the Greek server, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension
