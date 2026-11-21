@@ -332,6 +332,9 @@ What changes from the registry server:
   array before calling `callTool()`, as every example does. A JSON array
   passes that check too; the library refuses it with `isError` before your
   gate sees it, so `authorize()` and `call()` always get named arguments.
+- **A list that is still right.** When the tools change, the next request
+  sees them; the list a client already holds may not, depending on the mode
+  ([When the tools change](#when-the-tools-change)).
 
 The stateless revision `2026-07-28` has no `initialize` handshake and no
 session at all, which suits one process per request. The HTTP example serves
@@ -350,3 +353,49 @@ Once the host has read the revision, it goes to `Revision::fromString()` like
 any other, and the library adds the `resultType`, `ttlMs` and `cacheScope`
 that revision asks for. The stdio example keeps to the revisions with a
 handshake.
+
+---
+
+## When the tools change
+
+A module installed, a permission granted, a tool renamed: the library holds
+nothing from one request to the next, so the `ToolSet` and the gate a request
+hands over are the whole truth for that request. A search finds a new tool at
+once, and a tool that went away, or that the gate now hides, is refused at
+once, whatever an earlier search showed or the learning store kept.
+[ToolsChangeTest](../tests/Unit/ToolsChangeTest.php) holds this and the table
+below.
+
+What the client may still hold is its copy of `tools/list`. Whether that copy
+is now wrong depends on the mode:
+
+| Mode | Its list changes when | Its list stays the same when |
+|---|---|---|
+| Compact | a pinned tool comes, goes or changes | any other tool comes, goes or changes: it is found by a search |
+| Gateway | the first tool that changes something comes or the last one goes; with `changesApart`, any tool that changes something comes, goes or changes | a tool that only reads comes, goes or changes |
+| Grouped | a tool outside the groups changes in any way, or a grouped one comes, goes, or changes its name, its title, or whether it only reads | a grouped tool changes only its description or its schema: `describe` gives it as it is now |
+| Direct | any tool changes in any way | never |
+
+A host need not know this table by heart: comparing two answers of
+`listTools()` is enough. To keep a client's list right:
+
+- **With a session**, declare `"tools": {"listChanged": true}` in the
+  capabilities of `initialize`, keep the encoded `listTools()` answer of the
+  session, and send `notifications/tools/list_changed` when the next one
+  differs. In compact mode that is rare: hundreds of tools can come and go
+  behind the mode's own, which never move.
+- **In the stateless revision `2026-07-28`**, the same notification goes only
+  on a `subscriptions/listen` stream the client opened with
+  `toolsListChanged`, and the capability is declared in `server/discover`.
+  A client that opened none keeps its copy for the `ttlMs` given to
+  `listTools()`: a short one costs a list now and then, a long one is safe in
+  compact mode as long as the pinned tools stay as they are.
+
+A cached index is keyed by the tools it holds, so a change builds a new one on
+the next search, and the old one is read again only if the tools go back to
+what they were. `MemoryIndexCache` drops
+the oldest past its size. `FileIndexCache` leaves the old files where they
+are: emptying its directory when the server is deployed is safe, and the next
+search writes the index it needs. What the learning store kept for a tool
+only reorders tools a search already found, so a removed tool's counts lift
+nothing; a renamed tool starts learning again under its new name.

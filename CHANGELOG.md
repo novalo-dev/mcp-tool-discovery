@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **What to do when the tools change, in docs/HOSTS.md.** A table says, for
+  each mode, which changes to the host's tools change the `tools/list` a
+  client holds and which only reach it through a search: in compact mode only
+  a pinned tool moves the list. With it, how to send
+  `notifications/tools/list_changed` with a session, how long a `ttlMs` may be
+  in the stateless revision, and what becomes of the index cache and the
+  learning store; `FileIndexCache` keeps the files of past tool sets, and its
+  directory may be emptied when the server is deployed. A test holds the table
+  and the claim that a search and a run follow the new tools at once, with a
+  shared cache and learning store.
+
 - **A Burmese rice mill on the search benchmark.** 40 tools named in
   snake_case with titles and descriptions in Burmese, many of them neighbours
   (receive, correct and cancel a delivery of paddy; pay a farmer and void the

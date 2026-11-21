@@ -155,9 +155,11 @@ new SearchSetup(cache: new FileIndexCache($cacheDir)); // each request starts af
 The key is a hash of every text indexed and of the settings. Two callers who
 see different tools get two indexes, so an index never holds a tool hidden
 from the one searching it; a changed tool gives a new key, so nothing goes
-stale and nothing needs clearing. `FileIndexCache` writes PHP files that return
-an array: OPcache keeps them compiled in shared memory. Its directory must be
-one only the server writes to.
+stale. `FileIndexCache` writes PHP files that return an array: OPcache keeps
+them compiled in shared memory. Its directory must be one only the server
+writes to. The files of tools that have since changed stay there; emptying the
+directory when the server is deployed is safe
+([When the tools change](HOSTS.md#when-the-tools-change)).
 
 | Tools | No cache | Memory | Files, with OPcache |
 |---|---|---|---|
