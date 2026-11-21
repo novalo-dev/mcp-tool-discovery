@@ -136,11 +136,14 @@ final class ToolFinder
 
     /**
      * The tool's parameters added to an answer that reports a failure, so the
-     * assistant can fix its call without searching again.
+     * assistant can fix its call without searching again. Written as the
+     * search writes it: a host that read its definitions with
+     * json_decode(..., true) holds "properties" as [], and the assistant
+     * would read a list where the search showed it an object.
      */
     public static function withParameters(CallResult $result, Tool $tool): CallResult
     {
-        $schema = json_encode($tool->inputSchema(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $schema = json_encode(Json::schema($tool->inputSchema()), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         return is_string($schema) ? $result->withContent('Parameters of ' . $tool->name . ': ' . $schema) : $result;
     }

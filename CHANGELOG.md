@@ -81,6 +81,16 @@ becomes the next version's section when it is published.
   bytes, and its eight group tools from 7,486 to 7,154, almost a quarter
   under the 9,299 of the actions they stand for.
 
+### Fixed
+
+- **The parameters added to a failed run keep their objects.** With
+  `schemaOnError`, a run that fails carries the tool's parameters so the
+  assistant can correct its call. They were written as the host gave them,
+  so a host that read its definitions with `json_decode(..., true)`, as the
+  SDK registry example does, sent a tool with no parameter as
+  `"properties": []`: a list where the search had shown an object. They are
+  now written as the search writes them, in Compact, Grouped and Gateway.
+
 ## 0.5.0 - 2026-11-18
 
 ### Added
