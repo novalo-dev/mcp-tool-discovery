@@ -45,6 +45,19 @@ becomes the next version's section when it is published.
   without which the class of the tools is built with no argument and every
   call fails.
 
+- **The SDK example over its HTTP transport, in
+  `docs/examples/sdk/http-server.php`.** The same handler as the stdio
+  server, behind the SDK's Streamable HTTP transport, one process per
+  request as PHP-FPM runs it. The caller is read from the bearer token
+  before the SDK, and the gate and `Discovery` are built for it on each
+  request; the SDK keeps the session in files, and the caller is set as the
+  request's `PRINCIPAL_ATTRIBUTE`, so another token sent with the session's
+  id is answered 404 and one caller's gate never runs on another's session.
+  The index is cached on disk, with no learning store, since it would be
+  shared by every caller. docs/HOSTS.md lists what changes from stdio,
+  including `nyholm/psr7` in the example's `composer.json`. `ToolsHandler`
+  moves to `bridge.php`, shared by both servers.
+
 - **A Japanese veterinary clinic on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Japanese, written without
   spaces in three scripts, many of them neighbours (book, move, cancel an

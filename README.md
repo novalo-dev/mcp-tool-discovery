@@ -134,9 +134,9 @@ written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [
 complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
 HTTP server kept up in one ReactPHP process, the same as a Symfony application
-and as a Laravel one, and three on the official PHP SDK, two of them with
-their tools left in the SDK's registry, added by hand or found by their
-attribute.
+and as a Laravel one, and four on the official PHP SDK: over stdio and over
+its HTTP transport, and two with their tools left in the SDK's registry,
+added by hand or found by their attribute.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:
@@ -359,7 +359,7 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application, a Laravel application and the official PHP SDK, with tools outside or inside its registry |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application, a Laravel application and the official PHP SDK, over stdio or HTTP, with tools outside or inside its registry |
 | [docs/MODES.md](docs/MODES.md) | choosing a mode, what each costs, how a mode works, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |

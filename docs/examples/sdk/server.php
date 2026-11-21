@@ -27,14 +27,8 @@ namespace Example\Notes\Sdk;
 
 use Example\Notes\Notes;
 use Example\Notes\NotesGate;
-use Mcp\Schema\JsonRpc\Request;
-use Mcp\Schema\JsonRpc\Response;
-use Mcp\Schema\Request\CallToolRequest;
-use Mcp\Schema\Request\ListToolsRequest;
 use Mcp\Schema\ServerCapabilities;
-use Mcp\Server\Handler\Request\RequestHandlerInterface;
 use Mcp\Server\Server;
-use Mcp\Server\Session\SessionInterface;
 use Mcp\Server\Transport\StdioTransport;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
@@ -49,37 +43,6 @@ use function Example\Notes\definitions;
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
 require __DIR__ . '/bridge.php';
-
-/**
- * Answers tools/list and tools/call from the library. The SDK asks the
- * handlers a host adds before its own, so its registry of tools is never
- * reached and stays empty.
- *
- * @implements RequestHandlerInterface<Answer>
- */
-final class ToolsHandler implements RequestHandlerInterface
-{
-    public function __construct(private readonly Discovery $discovery, private readonly ToolSet $tools) {}
-
-    public function supports(Request $request): bool
-    {
-        return $request instanceof ListToolsRequest || $request instanceof CallToolRequest;
-    }
-
-    /**
-     * @return Response<Answer>
-     */
-    public function handle(Request $request, SessionInterface $session): Response
-    {
-        $revision = revision($request, $session);
-
-        if ($request instanceof CallToolRequest) {
-            return new Response($request->getId(), new Answer($this->discovery->callTool($request->name, arguments($request), $this->tools, $revision)));
-        }
-
-        return new Response($request->getId(), new Answer($this->discovery->listTools($this->tools, $revision)));
-    }
-}
 
 $role = getenv('MCP_NOTES_ROLE');
 $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));

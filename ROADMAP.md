@@ -53,7 +53,7 @@ A change to the search comes with the benchmark before and after.
 
 - Examples on other hosts, beside the servers written by hand over stdio and
   HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications
-  and the three on the official PHP SDK in
+  and the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.

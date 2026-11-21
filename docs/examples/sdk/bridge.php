@@ -12,21 +12,59 @@
 declare(strict_types=1);
 
 /*
- * What the two servers on the official MCP PHP SDK share: reading the
- * revision and the arguments the SDK agreed on, and handing the library's
- * answer back to it. docs/examples/sdk/server.php keeps its tools outside the
- * SDK; docs/examples/sdk/registry.php keeps them in the SDK's registry.
+ * What the servers on the official MCP PHP SDK share: reading the revision
+ * and the arguments the SDK agreed on, and handing the library's answer back
+ * to it. docs/examples/sdk/server.php and docs/examples/sdk/http-server.php
+ * keep their tools outside the SDK and answer them with ToolsHandler, over
+ * stdio and over HTTP; docs/examples/sdk/registry.php keeps them in the SDK's
+ * registry.
  */
 
 namespace Example\Notes\Sdk;
 
 use Mcp\Schema\JsonRpc\Request;
+use Mcp\Schema\JsonRpc\Response;
 use Mcp\Schema\JsonRpc\ResultInterface;
 use Mcp\Schema\Request\CallToolRequest;
+use Mcp\Schema\Request\ListToolsRequest;
+use Mcp\Server\Handler\Request\RequestHandlerInterface;
 use Mcp\Server\RequestContext;
 use Mcp\Server\Session\SessionInterface;
+use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
+
+/**
+ * Answers tools/list and tools/call from the library. The SDK asks the
+ * handlers a host adds before its own, so its registry of tools is never
+ * reached and stays empty.
+ *
+ * @implements RequestHandlerInterface<Answer>
+ */
+final class ToolsHandler implements RequestHandlerInterface
+{
+    public function __construct(private readonly Discovery $discovery, private readonly ToolSet $tools) {}
+
+    public function supports(Request $request): bool
+    {
+        return $request instanceof ListToolsRequest || $request instanceof CallToolRequest;
+    }
+
+    /**
+     * @return Response<Answer>
+     */
+    public function handle(Request $request, SessionInterface $session): Response
+    {
+        $revision = revision($request, $session);
+
+        if ($request instanceof CallToolRequest) {
+            return new Response($request->getId(), new Answer($this->discovery->callTool($request->name, arguments($request), $this->tools, $revision)));
+        }
+
+        return new Response($request->getId(), new Answer($this->discovery->listTools($this->tools, $revision)));
+    }
+}
 
 /**
  * A result the library already shaped for the revision. The SDK wants an

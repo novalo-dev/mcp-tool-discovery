@@ -5,11 +5,12 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in three
-on the official PHP SDK. All eight serve the same notes tools, kept with their
-gate in [examples/notes.php](examples/notes.php): only the transport differs,
-and the second and third SDK servers keep the tools in the SDK's own registry,
-added with `addTool()` or found by their `#[McpTool]` attribute.
+on ReactPHP, in a Symfony application, in a Laravel application, and in four
+on the official PHP SDK. All nine serve the same notes tools, kept with their
+gate in [examples/notes.php](examples/notes.php): only the transport differs.
+Two of the SDK servers keep their tools outside the SDK, over stdio and over
+HTTP; the other two keep them in the SDK's own registry, added with
+`addTool()` or found by their `#[McpTool]` attribute.
 
 ---
 
@@ -225,10 +226,33 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 | The answer | `Answer`, a `ResultInterface` holding the array | the SDK encodes an object; in the stateless revision it keeps the `resultType`, `ttlMs` and `cacheScope` the answer carries |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore`, given to the `Discovery` | as over stdio by hand: the index is kept for the process, and its one caller's runs teach the search for the session |
 
-Over the SDK's HTTP transport the handler stays the same; build the gate and
-the `Discovery` from the caller of each request, as in the HTTP example, and
-keep the `SearchSetup` once beside them. Its learning store is then shared by
-every caller of the server, as in the ReactPHP example.
+### Over the SDK's HTTP transport
+
+[examples/sdk/http-server.php](examples/sdk/http-server.php) serves the same
+handler over the SDK's Streamable HTTP transport, one process per request as
+PHP-FPM runs it. The SDK keeps the session between requests; the caller is no
+longer the process, so the gate and the `Discovery` are built for the caller
+each request names, as in the HTTP example written by hand.
+[tests/Sdk/SdkHttpServerTest.php](../tests/Sdk/SdkHttpServerTest.php) calls it
+over HTTP in the same CI job.
+
+```
+php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
+```
+
+What changes from the server over stdio:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The caller | read from the bearer token with `roleOf()` of `http.php`, before the SDK; no caller is answered 401 | the gate answers for one caller, and the SDK has no notion of who may see a tool |
+| The request | `Psr17Factory::createServerRequestFromGlobals()`, and `nyholm/psr7` in `composer.json` | the transport takes a PSR-7 request; the SDK finds a PSR-17 factory but ships none |
+| The session | `setSession(new FileSessionStore(...))` and a `FileSessionLock` on the same directory | without a store the SDK serves HTTP with no session at all; in files, the revision a client agreed on reaches its next requests, and two requests of one session do not overwrite each other |
+| Who a session serves | the caller set as the request's `StreamableHttpTransport::PRINCIPAL_ATTRIBUTE` | the SDK answers 404 to another caller sending the session's `Mcp-Session-Id`, so one caller's gate never runs on another's session |
+| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
+
+The stateless revision `2026-07-28` needs no session: the SDK reads its
+revision from `_meta` and asks for the `Mcp-Method` header, and the handler
+answers as it does for the others.
 
 ### Tools already in the SDK's registry
 
