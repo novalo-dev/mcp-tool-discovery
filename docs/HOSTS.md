@@ -335,6 +335,9 @@ What changes from the registry server:
 - **A list that is still right.** When the tools change, the next request
   sees them; the list a client already holds may not, depending on the mode
   ([When the tools change](#when-the-tools-change)).
+- **Pages, if the list is long.** `listTools()` answers in one piece.
+  A host that pages its list calls `listPage()` instead
+  ([A list in pages](#a-list-in-pages)).
 
 The stateless revision `2026-07-28` has no `initialize` handshake and no
 session at all, which suits one process per request. The HTTP example serves
@@ -353,6 +356,38 @@ Once the host has read the revision, it goes to `Revision::fromString()` like
 any other, and the library adds the `resultType`, `ttlMs` and `cacheScope`
 that revision asks for. The stdio example keeps to the revisions with a
 handshake.
+
+---
+
+## A list in pages
+
+`tools/list` may be paged: the client sends the `cursor` of the last answer,
+and the server answers with a `nextCursor` while tools remain. A client reads
+every page before it uses the list, so paging saves no token; it keeps each
+answer short, for a transport or a proxy that limits its size, or a server in
+direct mode with hundreds of tools.
+
+```php
+use Novalo\McpToolDiscovery\Exception\InvalidCursor;
+
+try {
+    $result = $discovery->listPage($tools, $revision, $params['cursor'] ?? null, 50, ttlMs: 300000);
+} catch (InvalidCursor $error) {
+    // The specification asks for invalid params.
+    return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32602, 'message' => $error->getMessage()]];
+}
+```
+
+The pages put together are the answer of `listTools()`, in every mode and
+every revision, each one with the same `ttlMs` and `cacheScope`. The cursor
+names the last tool of its page rather than a position, so a tool that comes
+or goes elsewhere in the list between two pages neither skips nor repeats
+one. A cursor whose tool has gone, or that names a tool the gate hides from
+this caller, is refused with `InvalidCursor`, in the same words as a cursor
+the list never gave: the client starts again from the first page. The
+modes other than direct list a handful of tools, where a page of 50 is the
+whole list and carries no `nextCursor`.
+[ListPageTest](../tests/Unit/ListPageTest.php) holds all of this.
 
 ---
 

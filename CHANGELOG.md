@@ -10,6 +10,16 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **`Discovery::listPage()`, for a host that pages `tools/list`.** It takes
+  the `cursor` of the request and a page size, and answers one page with a
+  `nextCursor` while tools remain; the pages put together are the answer of
+  `listTools()`. The cursor names the last tool of its page, so a tool added
+  or removed elsewhere between two pages neither skips nor repeats one. A
+  cursor the list did not give, or whose tool has gone or is hidden from the
+  caller, throws the new `InvalidCursor`, to be answered with error -32602;
+  its message is the same in every case. `listTools()` is unchanged. See
+  "A list in pages" in docs/HOSTS.md.
+
 - **What to do when the tools change, in docs/HOSTS.md.** A table says, for
   each mode, which changes to the host's tools change the `tools/list` a
   client holds and which only reach it through a search: in compact mode only
