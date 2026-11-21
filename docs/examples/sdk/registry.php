@@ -50,6 +50,9 @@ use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
@@ -134,6 +137,7 @@ final class RegistryToolsHandler implements RequestHandlerInterface
         private readonly RegistryInterface $registry,
         private readonly CallToolHandler $sdk,
         private readonly Closure $visible,
+        private readonly SearchSetup $search,
     ) {}
 
     public function supports(Request $request): bool
@@ -148,10 +152,12 @@ final class RegistryToolsHandler implements RequestHandlerInterface
     {
         $revision = revision($request, $session);
         // The gate runs the tool with this request's session, so it is built
-        // per request, and the Discovery with it.
+        // per request, and the Discovery with it. The search setup is not:
+        // its cache and what it learned outlive the request.
         $discovery = new Discovery(
             new CompactMode(prefix: 'notes_', batchLimit: 20),
             new RegistryGate($this->sdk, $request, $session, $this->visible),
+            $this->search,
         );
 
         if ($request instanceof CallToolRequest) {
@@ -231,6 +237,10 @@ $server = Server::builder()
         new CallToolHandler($registry, $referenceHandler),
         // The same rule as the other examples: only an admin sees deletion.
         (new NotesGate(is_string($role) ? $role : 'reader', $notes))->visible(...),
+        // The index is built at the first search instead of at every one. The
+        // process serves one caller, so what its runs teach the search lifts
+        // only that caller's tools, for as long as the session lasts.
+        new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore()),
     ))
     ->build();
 

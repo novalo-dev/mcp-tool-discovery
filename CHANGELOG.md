@@ -45,6 +45,19 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **The stdio examples keep their search index and learn.** The server
+  written by hand over stdio and the two on the official PHP SDK built the
+  index again at every search and never learned, so a host that started
+  from them did the same. Each now gives `Discovery` one `SearchSetup` for
+  the life of the process, with a `MemoryIndexCache` and a
+  `MemoryLearningStore`: the process serves one caller, so what its runs
+  teach lifts only that caller's tools, for its session. The registry
+  example still builds its gate and `Discovery` per request and shares the
+  setup between them. A test in each holds them to it: a search names the
+  tool that adds a note first for "open a note", a failed read with its
+  `search_id` changes nothing, and after one that succeeds the read comes
+  first.
+
 - **Learning no longer pairs the characters of one word.** A word of
   Japanese, Chinese, Korean or Thai is cut into pairs of characters, and
   learning paired those pairs with each other: they only said the object

@@ -64,6 +64,11 @@ final class SdkServerTest extends TestCase
         self::assertSame('Renew the certificate.', $replies[5]['result']['content'][0]['text']);
     }
 
+    public function testARunFoundBySearchLiftsItsToolForTheSession(): void
+    {
+        self::assertARunTeachesTheSession(dirname(__DIR__, 2) . '/docs/examples/sdk/server.php', [self::INITIALIZE, self::INITIALIZED]);
+    }
+
     public function testAToolTheGateHidesIsUnknownUntilTheRoleAllowsIt(): void
     {
         $delete = ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_delete', 'arguments' => ['id' => 1]]]];

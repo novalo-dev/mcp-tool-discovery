@@ -78,6 +78,11 @@ final class SdkRegistryTest extends TestCase
         self::assertSame('No note has this id.', $replies[5]['result']['content'][0]['text']);
     }
 
+    public function testARunFoundBySearchLiftsItsToolForTheSession(): void
+    {
+        self::assertARunTeachesTheSession(dirname(__DIR__, 2) . '/docs/examples/sdk/registry.php', [self::INITIALIZE, self::INITIALIZED]);
+    }
+
     // The SDK refuses these arguments as a protocol error; through the mode
     // the assistant gets them back as the tool's answer, and can try again.
     public function testArgumentsTheSdkSchemaRefusesComeBackAsAnError(): void

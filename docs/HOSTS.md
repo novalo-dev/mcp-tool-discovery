@@ -33,6 +33,7 @@ Its parts, in the order a host writes them:
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony and Laravel examples reuse behind their own gates |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
+| The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
 ignoring notifications, the JSON-RPC errors for a method it does not serve or
@@ -221,9 +222,12 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 | The revision | `RequestContext::getProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
 | The arguments | decoded again as arrays | the SDK keeps nested objects as `stdClass`; without this, every item of a batch is refused as not an object |
 | The answer | `Answer`, a `ResultInterface` holding the array | the SDK encodes an object; in the stateless revision it keeps the `resultType`, `ttlMs` and `cacheScope` the answer carries |
+| The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore`, given to the `Discovery` | as over stdio by hand: the index is kept for the process, and its one caller's runs teach the search for the session |
 
 Over the SDK's HTTP transport the handler stays the same; build the gate and
-the `Discovery` from the caller of each request, as in the HTTP example.
+the `Discovery` from the caller of each request, as in the HTTP example, and
+keep the `SearchSetup` once beside them. Its learning store is then shared by
+every caller of the server, as in the ReactPHP example.
 
 ### Tools already in the SDK's registry
 
@@ -249,6 +253,7 @@ What changes from the server above:
 | The tools | `RegistryInterface::getTools()`, each `Tool` encoded and read with `Tool::fromArray()` | the definitions the client would have seen, in the registry's order |
 | The gate | `RegistryGate`, built per request with its session | `call()` hands a `CallToolRequest` with the client's id and `_meta` to the SDK's `CallToolHandler`, which reads the revision from them; who sees which tool stays the host's rule |
 | The errors | an `Error` from the SDK becomes `CallResult::error()` | arguments the schema refuses are a protocol error for the SDK; through a mode they are the tool's answer, which the assistant reads and corrects |
+| The search | the same `SearchSetup`, built once and given to the handler | the gate and the `Discovery` are built per request, the cache and what was learned outlive it |
 | The capability | detected by the SDK | the registry is not empty, so the SDK announces tools by itself |
 
 The handler answers every `tools/call`, so a tool the gate hides is unknown

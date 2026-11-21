@@ -57,6 +57,11 @@ final class StdioServerTest extends TestCase
         self::assertSame('Renew the certificate.', $replies[4]['result']['content'][0]['text']);
     }
 
+    public function testARunFoundBySearchLiftsItsToolForTheSession(): void
+    {
+        self::assertARunTeachesTheSession(dirname(__DIR__, 2) . '/docs/examples/stdio-server.php', [self::INITIALIZE]);
+    }
+
     public function testAToolTheGateHidesIsUnknownUntilTheRoleAllowsIt(): void
     {
         $delete = ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_delete', 'arguments' => ['id' => 1]]]];

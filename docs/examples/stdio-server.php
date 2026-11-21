@@ -32,6 +32,9 @@ namespace Example\Notes;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
@@ -89,6 +92,10 @@ $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 $discovery = new Discovery(
     new CompactMode(prefix: 'notes_', batchLimit: 20),
     new NotesGate(is_string($role) ? $role : 'reader', new Notes()),
+    // The index is built at the first search instead of at every one. The
+    // process serves one caller, so what its runs teach the search lifts
+    // only that caller's tools, for as long as the session lasts.
+    new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore()),
 );
 $revision = null;
 
