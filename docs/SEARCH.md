@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 617 times
-out of 799 in fields, and 392 times as one sentence.
+On the benchmark below, the same requests find the right tool first 649 times
+out of 849 in fields, and 424 times as one sentence.
 
 ## How a tool is scored
 
@@ -89,8 +89,12 @@ run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
 consonant with its marks): "ยกเลิก" (to cancel) gives `ยก`, `กเ`, `เลิ`,
 `ลิก`. Unlike Chinese, the whole run is kept beside its pairs, and its
 trigrams with it: on the train half of the sports centre, keeping it found
-as many tools first, with fewer tools returned. Lao, Khmer and Burmese are
-written the same way and are not measured yet, so they are read as before.
+as many tools first, with fewer tools returned. Khmer is written the same
+way and is read as before, its runs met by their trigrams: on the train half
+of the water supply office (below), cutting it into pairs of clusters as Thai
+is found as many tools first, returned more, and learning lost one more
+request. Lao and Burmese are not measured yet, so they are read as before
+too.
 
 **A Korean word is cut into pairs.** Korean puts spaces between words, but
 glues to each word the particles that mark its role: "레슨을 취소해 줘"
@@ -272,7 +276,7 @@ locked while it is written.
 
 ## The measures
 
-Fifteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Sixteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -285,18 +289,19 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 (40 tools, `court_book`), a music school written in Korean (40 tools,
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
 `estimate_send`), the front desk of a hotel written in Russian (40 tools,
-`BOOKING_CHANGE_DATES`) and a veterinary clinic written in Japanese (40
-tools, `appointment_move`). 1597 requests, each written as one
+`BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
+tools, `appointment_move`) and a water supply office written in Khmer (40
+tools, `outage_schedule`). 1697 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 799 requests | Right tool first | Top 3 |
+| Test half, 849 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 617 | 719 |
-| The same request as one sentence | 392 | 529 |
-| In fields, after every train request was run once | 620 | 720 |
-| In fields, after the test requests were run once, then asked again | 674 | 738 |
+| The request in fields | 649 | 758 |
+| The same request as one sentence | 424 | 571 |
+| In fields, after every train request was run once | 652 | 759 |
+| In fields, after the test requests were run once, then asked again | 710 | 782 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -461,6 +466,26 @@ loses nothing (33 and 37 both ways). What it misses is mostly words the
 tools do not use ("ツケ" for an unpaid bill, "補充" for ordering supplies) and
 neighbours of one object (moving an appointment finds the tool that cancels
 it).
+
+The water supply office is written in Khmer, behind snake_case names: a
+script with no spaces between words, only between phrases, whose vowels are
+marks and whose consonants stack below one another. Its tools are neighbours
+by design (cut and reconnect the water; issue, void and correct a bill;
+schedule, cancel and announce an outage). Its 100 requests were written
+before any of them was run, as staff at the office talk, and nothing in the
+search was changed for it: 32 of its 50 test requests find the right tool
+first in fields (39 in the top 3), 32 as one sentence (42), and learning
+loses nothing. A phrase of Khmer is one token that meets tools by its
+trigrams, as Thai once did: the right tool is found, but less sharply, with
+about three tools returned against two on most servers. On its train half,
+pairs of grapheme clusters, kept beside the run as for Thai, found as many
+tools first (42) and as one sentence one more (38), but returned more tools
+(2.7 against 2.4 as one sentence) and learning lost two requests against
+one; pairs alone found 43 first and 48 in the top 3 against 49, and pairs of
+code points 41. None was kept. What it misses is mostly neighbours of one
+object (cancelling an outage finds the tool that schedules one) and words the
+tools do not use ("ពាក្យសុំ", an application form, where the tools write
+"សំណើ", a request).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

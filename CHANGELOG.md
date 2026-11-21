@@ -10,6 +10,18 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Khmer water supply office on the search benchmark.** 40 tools named in
+  snake_case with titles and descriptions in Khmer, a script written without
+  spaces between words and with stacked consonants, many of them neighbours
+  (cut and reconnect the water; issue, void and correct a bill; schedule,
+  cancel and announce an outage), and 100 requests written before any of them
+  was run. Nothing in the search changed for it: 32 of its 50 test requests
+  find the right tool first in fields, 32 as one sentence, and learning loses
+  nothing. Cutting Khmer into pairs of clusters, as Thai is, was measured on
+  its train half and not kept: no more tools first, more tools returned. The
+  benchmark now holds 1697 requests over sixteen servers; its floors move to
+  649 and 758 in fields and 710 asked again.
+
 - **The SDK example for tools already in its registry, in
   `docs/examples/sdk/registry.php`.** A server written for the official PHP
   SDK keeps its tools as it registered them, with `addTool()` or attribute
