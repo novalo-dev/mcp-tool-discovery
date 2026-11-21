@@ -33,6 +33,18 @@ becomes the next version's section when it is published.
   hides stays unknown even called by its own name. docs/HOSTS.md says what
   changes from the first SDK example, and the `sdk` test suite runs both.
 
+- **The SDK example for tools found by their `#[McpTool]` attribute, in
+  `docs/examples/sdk/attributes.php`.** The note tools are the methods of
+  one class, found by the SDK's discovery, with their descriptions taken
+  from the doc comments. They reach the same registry and run through the
+  same handler and gate as `registry.php`, now shared in
+  `registry-bridge.php`, and the `sdk` test suite holds both servers to the
+  same tests. docs/HOSTS.md lists the three things the attribute server
+  needs: `symfony/finder`, which the SDK only suggests; the class autoloaded
+  by Composer; and the SDK's container given to the `ReferenceHandler` too,
+  without which the class of the tools is built with no argument and every
+  call fails.
+
 - **A Japanese veterinary clinic on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Japanese, written without
   spaces in three scripts, many of them neighbours (book, move, cancel an

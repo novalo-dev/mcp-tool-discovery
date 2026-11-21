@@ -5,10 +5,11 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in two
-on the official PHP SDK. All seven serve the same notes tools, kept with their
+on ReactPHP, in a Symfony application, in a Laravel application, and in three
+on the official PHP SDK. All eight serve the same notes tools, kept with their
 gate in [examples/notes.php](examples/notes.php): only the transport differs,
-and the second SDK server keeps the tools in the SDK's own registry.
+and the second and third SDK servers keep the tools in the SDK's own registry,
+added with `addTool()` or found by their `#[McpTool]` attribute.
 
 ---
 
@@ -233,7 +234,9 @@ every caller of the server, as in the ReactPHP example.
 
 A server written for the SDK often has its tools there already, as handlers
 added with `addTool()` or found by attribute discovery.
-[examples/sdk/registry.php](examples/sdk/registry.php) keeps them as they are:
+[examples/sdk/registry.php](examples/sdk/registry.php) keeps the first as they
+are, and [examples/sdk/registry-bridge.php](examples/sdk/registry-bridge.php)
+holds what it shares with the attribute server below:
 the library reads their definitions from the registry and runs each one
 through the SDK's own `CallToolHandler`, so a tool found by search runs as a
 direct call would. Its arguments are checked against the schema the SDK
@@ -261,6 +264,29 @@ even when a client calls it by its own name. A tool that asks the client for
 input (`InputRequiredResult`) cannot run through a mode: the question and its
 answer travel between the SDK and the client, and the example answers it as
 an error.
+
+### Tools found by their attribute
+
+[examples/sdk/attributes.php](examples/sdk/attributes.php) serves the same
+tools as methods of one class,
+[examples/sdk/tools/NoteTools.php](examples/sdk/tools/NoteTools.php), each
+marked `#[McpTool]`. The SDK finds them, takes each description from the doc
+comment and each parameter's from its `@param`, and they reach the same
+registry, so the handler and the gate are the ones above, unchanged.
+[tests/Sdk/SdkAttributesTest.php](../tests/Sdk/SdkAttributesTest.php) holds
+it to every test of the registry server.
+
+```
+php docs/examples/sdk/attributes.php
+```
+
+What changes from the registry server:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The discovery | `setDiscovery(__DIR__, ['tools'])`, and `symfony/finder` in `composer.json` | the SDK needs Finder to read a directory and suggests it without requiring it |
+| The class | autoloaded by Composer (`autoload.psr-4` of the example) | the SDK reads the class from its file and asks the autoloader for it |
+| The container | one `Container`, given the server's `Notes` with `set()`, passed to `setContainer()` and to the `ReferenceHandler` | the class of the tools needs its `Notes`; a `ReferenceHandler` built without the container creates the class with `new` and no argument, and every call fails |
 
 ---
 

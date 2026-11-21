@@ -134,8 +134,9 @@ written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [
 complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
 HTTP server kept up in one ReactPHP process, the same as a Symfony application
-and as a Laravel one, and two on the official PHP SDK, one of them with
-its tools left in the SDK's registry.
+and as a Laravel one, and three on the official PHP SDK, two of them with
+their tools left in the SDK's registry, added by hand or found by their
+attribute.
 
 **4. Optionally, tune the search**, once, for whichever mode you use. The
 cache and the learning store are both optional:

@@ -10,7 +10,10 @@ parameters:
     paths:
         - bridge.php
         - server.php
+        - registry-bridge.php
         - registry.php
+        - attributes.php
+        - tools
     scanFiles:
         - ../notes.php
     bootstrapFiles:
