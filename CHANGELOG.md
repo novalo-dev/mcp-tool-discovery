@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Greek archaeological museum on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Greek, many of them
+  neighbours (register, correct, move and strike off a find; request,
+  approve and return a loan; book, cancel and move a guided tour), and 100
+  requests written before any of them was run, about a quarter without
+  accents and one in eight in capitals. The benchmark now holds 1897
+  requests over eighteen servers; its floors move to 723 and 851 in fields
+  and 795 asked again.
+
 - **The examples on the official PHP SDK page `tools/list`.** `ToolsHandler`
   and `RegistryToolsHandler` hand the `cursor` of the SDK's `ListToolsRequest`
   to `listPage()` and answer a cursor the list did not give with the SDK's
@@ -155,6 +164,16 @@ becomes the next version's section when it is published.
   under the 9,299 of the actions they stand for.
 
 ### Fixed
+
+- **The same search finds the same tools on every version of PHP.** The
+  Analyzer lowered text with Unicode's full mapping, which from PHP 8.3
+  chooses the Greek final sigma by context: a request typed in capitals
+  (`ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ`) gave other terms, and could find other tools, on 8.2
+  than on 8.3. The same mapping lowered the Turkish `İ` to an `i` and a
+  combining dot, so a tool titled "İzin kaydet" never met the word `izin`.
+  Each letter is now lowered on its own, with the simple mapping: a capital
+  sigma always becomes `σ`, as on 8.2, and `İ` becomes `i`. The index
+  format moves to 8, so a cached index is built again once.
 
 - **The parameters added to a failed run keep their objects.** With
   `schemaOnError`, a run that fails carries the tool's parameters so the

@@ -149,6 +149,18 @@ final class ToolSearchTest extends TestCase
         self::assertSame(['सर्वर'], $analyzer->words('सर्वर'), 'one term, no fragment');
     }
 
+    public function testEachLetterIsLoweredOnItsOwnOnEveryVersionOfPhp(): void
+    {
+        $analyzer = new Analyzer();
+
+        // The full mapping gave "i" and a combining dot, a word "izin" never met.
+        self::assertSame(['izin', 'kaydet'], $analyzer->tokens('İzin kaydet'), 'the Turkish capital dotted i');
+        // From PHP 8.3 the full mapping picked the final sigma by context:
+        // the same request found other tools on 8.2 than on 8.3.
+        self::assertSame(['ακυρωσησ', 'κρατησησ'], $analyzer->tokens('ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ'), 'a Greek capital sigma');
+        self::assertSame(['κράτησης'], $analyzer->tokens('κράτησης'), 'a word is shown back as it is written');
+    }
+
     public function testAWordWithMarksFindsItsTool(): void
     {
         $search = new ToolSearch(RecordingGate::server('depot'));

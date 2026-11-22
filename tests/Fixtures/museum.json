@@ -1,0 +1,801 @@
+[
+ {
+  "name": "finds_search",
+  "title": "Αναζήτηση ευρημάτων",
+  "description": "Αναζητά ευρήματα του καταλόγου με περίοδο, υλικό ή τόπο ανασκαφής.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "period": {
+     "type": "string",
+     "description": "Περίοδος"
+    },
+    "material": {
+     "type": "string",
+     "description": "Υλικό"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "find_get",
+  "title": "Καρτέλα ευρήματος",
+  "description": "Δείχνει την καρτέλα ενός ευρήματος: περιγραφή, διαστάσεις, φωτογραφίες, θέση στην αποθήκη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "find_register",
+  "title": "Καταγραφή ευρήματος",
+  "description": "Καταγράφει νέο εύρημα από ανασκαφή ή δωρεά στον κατάλογο.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Ονομασία"
+    },
+    "site": {
+     "type": "string",
+     "description": "Τόπος εύρεσης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "find_update",
+  "title": "Διόρθωση καρτέλας",
+  "description": "Διορθώνει την περιγραφή, τη χρονολόγηση ή τις διαστάσεις ενός ευρήματος.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "fields": {
+     "type": "object",
+     "description": "Πεδία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "find_move",
+  "title": "Μετακίνηση ευρήματος",
+  "description": "Μεταφέρει ένα εύρημα από την αποθήκη σε αίθουσα ή σε άλλο ράφι.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "place": {
+     "type": "string",
+     "description": "Νέα θέση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "find_deaccession",
+  "title": "Διαγραφή από τον κατάλογο",
+  "description": "Αφαιρεί οριστικά ένα εύρημα από τον κατάλογο, μετά από απόφαση του συμβουλίου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "decision": {
+     "type": "string",
+     "description": "Απόφαση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "conservation_request",
+  "title": "Αίτημα συντήρησης",
+  "description": "Στέλνει ένα εύρημα στο εργαστήριο συντήρησης με περιγραφή της φθοράς.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "damage": {
+     "type": "string",
+     "description": "Φθορά"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "conservation_done",
+  "title": "Ολοκλήρωση συντήρησης",
+  "description": "Σημειώνει ότι η συντήρηση ενός ευρήματος τελείωσε και καταγράφει τις εργασίες.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "report": {
+     "type": "string",
+     "description": "Έκθεση εργασιών"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "conservation_queue",
+  "title": "Εργαστήριο συντήρησης",
+  "description": "Δείχνει τα ευρήματα που περιμένουν ή βρίσκονται σε συντήρηση.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exhibitions_list",
+  "title": "Εκθέσεις",
+  "description": "Δείχνει τις μόνιμες και τις περιοδικές εκθέσεις με τις ημερομηνίες τους.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exhibition_create",
+  "title": "Νέα περιοδική έκθεση",
+  "description": "Δημιουργεί μια περιοδική έκθεση με τίτλο, αίθουσα και ημερομηνίες.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Τίτλος"
+    },
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exhibition_add_find",
+  "title": "Προσθήκη στην έκθεση",
+  "description": "Προσθέτει ένα εύρημα σε μια έκθεση, με τη θέση του στη βιτρίνα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exhibition_id": {
+     "type": "string",
+     "description": "Κωδικός έκθεσης"
+    },
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exhibition_close",
+  "title": "Λήξη έκθεσης",
+  "description": "Κλείνει μια περιοδική έκθεση και επιστρέφει τα ευρήματα στην αποθήκη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exhibition_id": {
+     "type": "string",
+     "description": "Κωδικός έκθεσης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "label_print",
+  "title": "Εκτύπωση ετικέτας",
+  "description": "Τυπώνει την ετικέτα της βιτρίνας ενός ευρήματος στα ελληνικά και στα αγγλικά.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loan_request",
+  "title": "Αίτημα δανεισμού",
+  "description": "Καταγράφει αίτημα άλλου μουσείου να δανειστεί ένα εύρημα για έκθεση.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "find_id": {
+     "type": "string",
+     "description": "Αριθμός ευρήματος"
+    },
+    "museum": {
+     "type": "string",
+     "description": "Μουσείο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loan_approve",
+  "title": "Έγκριση δανεισμού",
+  "description": "Εγκρίνει έναν δανεισμό και ορίζει ασφάλιση και ημερομηνία επιστροφής.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "loan_id": {
+     "type": "string",
+     "description": "Αριθμός δανεισμού"
+    },
+    "insurance": {
+     "type": "number",
+     "description": "Ασφαλιστική αξία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loan_return",
+  "title": "Επιστροφή δανεισμού",
+  "description": "Σημειώνει ότι ένα δανεισμένο εύρημα επέστρεψε και την κατάστασή του.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "loan_id": {
+     "type": "string",
+     "description": "Αριθμός δανεισμού"
+    },
+    "condition": {
+     "type": "string",
+     "description": "Κατάσταση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "loans_list",
+  "title": "Δανεισμοί",
+  "description": "Δείχνει τους ενεργούς δανεισμούς προς και από άλλα μουσεία.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_sell",
+  "title": "Έκδοση εισιτηρίου",
+  "description": "Εκδίδει ολόκληρο, μειωμένο ή δωρεάν εισιτήριο εισόδου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "Είδος εισιτηρίου"
+    },
+    "count": {
+     "type": "number",
+     "description": "Πλήθος"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tickets_sold",
+  "title": "Πωλήσεις εισιτηρίων",
+  "description": "Δείχνει πόσα εισιτήρια κόπηκαν ανά ημέρα και ανά είδος.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Ημερομηνία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tour_book",
+  "title": "Κράτηση ξενάγησης",
+  "description": "Κλείνει ξενάγηση για ομάδα, με γλώσσα, ώρα και ξεναγό.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Ομάδα"
+    },
+    "at": {
+     "type": "string",
+     "description": "Ώρα"
+    },
+    "language": {
+     "type": "string",
+     "description": "Γλώσσα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tour_cancel",
+  "title": "Ακύρωση κράτησης",
+  "description": "Ακυρώνει μια κράτηση ξενάγησης ή σχολικής επίσκεψης.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Αριθμός κράτησης"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "tour_reschedule",
+  "title": "Αλλαγή ώρας κράτησης",
+  "description": "Μεταφέρει μια κράτηση ξενάγησης σε άλλη ημέρα ή ώρα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Αριθμός κράτησης"
+    },
+    "at": {
+     "type": "string",
+     "description": "Νέα ώρα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bookings_list",
+  "title": "Κρατήσεις",
+  "description": "Δείχνει τις κρατήσεις ξεναγήσεων και σχολικών επισκέψεων της ημέρας.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Ημερομηνία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "school_visit_book",
+  "title": "Σχολική επίσκεψη",
+  "description": "Κλείνει επίσκεψη σχολείου με εκπαιδευτικό πρόγραμμα για τους μαθητές.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "school": {
+     "type": "string",
+     "description": "Σχολείο"
+    },
+    "pupils": {
+     "type": "number",
+     "description": "Μαθητές"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "guides_list",
+  "title": "Ξεναγοί",
+  "description": "Δείχνει τους ξεναγούς, τις γλώσσες τους και τη διαθεσιμότητά τους.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_shift_assign",
+  "title": "Ανάθεση βάρδιας",
+  "description": "Βάζει έναν φύλακα ή υπάλληλο σε βάρδια σε μια αίθουσα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Αριθμός υπαλλήλου"
+    },
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    },
+    "shift": {
+     "type": "string",
+     "description": "Βάρδια"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_leave_record",
+  "title": "Καταχώριση άδειας",
+  "description": "Καταχωρίζει κανονική άδεια ή αναρρωτική ενός υπαλλήλου.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Αριθμός υπαλλήλου"
+    },
+    "days": {
+     "type": "number",
+     "description": "Ημέρες"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_roster",
+  "title": "Πρόγραμμα βαρδιών",
+  "description": "Δείχνει το εβδομαδιαίο πρόγραμμα των φυλάκων ανά αίθουσα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Εβδομάδα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "alarm_log",
+  "title": "Συναγερμοί",
+  "description": "Δείχνει τα συμβάντα του συναγερμού και των καμερών ασφαλείας.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Ημερομηνία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "alarm_report",
+  "title": "Αναφορά συμβάντος",
+  "description": "Καταγράφει ένα συμβάν ασφαλείας: άγγιγμα έργου, κλοπή, ζημιά από επισκέπτη.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    },
+    "text": {
+     "type": "string",
+     "description": "Περιγραφή"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "climate_readings",
+  "title": "Θερμοκρασία και υγρασία",
+  "description": "Δείχνει τις μετρήσεις θερμοκρασίας και υγρασίας των αιθουσών και των βιτρινών.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "climate_alert_ack",
+  "title": "Επιβεβαίωση ειδοποίησης κλίματος",
+  "description": "Επιβεβαιώνει μια ειδοποίηση υψηλής υγρασίας ή θερμοκρασίας και σημειώνει τι έγινε.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "alert_id": {
+     "type": "string",
+     "description": "Αριθμός ειδοποίησης"
+    },
+    "note": {
+     "type": "string",
+     "description": "Σημείωση"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "room_close",
+  "title": "Κλείσιμο αίθουσας",
+  "description": "Κλείνει προσωρινά μια αίθουσα για το κοινό, για εργασίες ή έλλειψη φύλακα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Αιτία"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "room_open",
+  "title": "Άνοιγμα αίθουσας",
+  "description": "Ανοίγει ξανά για το κοινό μια αίθουσα που είχε κλείσει.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Αριθμός αιθουσών"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "photo_permit_issue",
+  "title": "Άδεια φωτογράφισης",
+  "description": "Εκδίδει άδεια φωτογράφισης ή βιντεοσκόπησης για ερευνητή ή συνεργείο.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "applicant": {
+     "type": "string",
+     "description": "Αιτών"
+    },
+    "purpose": {
+     "type": "string",
+     "description": "Σκοπός"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "research_access_request",
+  "title": "Πρόσβαση ερευνητή",
+  "description": "Καταγράφει αίτημα ερευνητή να μελετήσει ευρήματα της αποθήκης.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "researcher": {
+     "type": "string",
+     "description": "Ερευνητής"
+    },
+    "finds": {
+     "type": "array",
+     "description": "Ευρήματα"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "visitor_counts",
+  "title": "Επισκεψιμότητα",
+  "description": "Δείχνει πόσοι επισκέπτες μπήκαν ανά ημέρα, μήνα ή αίθουσα.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Μήνας"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "feedback_list",
+  "title": "Σχόλια επισκεπτών",
+  "description": "Δείχνει τα σχόλια και τα παράπονα που άφησαν οι επισκέπτες.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "newsletter_send",
+  "title": "Αποστολή ενημερωτικού",
+  "description": "Στέλνει το ενημερωτικό δελτίο με τα νέα του μουσείου στους συνδρομητές.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "subject": {
+     "type": "string",
+     "description": "Θέμα"
+    },
+    "text": {
+     "type": "string",
+     "description": "Κείμενο"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

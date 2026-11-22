@@ -113,8 +113,12 @@ final class Analyzer
         // Letters and digits of any script: the library holds no alphabet of
         // its own. mbstring lowers every script when the server has it;
         // without it, strtolower() lowers ASCII, which covers the English
-        // most tool lists are written in.
-        $lower = function_exists('mb_strtolower') ? mb_strtolower($split, 'UTF-8') : strtolower($split);
+        // most tool lists are written in. The simple mapping, one character
+        // for one: the full one turns the Turkish "İ" into "i" and a
+        // combining dot, so "İzin" never met "izin", and from PHP 8.3 it
+        // also picks the Greek final sigma by context, so the same request
+        // found other tools on 8.2 than on 8.3.
+        $lower = function_exists('mb_convert_case') ? mb_convert_case($split, MB_CASE_LOWER_SIMPLE, 'UTF-8') : strtolower($split);
         // Marks belong to the word they sit in. Devanagari, Thai, Tamil and
         // the other Brahmic scripts write most vowels as marks, Arabic and
         // Hebrew their vowel points, and decomposed text (NFD) every accent:

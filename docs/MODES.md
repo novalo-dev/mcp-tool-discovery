@@ -39,6 +39,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | clinic | 40 | 13,592 | 2,871 | 1,839 | - | 1,293 |
 | water | 40 | 17,857 | 2,871 | 1,839 | - | 3,011 |
 | mill | 40 | 19,842 | 2,871 | 1,839 | - | 1,551 |
+| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,385 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a

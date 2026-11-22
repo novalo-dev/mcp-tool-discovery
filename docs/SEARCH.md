@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 685 times
-out of 899 in fields, and 455 times as one sentence.
+On the benchmark below, the same requests find the right tool first 723 times
+out of 949 in fields, and 471 times as one sentence.
 
 ## How a tool is scored
 
@@ -65,6 +65,14 @@ A mark stays in the word it sits in: Hindi, Thai, Tamil and the other
 Brahmic scripts write most vowels as marks ("सर्वर" holds three), Arabic and
 Hebrew their vowel points, and text in decomposed form (NFD) every accent.
 Unicode says which characters are marks; the library holds no list.
+
+Each letter is lowered on its own, with Unicode's simple mapping, so a
+request gives the same terms on every version of PHP. The full mapping
+lowered the Turkish `İ` to an `i` and a combining dot, a word that never met
+`izin`, and from PHP 8.3 it chose the Greek final sigma by context: a request
+typed in capitals (`ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ`) found other tools on 8.2 than on 8.3.
+A capital sigma is now always lowered to `σ`, as PHP 8.2 did, and a word is
+shown back as the tools write it, `ς` and all.
 
 Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
 `atu`, `tus`, `us `. Trigram matches count at 0.6 of word matches. They let
@@ -296,18 +304,19 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 `estimate_send`), the front desk of a hotel written in Russian (40 tools,
 `BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
 tools, `appointment_move`) a water supply office written in Khmer (40
-tools, `outage_schedule`) and a rice mill written in Burmese (40 tools,
-`paddy_receive`). 1797 requests, each written as one
+tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
+`paddy_receive`) and an archaeological museum written in Greek (40 tools,
+`loan_approve`). 1897 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 899 requests | Right tool first | Top 3 |
+| Test half, 949 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 685 | 803 |
-| The same request as one sentence | 455 | 609 |
-| In fields, after every train request was run once | 688 | 803 |
-| In fields, after the test requests were run once, then asked again | 754 | 829 |
+| The request in fields | 723 | 851 |
+| The same request as one sentence | 471 | 637 |
+| In fields, after every train request was run once | 728 | 851 |
+| In fields, after the test requests were run once, then asked again | 795 | 879 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -510,6 +519,21 @@ the tools do not use ("တောင်သူ" for a farmer, where the tools writ
 "လယ်သမား"; "ချေးငွေ", a loan, where they write "ကြိုတင်ငွေ", an advance)
 and neighbours of one object (selling rice finds the tool that cancels a
 sale).
+
+The museum is written in Greek, the second server in that script, behind
+snake_case names. Its tools are neighbours by design (register, correct, move
+and strike off a find; request, approve and return a loan; book, cancel and
+move a guided tour), and its 100 requests were written before any of them was
+run: about a quarter typed without accents, as on the town hall, and one in
+eight in capitals, as copied from a form or the subject of an e-mail. Nothing
+was tuned on it: 38 of its 50 test requests find the right tool first in
+fields, 48 in the top 3, and 16 as one sentence; learned from its train half,
+40 come first, and learning loses none.
+It is what showed that PHP 8.2 and 8.3 lowered its capitals differently
+(above): with each letter lowered on its own, 16 come first as one sentence
+on every version, against 17 on 8.3 and 16 on 8.2 before. What it misses is
+mostly accents again (`συντηρησεις` asked, `συντήρηση` in the tool) and
+neighbours of one object (asking for a loan finds the list of loans).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
