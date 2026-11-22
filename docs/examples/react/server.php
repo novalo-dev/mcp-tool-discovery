@@ -172,7 +172,7 @@ $server = new HttpServer(static function (ServerRequestInterface $request) use (
         $held = array_filter($sessions, static fn(array $session): bool => $session['authorization'] === $authorization);
         if (count($held) >= SESSIONS_PER_CALLER) {
             uasort($held, static fn(array $a, array $b): int => $a['seen'] <=> $b['seen']);
-            $end((string) array_key_first($held));
+            $end(array_key_first($held));
         }
         $id = bin2hex(random_bytes(16));
         $sessions[$id] = ['authorization' => $authorization, 'revision' => $revision, 'held' => null, 'stream' => null, 'seen' => microtime(true)];
