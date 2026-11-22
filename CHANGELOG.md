@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The ReactPHP example sends `notifications/tools/list_changed` over
+  HTTP.** `initialize` opens a session with an `Mcp-Session-Id`, bound to
+  the token that opened it, and declares `listChanged`; a `GET` naming the
+  session opens its `text/event-stream`. Each `tools/list` keeps the
+  `listFingerprint()` of what the client holds, and a timer of the event
+  loop sends the notification once when the rights of the caller change it.
+  `MCP_NOTES_MODE=direct` and `MCP_NOTES_GRANTS` show it; a request with no
+  session is answered as before. `docs/examples/http.php` gains
+  `originAllowed()` and `tools()`, so the stream checks Origin the way every
+  other request does.
+
 - **`Discovery::listFingerprint()`, to know when to send
   `notifications/tools/list_changed`.** A short string that changes when,
   and only when, the list a caller would be given changes, in the client's

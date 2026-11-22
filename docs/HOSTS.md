@@ -42,7 +42,6 @@ Its parts, in the order a host writes them:
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
-
 | A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
@@ -119,6 +118,27 @@ What changes from one process per request:
 
 A learning store, if the host gives one, is shared the same way: the
 `SearchSetup` is built once, beside the cache.
+
+A process that stays up can also tell a client its list has changed between
+two of its requests, which a process per request cannot. The example does it
+over the Streamable HTTP transport:
+
+| Part | In the example | Why |
+|---|---|---|
+| The session | `initialize` answers with an `Mcp-Session-Id`, kept with the `Authorization` that opened it, and declares `listChanged` | a session belongs to its caller: another token, or an id the server never gave, gets 404 |
+| The stream | a `GET` that names the session opens a `text/event-stream`, one per session | the channel the specification gives a server for messages no request asked for |
+| The list the client holds | each `tools/list` of the session keeps its `listFingerprint()`, whichever page was asked | the fingerprint covers the whole list |
+| The look | a timer of the event loop builds the Discovery of each listening session with the rights its caller has now, and sends `notifications/tools/list_changed` once when the fingerprint differs | a server that learns of a change by an event sends it then, with no timer |
+
+```
+MCP_NOTES_MODE=direct MCP_NOTES_GRANTS=grants.json php docs/examples/react/server.php
+```
+
+Write `{"reader": "admin"}` in `grants.json` while a reader listens on its
+stream, and the notification arrives; the tests do it, then check that it
+came once and that the next `tools/list` shows the admin's tools. A request
+with no session is answered as before, so a client that opens none sees the
+same server as on PHP-FPM.
 
 ---
 
@@ -438,6 +458,8 @@ it nothing. To keep a client's list right:
   [stdio server](#a-server-over-stdio) does this, and its tests grant and take
   back a role while a client is connected: in direct mode the client is told
   once each time, in compact mode never, and its next search finds the tool.
+  The [ReactPHP server](#a-server-that-stays-up-on-reactphp) does it over
+  HTTP, on the stream a session opens with `GET`.
 - **In the stateless revision `2026-07-28`**, the same notification goes only
   on a `subscriptions/listen` stream the client opened with
   `toolsListChanged`, and the capability is declared in `server/discover`.
