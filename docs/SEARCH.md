@@ -572,6 +572,22 @@ kind is what `vocabulary` and the host's synonyms are for.
 - Add requests to `tests/Fixtures/queries.json` **before** running them on your
   change, or the benchmark only measures what you tuned. Choose on `train`,
   judge on `test`.
+- Split a new server's requests so each half holds the first request written
+  for half of its tools: the first request of the tools of even rank goes to
+  `train`, that of the tools of odd rank to `test`, and so on, alternating.
+  The first request one writes for a tool is the plain one, its second a
+  paraphrase. The servers so far put the first in `train` and the second in
+  `test`, and their train half is easier for it: 862 of its 998 requests
+  come first in fields against 762 of 999 on test, and the gap holds on
+  every server added later (46 against 39 on the bike rental, 48 against 35
+  on the newsroom). The later requests of the train half, the third written
+  for a tool, are as hard as the test half: 136 of 190 come first.
+- So learning cannot be tuned on the train half of these servers. Learning
+  helps where the text misses, and the train half misses half as often:
+  learned from the rest of train, ten folds of it lose 8 first places
+  (862 to 854) while the test half gains 5 (762 to 767), and a lift scaled
+  by the share of the request's pairs ever learned won 5 on the folds and
+  lost 4 on test. A setting of learning waits for servers split as above.
 - Give the numbers before and after in the pull request, and update this page
   and the README: `BenchmarkTest` fails until their tables, and the sentence
   that sums the fields up, give the scores the benchmark measures.
