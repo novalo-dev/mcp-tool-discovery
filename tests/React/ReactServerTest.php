@@ -111,6 +111,69 @@ final class ReactServerTest extends HttpServerTestCase
         }
     }
 
+    // The process keeps what it opens for as long as it runs: a caller who
+    // initializes again and again must not grow it without end, and a client
+    // that is done can say so and its session is gone at once.
+    public function testACallerHoldsABoundedNumberOfSessionsAndEndsOneWithDelete(): void
+    {
+        $server = LocalServer::start(self::command(...));
+        $url = $server->url();
+        $initialize = ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-11-25']];
+        $list = ['jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/list'];
+        /** @param array<string, mixed>|null $message */
+        $status = static fn(string $method, string $token, string $session, ?array $message = null): string => self::send($url, $method, ['Authorization: Bearer ' . $token, 'Mcp-Session-Id: ' . $session, 'MCP-Protocol-Version: 2025-11-25'], $message)[0]['status'];
+
+        try {
+            $admin = self::send($url, 'POST', ['Authorization: Bearer admin-token'], $initialize)[0]['mcp-session-id'] ?? '';
+            $sessions = [];
+            for ($i = 0; $i <= 16; ++$i) {
+                $sessions[] = self::send($url, 'POST', ['Authorization: Bearer reader-token'], $initialize)[0]['mcp-session-id'] ?? '';
+                usleep(2000);
+            }
+
+            // The seventeenth let the least recently used one go, and only
+            // the reader's: the admin's session is not the reader's to lose.
+            self::assertSame('404', $status('POST', 'reader-token', $sessions[0], $list));
+            self::assertSame('200', $status('POST', 'reader-token', $sessions[1], $list));
+            self::assertSame('200', $status('POST', 'admin-token', $admin, $list));
+
+            // Only its caller ends a session.
+            self::assertSame('404', $status('DELETE', 'admin-token', $sessions[2]));
+            self::assertSame('204', $status('DELETE', 'reader-token', $sessions[2]));
+            self::assertSame('404', $status('POST', 'reader-token', $sessions[2], $list));
+        } finally {
+            $server->stop();
+        }
+    }
+
+    // A session nobody listens on is let go once idle; one with an open
+    // stream is in use however long ago its last request was.
+    public function testASessionIsLetGoWhenIdleButNotWhileItsStreamIsOpen(): void
+    {
+        $server = LocalServer::start(self::command(...), ['MCP_SESSION_IDLE' => '1']);
+        $url = $server->url();
+        $initialize = ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-11-25']];
+        $list = ['jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/list'];
+        $open = static fn(): string => self::send($url, 'POST', ['Authorization: Bearer reader-token'], $initialize)[0]['mcp-session-id'] ?? '';
+        $headers = static fn(string $session): array => ['Authorization: Bearer reader-token', 'Mcp-Session-Id: ' . $session, 'MCP-Protocol-Version: 2025-11-25'];
+
+        try {
+            [$idle, $listening] = [$open(), $open()];
+            $stream = self::listen($url, [...$headers($listening), 'Accept: text/event-stream']);
+            usleep(2_000_000);
+
+            self::assertSame('404', self::send($url, 'POST', $headers($idle), $list)[0]['status']);
+            self::assertSame('200', self::send($url, 'POST', $headers($listening), $list)[0]['status']);
+
+            // Closed, the stream no longer keeps it: idle from then on.
+            fclose($stream);
+            usleep(2_000_000);
+            self::assertSame('404', self::send($url, 'POST', $headers($listening), $list)[0]['status']);
+        } finally {
+            $server->stop();
+        }
+    }
+
     /**
      * @param list<string>              $headers
      * @param array<string, mixed>|null $message

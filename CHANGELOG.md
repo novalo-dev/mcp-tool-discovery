@@ -181,6 +181,17 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **The ReactPHP example bounds the sessions it keeps.** The process kept
+  every session `initialize` opened for as long as it ran, so a caller that
+  initialized again and again, or a client that left without a word, grew
+  its memory without end. A session nobody listens on is now let go after
+  600 seconds without a request (`MCP_SESSION_IDLE`), one with an open
+  stream is kept while the stream is; a caller holds 16 sessions at most,
+  and a seventeenth lets its least recently used one go; and a `DELETE`
+  naming the session ends it at once (204), as the specification lets a
+  client do. A request on a session that is gone gets 404, which tells the
+  client to initialize again.
+
 - **A full learning store no longer sorts every count at each run.** Once
   `MemoryLearningStore` or `FileLearningStore` held its 20,000 counts, each
   run that learned a new word or pair sorted them all to drop the least run:

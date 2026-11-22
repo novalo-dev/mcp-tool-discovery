@@ -129,6 +129,7 @@ over the Streamable HTTP transport:
 | The stream | a `GET` that names the session opens a `text/event-stream`, one per session | the channel the specification gives a server for messages no request asked for |
 | The list the client holds | each `tools/list` of the session keeps its `listFingerprint()`, whichever page was asked | the fingerprint covers the whole list |
 | The look | a timer of the event loop builds the Discovery of each listening session with the rights its caller has now, and sends `notifications/tools/list_changed` once when the fingerprint differs | a server that learns of a change by an event sends it then, with no timer |
+| The end of a session | a `DELETE` naming it ends it (204); one nobody listens on goes after `MCP_SESSION_IDLE` seconds without a request (600); a caller holds 16 at most, and a new one lets its least recently used go | the process outlives every client, so what it keeps must be bounded; a client whose session is gone gets 404 and initializes again |
 
 ```
 MCP_NOTES_MODE=direct MCP_NOTES_GRANTS=grants.json php docs/examples/react/server.php
