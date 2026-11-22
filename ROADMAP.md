@@ -43,7 +43,9 @@ The benchmark says where the search still misses, in
   stacked consonants (a water supply office) and a Burmese one, cut into
   pairs of clusters as Thai is (a rice mill) and a second Greek one, with
   requests in capitals (an archaeological museum) and a Polish one, typed
-  with and without its letters (a city bike rental) are in. Lao, written the
+  with and without its letters (a city bike rental) and a second large
+  English one, with 150 tools that are mostly neighbours (an airline
+  operations centre) are in. Lao, written the
   same way as Thai, is not measured yet.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A

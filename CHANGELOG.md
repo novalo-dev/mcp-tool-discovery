@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **An airline operations centre on the search benchmark, with 150 tools.**
+  Named by a dotted object and a hyphenated action
+  (`flight.change-aircraft`), in English, and mostly neighbours on one
+  object (delay, cancel, reinstate and divert a flight; assign, unassign and
+  swap a crew member; block and unblock a gate or a seat), as large servers
+  are. Its 300 requests were written before any of them was run, and split
+  so that each half holds the first request of half the tools: both halves
+  score alike (111 and 117 first in fields). The benchmark now holds 2297
+  requests over twenty servers; its floors move to 879 and 1023 in fields
+  and 961 asked again.
+
 - **The SDK HTTP example tells a client of `2026-07-28` that its list
   changed.** A `subscriptions/listen` stream opened with `toolsListChanged`
   is sent `notifications/tools/list_changed` once when the list its caller

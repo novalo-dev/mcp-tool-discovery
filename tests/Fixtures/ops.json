@@ -1,0 +1,3035 @@
+[
+ {
+  "name": "flight.list",
+  "title": "Flights",
+  "description": "Lists the flights of a day with their status, aircraft and gate.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Day"
+    },
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.get",
+  "title": "Flight details",
+  "description": "Shows one flight: times, aircraft, crew, gate, passengers booked and status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.schedule",
+  "title": "Schedule a flight",
+  "description": "Adds a new flight to the schedule, such as an extra section or a charter.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "number": {
+     "type": "string",
+     "description": "Flight number"
+    },
+    "departure": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "arrival": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "time": {
+     "type": "string",
+     "description": "Departure time"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.delay",
+  "title": "Delay a flight",
+  "description": "Sets a new estimated departure time for a flight and records the delay code.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "time": {
+     "type": "string",
+     "description": "New departure time"
+    },
+    "code": {
+     "type": "string",
+     "description": "Delay code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.cancel",
+  "title": "Cancel a flight",
+  "description": "Cancels a flight; its passengers are left to be rebooked.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "flight.reinstate",
+  "title": "Reinstate a flight",
+  "description": "Brings back a cancelled flight with its original passengers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.divert",
+  "title": "Divert a flight",
+  "description": "Records that a flight in the air is landing at another airport than planned.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.change-aircraft",
+  "title": "Change the aircraft",
+  "description": "Puts another aircraft on a flight, for example when the planned one is grounded.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.track",
+  "title": "Track a flight",
+  "description": "Shows where a flight is now: position, altitude, speed and estimated arrival.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.history",
+  "title": "Flight timeline",
+  "description": "Shows every change made to a flight: delays, gate changes, aircraft swaps, who made them.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.open-boarding",
+  "title": "Open boarding",
+  "description": "Opens boarding at the gate so passengers can board.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.close-boarding",
+  "title": "Close boarding",
+  "description": "Closes boarding: passengers not yet on board are marked as no-shows.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.release",
+  "title": "Release a flight",
+  "description": "Gives the dispatch release that allows the flight to depart.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.load-sheet",
+  "title": "Load sheet",
+  "description": "Builds the load sheet: weight and balance, passengers, bags, cargo and fuel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flight.set-estimate",
+  "title": "Set arrival estimate",
+  "description": "Updates the estimated arrival time of a flight on its way.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "time": {
+     "type": "string",
+     "description": "Estimated arrival"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.list",
+  "title": "Gates",
+  "description": "Lists the gates of an airport with the flights on them through the day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.get",
+  "title": "Gate details",
+  "description": "Shows one gate: stand, jet bridge, size of aircraft it takes and its flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "gate": {
+     "type": "string",
+     "description": "Gate code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.assign",
+  "title": "Assign a gate",
+  "description": "Puts a flight on a gate for its departure or arrival.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "gate": {
+     "type": "string",
+     "description": "Gate code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.release",
+  "title": "Release a gate",
+  "description": "Frees the gate a flight holds, once it has left or moved.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.block",
+  "title": "Block a gate",
+  "description": "Takes a gate out of use, for works or a broken jet bridge.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "gate": {
+     "type": "string",
+     "description": "Gate code"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.unblock",
+  "title": "Unblock a gate",
+  "description": "Puts a blocked gate back in use.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "gate": {
+     "type": "string",
+     "description": "Gate code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.conflicts",
+  "title": "Gate conflicts",
+  "description": "Finds flights given the same gate at overlapping times.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "gate.swap",
+  "title": "Swap gates",
+  "description": "Exchanges the gates of two flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "second": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.list",
+  "title": "Fleet",
+  "description": "Lists the aircraft of the fleet with their type, base and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "description": "Aircraft type"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.get",
+  "title": "Aircraft details",
+  "description": "Shows one aircraft: type, seats, hours flown, cycles, next check and open defects.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.add",
+  "title": "Add an aircraft",
+  "description": "Adds a newly delivered or leased aircraft to the fleet.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Aircraft registration"
+    },
+    "type": {
+     "type": "string",
+     "description": "Aircraft type"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.retire",
+  "title": "Retire an aircraft",
+  "description": "Removes an aircraft from the fleet for good, when it is sold or returned to the lessor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "aircraft.ground",
+  "title": "Ground an aircraft",
+  "description": "Marks an aircraft as unable to fly (AOG) until it is repaired.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.return-to-service",
+  "title": "Return to service",
+  "description": "Puts a grounded aircraft back into service after its repair.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.rotation",
+  "title": "Aircraft rotation",
+  "description": "Shows the flights an aircraft is planned to fly, one after another, over the coming days.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.locate",
+  "title": "Where is the aircraft",
+  "description": "Shows the airport or stand where an aircraft is parked now, or the flight it is on.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aircraft.tech-log",
+  "title": "Technical log",
+  "description": "Shows the entries the pilots and engineers wrote in the aircraft technical log.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "defect.list",
+  "title": "Defects",
+  "description": "Lists the open defects of the fleet or of one aircraft.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "defect.report",
+  "title": "Report a defect",
+  "description": "Records a defect found on an aircraft, such as a broken seat or a warning light.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    },
+    "description": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "defect.defer",
+  "title": "Defer a defect",
+  "description": "Allows the aircraft to keep flying with a defect under the minimum equipment list, until a given date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "defect": {
+     "type": "string",
+     "description": "Defect id"
+    },
+    "until": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "defect.clear",
+  "title": "Clear a defect",
+  "description": "Closes a defect once it has been fixed and signed off.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "defect": {
+     "type": "string",
+     "description": "Defect id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "check.list",
+  "title": "Maintenance checks",
+  "description": "Lists the planned maintenance checks (A, C, daily) of the fleet.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "check.schedule",
+  "title": "Schedule a check",
+  "description": "Plans a maintenance check for an aircraft in a hangar slot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aircraft": {
+     "type": "string",
+     "description": "Aircraft registration"
+    },
+    "type": {
+     "type": "string",
+     "description": "Check type"
+    },
+    "date": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "check.reschedule",
+  "title": "Reschedule a check",
+  "description": "Moves a planned maintenance check to another date or hangar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "check": {
+     "type": "string",
+     "description": "Maintenance check id"
+    },
+    "date": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "check.cancel",
+  "title": "Cancel a check",
+  "description": "Cancels a planned maintenance check.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "check": {
+     "type": "string",
+     "description": "Maintenance check id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "check.complete",
+  "title": "Complete a check",
+  "description": "Signs off a maintenance check as done.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "check": {
+     "type": "string",
+     "description": "Maintenance check id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "engineer.assign",
+  "title": "Assign an engineer",
+  "description": "Gives a defect or a check to an engineer on shift.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "task": {
+     "type": "string",
+     "description": "Defect or check id"
+    },
+    "engineer": {
+     "type": "string",
+     "description": "Engineer id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "part.request",
+  "title": "Request a spare part",
+  "description": "Asks the stores for a spare part to be sent to an aircraft or a station.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "part": {
+     "type": "string",
+     "description": "Part number"
+    },
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.list",
+  "title": "Crew",
+  "description": "Lists pilots and cabin crew with their base and rank.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "base": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "rank": {
+     "type": "string",
+     "description": "Rank"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.get",
+  "title": "Crew member",
+  "description": "Shows one crew member: rank, base, licences, roster and hours flown.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.add",
+  "title": "Add a crew member",
+  "description": "Creates the record of a newly hired pilot or flight attendant.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "rank": {
+     "type": "string",
+     "description": "Rank"
+    },
+    "base": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.remove",
+  "title": "Remove a crew member",
+  "description": "Deletes the record of a crew member who has left the airline.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "crew.assign",
+  "title": "Assign crew",
+  "description": "Puts a crew member on a flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.unassign",
+  "title": "Unassign crew",
+  "description": "Takes a crew member off a flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.swap",
+  "title": "Swap crew",
+  "description": "Exchanges two crew members between their flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "second": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.standby",
+  "title": "Standby crew",
+  "description": "Lists the crew on standby or reserve at a base who can be called out.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "base": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.call-out",
+  "title": "Call out standby",
+  "description": "Calls a crew member on standby to operate a flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.duty-time",
+  "title": "Duty time",
+  "description": "Shows the duty and flight time a crew member has left before the legal limits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.mark-sick",
+  "title": "Report sick",
+  "description": "Records that a crew member called in sick and takes them off their flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.mark-fit",
+  "title": "Back from sick",
+  "description": "Records that a crew member is fit to fly again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.qualifications",
+  "title": "Qualifications",
+  "description": "Shows the licences, type ratings, medical and training of a crew member, with their expiry dates.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew.add-qualification",
+  "title": "Add a qualification",
+  "description": "Records a new type rating or training passed by a crew member.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "qualification": {
+     "type": "string",
+     "description": "Qualification"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "roster.get",
+  "title": "Roster",
+  "description": "Shows the published roster of a crew member or a base for a month.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "crew": {
+     "type": "string",
+     "description": "Crew member id"
+    },
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "roster.publish",
+  "title": "Publish the roster",
+  "description": "Publishes next month's roster so crew can see their duties.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "base": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.search",
+  "title": "Find passengers",
+  "description": "Finds passengers by name, frequent flyer number, e-mail or phone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.get",
+  "title": "Passenger details",
+  "description": "Shows one passenger: contact, frequent flyer tier, trips and special needs.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.list",
+  "title": "Passenger list",
+  "description": "Lists the passengers booked on a flight, checked in or not.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.check-in",
+  "title": "Check in",
+  "description": "Checks a passenger in for a flight and issues the boarding pass.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.cancel-check-in",
+  "title": "Undo check-in",
+  "description": "Cancels the check-in of a passenger who will not travel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.rebook",
+  "title": "Rebook a passenger",
+  "description": "Moves a passenger to another flight, for example after a cancellation or a missed connection.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.offload",
+  "title": "Offload a passenger",
+  "description": "Takes a checked-in passenger off a flight, with their bags.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.change-seat",
+  "title": "Change seat",
+  "description": "Moves a passenger to another seat on the same flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "seat": {
+     "type": "string",
+     "description": "Seat"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.upgrade",
+  "title": "Upgrade",
+  "description": "Moves a passenger to a higher cabin, such as from economy to business.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.downgrade",
+  "title": "Downgrade",
+  "description": "Moves a passenger to a lower cabin when the higher one is full.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.add-assistance",
+  "title": "Request assistance",
+  "description": "Asks for help for a passenger: wheelchair, escort for a child travelling alone, or a guide.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "kind": {
+     "type": "string",
+     "description": "Kind of help"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.remove-assistance",
+  "title": "Cancel assistance",
+  "description": "Cancels the help that was requested for a passenger.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.compensate",
+  "title": "Compensate a passenger",
+  "description": "Pays a passenger the compensation the law gives for a long delay or a cancellation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.meal-allowance",
+  "title": "Meal allowance",
+  "description": "Gives a waiting passenger an allowance to spend on food at the airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Amount"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.accommodate",
+  "title": "Hotel for stranded passengers",
+  "description": "Books a hotel room and transport for passengers stuck overnight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger.deny-boarding",
+  "title": "Deny boarding",
+  "description": "Refuses boarding to a passenger, for example a missing visa or an overbooked flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "booking.get",
+  "title": "Booking",
+  "description": "Shows a booking by its reference: passengers, flights, fares and paid extras.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.search",
+  "title": "Find bookings",
+  "description": "Finds bookings by passenger name, flight or date of travel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.create",
+  "title": "Create a booking",
+  "description": "Books one or more passengers on flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passengers": {
+     "type": "array",
+     "description": "Passengers"
+    },
+    "flights": {
+     "type": "array",
+     "description": "Flights"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.cancel",
+  "title": "Cancel a booking",
+  "description": "Cancels a whole booking and its flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "booking.split",
+  "title": "Split a booking",
+  "description": "Takes some passengers out of a booking into a new one, so their trip can change apart.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    },
+    "passengers": {
+     "type": "array",
+     "description": "Passengers"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.add-passenger",
+  "title": "Add a passenger",
+  "description": "Adds a passenger to an existing booking.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.remove-passenger",
+  "title": "Remove a passenger",
+  "description": "Removes one passenger from a booking, keeping the others.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    },
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.change-date",
+  "title": "Change travel date",
+  "description": "Moves the flights of a booking to another date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    },
+    "date": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.rename",
+  "title": "Correct a name",
+  "description": "Corrects the spelling of a passenger's name in a booking.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    },
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking.resend-itinerary",
+  "title": "Resend the itinerary",
+  "description": "Sends the e-ticket and itinerary of a booking again by e-mail.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking reference"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seatmap.get",
+  "title": "Seat map",
+  "description": "Shows the seat map of a flight with taken, free and blocked seats.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seat.block",
+  "title": "Block a seat",
+  "description": "Blocks a seat so nobody can take it, for a broken seat or crew rest.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "seat": {
+     "type": "string",
+     "description": "Seat"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seat.unblock",
+  "title": "Unblock a seat",
+  "description": "Frees a blocked seat for passengers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "seat": {
+     "type": "string",
+     "description": "Seat"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seatmap.change-layout",
+  "title": "Change cabin layout",
+  "description": "Changes the seat configuration used on a flight, for example a different cabin version.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "layout": {
+     "type": "string",
+     "description": "Layout"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.trace",
+  "title": "Trace a bag",
+  "description": "Follows a bag by its tag through every scan: check-in, sorting, loading and arrival.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.list",
+  "title": "Bags of a flight",
+  "description": "Lists the bags loaded on a flight, by hold and container.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.report-missing",
+  "title": "Report a missing bag",
+  "description": "Opens a claim for a bag that did not arrive with its passenger.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.report-damaged",
+  "title": "Report a damaged bag",
+  "description": "Opens a claim for a bag that arrived broken or wet.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    },
+    "damage": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.claims",
+  "title": "Baggage claims",
+  "description": "Lists open claims for missing and damaged bags.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.close-claim",
+  "title": "Close a claim",
+  "description": "Closes a baggage claim once the bag is delivered or paid for.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "claim": {
+     "type": "string",
+     "description": "Claim id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.forward",
+  "title": "Forward a bag",
+  "description": "Sends a bag that missed its flight on the next one to its passenger's destination.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.offload",
+  "title": "Offload a bag",
+  "description": "Takes a bag off a flight, for example when its passenger did not board.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.deliver",
+  "title": "Deliver a bag",
+  "description": "Records that a found bag was delivered to its passenger's address.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tag": {
+     "type": "string",
+     "description": "Bag tag number"
+    },
+    "address": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.excess",
+  "title": "Excess baggage",
+  "description": "Charges a passenger for an extra or overweight bag.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "passenger": {
+     "type": "string",
+     "description": "Passenger id"
+    },
+    "weight": {
+     "type": "number",
+     "description": "Weight kg"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bag.rate",
+  "title": "Mishandled bags",
+  "description": "Counts the bags mishandled per thousand passengers, by airport and month.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.list",
+  "title": "Cargo of a flight",
+  "description": "Lists the freight booked on a flight with its weight and kind.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.get",
+  "title": "Air waybill",
+  "description": "Shows one cargo consignment: sender, receiver, pieces, weight and flights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "awb": {
+     "type": "string",
+     "description": "Air waybill number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.book",
+  "title": "Book cargo",
+  "description": "Books freight on a flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "weight": {
+     "type": "number",
+     "description": "Weight kg"
+    },
+    "pieces": {
+     "type": "number",
+     "description": "Pieces"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.cancel",
+  "title": "Cancel cargo",
+  "description": "Cancels a cargo booking.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "awb": {
+     "type": "string",
+     "description": "Air waybill number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "cargo.offload",
+  "title": "Offload cargo",
+  "description": "Takes freight off a flight that is too heavy, to fly it later.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "awb": {
+     "type": "string",
+     "description": "Air waybill number"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.track",
+  "title": "Track cargo",
+  "description": "Follows a consignment from acceptance to delivery.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "awb": {
+     "type": "string",
+     "description": "Air waybill number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.check-dangerous-goods",
+  "title": "Check dangerous goods",
+  "description": "Checks that batteries, chemicals and other dangerous goods may fly on a flight and where they can be loaded.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "awb": {
+     "type": "string",
+     "description": "Air waybill number"
+    },
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cargo.load-plan",
+  "title": "Cargo load plan",
+  "description": "Plans which hold and position each pallet and container goes into.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "weather.current",
+  "title": "Current weather",
+  "description": "Shows the current weather report (METAR) at an airport: wind, visibility, cloud.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "weather.forecast",
+  "title": "Weather forecast",
+  "description": "Shows the forecast (TAF) for an airport over the next hours.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "weather.alerts",
+  "title": "Weather warnings",
+  "description": "Lists warnings for storms, snow, ice or volcanic ash on the network.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notam.list",
+  "title": "NOTAMs",
+  "description": "Lists the notices to airmen at an airport: closed runways, broken lights, restrictions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notam.get",
+  "title": "NOTAM",
+  "description": "Shows the full text of one notice to airmen.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string",
+     "description": "NOTAM id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "deicing.request",
+  "title": "Request de-icing",
+  "description": "Asks for an aircraft to be de-iced before departure.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel.plan",
+  "title": "Fuel plan",
+  "description": "Computes the fuel a flight needs: trip, reserve, alternate and extra.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel.adjust",
+  "title": "Adjust fuel",
+  "description": "Changes the fuel planned for a flight, for example extra fuel for bad weather.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "kg": {
+     "type": "number",
+     "description": "Fuel kg"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel.request-uplift",
+  "title": "Request fuel",
+  "description": "Asks the fuel supplier at the airport to fill the aircraft.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "kg": {
+     "type": "number",
+     "description": "Fuel kg"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel.uplift",
+  "title": "Fuel taken",
+  "description": "Shows how much fuel was put into the aircraft and at what price.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "slot.list",
+  "title": "Slots",
+  "description": "Lists the take-off and landing slots the airline holds at an airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "slot.request",
+  "title": "Request a slot",
+  "description": "Asks the airport coordinator for a take-off or landing slot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "time": {
+     "type": "string",
+     "description": "Time"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "slot.swap",
+  "title": "Swap slots",
+  "description": "Exchanges the slots of two flights at a coordinated airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "second": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "slot.return",
+  "title": "Give back a slot",
+  "description": "Returns a slot the airline will not use.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "slot": {
+     "type": "string",
+     "description": "Slot id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "airport.get",
+  "title": "Airport",
+  "description": "Shows an airport: runways, opening hours, curfew, handling agent and contacts.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "airport.curfew",
+  "title": "Night curfew",
+  "description": "Tells whether a late flight will land after the night curfew of its airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.open",
+  "title": "Open a disruption",
+  "description": "Starts a disruption file for a strike, storm or closed airport, grouping the flights it hits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Text"
+    },
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.list",
+  "title": "Disruptions",
+  "description": "Lists the disruptions open on the network.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.get",
+  "title": "Disruption",
+  "description": "Shows one disruption: flights hit, passengers to rebook, actions taken.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "disruption": {
+     "type": "string",
+     "description": "Disruption id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.update",
+  "title": "Update a disruption",
+  "description": "Adds news or actions to a disruption file.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "disruption": {
+     "type": "string",
+     "description": "Disruption id"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.close",
+  "title": "Close a disruption",
+  "description": "Closes a disruption file once operations are back to normal.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "disruption": {
+     "type": "string",
+     "description": "Disruption id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disruption.recovery-plan",
+  "title": "Recovery plan",
+  "description": "Proposes which flights to delay, cancel or swap to get the schedule back on time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "disruption": {
+     "type": "string",
+     "description": "Disruption id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notify.passengers",
+  "title": "Notify passengers",
+  "description": "Sends passengers of a flight a text message or e-mail, for example about a delay or a gate change.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notify.crew",
+  "title": "Notify crew",
+  "description": "Sends a message to the crew of a flight or a base.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notify.station",
+  "title": "Notify a station",
+  "description": "Sends a message to the ground team of an airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "airport": {
+     "type": "string",
+     "description": "Airport code"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acars.send",
+  "title": "Message the cockpit",
+  "description": "Sends a text message to the pilots of a flight in the air (ACARS).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "acars.list",
+  "title": "Cockpit messages",
+  "description": "Lists the messages exchanged with the pilots of a flight.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "flight": {
+     "type": "string",
+     "description": "Flight number and date, such as NV412/2026-11-22"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "log.add",
+  "title": "Add to the ops log",
+  "description": "Writes an entry in the operations log of the shift.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.on-time",
+  "title": "Punctuality",
+  "description": "Shows the share of flights that left and arrived on time, by day, route or airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.delay-causes",
+  "title": "Delay causes",
+  "description": "Breaks delay minutes down by cause: weather, technical, crew, air traffic control.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.load-factor",
+  "title": "Load factor",
+  "description": "Shows how full the flights were, seats sold against seats flown, by route.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.crew-hours",
+  "title": "Crew hours",
+  "description": "Sums the hours flown by each crew member over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.fuel-burn",
+  "title": "Fuel burn",
+  "description": "Compares the fuel burnt by each flight with the fuel planned.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.cancellations",
+  "title": "Cancellations",
+  "description": "Counts cancelled flights by cause and route.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.daily",
+  "title": "Daily operations summary",
+  "description": "Summarises yesterday: flights flown, delays, cancellations, diversions and incidents.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report.compensation",
+  "title": "Compensation paid",
+  "description": "Sums the compensation paid to passengers by flight and cause.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user.list",
+  "title": "Users",
+  "description": "Lists the people who can sign in to the operations tool, with their role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user.invite",
+  "title": "Invite a user",
+  "description": "Invites a colleague to sign in, with a role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user.disable",
+  "title": "Disable a user",
+  "description": "Stops a user from signing in, for example when they leave.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "user.enable",
+  "title": "Enable a user",
+  "description": "Lets a disabled user sign in again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user.set-role",
+  "title": "Change a user's role",
+  "description": "Gives a user another role, such as controller, dispatcher or viewer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User id"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "audit.list",
+  "title": "Audit trail",
+  "description": "Lists who changed what in the tool, and when.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

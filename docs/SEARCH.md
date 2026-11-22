@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 762 times
-out of 999 in fields, and 502 times as one sentence.
+On the benchmark below, the same requests find the right tool first 879 times
+out of 1149 in fields, and 600 times as one sentence.
 
 ## How a tool is scored
 
@@ -306,18 +306,19 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 tools, `appointment_move`) a water supply office written in Khmer (40
 tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
-`loan_approve`) and a city bike rental written in Polish (40 tools,
-`bike_unlock`). 1997 requests, each written as one
+`loan_approve`), a city bike rental written in Polish (40 tools,
+`bike_unlock`) and an airline operations centre (150 tools,
+`flight.change-aircraft`). 2297 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 999 requests | Right tool first | Top 3 |
+| Test half, 1149 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 762 | 897 |
-| The same request as one sentence | 502 | 675 |
-| In fields, after every train request was run once | 767 | 897 |
-| In fields, after the test requests were run once, then asked again | 839 | 926 |
+| The request in fields | 879 | 1023 |
+| The same request as one sentence | 600 | 793 |
+| In fields, after every train request was run once | 883 | 1023 |
+| In fields, after the test requests were run once, then asked again | 961 | 1059 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -551,6 +552,24 @@ keep enough trigrams to meet without their letters ("rowerow" finds
 "doładuj") and neighbours of one object (closing a lock remotely finds the
 tool that opens it).
 
+The airline operations centre is the size and shape of a real server: 150
+tools in English, named by a dotted object and a hyphenated action
+(`flight.change-aircraft`, `crew.call-out`), most of them neighbours on one
+object (delay, cancel, reinstate and divert a flight; assign, unassign and
+swap a crew member; block and unblock a gate or a seat). Its 300 requests,
+two per tool, were written before any of them was run, and it is the first
+server split as "Changing the ranking" says: the first request of half its
+tools is in each half. Nothing was tuned on it: 117 of its 150 test requests
+find the right tool first in fields, 126 in the top 3, 98 as one sentence;
+learned from its train half, 121 come first and none is lost from the top 3;
+asked again, 122. Its train half scores 111 in fields, so both halves are as
+hard. What it misses is the two kinds below, at this size: neighbours of one
+object ("reopen" a gate finds the tool that blocks it, "release" a repaired
+aircraft finds the dispatch release of a flight, "move down" a traveller
+finds the upgrade) and words its tools do not use ("reservation" for a
+booking, "luggage" for a bag, "plane" for an aircraft), where trigrams then
+meet the wrong word ("reservation" lands on "reserve" and "service").
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
 Learning by pairs of words, measured before the town hall came in, loses
@@ -580,7 +599,8 @@ kind is what `vocabulary` and the host's synonyms are for.
   `test`, and their train half is easier for it: 862 of its 998 requests
   come first in fields against 762 of 999 on test, and the gap holds on
   every server added later (46 against 39 on the bike rental, 48 against 35
-  on the newsroom). The later requests of the train half, the third written
+  on the newsroom). Split this way, the airline operations centre scores
+  111 on train against 117 on test. The later requests of the train half, the third written
   for a tool, are as hard as the test half: 136 of 190 come first.
 - So learning cannot be tuned on the train half of these servers. Learning
   helps where the text misses, and the train half misses half as often:
