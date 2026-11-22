@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Novalo\McpToolDiscovery\Tests\Sdk;
 
+use Novalo\McpToolDiscovery\Tests\Examples\LocalServer;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -31,8 +32,7 @@ final class SdkHttpServerTest extends TestCase
         'io.modelcontextprotocol/clientInfo' => ['name' => 'test', 'version' => '1'],
     ];
 
-    /** @var resource|null */
-    private static $server;
+    private static ?LocalServer $server = null;
     private static string $url = '';
     private static string $data = '';
 
@@ -41,49 +41,19 @@ final class SdkHttpServerTest extends TestCase
         if (!is_file(dirname(__DIR__, 2) . '/docs/examples/sdk/vendor/autoload.php')) {
             self::markTestSkipped('Run composer install in docs/examples/sdk first.');
         }
-        // A free port, taken from the system rather than guessed.
-        $probe = stream_socket_server('tcp://127.0.0.1:0');
-        self::assertIsResource($probe);
-        $address = (string) stream_socket_get_name($probe, false);
-        fclose($probe);
-
         self::$data = sys_get_temp_dir() . '/mcp-sdk-http-example-' . bin2hex(random_bytes(6));
-        self::$url = 'http://' . $address . '/mcp';
-        $server = proc_open(
-            [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/sdk/http-server.php'],
-            [0 => ['pipe', 'r'], 1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']],
-            $pipes,
-            null,
-            ['MCP_NOTES_DATA' => self::$data] + getenv(),
+        self::$server = LocalServer::start(
+            static fn(string $address): array => [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/sdk/http-server.php'],
+            ['MCP_NOTES_DATA' => self::$data],
         );
-        self::assertIsResource($server);
-        self::$server = $server;
-
-        for ($i = 0; $i < 100; ++$i) {
-            $socket = @stream_socket_client('tcp://' . $address, $code, $text, 0.1);
-            if ($socket !== false) {
-                fclose($socket);
-
-                return;
-            }
-            usleep(50000);
-        }
-        self::fail('The server did not start.');
+        self::$url = self::$server->url();
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$server !== null) {
-            proc_terminate(self::$server);
-            proc_close(self::$server);
-            self::$server = null;
-        }
-        foreach (glob(self::$data . '/{,index/,sessions/}{,.}*', GLOB_BRACE) ?: [] as $file) {
-            is_file($file) && unlink($file);
-        }
-        @rmdir(self::$data . '/index');
-        @rmdir(self::$data . '/sessions');
-        @rmdir(self::$data);
+        self::$server?->stop();
+        self::$server = null;
+        LocalServer::remove(self::$data);
     }
 
     public function testTheSessionKeepsTheRevisionTheClientAgreedOn(): void

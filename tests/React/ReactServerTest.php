@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Novalo\McpToolDiscovery\Tests\React;
 
 use Novalo\McpToolDiscovery\Tests\Examples\HttpServerTestCase;
+use Novalo\McpToolDiscovery\Tests\Examples\LocalServer;
 
 /**
  * Runs docs/examples/react/server.php, one process that serves every
@@ -73,7 +74,8 @@ final class ReactServerTest extends HttpServerTestCase
     {
         $grants = sys_get_temp_dir() . '/mcp-react-grants-' . bin2hex(random_bytes(6)) . '.json';
         file_put_contents($grants, '{}');
-        [$process, $url] = self::start(['MCP_NOTES_MODE' => 'direct', 'MCP_NOTES_GRANTS' => $grants]);
+        $server = LocalServer::start(self::command(...), ['MCP_NOTES_MODE' => 'direct', 'MCP_NOTES_GRANTS' => $grants]);
+        $url = $server->url();
 
         try {
             [$headers, $initialized] = self::send($url, 'POST', ['Authorization: Bearer reader-token'], ['jsonrpc' => '2.0', 'id' => 1, 'method' => 'initialize', 'params' => ['protocolVersion' => '2025-11-25']]);
@@ -104,43 +106,9 @@ final class ReactServerTest extends HttpServerTestCase
             [, $again] = self::send($url, 'POST', $reader, ['jsonrpc' => '2.0', 'id' => 4, 'method' => 'tools/list']);
             self::assertContains('notes_delete', array_column($again['result']['tools'] ?? [], 'name'));
         } finally {
-            proc_terminate($process);
-            proc_close($process);
+            $server->stop();
             @unlink($grants);
         }
-    }
-
-    /**
-     * A server of its own, for a test that needs other settings.
-     *
-     * @param array<string, string> $env
-     *
-     * @return array{resource, string}
-     */
-    private static function start(array $env): array
-    {
-        $probe = stream_socket_server('tcp://127.0.0.1:0');
-        self::assertIsResource($probe);
-        $address = (string) stream_socket_get_name($probe, false);
-        fclose($probe);
-        $process = proc_open(
-            self::command($address),
-            [0 => ['pipe', 'r'], 1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']],
-            $pipes,
-            null,
-            ['MCP_LISTEN' => $address] + $env + getenv(),
-        );
-        self::assertIsResource($process);
-        for ($i = 0; $i < 100; ++$i) {
-            $socket = @stream_socket_client('tcp://' . $address, $code, $text, 0.1);
-            if ($socket !== false) {
-                fclose($socket);
-
-                return [$process, 'http://' . $address . '/mcp'];
-            }
-            usleep(50000);
-        }
-        self::fail('The server did not start.');
     }
 
     /**

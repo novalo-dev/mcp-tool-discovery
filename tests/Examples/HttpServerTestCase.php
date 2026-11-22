@@ -26,41 +26,15 @@ abstract class HttpServerTestCase extends TestCase
     private const READER = 'reader-token';
     private const ADMIN = 'admin-token';
 
-    /** @var resource|null */
-    private static $server;
+    private static ?LocalServer $server = null;
     private static string $url = '';
     protected static string $data = '';
 
     public static function setUpBeforeClass(): void
     {
-        // A free port, taken from the system rather than guessed.
-        $probe = stream_socket_server('tcp://127.0.0.1:0');
-        self::assertIsResource($probe);
-        $address = (string) stream_socket_get_name($probe, false);
-        fclose($probe);
-
         self::$data = sys_get_temp_dir() . '/mcp-http-example-' . bin2hex(random_bytes(6));
-        self::$url = 'http://' . $address . '/mcp';
-        $server = proc_open(
-            static::command($address),
-            [0 => ['pipe', 'r'], 1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']],
-            $pipes,
-            null,
-            ['MCP_NOTES_DATA' => self::$data, 'MCP_LISTEN' => $address] + getenv(),
-        );
-        self::assertIsResource($server);
-        self::$server = $server;
-
-        for ($i = 0; $i < 100; ++$i) {
-            $socket = @stream_socket_client('tcp://' . $address, $code, $text, 0.1);
-            if ($socket !== false) {
-                fclose($socket);
-
-                return;
-            }
-            usleep(50000);
-        }
-        self::fail('The server did not start.');
+        self::$server = LocalServer::start(static::command(...), ['MCP_NOTES_DATA' => self::$data]);
+        self::$url = self::$server->url();
     }
 
     /**
@@ -72,16 +46,9 @@ abstract class HttpServerTestCase extends TestCase
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$server !== null) {
-            proc_terminate(self::$server);
-            proc_close(self::$server);
-            self::$server = null;
-        }
-        foreach (glob(self::$data . '/{,index/}*', GLOB_BRACE) ?: [] as $file) {
-            is_file($file) && unlink($file);
-        }
-        @rmdir(self::$data . '/index');
-        @rmdir(self::$data);
+        self::$server?->stop();
+        self::$server = null;
+        LocalServer::remove(self::$data);
     }
 
     public function testInitializeNegotiatesAndTheHeaderCarriesTheRevisionAfterwards(): void

@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Novalo\McpToolDiscovery\Tests\Sdk;
 
+use Novalo\McpToolDiscovery\Tests\Examples\LocalServer;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,8 +30,7 @@ final class SdkListenTest extends TestCase
     private string $data = '';
     private string $grants = '';
 
-    /** @var resource|null */
-    private $server;
+    private ?LocalServer $server = null;
 
     protected function setUp(): void
     {
@@ -46,19 +46,9 @@ final class SdkListenTest extends TestCase
 
     protected function tearDown(): void
     {
-        if ($this->server !== null) {
-            proc_terminate($this->server);
-            proc_close($this->server);
-            $this->server = null;
-        }
-        if ($this->data !== '' && is_dir($this->data)) {
-            $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->data, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST);
-            foreach ($files as $file) {
-                \assert($file instanceof \SplFileInfo);
-                $file->isDir() ? rmdir($file->getPathname()) : unlink($file->getPathname());
-            }
-            rmdir($this->data);
-        }
+        $this->server?->stop();
+        $this->server = null;
+        LocalServer::remove($this->data);
     }
 
     public function testAStreamIsToldOnlyWhenItsOwnCallersListChanges(): void
@@ -95,33 +85,13 @@ final class SdkListenTest extends TestCase
 
     private function start(string $mode): string
     {
-        // A free port, taken from the system rather than guessed.
-        $probe = stream_socket_server('tcp://127.0.0.1:0');
-        self::assertIsResource($probe);
-        $address = (string) stream_socket_get_name($probe, false);
-        fclose($probe);
-
-        $server = proc_open(
-            [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/sdk/http-server.php'],
-            [0 => ['pipe', 'r'], 1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']],
-            $pipes,
-            null,
+        $this->server = LocalServer::start(
+            static fn(string $address): array => [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/sdk/http-server.php'],
             // A stream holds a worker for as long as it is open.
-            $this->environment() + ['MCP_NOTES_MODE' => $mode, 'PHP_CLI_SERVER_WORKERS' => '4'] + getenv(),
+            $this->environment() + ['MCP_NOTES_MODE' => $mode, 'PHP_CLI_SERVER_WORKERS' => '4'],
         );
-        self::assertIsResource($server);
-        $this->server = $server;
 
-        for ($i = 0; $i < 100; ++$i) {
-            $socket = @stream_socket_client('tcp://' . $address, $code, $text, 0.1);
-            if ($socket !== false) {
-                fclose($socket);
-
-                return $address;
-            }
-            usleep(50000);
-        }
-        self::fail('The server did not start.');
+        return $this->server->address;
     }
 
     /**
