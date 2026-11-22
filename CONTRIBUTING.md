@@ -117,7 +117,9 @@ The search is measured, not tuned by feel.
 - New fixture queries go in `tests/Fixtures/queries.json`, written **before**
   running them against your change, so the benchmark keeps measuring and does
   not just repeat what was tuned. Settings are chosen on the `train` half and
-  judged on the `test` half.
+  judged on the `test` half. A new server's first request of each tool goes
+  to `train` for half of its tools and to `test` for the other half, since
+  the first request written is the plain one (see docs/SEARCH.md).
 - The library holds no list of words and assumes no naming convention: no stop
   words, no verbs, no prefix to strip. A word of a business ("meeting",
   "admin") belongs in the host's synonyms, not in the library.

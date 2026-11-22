@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Novalo\McpToolDiscovery;
 
+use Novalo\McpToolDiscovery\Exception\InvalidCursor;
 use Novalo\McpToolDiscovery\Exception\InvalidTool;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
@@ -21,6 +22,7 @@ use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Protocol\Shaper;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
@@ -54,6 +56,61 @@ final class Discovery
     public function listTools(ToolSet $tools, Revision $revision, int $ttlMs = 0, string $cacheScope = 'private'): array
     {
         return Shaper::listResult($this->mode->listTools($this->visible($tools)), $revision, $ttlMs, $cacheScope);
+    }
+
+    /**
+     * One page of the `tools/list` answer, for a host that pages its list.
+     *
+     * Pass the `cursor` of the request as it came, null for the first page.
+     * The answer carries a `nextCursor` while tools remain. The cursor names
+     * the last tool of the page, not a position: a tool added or removed
+     * elsewhere in the list between two pages neither skips nor repeats one.
+     *
+     * @param 'private'|'public' $cacheScope
+     *
+     * @return array<string, mixed>
+     *
+     * @throws InvalidCursor when the cursor was not given by this list, or
+     *         names a tool it no longer holds; answer with error -32602
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
+     */
+    public function listPage(ToolSet $tools, Revision $revision, ?string $cursor, int $pageSize, int $ttlMs = 0, string $cacheScope = 'private'): array
+    {
+        if ($pageSize < 1) {
+            throw new \InvalidArgumentException(sprintf('A page holds at least one tool, %d given.', $pageSize));
+        }
+        $listed = $this->mode->listTools($this->visible($tools));
+        $start = $cursor === null ? 0 : self::after($listed, $cursor);
+        $page = array_slice($listed, $start, $pageSize);
+        $last = end($page);
+        $next = $last !== false && $start + $pageSize < count($listed) ? self::cursor($last) : null;
+
+        return Shaper::listResult($page, $revision, $ttlMs, $cacheScope, $next);
+    }
+
+    /**
+     * A short string that changes when, and only when, the whole list this
+     * caller would be given changes, for a host that tells its clients with
+     * `notifications/tools/list_changed`.
+     *
+     * Keep the one of the list a session was given, and compare it with the
+     * one of the next request. It covers every page at once and leaves out
+     * what is not the list (`nextCursor`, `ttlMs`, `cacheScope`), so a host
+     * that pages its list or changes its cache times is not misled by them.
+     * It is taken for one revision, because a client holds the list shaped
+     * for its own: a change to a field its revision leaves out tells it
+     * nothing.
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
+     */
+    public function listFingerprint(ToolSet $tools, Revision $revision): string
+    {
+        $shaped = array_map(static fn(Tool $tool): array => Shaper::tool($tool, $revision), $this->mode->listTools($this->visible($tools)));
+
+        // serialize() rather than JSON: a host tool with bytes JSON cannot
+        // encode still gets a fingerprint, and the mode's order is kept, as
+        // the client sees it.
+        return hash('sha256', serialize($shaped));
     }
 
     /**
@@ -93,6 +150,31 @@ final class Discovery
         $runner = new ToolRunner($this->visible($tools), $this->gate, $this->search);
 
         return $this->mode->owns($name) ? $this->mode->call($name, $arguments, $runner) : $runner->run($name, $arguments);
+    }
+
+    private static function cursor(Tool $tool): string
+    {
+        return rtrim(strtr(base64_encode($tool->name), '+/', '-_'), '=');
+    }
+
+    /**
+     * The position that follows the tool a cursor names.
+     *
+     * Only the listed tools are compared, so a cursor naming a hidden tool is
+     * refused exactly as one naming no tool at all: the error says nothing
+     * about what another caller may see.
+     *
+     * @param list<Tool> $listed
+     */
+    private static function after(array $listed, string $cursor): int
+    {
+        foreach ($listed as $position => $tool) {
+            if (self::cursor($tool) === $cursor) {
+                return $position + 1;
+            }
+        }
+
+        throw InvalidCursor::given();
     }
 
     private function visible(ToolSet $tools): ToolSet

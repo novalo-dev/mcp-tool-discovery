@@ -1,0 +1,785 @@
+[
+ {
+  "name": "owners_list",
+  "title": "飼い主一覧",
+  "description": "登録されている飼い主の一覧を、電話番号と飼っている動物の数とともに表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "owner_get",
+  "title": "飼い主の詳細",
+  "description": "飼い主一人の連絡先、住所、登録している動物を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "飼い主のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "owner_add",
+  "title": "飼い主を登録",
+  "description": "新しい飼い主を名前と電話番号で登録します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "名前"
+    },
+    "phone": {
+     "type": "string",
+     "description": "電話番号"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "owner_update",
+  "title": "飼い主情報を変更",
+  "description": "飼い主の電話番号、住所、メールアドレスを変更します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "飼い主のID"
+    },
+    "phone": {
+     "type": "string",
+     "description": "新しい電話番号"
+    },
+    "address": {
+     "type": "string",
+     "description": "新しい住所"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patients_list",
+  "title": "患者一覧",
+  "description": "病院に登録されている動物の一覧を、種類と年齢とともに表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "species": {
+     "type": "string",
+     "description": "犬、猫などの種類"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patient_get",
+  "title": "患者カルテ",
+  "description": "動物一匹のカルテを表示します。種類、品種、体重、アレルギー、持病が分かります。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patient_add",
+  "title": "患者を登録",
+  "description": "新しい動物を飼い主に結び付けて登録します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "飼い主のID"
+    },
+    "name": {
+     "type": "string",
+     "description": "動物の名前"
+    },
+    "species": {
+     "type": "string",
+     "description": "種類"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patient_weight_record",
+  "title": "体重を記録",
+  "description": "診察のときに測った動物の体重を記録します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "kg": {
+     "type": "number",
+     "description": "体重（kg）"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patient_deceased",
+  "title": "死亡を記録",
+  "description": "動物が亡くなったことを記録し、今後の予約とお知らせを止めます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "appointments_list",
+  "title": "予約一覧",
+  "description": "指定した日の診察予約を、時間と担当の獣医とともに表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "日付"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_book",
+  "title": "診察を予約",
+  "description": "動物の診察予約を、日時と獣医を指定して入れます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "at": {
+     "type": "string",
+     "description": "日時"
+    },
+    "vet": {
+     "type": "string",
+     "description": "獣医"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_move",
+  "title": "予約を変更",
+  "description": "すでに入っている予約の日時や担当の獣医を変更します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "予約のID"
+    },
+    "at": {
+     "type": "string",
+     "description": "新しい日時"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appointment_cancel",
+  "title": "予約を取り消す",
+  "description": "診察予約を取り消し、その時間を空けます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "予約のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "appointment_check_in",
+  "title": "来院を受付",
+  "description": "予約した動物が病院に着いたことを記録し、待合室の順番に入れます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "appointment_id": {
+     "type": "string",
+     "description": "予約のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "waiting_room",
+  "title": "待合室の状況",
+  "description": "いま待っている動物と、待ち時間の目安を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "visit_notes_write",
+  "title": "診察記録を書く",
+  "description": "診察の所見、診断、処置をカルテに書き込みます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "notes": {
+     "type": "string",
+     "description": "所見と処置"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "visits_history",
+  "title": "診察履歴",
+  "description": "動物の過去の診察を日付順に表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vaccinations_list",
+  "title": "予防接種の記録",
+  "description": "動物が受けたワクチンと、次の接種の予定日を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vaccination_record",
+  "title": "ワクチン接種を記録",
+  "description": "その日に打ったワクチンの種類とロット番号を記録します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "vaccine": {
+     "type": "string",
+     "description": "ワクチンの種類"
+    },
+    "lot": {
+     "type": "string",
+     "description": "ロット番号"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vaccination_reminders_send",
+  "title": "接種のお知らせを送る",
+  "description": "次のワクチンの時期が来た動物の飼い主に、お知らせを送ります。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "対象の月"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prescription_issue",
+  "title": "処方する",
+  "description": "薬の名前、量、日数を指定して処方します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "medicine": {
+     "type": "string",
+     "description": "薬の名前"
+    },
+    "days": {
+     "type": "integer",
+     "description": "日数"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prescription_refill",
+  "title": "同じ薬をもう一度出す",
+  "description": "前回と同じ処方を、もう一度出します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "prescription_id": {
+     "type": "string",
+     "description": "処方のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prescription_cancel",
+  "title": "処方を取り消す",
+  "description": "まだ渡していない処方を取り消します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "prescription_id": {
+     "type": "string",
+     "description": "処方のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lab_test_request",
+  "title": "検査を依頼",
+  "description": "血液検査や尿検査などを検査室に依頼します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "test": {
+     "type": "string",
+     "description": "検査の種類"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lab_results_get",
+  "title": "検査結果",
+  "description": "依頼した検査の結果と基準値を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "surgery_schedule",
+  "title": "手術を予定に入れる",
+  "description": "手術の日時、内容、担当の獣医を予定に入れます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "at": {
+     "type": "string",
+     "description": "日時"
+    },
+    "kind": {
+     "type": "string",
+     "description": "手術の内容"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "surgery_cancel",
+  "title": "手術を中止",
+  "description": "予定していた手術を中止し、手術室を空けます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "surgery_id": {
+     "type": "string",
+     "description": "手術のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "hospitalization_admit",
+  "title": "入院させる",
+  "description": "動物を入院させ、ケージを割り当てます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hospitalization_discharge",
+  "title": "退院させる",
+  "description": "入院中の動物を退院させ、ケージを空けます。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inpatients_list",
+  "title": "入院中の動物",
+  "description": "いま入院している動物と、そのケージ、入院した日を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "boarding_book",
+  "title": "ペットホテルを予約",
+  "description": "預かる期間とケージの大きさを指定して、ペットホテルを予約します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    },
+    "start": {
+     "type": "string",
+     "description": "預け始める日"
+    },
+    "end": {
+     "type": "string",
+     "description": "迎えの日"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "boarding_cancel",
+  "title": "ペットホテルの予約を取り消す",
+  "description": "ペットホテルの預かりの予約を取り消します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boarding_id": {
+     "type": "string",
+     "description": "預かりのID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "invoice_create",
+  "title": "会計を作る",
+  "description": "診察、薬、検査の料金から請求書を作ります。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "patient_id": {
+     "type": "string",
+     "description": "動物のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invoice_void",
+  "title": "請求書を取り消す",
+  "description": "間違って作った請求書を無効にします。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "請求書のID"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "payment_record",
+  "title": "支払いを記録",
+  "description": "現金、カード、ペット保険で受け取った支払いを記録します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "請求書のID"
+    },
+    "amount": {
+     "type": "number",
+     "description": "金額"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpaid_invoices",
+  "title": "未払いの請求",
+  "description": "まだ支払われていない請求書と、その金額を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "supplies_list",
+  "title": "薬の残り",
+  "description": "薬とワクチンの残りの数と、使用期限を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "supplies_request",
+  "title": "薬を取り寄せる",
+  "description": "残りが少なくなった薬やワクチンを、卸の業者に注文します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item": {
+     "type": "string",
+     "description": "薬の名前"
+    },
+    "quantity": {
+     "type": "integer",
+     "description": "数"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vets_schedule",
+  "title": "獣医の勤務表",
+  "description": "獣医ごとの出勤日と、診察できる時間を表示します。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "週"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "owner_message_send",
+  "title": "飼い主に連絡",
+  "description": "飼い主にメッセージを送ります。検査の結果や迎えの時間を伝えるときに使います。",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "飼い主のID"
+    },
+    "text": {
+     "type": "string",
+     "description": "本文"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

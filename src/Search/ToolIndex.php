@@ -44,18 +44,26 @@ final class ToolIndex
      * changes, so an old cache entry is rebuilt rather than compared with
      * terms it never held.
      */
-    private const FORMAT = 6;
+    private const FORMAT = 9;
 
     /**
      * How alike a word the tools do not use and a word they do must be to be
-     * taken for it when learning: the Dice coefficient of their trigrams.
-     * Chosen on the train half; see nearest().
+     * taken for it: the Dice coefficient of their trigrams. Chosen on the
+     * train half; see nearest() and alike().
      */
     private const NEAREST = 0.3;
 
     /**
-     * The words of the index in index order, built the first time nearest()
-     * needs them, since only a search that learns does.
+     * How much a word the tools use counts, against the word itself, when a
+     * query holds a word alike it instead (see score()). Chosen on the train
+     * half: from 0.25 to 1 the requests in fields barely move, as one
+     * sentence they gain the most around 0.5 to 0.75.
+     */
+    private const ALIKE_WEIGHT = 0.5;
+
+    /**
+     * The words of the index in index order, built the first time a query
+     * holds a word no document does.
      *
      * @var list<string>|null
      */
@@ -66,7 +74,7 @@ final class ToolIndex
      * @param array<array-key, array<int|string, float>> $words per word, per document holding it: its
      *        weighted frequency, the fields' weights and lengths already applied
      * @param array<array-key, array<int|string, float>> $grams the same for trigrams
-     * @param array{array<array-key, list<int>>, list<int>}|null $nearby see invert(); null until nearest() needs it
+     * @param array{array<array-key, list<int>>, list<int>}|null $nearby see invert(); null until alike() needs it
      *
      * Keys are array-key, not string: PHP turns a key such as "123", a trigram
      * of a word with digits, into an integer, and looks it up the same way.
@@ -84,7 +92,8 @@ final class ToolIndex
      * @param iterable<int|string, array<string, string>> $documents id => field => text
      * @param array<string, float> $weights field => weight; a field missing here is not indexed
      * @param float $trigramWeight how much trigram matches count against whole-word matches
-     * @param bool $nearby whether nearest() will be asked, so what it reads is built now and kept with the index
+     * @param bool $nearby whether what alike() reads is built now and kept with the index, rather than at
+     *        the first query holding a word no document does
      */
     public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6, bool $nearby = false): self
     {
@@ -125,9 +134,8 @@ final class ToolIndex
         }
 
         // Built here, from the trigrams already cut, and kept by the cache:
-        // working them out again at each request cost a search that learns
-        // ten times the search itself. Only for a host that learns, so the
-        // cache of one that does not stays as small as it was.
+        // working them out again at each request cost more than the search
+        // itself.
         $inverted = $nearby ? self::invert($words, $trigrams) : null;
 
         return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight, $inverted);
@@ -176,6 +184,23 @@ final class ToolIndex
         $words = array_values(array_unique($words));
         $wordScores = $this->bm25f($words, $this->words);
         $gramScores = $this->bm25f(array_values(array_unique($grams)), $this->grams);
+        // A word no tool uses ("reservation") still reaches the tools by its
+        // trigrams, but pooled with the others, trigrams find any word with
+        // a common piece ("service" by "ser", "vic"). The words alike it as
+        // a whole ("reserve", "reservations") also count as words, by how
+        // alike they are, so the tool that holds one is told from the tools
+        // that only share pieces of it. Added to the trigrams, not in place
+        // of them: alone they lost the requests a trigram still found.
+        foreach ($words as $word) {
+            if (isset($this->words[$word])) {
+                continue;
+            }
+            foreach ($this->alike($word) as $alike => $dice) {
+                foreach ($this->bm25f([(string) $alike], $this->words) as $id => $score) {
+                    $wordScores[$id] = ($wordScores[$id] ?? 0.0) + self::ALIKE_WEIGHT * $dice * $score;
+                }
+            }
+        }
 
         $scores = [];
         foreach ($this->ids as $id) {
@@ -258,9 +283,35 @@ final class ToolIndex
      */
     public function nearest(string $word): ?string
     {
+        $nearest = null;
+        $best = 0.0;
+        // alike() lists the words in index order, so the first of equals
+        // wins whatever order the trigrams visited them in.
+        foreach ($this->alike($word) as $alike => $dice) {
+            if ($dice > $best) {
+                $nearest = $alike;
+                $best = $dice;
+            }
+        }
+
+        return $nearest === null ? null : (string) $nearest;
+    }
+
+    /**
+     * The indexed words alike a word, by the Dice coefficient of their
+     * trigrams, at least NEAREST, in index order.
+     *
+     * Only the words sharing a trigram with it are visited, through the
+     * inverted trigrams kept with the index: a word sharing none is not
+     * alike at all.
+     *
+     * @return array<array-key, float> word => Dice coefficient; PHP keys a word such as "123" as an integer
+     */
+    private function alike(string $word): array
+    {
         $grams = array_unique(Analyzer::trigrams($word));
         if ($grams === []) {
-            return null;
+            return [];
         }
         [$wordsByGram, $gramCounts] = $this->nearby ??= self::invert($this->words);
         $shared = [];
@@ -269,23 +320,17 @@ final class ToolIndex
                 $shared[$position] = ($shared[$position] ?? 0) + 1;
             }
         }
-        $nearest = null;
-        $best = self::NEAREST;
+        ksort($shared);
+        $this->wordList ??= array_map('strval', array_keys($this->words));
+        $alike = [];
         foreach ($shared as $position => $count) {
             $dice = 2 * $count / (count($grams) + ($gramCounts[$position] ?? 0));
-            // The lower position on a tie, whatever order the trigrams of
-            // the word visited them in.
-            if ($dice > $best || ($dice === $best && ($nearest === null || $position < $nearest))) {
-                $nearest = $position;
-                $best = $dice;
+            if ($dice >= self::NEAREST && isset($this->wordList[$position])) {
+                $alike[$this->wordList[$position]] = $dice;
             }
         }
-        if ($nearest === null) {
-            return null;
-        }
-        $this->wordList ??= array_map('strval', array_keys($this->words));
 
-        return $this->wordList[$nearest] ?? null;
+        return $alike;
     }
 
     /**

@@ -103,6 +103,23 @@ final class ToolSearchTest extends TestCase
         self::assertSame('staff_shifts', $search->search('พรุ่งนี้ใครเข้ากะหน้าเคาน์เตอร์')[0]->name ?? null);
     }
 
+    public function testBurmeseIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ပယ်', 'ယ်ဖျ', 'ဖျက်', 'ပယ်ဖျက်'], $analyzer->words('ပယ်ဖျက်'), 'a stacked consonant or a vowel stays on its consonant, the run is kept');
+        self::assertSame(['ပယ်ဖျက်'], $analyzer->tokens('ပယ်ဖျက်'), 'the caller is shown the word it wrote');
+    }
+
+    public function testASentenceInBurmeseFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('mill'));
+
+        // Both found another tool first while a run of Burmese met tools by its trigrams only.
+        self::assertSame('unpaid_receipts', $search->search('ဘယ်သူ့ကို စပါးဖိုးမပေးရသေးလဲ')[0]->name ?? null);
+        self::assertSame('truck_book', $search->search('ဗုဒ္ဓဟူးနေ့ ကွင်းကြီးရွာကစပါးသယ်ဖို့ ကားငှားပါ')[0]->name ?? null);
+    }
+
     public function testAKoreanWordIsCutInPairs(): void
     {
         $analyzer = new Analyzer();
@@ -130,6 +147,18 @@ final class ToolSearchTest extends TestCase
         self::assertSame(['ยกเลิก'], $analyzer->tokens('ยกเลิก'), 'Thai vowels and tone marks');
         self::assertSame(["re\u{301}sume\u{301}"], $analyzer->tokens("re\u{301}sume\u{301}"), 'decomposed accents');
         self::assertSame(['सर्वर'], $analyzer->words('सर्वर'), 'one term, no fragment');
+    }
+
+    public function testEachLetterIsLoweredOnItsOwnOnEveryVersionOfPhp(): void
+    {
+        $analyzer = new Analyzer();
+
+        // The full mapping gave "i" and a combining dot, a word "izin" never met.
+        self::assertSame(['izin', 'kaydet'], $analyzer->tokens('İzin kaydet'), 'the Turkish capital dotted i');
+        // From PHP 8.3 the full mapping picked the final sigma by context:
+        // the same request found other tools on 8.2 than on 8.3.
+        self::assertSame(['ακυρωσησ', 'κρατησησ'], $analyzer->tokens('ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ'), 'a Greek capital sigma');
+        self::assertSame(['κράτησης'], $analyzer->tokens('κράτησης'), 'a word is shown back as it is written');
     }
 
     public function testAWordWithMarksFindsItsTool(): void
@@ -322,8 +351,8 @@ final class ToolSearchTest extends TestCase
         $learning = ToolIndex::build($documents, $weights, nearby: true);
         $restored = ToolIndex::fromArray($learning->toArray());
 
-        // Kept with the index only for a host that learns, so the cache of
-        // one that does not stays as small as it was.
+        // Built with the index only when asked (a host with a cache asks),
+        // otherwise at the first word no tool uses.
         self::assertNull($plain->toArray()['nearby']);
         self::assertNotNull($learning->toArray()['nearby']);
         self::assertNotNull($restored);
@@ -334,6 +363,17 @@ final class ToolSearchTest extends TestCase
         }
         self::assertSame('rollback', $plain->nearest('rollbak'));
         self::assertNull($plain->nearest('zzzz'));
+    }
+
+    public function testAWordAlikeAsAWholeCountsAsThatWord(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $query = new SearchQuery('resolve', 'ticket', 'mark the wifi issue as fixed');
+
+        // "resolve" and "fixed" are in no tool. By the trigrams of the whole
+        // request alone, the tool that labels a ticket came first; the
+        // status tool holds "solved", alike "resolve" as a whole.
+        self::assertSame('acme_set_ticket_status', self::names((new ToolSearch($tools))->search($query))[0]);
     }
 
     public function testLearningLiftsTheToolThatWorked(): void
@@ -417,6 +457,27 @@ final class ToolSearchTest extends TestCase
         self::assertSame('send_estimate', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('sending', 'estimate')))[0]);
     }
 
+    public function testThePairsOfCharactersOfOneWordAreNotLearnedAsAPair(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'owner_show', 'title' => '飼い主の詳細', 'description' => '飼い主の住所を表示します。', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'owners_list', 'title' => '飼い主一覧', 'description' => '飼い主の一覧を表示します。', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(new SearchQuery('住所', '飼い主'))->searchId, 'owner_show');
+        }
+
+        // "飼い" and "い主" are both "飼い主" (owner): paired, they would lift
+        // the tool asked for an address for every request about an owner,
+        // listing them too. The verb and the object are still paired.
+        self::assertArrayNotHasKey('い主 飼い', $store->load());
+        self::assertArrayHasKey('住所 飼い', $store->load());
+        self::assertSame('owners_list', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('表示', '飼い主')))[0]);
+        self::assertSame('owner_show', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('住所', '飼い主')))[0]);
+    }
+
     public function testTheFileStoreKeepsWhatWasLearned(): void
     {
         $file = self::temporary('learning') . '.json';
@@ -449,6 +510,36 @@ final class ToolSearchTest extends TestCase
             self::assertSame(1, $counts['latest']['acme_get_ticket'] ?? null);
         }
         unlink($file);
+    }
+
+    public function testAFullStoreMakesRoomForManyPairsAtOnce(): void
+    {
+        $file = self::temporary('learning') . '.json';
+        $words = array_map(static fn(int $i): string => 'word' . $i, range(1, Counts::LIMIT));
+        foreach ([new MemoryLearningStore(), new FileLearningStore($file)] as $store) {
+            foreach (array_chunk($words, 500) as $chunk) {
+                $store->record($chunk, 'acme_get_ticket');
+            }
+            self::assertSame(Counts::LIMIT, self::total($store, $file), 'a store at its limit drops nothing');
+
+            $store->record(['past the limit'], 'acme_get_ticket');
+            self::assertSame(Counts::KEPT, self::total($store, $file), 'going past the limit cuts below it');
+
+            // The room made is what spares a full store a sort at every run.
+            $store->record(['next', 'pair'], 'acme_get_ticket');
+            self::assertSame(Counts::KEPT + 2, self::total($store, $file), 'the next pairs fit without a cut');
+            $counts = $store instanceof FileLearningStore ? (new FileLearningStore($file))->load() : $store->load();
+            self::assertArrayHasKey('past the limit', $counts, 'the pair that went past the limit is kept');
+            self::assertArrayNotHasKey('word1', $counts, 'the oldest of the least run went first');
+        }
+        unlink($file);
+    }
+
+    private static function total(MemoryLearningStore|FileLearningStore $store, string $file): int
+    {
+        $counts = $store instanceof FileLearningStore ? (new FileLearningStore($file))->load() : $store->load();
+
+        return array_sum(array_map('count', $counts));
     }
 
     public function testAToolWithANumericNameIsFoundAndLearned(): void

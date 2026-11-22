@@ -58,6 +58,22 @@ function roleOf(callable $header): ?string
 }
 
 /**
+ * The role whose rights a caller has now. MCP_NOTES_GRANTS names a JSON file,
+ * read again at each call, that gives a role the rights of another, such as
+ * {"reader": "admin"}: it stands for the user store a real server reads at
+ * each request, so that a test can change a caller's rights while a client
+ * is connected.
+ */
+function grantedRole(string $role): string
+{
+    $file = getenv('MCP_NOTES_GRANTS');
+    $grants = is_string($file) && is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+    $granted = is_array($grants) ? ($grants[$role] ?? null) : null;
+
+    return is_string($granted) ? $granted : $role;
+}
+
+/**
  * The answer to one HTTP request: its status, its JSON body if it has one,
  * and its headers.
  *
@@ -69,11 +85,7 @@ function roleOf(callable $header): ?string
  */
 function answerHttp(string $method, callable $header, string $body, \Closure $discovery): array
 {
-    // The specification asks a server to check Origin, so that a page the
-    // person opens in a browser cannot reach a server that listens on their
-    // machine.
-    $origin = $header('Origin');
-    if ($origin !== null && !in_array(parse_url($origin, PHP_URL_HOST), ['localhost', '127.0.0.1'], true)) {
+    if (!originAllowed($header)) {
         return [403, null, []];
     }
     // No stream of messages from the server, so nothing to open with GET.
@@ -149,7 +161,7 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
         }
     }
 
-    $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
+    $tools = tools();
 
     if ($method === 'tools/call') {
         $name = $params['name'] ?? null;
@@ -170,6 +182,31 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
     };
 
     return [200, $result === null ? error($id, -32601, 'Method not found.') : ['jsonrpc' => '2.0', 'id' => $id, 'result' => $result], []];
+}
+
+/**
+ * Whether the request may come from where it says it comes from.
+ *
+ * The specification asks a server to check Origin, so that a page the person
+ * opens in a browser cannot reach a server that listens on their machine.
+ * Kept apart so that a server answering more than answerHttp() does, such as
+ * the stream of react/server.php, checks it the same way.
+ *
+ * @param callable(string): ?string $header a header of the request by its name, null when it has none
+ */
+function originAllowed(callable $header): bool
+{
+    $origin = $header('Origin');
+
+    return $origin === null || in_array(parse_url($origin, PHP_URL_HOST), ['localhost', '127.0.0.1'], true);
+}
+
+/**
+ * The tools of the notes server, as the library takes them.
+ */
+function tools(): ToolSet
+{
+    return ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 }
 
 /**

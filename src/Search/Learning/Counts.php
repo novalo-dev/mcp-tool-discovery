@@ -31,6 +31,14 @@ final class Counts
     public const LIMIT = 20_000;
 
     /**
+     * How many counts a store keeps after going over LIMIT. Cutting to the
+     * limit itself would sort every count again at the next new pair, on
+     * every run once the store is full; cutting a tenth below it sorts once
+     * every 2,000 new pairs, and what goes is still the least run.
+     */
+    public const KEPT = self::LIMIT - 2_000;
+
+    /**
      * The counts with one more run of the tool for each word.
      *
      * @param array<string, array<string, int>> $counts
@@ -48,9 +56,9 @@ final class Counts
     }
 
     /**
-     * The counts cut to LIMIT, the least run going first and, among equal
-     * counts, the words the store has held longest, so a word just learned
-     * is not the first thing dropped.
+     * The counts cut to KEPT once they pass LIMIT, the least run going
+     * first and, among equal counts, the words the store has held longest,
+     * so a word just learned is not the first thing dropped.
      *
      * @param array<string, array<string, int>> $counts
      *
@@ -71,7 +79,7 @@ final class Counts
         }
         // usort is stable since PHP 8.0: equal counts keep the store's order.
         usort($entries, static fn(array $a, array $b): int => $a[0] <=> $b[0]);
-        foreach (array_slice($entries, 0, $total - self::LIMIT) as [, $word, $tool]) {
+        foreach (array_slice($entries, 0, $total - self::KEPT) as [, $word, $tool]) {
             unset($counts[$word][$tool]);
             if ($counts[$word] === []) {
                 unset($counts[$word]);

@@ -22,20 +22,26 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 
 | Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
 |---|---|---|---|---|---|---|
-| workspace | 50 | 16,147 | 2,871 | 1,839 | 14,314 | 1,125 |
-| platform | 40 | 12,829 | 2,871 | 1,839 | - | 862 |
-| people | 40 | 12,814 | 2,871 | 1,839 | - | 874 |
-| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,069 |
-| school | 40 | 15,096 | 2,871 | 1,839 | - | 1,076 |
-| hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,345 |
-| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,428 |
-| newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,677 |
+| workspace | 50 | 16,147 | 2,871 | 1,839 | 13,982 | 1,161 |
+| platform | 40 | 12,829 | 2,871 | 1,839 | - | 851 |
+| people | 40 | 12,814 | 2,871 | 1,839 | - | 854 |
+| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,073 |
+| school | 40 | 15,096 | 2,871 | 1,839 | - | 1,086 |
+| hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,342 |
+| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,444 |
+| newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,682 |
 | estate | 40 | 12,284 | 2,871 | 1,839 | - | 813 |
-| depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,375 |
-| arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,460 |
+| depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,353 |
+| arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,390 |
 | academy | 40 | 12,433 | 2,871 | 1,839 | - | 765 |
-| garage | 40 | 15,281 | 2,871 | 1,839 | - | 1,373 |
-| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,724 |
+| garage | 40 | 15,281 | 2,871 | 1,839 | - | 1,315 |
+| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,707 |
+| clinic | 40 | 13,592 | 2,871 | 1,839 | - | 1,293 |
+| water | 40 | 17,857 | 2,871 | 1,839 | - | 2,997 |
+| mill | 40 | 19,842 | 2,871 | 1,839 | - | 1,635 |
+| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,414 |
+| bikes | 40 | 12,966 | 2,871 | 1,839 | - | 994 |
+| ops | 150 | 50,720 | 2,871 | 1,839 | - | 1,015 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
@@ -58,9 +64,9 @@ tools stay outside them, listed as themselves.
 - **Grouped** shows the map of the server without a search, for a client that
   searches badly and a server whose tools fall into a few clear groups. It
   leaves the schemas out but names every action, so its list grows with the
-  server. On the workspace its eight tools take 7,486 bytes where the 28
-  actions they stand for would take 9,299: on short tools it saves about a
-  fifth, more as the schemas grow.
+  server. On the workspace its eight tools take 7,154 bytes where the 28
+  actions they stand for would take 9,299: on short tools it saves almost a
+  quarter, more as the schemas grow.
 - **Direct** lists every tool as itself, the first column. It suits a server
   with a few tools, where a search would cost more than it saves, and the
   host that lets its users turn the other modes off.

@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 584 times
-out of 749 in fields, and 366 times as one sentence.
+On the benchmark below, the same requests find the right tool first 883 times
+out of 1149 in fields, and 628 times as one sentence.
 
 ## How a tool is scored
 
@@ -66,10 +66,36 @@ Brahmic scripts write most vowels as marks ("सर्वर" holds three), Arab
 Hebrew their vowel points, and text in decomposed form (NFD) every accent.
 Unicode says which characters are marks; the library holds no list.
 
+Each letter is lowered on its own, with Unicode's simple mapping, so a
+request gives the same terms on every version of PHP. The full mapping
+lowered the Turkish `İ` to an `i` and a combining dot, a word that never met
+`izin`, and from PHP 8.3 it chose the Greek final sigma by context: a request
+typed in capitals (`ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ`) found other tools on 8.2 than on 8.3.
+A capital sigma is now always lowered to `σ`, as PHP 8.2 did, and a word is
+shown back as the tools write it, `ς` and all.
+
 Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
 `atu`, `tus`, `us `. Trigram matches count at 0.6 of word matches. They let
 "statuses" meet "status" and "categories" meet "category" with no rule of any
 language.
+
+**A word the tools do not use also counts as the tool words alike it.** The
+trigrams of a request are pooled, so a word no tool holds meets any tool
+sharing a piece of it: "reservation" meets "service" by `ser` and `vic` as
+much as "reserve" by `res` and `ser`. Each tool word whose trigrams are alike
+the whole word (a Dice coefficient of 0.3 at least, the threshold learning
+already uses) now also counts as a word match, at half the weight and by how
+alike it is, on top of the trigrams. Chosen on the train half: from 0.25 to 1
+the requests in fields moved by 1 to 3 first places, as one sentence they
+gained 17 to 33, most around 0.5 to 0.75; 0.5 was kept, which also gave the
+most in the top 3. On the test half, the requests in fields go from 879 to
+883 first (1023 in the top 3, unchanged), as one sentence from 600 to 628
+(793 to 825), learned from the other half from 883 to 884, asked again 961
+(1059 to 1060 in the top 3). In fields, 10 test requests come first that did
+not and 6 no longer do, where the word alike in form is not the one meant.
+In place of the trigrams of
+those words, rather than on top, it lost 25 first places on train: rejected.
+A cached search over 150 tools takes 0.27 ms against 0.25 ms.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are
@@ -82,15 +108,22 @@ still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修
 when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
 synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
 
-**Thai is cut into pairs of what is seen.** It is written without spaces
-too, but its vowels and tone marks are marks, so a pair of code points would
+**Thai and Burmese are cut into pairs of what is seen.** Thai is written
+without spaces too, but its vowels and tone marks are marks, so a pair of code points would
 hold a consonant and the vowel it carries, a fragment that means nothing. A
 run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
 consonant with its marks): "ยกเลิก" (to cancel) gives `ยก`, `กเ`, `เลิ`,
 `ลิก`. Unlike Chinese, the whole run is kept beside its pairs, and its
 trigrams with it: on the train half of the sports centre, keeping it found
-as many tools first, with fewer tools returned. Lao, Khmer and Burmese are
-written the same way and are not measured yet, so they are read as before.
+as many tools first, with fewer tools returned. Khmer is written the same
+way and is read as before, its runs met by their trigrams: on the train half
+of the water supply office (below), cutting it into pairs of clusters as Thai
+is found as many tools first, returned more, and learning lost one more
+request. Burmese, measured on the rice mill (below), is cut as Thai is:
+on its train half, pairs kept beside the run found 45 of 50 tools first
+against 43, and 39 as one sentence against 36, with fewer tools returned
+(1.9 against 2.0); pairs alone found 44. Lao is not measured on the
+benchmark yet, so it is read as before.
 
 **A Korean word is cut into pairs.** Korean puts spaces between words, but
 glues to each word the particles that mark its role: "레슨을 취소해 줘"
@@ -148,9 +181,11 @@ new SearchSetup(cache: new FileIndexCache($cacheDir)); // each request starts af
 The key is a hash of every text indexed and of the settings. Two callers who
 see different tools get two indexes, so an index never holds a tool hidden
 from the one searching it; a changed tool gives a new key, so nothing goes
-stale and nothing needs clearing. `FileIndexCache` writes PHP files that return
-an array: OPcache keeps them compiled in shared memory. Its directory must be
-one only the server writes to.
+stale. `FileIndexCache` writes PHP files that return an array: OPcache keeps
+them compiled in shared memory. Its directory must be one only the server
+writes to. The files of tools that have since changed stay there; emptying the
+directory when the server is deployed is safe
+([When the tools change](HOSTS.md#when-the-tools-change)).
 
 | Tools | No cache | Memory | Files, with OPcache |
 |---|---|---|---|
@@ -204,6 +239,25 @@ for requests of one word, and learns the pairs from the next runs. The pairs
 of a request are taken from its first 16 words in alphabetical order, so a
 long request costs at most 120 keys.
 
+Two pairs of characters of one word are not a pair. Japanese, Chinese,
+Korean, Thai and Burmese are cut into pairs of characters (above), so one word of a
+request gives several terms: "飼い主" (owner) gives "飼い" and "い主". Paired
+with each other, they only said the object again, and a search for an
+owner's address then lifted that tool for every request about an owner. When
+a request has several tokens (its fields, the words of a Korean sentence),
+only terms of different tokens are paired, so the verb still pairs with its
+object; a sentence without spaces is one token, and keeps every pair of its
+terms. A word of an alphabet is one term, so nothing changes for it. The
+rule was chosen on the train half of the Japanese veterinary clinic
+(below), in two folds: learning from one fold to the other cost 2 first places, and
+now costs none; pairing only terms that never share a token did better
+there than skipping only terms of one token alone (1 lost). The train half
+of the other servers does not move. On their test half, the sports centre
+gains one first place after learning from the other half (586 to 587 in
+all) and one asked again (637 to 638), with nothing lost. A `search_id` now keeps the
+terms of each token together; an id of single words, as before, reads as one
+token per word and learns as it did.
+
 The limits are the point:
 
 - **Only words the tools use are kept** (a word they do not use, as the tool
@@ -238,9 +292,9 @@ taken for a tool word they only half resemble. The closest word is only
 looked for when the host learns, and only for words the tools do not use. It
 reads the trigrams of the tool words inverted, each pointing to the words
 that hold it, so only the words sharing a trigram are compared. With an
-`IndexCache`, they are built with the index of a host that learns and kept
-with it (its saved index is about a quarter larger; a host that does not
-learn keeps the same). Cutting every tool word again at each request made a
+`IndexCache`, they are built with the index and kept with it, since the
+search reads them too (see "Words and trigrams"): the saved index is about a
+quarter larger. Cutting every tool word again at each request made a
 search that learns over 176 tools take more than 6 ms, ten times the search
 itself; it now takes about 0.6 ms against 0.4 ms, and 1.9 ms against 1.8 ms
 over 706 tools, the closest word being the same for each of the 15 944 words
@@ -253,7 +307,7 @@ locked while it is written.
 
 ## The measures
 
-Fourteen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Seventeen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -265,18 +319,24 @@ estate written in Chinese (40 tools, `repair_assign`), a bus depot
 written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 (40 tools, `court_book`), a music school written in Korean (40 tools,
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
-`estimate_send`) and the front desk of a hotel written in Russian (40 tools,
-`BOOKING_CHANGE_DATES`). 1497 requests, each written as one
+`estimate_send`), the front desk of a hotel written in Russian (40 tools,
+`BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
+tools, `appointment_move`) a water supply office written in Khmer (40
+tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
+`paddy_receive`), an archaeological museum written in Greek (40 tools,
+`loan_approve`), a city bike rental written in Polish (40 tools,
+`bike_unlock`) and an airline operations centre (150 tools,
+`flight.change-aircraft`). 2297 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 749 requests | Right tool first | Top 3 |
+| Test half, 1149 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 584 | 682 |
-| The same request as one sentence | 366 | 494 |
-| In fields, after every train request was run once | 586 | 683 |
-| In fields, after the test requests were run once, then asked again | 637 | 698 |
+| The request in fields | 883 | 1023 |
+| The same request as one sentence | 628 | 825 |
+| In fields, after every train request was run once | 884 | 1023 |
+| In fields, after the test requests were run once, then asked again | 961 | 1060 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -426,6 +486,108 @@ What it misses is mostly neighbours of one object (opening a room again after
 repairs finds the tool that closes it) and words the tools do not use
 ("такси" for the transfer).
 
+The clinic is written in Japanese, kanji, hiragana and katakana with no
+spaces, behind snake_case names: a veterinary clinic whose tools are
+neighbours by design (book, move, cancel an appointment; prescribe, refill,
+cancel a prescription; admit and discharge). Its 100 requests were written
+before any of them was run, as staff at the desk talk, and the pairs of
+characters were never measured on Japanese before it. Nothing in the
+weights or the cut was changed for it: 33 of its 50 test requests find the
+right tool first in fields (37 in the top 3) and 26 as one sentence (35).
+It could not join at first: learning from its train half cost 3 test
+requests their first place, the pairs of characters of one word being
+learned as a pair (above); with terms paired across tokens only, learning
+loses nothing (33 and 37 both ways). What it misses is mostly words the
+tools do not use ("ツケ" for an unpaid bill, "補充" for ordering supplies) and
+neighbours of one object (moving an appointment finds the tool that cancels
+it).
+
+The water supply office is written in Khmer, behind snake_case names: a
+script with no spaces between words, only between phrases, whose vowels are
+marks and whose consonants stack below one another. Its tools are neighbours
+by design (cut and reconnect the water; issue, void and correct a bill;
+schedule, cancel and announce an outage). Its 100 requests were written
+before any of them was run, as staff at the office talk, and nothing in the
+search was changed for it: 32 of its 50 test requests find the right tool
+first in fields (39 in the top 3), 32 as one sentence (42), and learning
+loses nothing. A phrase of Khmer is one token that meets tools by its
+trigrams, as Thai once did: the right tool is found, but less sharply, with
+about three tools returned against two on most servers. On its train half,
+pairs of grapheme clusters, kept beside the run as for Thai, found as many
+tools first (42) and as one sentence one more (38), but returned more tools
+(2.7 against 2.4 as one sentence) and learning lost two requests against
+one; pairs alone found 43 first and 48 in the top 3 against 49, and pairs of
+code points 41. None was kept. What it misses is mostly neighbours of one
+object (cancelling an outage finds the tool that schedules one) and words the
+tools do not use ("ពាក្យសុំ", an application form, where the tools write
+"សំណើ", a request).
+
+The rice mill is written in Burmese, behind snake_case names, with spaces
+between phrases only, vowels and tones written as marks and consonants
+stacked with a virama. Its tools are neighbours by design (receive, correct
+and cancel a delivery of paddy; pay a farmer and void the payment; record and
+cancel a sale of rice; grant and repay an advance; book and cancel a truck).
+Its 100 requests were written before any of them was run, most of them as
+one run with no space at all. Its train half chose one thing, how Burmese is
+cut (above); no weight or cut changed for it. On its test half, read by its
+trigrams as before, 36 of 50 requests found the right tool first in fields
+and 42 in the top 3, with 2.42 tools returned, and learning lost one. Cut
+into pairs of clusters, 36 come first and 45 in the top 3, with 2.36 tools
+returned; 31 as one sentence (38 in the top 3, one less than before), and
+learning loses nothing (36 and 45 both ways). What it misses is mostly words
+the tools do not use ("တောင်သူ" for a farmer, where the tools write
+"လယ်သမား"; "ချေးငွေ", a loan, where they write "ကြိုတင်ငွေ", an advance)
+and neighbours of one object (selling rice finds the tool that cancels a
+sale).
+
+The museum is written in Greek, the second server in that script, behind
+snake_case names. Its tools are neighbours by design (register, correct, move
+and strike off a find; request, approve and return a loan; book, cancel and
+move a guided tour), and its 100 requests were written before any of them was
+run: about a quarter typed without accents, as on the town hall, and one in
+eight in capitals, as copied from a form or the subject of an e-mail. Nothing
+was tuned on it: 38 of its 50 test requests find the right tool first in
+fields, 48 in the top 3, and 16 as one sentence; learned from its train half,
+40 come first, and learning loses none.
+It is what showed that PHP 8.2 and 8.3 lowered its capitals differently
+(above): with each letter lowered on its own, 16 come first as one sentence
+on every version, against 17 on 8.3 and 16 on 8.2 before. What it misses is
+mostly accents again (`συντηρησεις` asked, `συντήρηση` in the tool) and
+neighbours of one object (asking for a loan finds the list of loans).
+
+The bike rental is written in Polish, the first Latin script whose letters
+are typed away as often as its accents: "zglos" for "zgłoś", where no
+decomposition gives "ł" a base. Its tools are neighbours by design (lock and
+unlock a bike, block and unblock an account, close and reopen a station,
+issue and waive a penalty), and its 100 requests were written before any of
+them was run, alternating with and without the Polish letters, so that each
+half holds both (27 of the train half and 30 of the test half are plain
+ASCII). Nothing was tuned on it: 39 of its 50 test requests find the right
+tool first in fields, 46 in the top 3, 31 as one sentence, with 2.24 tools
+returned; learned from its train half, 39 and 46 again. Long Polish words
+keep enough trigrams to meet without their letters ("rowerow" finds
+"rowerów"); what it misses is short ones that do not ("doladuj" against
+"doładuj") and neighbours of one object (closing a lock remotely finds the
+tool that opens it).
+
+The airline operations centre is the size and shape of a real server: 150
+tools in English, named by a dotted object and a hyphenated action
+(`flight.change-aircraft`, `crew.call-out`), most of them neighbours on one
+object (delay, cancel, reinstate and divert a flight; assign, unassign and
+swap a crew member; block and unblock a gate or a seat). Its 300 requests,
+two per tool, were written before any of them was run, and it is the first
+server split as "Changing the ranking" says: the first request of half its
+tools is in each half. Nothing was tuned on it: 117 of its 150 test requests
+find the right tool first in fields, 126 in the top 3, 98 as one sentence;
+learned from its train half, 121 come first and none is lost from the top 3;
+asked again, 122. Its train half scores 111 in fields, so both halves are as
+hard. What it misses is the two kinds below, at this size: neighbours of one
+object ("reopen" a gate finds the tool that blocks it, "release" a repaired
+aircraft finds the dispatch release of a flight, "move down" a traveller
+finds the upgrade) and words its tools do not use ("reservation" for a
+booking, "luggage" for a bag, "plane" for an aircraft), where trigrams then
+meet the wrong word ("reservation" lands on "reserve" and "service").
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
 Learning by pairs of words, measured before the town hall came in, loses
@@ -447,6 +609,23 @@ kind is what `vocabulary` and the host's synonyms are for.
 - Add requests to `tests/Fixtures/queries.json` **before** running them on your
   change, or the benchmark only measures what you tuned. Choose on `train`,
   judge on `test`.
+- Split a new server's requests so each half holds the first request written
+  for half of its tools: the first request of the tools of even rank goes to
+  `train`, that of the tools of odd rank to `test`, and so on, alternating.
+  The first request one writes for a tool is the plain one, its second a
+  paraphrase. The servers so far put the first in `train` and the second in
+  `test`, and their train half is easier for it: 862 of its 998 requests
+  come first in fields against 762 of 999 on test, and the gap holds on
+  every server added later (46 against 39 on the bike rental, 48 against 35
+  on the newsroom). Split this way, the airline operations centre scores
+  111 on train against 117 on test. The later requests of the train half, the third written
+  for a tool, are as hard as the test half: 136 of 190 come first.
+- So learning cannot be tuned on the train half of these servers. Learning
+  helps where the text misses, and the train half misses half as often:
+  learned from the rest of train, ten folds of it lose 8 first places
+  (862 to 854) while the test half gains 5 (762 to 767), and a lift scaled
+  by the share of the request's pairs ever learned won 5 on the folds and
+  lost 4 on test. A setting of learning waits for servers split as above.
 - Give the numbers before and after in the pull request, and update this page
   and the README: `BenchmarkTest` fails until their tables, and the sentence
   that sums the fields up, give the scores the benchmark measures.

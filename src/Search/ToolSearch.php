@@ -71,7 +71,7 @@ final class ToolSearch
             ];
         }
         $this->position = array_flip(array_keys($documents));
-        $this->index = self::index($documents, $options, $this->analyzer, $cache, $learning !== null && $options->learningWeight > 0);
+        $this->index = self::index($documents, $options, $this->analyzer, $cache);
     }
 
     /**
@@ -97,12 +97,16 @@ final class ToolSearch
                 $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;
             }
         }
-        $known = [];
+        // The known terms of each token apart: learning pairs terms of
+        // different tokens only (see pairs()).
+        $groups = [];
         $unmatched = [];
         $learns = $this->learning !== null && $this->options->learningWeight > 0;
         foreach (array_unique($tokens) as $token) {
             $terms = array_values(array_filter(Analyzer::terms($token), fn(string $term): bool => $this->index->has($term)));
-            array_push($known, ...$terms);
+            if ($terms !== []) {
+                $groups[] = $terms;
+            }
             // The caller is told the words it wrote, never a pair of
             // characters cut out of its sentence, which it could not reuse.
             if ($terms === []) {
@@ -113,18 +117,17 @@ final class ToolSearch
                 // finding it reads every word of the index.
                 $nearest = $learns ? $this->index->nearest($token) : null;
                 if ($nearest !== null) {
-                    $known[] = $nearest;
+                    $groups[] = [$nearest];
                 }
             }
         }
-        $known = array_values(array_unique($known));
-        $searchId = $known === [] ? null : self::encode($known);
+        $searchId = $groups === [] ? null : self::encode($groups);
         if ($scores === []) {
             return new SearchResult([], $searchId, $unmatched);
         }
 
         $best = max($scores);
-        foreach ($this->learned($known) as $name => $lift) {
+        foreach ($this->learned($groups) as $name => $lift) {
             // Only tools the text already found: what was learned reorders
             // the answer, it never brings a tool the query does not describe.
             if (isset($scores[$name])) {
@@ -167,9 +170,15 @@ final class ToolSearch
         if ($this->learning === null || $this->options->learningWeight <= 0 || !$this->tools->has($tool)) {
             return;
         }
-        $words = array_values(array_filter(self::decode($searchId), fn(string $word): bool => $this->index->has($word)));
-        if ($words !== []) {
-            $this->learning->record([...$words, ...self::pairs($words)], $tool);
+        $groups = [];
+        foreach (self::decode($searchId) as $group) {
+            $group = array_values(array_filter($group, fn(string $word): bool => $this->index->has($word)));
+            if ($group !== []) {
+                $groups[] = $group;
+            }
+        }
+        if ($groups !== []) {
+            $this->learning->record([...self::flat($groups), ...self::pairs($groups)], $tool);
         }
     }
 
@@ -208,19 +217,20 @@ final class ToolSearch
      * more than the thing. A query of one word has no pair and uses the
      * single words.
      *
-     * @param list<string> $words
+     * @param list<list<string>> $groups the known terms of each token
      *
      * @return array<string, float>
      */
-    private function learned(array $words): array
+    private function learned(array $groups): array
     {
+        $words = self::flat($groups);
         if ($this->learning === null || $this->options->learningWeight <= 0 || $words === []) {
             return [];
         }
         $counts = $this->learning->load();
         $lift = [];
         if (count($words) > 1) {
-            $words = self::pairs($words);
+            $words = self::pairs($groups);
         }
         foreach ($words as $word) {
             foreach ($counts[$word] ?? [] as $tool => $runs) {
@@ -236,18 +246,39 @@ final class ToolSearch
      * Analyzer never keeps a space inside a word, so a pair cannot be taken
      * for a word, and the store keeps both under its one format.
      *
-     * @param list<string> $words
+     * When the request has several tokens, two terms of the same token are
+     * not paired. A token of Japanese, Chinese or Korean gives several pairs
+     * of characters, all of one word: "飼い主" (owner) gives "飼い" and
+     * "い主", and their pair says the object again, as one word would.
+     * Paired, they lifted the tool that lists owners for every request about
+     * an owner, which is what pairs are there to avoid; the verb and the
+     * object are two tokens, and their pairs still are. A request of one
+     * token (a sentence without spaces) has nothing else to pair, and keeps
+     * every pair of its terms. A token of an alphabet gives one term, so
+     * nothing changes for it.
+     *
+     * @param list<list<string>> $groups the known terms of each token
      *
      * @return list<string>
      */
-    private static function pairs(array $words): array
+    private static function pairs(array $groups): array
     {
-        $words = array_values(array_unique($words));
+        $words = self::flat($groups);
         sort($words);
         $words = array_slice($words, 0, self::MAX_PAIRED_WORDS);
+        $tokensOf = [];
+        foreach ($groups as $token => $group) {
+            foreach ($group as $word) {
+                $tokensOf[$word][$token] = true;
+            }
+        }
+        $apart = count($groups) > 1;
         $pairs = [];
         foreach ($words as $i => $first) {
             foreach (array_slice($words, $i + 1) as $second) {
+                if ($apart && array_intersect_key($tokensOf[$first] ?? [], $tokensOf[$second] ?? []) !== []) {
+                    continue;
+                }
                 $pairs[] = $first . ' ' . $second;
             }
         }
@@ -256,24 +287,36 @@ final class ToolSearch
     }
 
     /**
+     * @param list<list<string>> $groups
+     *
+     * @return list<string>
+     */
+    private static function flat(array $groups): array
+    {
+        return array_values(array_unique(array_merge(...$groups)));
+    }
+
+    /**
      * @param array<string, array<string, string>> $documents
      */
-    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache, bool $learns): ToolIndex
+    private static function index(array $documents, SearchOptions $options, Analyzer $analyzer, ?IndexCache $cache): ToolIndex
     {
-        // Without a cache nothing is kept for the next request: what learning
-        // reads is then built only if a search meets a word the tools lack.
+        // Without a cache nothing is kept for the next request: what finding
+        // the words alike a word reads is then built only if a search meets
+        // a word the tools lack.
         if ($cache === null) {
             return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
         }
         // The key covers every text indexed, so it changes with any tool and
-        // differs between callers who see different tools. It also says
-        // whether the index holds what learning reads, so a host that learns
-        // never gets one without it from a cache it shares.
-        $key = hash('xxh128', serialize($documents) . $options->indexKey() . ($learns ? ' learns' : ''));
+        // differs between callers who see different tools.
+        $key = hash('xxh128', serialize($documents) . $options->indexKey());
         $saved = $cache->get($key);
         $index = $saved === null ? null : ToolIndex::fromArray($saved, $analyzer);
         if ($index === null) {
-            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, $learns);
+            // With what alike() reads: any search meeting a word the tools lack
+            // needs it, and working it out again at each request cost more
+            // than the search itself.
+            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, true);
             $cache->set($key, $index->toArray());
         }
 
@@ -337,22 +380,47 @@ final class ToolSearch
     }
 
     /**
-     * @param list<string> $words
+     * The tokens apart by spaces, the terms of one token joined by "+",
+     * which the Analyzer never keeps in a term. An id of single words, as
+     * ids were before tokens were told apart, reads as one token per word.
+     *
+     * @param list<list<string>> $groups
      */
-    private static function encode(array $words): string
+    private static function encode(array $groups): string
     {
-        sort($words);
+        $tokens = [];
+        foreach ($groups as $group) {
+            sort($group);
+            $tokens[] = implode('+', $group);
+        }
+        // Sorted, so the same words give the same id in any order.
+        sort($tokens);
 
-        return rtrim(strtr(base64_encode(implode(' ', $words)), '+/', '-_'), '=');
+        return rtrim(strtr(base64_encode(implode(' ', $tokens)), '+/', '-_'), '=');
     }
 
     /**
-     * @return list<string>
+     * @return list<list<string>> at most 64 terms in all
      */
     private static function decode(string $searchId): array
     {
         $text = base64_decode(strtr(substr($searchId, 0, 2048), '-_', '+/'), true);
+        if (!is_string($text)) {
+            return [];
+        }
+        $groups = [];
+        $left = 64;
+        foreach (explode(' ', $text) as $token) {
+            $group = array_slice(array_values(array_filter(explode('+', $token), static fn(string $word): bool => $word !== '')), 0, $left);
+            if ($group !== []) {
+                $groups[] = $group;
+                $left -= count($group);
+            }
+            if ($left <= 0) {
+                break;
+            }
+        }
 
-        return is_string($text) ? array_slice(array_values(array_filter(explode(' ', $text), static fn(string $word): bool => $word !== '')), 0, 64) : [];
+        return $groups;
     }
 }

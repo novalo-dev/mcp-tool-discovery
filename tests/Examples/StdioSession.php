@@ -65,4 +65,37 @@ trait StdioSession
 
         return $replies;
     }
+
+    /**
+     * Holds a server to what its search learns over one session: a run with
+     * the search_id lifts its tool for the next search, a failed run teaches
+     * nothing. "open a note" finds the tool that adds one first, by "a note";
+     * the client reads the note instead.
+     *
+     * The id comes from a first process: it holds only the words of the
+     * request, so it is the same in the next one, where the learning is kept.
+     *
+     * @param list<array<string, mixed>> $opening the handshake of the server
+     */
+    private static function assertARunTeachesTheSession(string $script, array $opening): void
+    {
+        $search = ['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['query' => 'open a note']]];
+        $at = count($opening) + 1;
+
+        $first = self::exchange($script, [...$opening, $search], 'reader')[$at]['result']['structuredContent'];
+        self::assertSame('notes_add', $first['tools'][0]['name']);
+        self::assertIsString($first['search_id']);
+
+        $read = static fn(int $id): array => ['method' => 'tools/call', 'params' => ['name' => 'notes_run_read_tool', 'arguments' => [
+            'name' => 'notes_get',
+            'arguments' => ['id' => $id],
+            'search_id' => $first['search_id'],
+        ]]];
+        $replies = self::exchange($script, [...$opening, $read(9), $search, $read(1), $search], 'reader');
+
+        self::assertTrue($replies[$at]['result']['isError']);
+        self::assertSame('notes_add', $replies[$at + 1]['result']['structuredContent']['tools'][0]['name']);
+        self::assertArrayNotHasKey('isError', $replies[$at + 2]['result']);
+        self::assertSame('notes_get', $replies[$at + 3]['result']['structuredContent']['tools'][0]['name']);
+    }
 }

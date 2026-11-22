@@ -8,8 +8,17 @@ parameters:
     level: max
     phpVersion: 80200
     paths:
+        - bridge.php
         - server.php
+        - http-server.php
+        - notifications.php
+        - grant.php
+        - registry-bridge.php
+        - registry.php
+        - attributes.php
+        - tools
     scanFiles:
         - ../notes.php
+        - ../http.php
     bootstrapFiles:
         - vendor/autoload.php

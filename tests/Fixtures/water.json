@@ -1,0 +1,752 @@
+[
+ {
+  "name": "users_list",
+  "title": "អ្នកប្រើទឹកទាំងអស់",
+  "description": "បង្ហាញបញ្ជីអ្នកប្រើទឹកទាំងអស់ ជាមួយលេខនាឡិកាទឹក និងភូមិដែលគេរស់នៅ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "village": {
+     "type": "string",
+     "description": "ភូមិ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user_get",
+  "title": "ព័ត៌មានអ្នកប្រើទឹក",
+  "description": "បង្ហាញឈ្មោះ លេខទូរសព្ទ អាសយដ្ឋាន និងនាឡិកាទឹករបស់អ្នកប្រើទឹកម្នាក់។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user_add",
+  "title": "ចុះឈ្មោះអ្នកប្រើទឹកថ្មី",
+  "description": "ចុះឈ្មោះអ្នកប្រើទឹកថ្មី ដោយឈ្មោះ លេខទូរសព្ទ និងអាសយដ្ឋាន។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "ឈ្មោះ"
+    },
+    "phone": {
+     "type": "string",
+     "description": "លេខទូរសព្ទ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "user_update",
+  "title": "កែព័ត៌មានអ្នកប្រើទឹក",
+  "description": "ផ្លាស់ប្តូរលេខទូរសព្ទ ឬអាសយដ្ឋានរបស់អ្នកប្រើទឹក។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    },
+    "phone": {
+     "type": "string",
+     "description": "លេខទូរសព្ទថ្មី"
+    },
+    "address": {
+     "type": "string",
+     "description": "អាសយដ្ឋានថ្មី"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "connection_request",
+  "title": "ស្នើសុំតបណ្តាញទឹក",
+  "description": "ចុះសំណើតបណ្តាញទឹកថ្មីសម្រាប់ផ្ទះមួយ ដែលមិនទាន់មានទឹករដ្ឋ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "address": {
+     "type": "string",
+     "description": "អាសយដ្ឋានផ្ទះ"
+    },
+    "name": {
+     "type": "string",
+     "description": "ឈ្មោះអ្នកស្នើ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "connection_requests_list",
+  "title": "សំណើតបណ្តាញទឹក",
+  "description": "បង្ហាញសំណើតបណ្តាញទឹកដែលកំពុងរង់ចាំការសម្រេច។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "connection_approve",
+  "title": "អនុម័តការតបណ្តាញ",
+  "description": "អនុម័តសំណើតបណ្តាញទឹក ហើយបញ្ជូនទៅក្រុមជាងដើម្បីដំឡើង។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "លេខសំណើ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "connection_reject",
+  "title": "បដិសេធសំណើតបណ្តាញ",
+  "description": "បដិសេធសំណើតបណ្តាញទឹក ដោយប្រាប់មូលហេតុ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "លេខសំណើ"
+    },
+    "reason": {
+     "type": "string",
+     "description": "មូលហេតុ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "water_cut",
+  "title": "ផ្តាច់ទឹក",
+  "description": "ផ្តាច់ទឹកពីផ្ទះមួយ ពេលមិនបង់ប្រាក់ ឬតាមការស្នើរបស់ម្ចាស់ផ្ទះ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    },
+    "reason": {
+     "type": "string",
+     "description": "មូលហេតុ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "water_reconnect",
+  "title": "ភ្ជាប់ទឹកវិញ",
+  "description": "ភ្ជាប់ទឹកឡើងវិញ ចំពោះផ្ទះដែលត្រូវបានផ្តាច់ពីមុន។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meter_reading_record",
+  "title": "កត់អំណាននាឡិកាទឹក",
+  "description": "កត់លេខដែលអានបានពីនាឡិកាទឹកប្រចាំខែ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meter_id": {
+     "type": "string",
+     "description": "លេខនាឡិកាទឹក"
+    },
+    "value": {
+     "type": "number",
+     "description": "លេខអំណាន គិតជាម៉ែត្រគូប"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meter_readings_list",
+  "title": "អំណាននាឡិកាទឹក",
+  "description": "បង្ហាញអំណាននាឡិកាទឹកពីខែមុនៗ របស់ផ្ទះមួយ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meter_id": {
+     "type": "string",
+     "description": "លេខនាឡិកាទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meter_replace",
+  "title": "ប្តូរនាឡិកាទឹក",
+  "description": "ប្តូរនាឡិកាទឹកដែលខូច ឬចាស់ ដោយនាឡិកាថ្មី។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meter_id": {
+     "type": "string",
+     "description": "លេខនាឡិកាទឹក"
+    },
+    "new_meter": {
+     "type": "string",
+     "description": "លេខនាឡិកាថ្មី"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meter_inspect",
+  "title": "ពិនិត្យនាឡិកាទឹក",
+  "description": "ចាត់ជាងទៅពិនិត្យថា នាឡិកាទឹករាប់ត្រូវ ឬរាប់លើស។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meter_id": {
+     "type": "string",
+     "description": "លេខនាឡិកាទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bills_list",
+  "title": "វិក្កយបត្រប្រចាំខែ",
+  "description": "បង្ហាញវិក្កយបត្រទឹកទាំងអស់នៃខែមួយ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ខែ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bill_get",
+  "title": "វិក្កយបត្រមួយ",
+  "description": "បង្ហាញវិក្កយបត្រទឹកមួយ ជាមួយបរិមាណទឹកដែលប្រើ និងចំនួនប្រាក់។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bill_id": {
+     "type": "string",
+     "description": "លេខវិក្កយបត្រ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bill_issue",
+  "title": "ចេញវិក្កយបត្រ",
+  "description": "ចេញវិក្កយបត្រទឹកពីអំណាននាឡិកាចុងក្រោយ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    },
+    "month": {
+     "type": "string",
+     "description": "ខែ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bill_void",
+  "title": "លុបចោលវិក្កយបត្រ",
+  "description": "លុបចោលវិក្កយបត្រដែលចេញខុស។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bill_id": {
+     "type": "string",
+     "description": "លេខវិក្កយបត្រ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "bill_adjust",
+  "title": "កែតម្រូវវិក្កយបត្រ",
+  "description": "កែចំនួនប្រាក់ក្នុងវិក្កយបត្រ ពេលអំណានខុស ឬមានទឹកលេច។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bill_id": {
+     "type": "string",
+     "description": "លេខវិក្កយបត្រ"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ចំនួនប្រាក់ថ្មី"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payment_record",
+  "title": "កត់ត្រាការបង់ប្រាក់",
+  "description": "កត់ត្រាប្រាក់ដែលអ្នកប្រើទឹកបានបង់ ជាសាច់ប្រាក់ ឬតាមធនាគារ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bill_id": {
+     "type": "string",
+     "description": "លេខវិក្កយបត្រ"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ចំនួនប្រាក់"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpaid_bills",
+  "title": "វិក្កយបត្រមិនទាន់បង់",
+  "description": "បង្ហាញវិក្កយបត្រដែលមិនទាន់បង់ និងចំនួនខែដែលជំពាក់។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "payment_reminders_send",
+  "title": "ផ្ញើការរំលឹកបង់ប្រាក់",
+  "description": "ផ្ញើសារ SMS រំលឹកអ្នកប្រើទឹកដែលមិនទាន់បង់វិក្កយបត្រ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ខែ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_open",
+  "title": "បើកពាក្យបណ្តឹង",
+  "description": "ចុះពាក្យបណ្តឹងថ្មីរបស់អ្នកប្រើទឹក ដូចជាទឹកខ្សោយ ទឹកល្អក់ ឬវិក្កយបត្រខុស។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "លេខអ្នកប្រើទឹក"
+    },
+    "text": {
+     "type": "string",
+     "description": "បញ្ហា"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_assign",
+  "title": "ចាត់ពាក្យបណ្តឹង",
+  "description": "ចាត់ពាក្យបណ្តឹងមួយទៅឱ្យក្រុមជាង ឬបុគ្គលិកដោះស្រាយ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "លេខពាក្យបណ្តឹង"
+    },
+    "crew": {
+     "type": "string",
+     "description": "ក្រុម"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_close",
+  "title": "បិទពាក្យបណ្តឹង",
+  "description": "បិទពាក្យបណ្តឹងដែលបានដោះស្រាយរួច។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "លេខពាក្យបណ្តឹង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaints_list",
+  "title": "ពាក្យបណ្តឹង",
+  "description": "បង្ហាញពាក្យបណ្តឹងដែលនៅបើក និងអ្នកដែលកំពុងដោះស្រាយ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "leak_report",
+  "title": "រាយការណ៍ទឹកលេច",
+  "description": "ចុះការរាយការណ៍ពីបំពង់បែក ឬទឹកលេចធ្លាយនៅតាមផ្លូវ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "ទីតាំង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "leaks_list",
+  "title": "ទឹកលេចដែលបានរាយការណ៍",
+  "description": "បង្ហាញកន្លែងទឹកលេច ដែលមិនទាន់ជួសជុល។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_schedule",
+  "title": "កំណត់ពេលជួសជុល",
+  "description": "កំណត់ថ្ងៃ និងក្រុមជាង សម្រាប់ជួសជុលបំពង់ ឬទឹកលេច។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "ទីតាំង"
+    },
+    "at": {
+     "type": "string",
+     "description": "ថ្ងៃម៉ោង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_complete",
+  "title": "បញ្ចប់ការជួសជុល",
+  "description": "កត់ថាការជួសជុលបានធ្វើរួច ហើយទឹកដំណើរការវិញ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "លេខការងារជួសជុល"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_cancel",
+  "title": "លុបចោលការជួសជុល",
+  "description": "លុបចោលការងារជួសជុលដែលបានកំណត់ពេល។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "job_id": {
+     "type": "string",
+     "description": "លេខការងារជួសជុល"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "crews_list",
+  "title": "ក្រុមជាងទាំងអស់",
+  "description": "បង្ហាញក្រុមជាងទាំងអស់ សមាជិក និងតំបន់ដែលគេទទួលខុសត្រូវ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_schedule",
+  "title": "កាលវិភាគក្រុមជាង",
+  "description": "បង្ហាញការងាររបស់ក្រុមជាងនីមួយៗ ក្នុងសប្តាហ៍។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "សប្តាហ៍"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "outage_schedule",
+  "title": "កំណត់ការផ្អាកទឹក",
+  "description": "កំណត់ការផ្អាកទឹកមួយ ក្នុងតំបន់មួយ សម្រាប់ការងារលើបណ្តាញ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "area": {
+     "type": "string",
+     "description": "តំបន់"
+    },
+    "at": {
+     "type": "string",
+     "description": "ថ្ងៃម៉ោង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "outage_cancel",
+  "title": "លុបចោលការផ្អាកទឹក",
+  "description": "លុបចោលការផ្អាកទឹកដែលបានកំណត់ ហើយទឹកនៅតែមានធម្មតា។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "outage_id": {
+     "type": "string",
+     "description": "លេខការផ្អាកទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "outage_notify",
+  "title": "ជូនដំណឹងពីការផ្អាកទឹក",
+  "description": "ផ្ញើសារជូនដំណឹងដល់អ្នកប្រើទឹកក្នុងតំបន់ ពីការផ្អាកទឹកដែលនឹងមកដល់។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "outage_id": {
+     "type": "string",
+     "description": "លេខការផ្អាកទឹក"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "outages_list",
+  "title": "ការផ្អាកទឹក",
+  "description": "បង្ហាញការផ្អាកទឹកដែលកំពុងកើតឡើង និងដែលបានកំណត់ទុក។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "water_quality_test",
+  "title": "ធ្វើតេស្តគុណភាពទឹក",
+  "description": "ស្នើយកសំណាកទឹកពីកន្លែងមួយ ទៅធ្វើតេស្តនៅមន្ទីរពិសោធន៍។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "ទីតាំង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "water_quality_results",
+  "title": "លទ្ធផលគុណភាពទឹក",
+  "description": "បង្ហាញលទ្ធផលតេស្តទឹក ដូចជាក្លរ ភាពល្អក់ និងបាក់តេរី។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "ទីតាំង"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "usage_report",
+  "title": "របាយការណ៍ការប្រើប្រាស់ទឹក",
+  "description": "បង្ហាញបរិមាណទឹកដែលប្រើក្នុងមួយខែ តាមភូមិ ឬតាមផ្ទះ។",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ខែ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

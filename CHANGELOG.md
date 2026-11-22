@@ -8,6 +8,281 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.6.0 - 2026-11-22
+
+### Added
+
+- **An airline operations centre on the search benchmark, with 150 tools.**
+  Named by a dotted object and a hyphenated action
+  (`flight.change-aircraft`), in English, and mostly neighbours on one
+  object (delay, cancel, reinstate and divert a flight; assign, unassign and
+  swap a crew member; block and unblock a gate or a seat), as large servers
+  are. Its 300 requests were written before any of them was run, and split
+  so that each half holds the first request of half the tools: both halves
+  score alike (111 and 117 first in fields). The benchmark now holds 2297
+  requests over twenty servers; its floors move to 879 and 1023 in fields
+  and 961 asked again.
+
+- **The SDK HTTP example tells a client of `2026-07-28` that its list
+  changed.** A `subscriptions/listen` stream opened with `toolsListChanged`
+  is sent `notifications/tools/list_changed` once when the list its caller
+  may see moves. The host publishes on the SDK's shared bus that the tools
+  changed (`docs/examples/sdk/grant.php` does, for a right granted or taken
+  back); `CallerNotifications` reads that bus for one caller and passes the
+  change on only when `listFingerprint()` differs, so a reader is never told
+  of an admin's tools and compact mode tells no one. The bus is a
+  `Psr6NotificationBus` in files, shared by PHP-FPM workers, which adds
+  `symfony/cache` to the example's `composer.json`. `toolsListChanged` is
+  declared only to clients of that revision. `grantedRole()` in
+  `docs/examples/http.php` now reads the grants file for the ReactPHP
+  example and this one.
+
+- **A Polish city bike rental on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Polish, many of them
+  neighbours (lock and unlock a bike, block and unblock an account, close
+  and reopen a station, issue and waive a penalty), and 100 requests written
+  before any of them was run, alternating with and without the Polish
+  letters so that both halves hold both. It is the first server where a
+  request drops letters no decomposition gives a base to ("zglos" for
+  "zgłoś"). The benchmark now holds 1997 requests over nineteen servers; its
+  floors move to 762 and 897 in fields and 839 asked again.
+
+- **The ReactPHP example sends `notifications/tools/list_changed` over
+  HTTP.** `initialize` opens a session with an `Mcp-Session-Id`, bound to
+  the token that opened it, and declares `listChanged`; a `GET` naming the
+  session opens its `text/event-stream`. Each `tools/list` keeps the
+  `listFingerprint()` of what the client holds, and a timer of the event
+  loop sends the notification once when the rights of the caller change it.
+  `MCP_NOTES_MODE=direct` and `MCP_NOTES_GRANTS` show it; a request with no
+  session is answered as before. `docs/examples/http.php` gains
+  `originAllowed()` and `tools()`, so the stream checks Origin the way every
+  other request does.
+
+- **`Discovery::listFingerprint()`, to know when to send
+  `notifications/tools/list_changed`.** A short string that changes when,
+  and only when, the list a caller would be given changes, in the client's
+  revision. It covers every page at once and leaves out `nextCursor`,
+  `ttlMs` and `cacheScope`, so a host that pages its list no longer
+  compares only the page it last answered, and a host that keeps it in a
+  session keeps a hash instead of the whole answer. The stdio example and
+  docs/HOSTS.md use it.
+
+- **The stdio example sends `notifications/tools/list_changed`.** It
+  declares `listChanged` at `initialize`, keeps the `tools/list` answer the
+  client last received, and sends the notification once when the list built
+  for the next message differs. With `MCP_NOTES_ROLE_FILE` it reads the role
+  again at each message, as a server reads its user store at each request,
+  and `MCP_NOTES_MODE=direct` lists every tool as itself. Its tests grant and
+  take back a role while a client is connected: in direct mode the client is
+  told once each time, in compact mode never, and its next search finds the
+  tool the role now shows.
+
+- **A Greek archaeological museum on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Greek, many of them
+  neighbours (register, correct, move and strike off a find; request,
+  approve and return a loan; book, cancel and move a guided tour), and 100
+  requests written before any of them was run, about a quarter without
+  accents and one in eight in capitals. The benchmark now holds 1897
+  requests over eighteen servers; its floors move to 723 and 851 in fields
+  and 795 asked again.
+
+- **The examples on the official PHP SDK page `tools/list`.** `ToolsHandler`
+  and `RegistryToolsHandler` hand the `cursor` of the SDK's `ListToolsRequest`
+  to `listPage()` and answer a cursor the list did not give with the SDK's
+  invalid params error, -32602, instead of an internal one. Both take a
+  `pageSize`, 50 by default like the SDK's `setPaginationLimit()`, so a host
+  that copies them pages its tools as the SDK pages its other lists.
+
+- **`Discovery::listPage()`, for a host that pages `tools/list`.** It takes
+  the `cursor` of the request and a page size, and answers one page with a
+  `nextCursor` while tools remain; the pages put together are the answer of
+  `listTools()`. The cursor names the last tool of its page, so a tool added
+  or removed elsewhere between two pages neither skips nor repeats one. A
+  cursor the list did not give, or whose tool has gone or is hidden from the
+  caller, throws the new `InvalidCursor`, to be answered with error -32602;
+  its message is the same in every case. `listTools()` is unchanged. See
+  "A list in pages" in docs/HOSTS.md.
+
+- **What to do when the tools change, in docs/HOSTS.md.** A table says, for
+  each mode, which changes to the host's tools change the `tools/list` a
+  client holds and which only reach it through a search: in compact mode only
+  a pinned tool moves the list. With it, how to send
+  `notifications/tools/list_changed` with a session, how long a `ttlMs` may be
+  in the stateless revision, and what becomes of the index cache and the
+  learning store; `FileIndexCache` keeps the files of past tool sets, and its
+  directory may be emptied when the server is deployed. A test holds the table
+  and the claim that a search and a run follow the new tools at once, with a
+  shared cache and learning store.
+
+- **A Burmese rice mill on the search benchmark.** 40 tools named in
+  snake_case with titles and descriptions in Burmese, many of them neighbours
+  (receive, correct and cancel a delivery of paddy; pay a farmer and void the
+  payment; record and cancel a sale; grant and repay an advance; book and
+  cancel a truck), and 100 requests written before any of them was run, most
+  of them with no space at all. The benchmark now holds 1797 requests over
+  seventeen servers; its floors move to 685 and 803 in fields and 754 asked
+  again.
+
+- **A Khmer water supply office on the search benchmark.** 40 tools named in
+  snake_case with titles and descriptions in Khmer, a script written without
+  spaces between words and with stacked consonants, many of them neighbours
+  (cut and reconnect the water; issue, void and correct a bill; schedule,
+  cancel and announce an outage), and 100 requests written before any of them
+  was run. Nothing in the search changed for it: 32 of its 50 test requests
+  find the right tool first in fields, 32 as one sentence, and learning loses
+  nothing. Cutting Khmer into pairs of clusters, as Thai is, was measured on
+  its train half and not kept: no more tools first, more tools returned. The
+  benchmark now holds 1697 requests over sixteen servers; its floors move to
+  649 and 758 in fields and 710 asked again.
+
+- **The SDK example for tools already in its registry, in
+  `docs/examples/sdk/registry.php`.** A server written for the official PHP
+  SDK keeps its tools as it registered them, with `addTool()` or attribute
+  discovery. The library reads their definitions from the SDK's registry and
+  runs each one through the SDK's own `CallToolHandler`, so the schema the SDK
+  derived is still checked, results are formatted as before and a
+  `ToolCallException` is still the tool's error; arguments the schema refuses
+  come back as an error result the assistant can correct. A tool the gate
+  hides stays unknown even called by its own name. docs/HOSTS.md says what
+  changes from the first SDK example, and the `sdk` test suite runs both.
+
+- **The SDK example for tools found by their `#[McpTool]` attribute, in
+  `docs/examples/sdk/attributes.php`.** The note tools are the methods of
+  one class, found by the SDK's discovery, with their descriptions taken
+  from the doc comments. They reach the same registry and run through the
+  same handler and gate as `registry.php`, now shared in
+  `registry-bridge.php`, and the `sdk` test suite holds both servers to the
+  same tests. docs/HOSTS.md lists the three things the attribute server
+  needs: `symfony/finder`, which the SDK only suggests; the class autoloaded
+  by Composer; and the SDK's container given to the `ReferenceHandler` too,
+  without which the class of the tools is built with no argument and every
+  call fails.
+
+- **The SDK example over its HTTP transport, in
+  `docs/examples/sdk/http-server.php`.** The same handler as the stdio
+  server, behind the SDK's Streamable HTTP transport, one process per
+  request as PHP-FPM runs it. The caller is read from the bearer token
+  before the SDK, and the gate and `Discovery` are built for it on each
+  request; the SDK keeps the session in files, and the caller is set as the
+  request's `PRINCIPAL_ATTRIBUTE`, so another token sent with the session's
+  id is answered 404 and one caller's gate never runs on another's session.
+  The index is cached on disk, with no learning store, since it would be
+  shared by every caller. docs/HOSTS.md lists what changes from stdio,
+  including `nyholm/psr7` in the example's `composer.json`. `ToolsHandler`
+  moves to `bridge.php`, shared by both servers.
+
+- **A Japanese veterinary clinic on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Japanese, written without
+  spaces in three scripts, many of them neighbours (book, move, cancel an
+  appointment; prescribe, refill, cancel a prescription), and 100 requests
+  written before any of them was run. It is the first measure of the pairs
+  of characters on Japanese: 33 of its 50 test requests find the right tool
+  first in fields, 26 as one sentence, and learning loses nothing. The
+  benchmark now holds 1597 requests over fifteen servers; its floors move to
+  617 and 719 in fields and 674 asked again.
+
+### Changed
+
+- **A word the tools do not use counts as the tool words alike it.** A
+  request that writes "reservation" where the tools say "reserve" met them
+  only by trigrams pooled with the rest of the request, so a tool sharing
+  pieces of the word ("service") could come first. Each tool word whose
+  trigrams are alike the whole word now also counts as a word match, at half
+  the weight. On the test half of the benchmark: 883 requests in fields find
+  the right tool first instead of 879, 628 as one sentence instead of 600
+  (825 in the top 3 instead of 793). A cached search costs a few hundredths
+  of a millisecond more. An `IndexCache` now keeps the inverted trigrams
+  with every index, not only for a host that learns, so the saved index of
+  a host that does not learn is about a quarter larger, and its cache
+  entries are rebuilt once.
+
+- **The ReactPHP example bounds the sessions it keeps.** The process kept
+  every session `initialize` opened for as long as it ran, so a caller that
+  initialized again and again, or a client that left without a word, grew
+  its memory without end. A session nobody listens on is now let go after
+  600 seconds without a request (`MCP_SESSION_IDLE`), one with an open
+  stream is kept while the stream is; a caller holds 16 sessions at most,
+  and a seventeenth lets its least recently used one go; and a `DELETE`
+  naming the session ends it at once (204), as the specification lets a
+  client do. A request on a session that is gone gets 404, which tells the
+  client to initialize again.
+
+- **A full learning store no longer sorts every count at each run.** Once
+  `MemoryLearningStore` or `FileLearningStore` held its 20,000 counts, each
+  run that learned a new word or pair sorted them all to drop the least run:
+  about 19 ms on every such run, for every caller. Going past the limit now
+  cuts the store to 18,000, so the next 2,000 new pairs need no sort; a full
+  memory store learns in 0.7 ms a run instead of 19, a file store in 12 ms
+  instead of 34. What goes is still the least run, the oldest first among
+  equals, and the benchmark, which never fills a store, is unchanged.
+
+- **Burmese is searched by pairs of what is seen, as Thai is.** A run of
+  Burmese was one token that met tools only by its trigrams. It is now cut
+  into overlapping pairs of grapheme clusters, the run kept beside them. On
+  the test half of the new rice mill, as many requests find the right tool
+  first in fields (36 of 50), 45 are in the top 3 against 42, fewer tools are
+  returned (2.36 against 2.42), and learning no longer loses a request; one
+  request as one sentence leaves the top 3. Chosen on its train half: 45
+  first against 43. Khmer, measured the same way on the water supply office,
+  stays read by its trigrams. The index format changes, so a cached index is
+  rebuilt once.
+
+- **The stdio examples keep their search index and learn.** The server
+  written by hand over stdio and the two on the official PHP SDK built the
+  index again at every search and never learned, so a host that started
+  from them did the same. Each now gives `Discovery` one `SearchSetup` for
+  the life of the process, with a `MemoryIndexCache` and a
+  `MemoryLearningStore`: the process serves one caller, so what its runs
+  teach lifts only that caller's tools, for its session. The registry
+  example still builds its gate and `Discovery` per request and shares the
+  setup between them. A test in each holds them to it: a search names the
+  tool that adds a note first for "open a note", a failed read with its
+  `search_id` changes nothing, and after one that succeeds the read comes
+  first.
+
+- **Learning no longer pairs the characters of one word.** A word of
+  Japanese, Chinese, Korean or Thai is cut into pairs of characters, and
+  learning paired those pairs with each other: they only said the object
+  again ("飼い主", owner), so a search for an owner's address lifted that tool
+  for every later request about an owner. Terms are now paired only across
+  tokens (the verb with its object) when a request has several, and a
+  sentence without spaces still keeps every pair. Requests in an alphabet
+  learn exactly as before. On the test half, after learning from the other
+  half, 587 requests find their tool first instead of 586, and 638 instead
+  of 637 when asked again; the floor of the benchmark moves to 638. The
+  `search_id` keeps the terms of each token together; an id from before
+  this reads as one token per word, and a learning store needs no change.
+
+- **The grouped list says how to describe an action once, not twice.** Each
+  group's read tool told the model how to read an action's parameters in
+  its description, then again in the description of its `describe`
+  property, and a client sends both. The sentence in the description is
+  gone; the property says it, now with "before running them". Nothing else
+  changes: the same tools, the same schemas, the same answers. On the
+  workspace benchmark server the grouped list goes from 14,314 to 13,982
+  bytes, and its eight group tools from 7,486 to 7,154, almost a quarter
+  under the 9,299 of the actions they stand for.
+
+### Fixed
+
+- **The same search finds the same tools on every version of PHP.** The
+  Analyzer lowered text with Unicode's full mapping, which from PHP 8.3
+  chooses the Greek final sigma by context: a request typed in capitals
+  (`ΑΚΥΡΩΣΗΣ ΚΡΑΤΗΣΗΣ`) gave other terms, and could find other tools, on 8.2
+  than on 8.3. The same mapping lowered the Turkish `İ` to an `i` and a
+  combining dot, so a tool titled "İzin kaydet" never met the word `izin`.
+  Each letter is now lowered on its own, with the simple mapping: a capital
+  sigma always becomes `σ`, as on 8.2, and `İ` becomes `i`. The index
+  format moves to 8, so a cached index is built again once.
+
+- **The parameters added to a failed run keep their objects.** With
+  `schemaOnError`, a run that fails carries the tool's parameters so the
+  assistant can correct its call. They were written as the host gave them,
+  so a host that read its definitions with `json_decode(..., true)`, as the
+  SDK registry example does, sent a tool with no parameter as
+  `"properties": []`: a list where the search had shown an object. They are
+  now written as the search writes them, in Compact, Grouped and Gateway.
+
 ## 0.5.0 - 2026-11-18
 
 ### Added

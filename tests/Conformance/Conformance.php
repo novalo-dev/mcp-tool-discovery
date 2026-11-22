@@ -119,6 +119,9 @@ final class Conformance
 
         $direct = new Discovery(new DirectMode(), new RecordingGate(['acme_list_users'], ['acme_deactivate_user']));
         $checks['direct: tools/list'] = ['definition' => 'ListToolsResult', 'value' => $direct->listTools($tools, $revision, 60000)];
+        $first = $direct->listPage($tools, $revision, null, 20, 60000);
+        $checks['direct: first page of tools/list'] = ['definition' => 'ListToolsResult', 'value' => $first];
+        $checks['direct: last page of tools/list'] = ['definition' => 'ListToolsResult', 'value' => $direct->listPage($tools, $revision, is_string($first['nextCursor'] ?? null) ? $first['nextCursor'] : null, 40, 60000)];
         $checks['direct: run a read'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_get_file', ['file_id' => '1'], $tools, $revision)];
         $checks['direct: run a change'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_set_ticket_status', [], $tools, $revision)];
         $checks['direct: refused by the host'] = ['definition' => 'CallToolResult', 'value' => $direct->callTool('acme_deactivate_user', [], $tools, $revision)];

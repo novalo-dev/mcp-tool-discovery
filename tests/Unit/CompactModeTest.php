@@ -21,6 +21,7 @@ use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
 use Novalo\McpToolDiscovery\Tool\Tool;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
 use PHPUnit\Framework\TestCase;
 
 final class CompactModeTest extends TestCase
@@ -221,6 +222,17 @@ final class CompactModeTest extends TestCase
 
         self::assertTrue($result->isError);
         self::assertStringContainsString('Parameters of acme_deactivate_user', self::text($result));
+    }
+
+    // The definitions of a host that decoded them as arrays: no parameter is
+    // "properties": [], which the failure must still write as an object.
+    public function testTheParametersOfAFailedRunKeepTheirObjects(): void
+    {
+        $tools = ToolSet::of([['name' => 'acme_ping', 'description' => 'Checks the server answers.', 'inputSchema' => ['type' => 'object', 'properties' => []]]]);
+        $result = (new Discovery(new CompactMode(), new RecordingGate([], ['acme_ping'])))->call(CompactMode::RUN_WRITE, ['name' => 'acme_ping'], $tools);
+
+        self::assertTrue($result->isError);
+        self::assertStringContainsString('Parameters of acme_ping: {"type":"object","properties":{}}', self::text($result));
     }
 
     /**

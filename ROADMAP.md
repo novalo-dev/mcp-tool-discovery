@@ -38,9 +38,16 @@ The benchmark says where the search still misses, in
   a Korean one, whose words carry their particles (a music school) and an
   Arabic one, whose words carry the article (a car repair workshop) and a
   Russian one, whose words change their endings (the front desk of a hotel)
-  are in. Lao, Khmer and Burmese, written the same way, are not measured
-  yet.
-- **Accents.** On the Greek server, a request typed without its accents
+  and a Japanese one, which mixes three scripts with no spaces (a
+  veterinary clinic) and a Khmer one, written without spaces and with
+  stacked consonants (a water supply office) and a Burmese one, cut into
+  pairs of clusters as Thai is (a rice mill) and a second Greek one, with
+  requests in capitals (an archaeological museum) and a Polish one, typed
+  with and without its letters (a city bike rental) and a second large
+  English one, with 150 tools that are mostly neighbours (an airline
+  operations centre) are in. Lao, written the
+  same way as Thai, is not measured yet.
+- **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension
   required is welcome.
@@ -51,7 +58,7 @@ A change to the search comes with the benchmark before and after.
 
 - Examples on other hosts, beside the servers written by hand over stdio and
   HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications
-  and the one on the official PHP SDK in
+  and the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed. They decide what the search learns next.

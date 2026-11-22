@@ -5,10 +5,12 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in one
-on the official PHP SDK. All six serve the same notes
-tools, kept with their gate in [examples/notes.php](examples/notes.php): only
-the transport differs.
+on ReactPHP, in a Symfony application, in a Laravel application, and in four
+on the official PHP SDK. All nine serve the same notes tools, kept with their
+gate in [examples/notes.php](examples/notes.php): only the transport differs.
+Two of the SDK servers keep their tools outside the SDK, over stdio and over
+HTTP; the other two keep them in the SDK's own registry, added with
+`addTool()` or found by their `#[McpTool]` attribute.
 
 ---
 
@@ -23,7 +25,13 @@ library ([tests/Examples/StdioServerTest.php](../tests/Examples/StdioServerTest.
 ```
 php docs/examples/stdio-server.php
 MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
+MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php docs/examples/stdio-server.php
 ```
+
+The third reads the role again from `role.txt` at each message and lists
+every tool as itself: write `admin` in the file while a client is connected
+and the server sends `notifications/tools/list_changed`, as
+[When the tools change](#when-the-tools-change) describes.
 
 Its parts, in the order a host writes them:
 
@@ -33,6 +41,8 @@ Its parts, in the order a host writes them:
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony and Laravel examples reuse behind their own gates |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
+| The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
+| A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
 ignoring notifications, the JSON-RPC errors for a method it does not serve or
@@ -108,6 +118,28 @@ What changes from one process per request:
 
 A learning store, if the host gives one, is shared the same way: the
 `SearchSetup` is built once, beside the cache.
+
+A process that stays up can also tell a client its list has changed between
+two of its requests, which a process per request cannot. The example does it
+over the Streamable HTTP transport:
+
+| Part | In the example | Why |
+|---|---|---|
+| The session | `initialize` answers with an `Mcp-Session-Id`, kept with the `Authorization` that opened it, and declares `listChanged` | a session belongs to its caller: another token, or an id the server never gave, gets 404 |
+| The stream | a `GET` that names the session opens a `text/event-stream`, one per session | the channel the specification gives a server for messages no request asked for |
+| The list the client holds | each `tools/list` of the session keeps its `listFingerprint()`, whichever page was asked | the fingerprint covers the whole list |
+| The look | a timer of the event loop builds the Discovery of each listening session with the rights its caller has now, and sends `notifications/tools/list_changed` once when the fingerprint differs | a server that learns of a change by an event sends it then, with no timer |
+| The end of a session | a `DELETE` naming it ends it (204); one nobody listens on goes after `MCP_SESSION_IDLE` seconds without a request (600); a caller holds 16 at most, and a new one lets its least recently used go | the process outlives every client, so what it keeps must be bounded; a client whose session is gone gets 404 and initializes again |
+
+```
+MCP_NOTES_MODE=direct MCP_NOTES_GRANTS=grants.json php docs/examples/react/server.php
+```
+
+Write `{"reader": "admin"}` in `grants.json` while a reader listens on its
+stream, and the notification arrives; the tests do it, then check that it
+came once and that the next `tools/list` shows the admin's tools. A request
+with no session is answered as before, so a client that opens none sees the
+same server as on PHP-FPM.
 
 ---
 
@@ -216,14 +248,124 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 
 | Part | On the SDK | Why |
 |---|---|---|
-| The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` and `CallToolRequest` from `listTools()` and `callTool()`; the SDK's registry of tools stays empty |
+| The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` from `listPage()`, with the request's `cursor`, and `CallToolRequest` from `callTool()`; the SDK's registry of tools stays empty |
+| The pages | the handler's `pageSize`, 50 by default | the SDK's own `setPaginationLimit()` default, so pass the number you give it there; a cursor the list did not give gets the SDK's `Error::forInvalidParams()` |
 | The capability | `setCapabilities(new ServerCapabilities(tools: true, ...))` | with an empty registry the SDK would not announce tools by itself |
 | The revision | `RequestContext::getProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
 | The arguments | decoded again as arrays | the SDK keeps nested objects as `stdClass`; without this, every item of a batch is refused as not an object |
 | The answer | `Answer`, a `ResultInterface` holding the array | the SDK encodes an object; in the stateless revision it keeps the `resultType`, `ttlMs` and `cacheScope` the answer carries |
+| The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore`, given to the `Discovery` | as over stdio by hand: the index is kept for the process, and its one caller's runs teach the search for the session |
 
-Over the SDK's HTTP transport the handler stays the same; build the gate and
-the `Discovery` from the caller of each request, as in the HTTP example.
+### Over the SDK's HTTP transport
+
+[examples/sdk/http-server.php](examples/sdk/http-server.php) serves the same
+handler over the SDK's Streamable HTTP transport, one process per request as
+PHP-FPM runs it. The SDK keeps the session between requests; the caller is no
+longer the process, so the gate and the `Discovery` are built for the caller
+each request names, as in the HTTP example written by hand.
+[tests/Sdk/SdkHttpServerTest.php](../tests/Sdk/SdkHttpServerTest.php) calls it
+over HTTP in the same CI job.
+
+```
+php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
+```
+
+What changes from the server over stdio:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The caller | read from the bearer token with `roleOf()` of `http.php`, before the SDK; no caller is answered 401 | the gate answers for one caller, and the SDK has no notion of who may see a tool |
+| The request | `Psr17Factory::createServerRequestFromGlobals()`, and `nyholm/psr7` in `composer.json` | the transport takes a PSR-7 request; the SDK finds a PSR-17 factory but ships none |
+| The session | `setSession(new FileSessionStore(...))` and a `FileSessionLock` on the same directory | without a store the SDK serves HTTP with no session at all; in files, the revision a client agreed on reaches its next requests, and two requests of one session do not overwrite each other |
+| Who a session serves | the caller set as the request's `StreamableHttpTransport::PRINCIPAL_ATTRIBUTE` | the SDK answers 404 to another caller sending the session's `Mcp-Session-Id`, so one caller's gate never runs on another's session |
+| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
+
+The stateless revision `2026-07-28` needs no session: the SDK reads its
+revision from `_meta` and asks for the `Mcp-Method` header, and the handler
+answers as it does for the others.
+
+A client of that revision that opens a `subscriptions/listen` stream with
+`toolsListChanged` is told when its caller's list changes. The SDK carries
+notifications through a bus every process shares, and the host that changes
+a right or a tool publishes on it that the tools changed, without knowing
+whose list moved. [examples/sdk/grant.php](examples/sdk/grant.php) is that
+host: it changes a role's rights in the grants file of `grantedRole()` and
+publishes. [tests/Sdk/SdkListenTest.php](../tests/Sdk/SdkListenTest.php)
+opens a reader's stream and an admin's, then grants and takes back.
+
+```
+MCP_NOTES_MODE=direct MCP_NOTES_GRANTS=grants.json PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
+MCP_NOTES_GRANTS=grants.json php docs/examples/sdk/grant.php reader admin
+```
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The bus | `Psr6NotificationBus` over a `FilesystemAdapter` of `symfony/cache`, given to `setNotificationBus()` | under PHP-FPM the request that changes rights and the stream are different workers: they share files, not memory |
+| The stream of a caller | `CallerNotifications`, in [examples/sdk/notifications.php](examples/sdk/notifications.php), around the bus, built per request with the caller's `Discovery` | the SDK asks for its cursor when a stream opens, so the `listFingerprint()` of that moment is held; a published change is passed on once, and only when the fingerprint of the caller's rights now differs |
+| The capability | `toolsListChanged` declared only when the request is of `2026-07-28` | the SDK sends these notifications on a listen stream alone; a client with a session would be promised them for nothing |
+| The mode | `MCP_NOTES_MODE=direct` to watch it | in compact mode a right granted moves no line of the list, so the stream is told nothing |
+
+A reader is never told of a tool only an admin may see, and a change in
+compact mode tells no one: the bus says the tools may have changed, and the
+library says for whom.
+
+### Tools already in the SDK's registry
+
+A server written for the SDK often has its tools there already, as handlers
+added with `addTool()` or found by attribute discovery.
+[examples/sdk/registry.php](examples/sdk/registry.php) keeps the first as they
+are, and [examples/sdk/registry-bridge.php](examples/sdk/registry-bridge.php)
+holds what it shares with the attribute server below:
+the library reads their definitions from the registry and runs each one
+through the SDK's own `CallToolHandler`, so a tool found by search runs as a
+direct call would. Its arguments are checked against the schema the SDK
+derived, its return value is formatted by the SDK, and a `ToolCallException`
+becomes an error result. [tests/Sdk/SdkRegistryTest.php](../tests/Sdk/SdkRegistryTest.php)
+runs it in the same CI job.
+
+```
+php docs/examples/sdk/registry.php
+```
+
+What changes from the server above:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The registry | `new Registry()` given to `setRegistry()`, and the same `ReferenceHandler` to `setReferenceHandler()` | the handler reads the tools the SDK registered, and runs them with the handler that would have run them |
+| The tools | `RegistryInterface::getTools()`, each `Tool` encoded and read with `Tool::fromArray()` | the definitions the client would have seen, in the registry's order |
+| The gate | `RegistryGate`, built per request with its session | `call()` hands a `CallToolRequest` with the client's id and `_meta` to the SDK's `CallToolHandler`, which reads the revision from them; who sees which tool stays the host's rule |
+| The errors | an `Error` from the SDK becomes `CallResult::error()` | arguments the schema refuses are a protocol error for the SDK; through a mode they are the tool's answer, which the assistant reads and corrects |
+| The search | the same `SearchSetup`, built once and given to the handler | the gate and the `Discovery` are built per request, the cache and what was learned outlive it |
+| The capability | detected by the SDK | the registry is not empty, so the SDK announces tools by itself |
+
+The handler answers every `tools/call`, so a tool the gate hides is unknown
+even when a client calls it by its own name. A tool that asks the client for
+input (`InputRequiredResult`) cannot run through a mode: the question and its
+answer travel between the SDK and the client, and the example answers it as
+an error.
+
+### Tools found by their attribute
+
+[examples/sdk/attributes.php](examples/sdk/attributes.php) serves the same
+tools as methods of one class,
+[examples/sdk/tools/NoteTools.php](examples/sdk/tools/NoteTools.php), each
+marked `#[McpTool]`. The SDK finds them, takes each description from the doc
+comment and each parameter's from its `@param`, and they reach the same
+registry, so the handler and the gate are the ones above, unchanged.
+[tests/Sdk/SdkAttributesTest.php](../tests/Sdk/SdkAttributesTest.php) holds
+it to every test of the registry server.
+
+```
+php docs/examples/sdk/attributes.php
+```
+
+What changes from the registry server:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The discovery | `setDiscovery(__DIR__, ['tools'])`, and `symfony/finder` in `composer.json` | the SDK needs Finder to read a directory and suggests it without requiring it |
+| The class | autoloaded by Composer (`autoload.psr-4` of the example) | the SDK reads the class from its file and asks the autoloader for it |
+| The container | one `Container`, given the server's `Notes` with `set()`, passed to `setContainer()` and to the `ReferenceHandler` | the class of the tools needs its `Notes`; a `ReferenceHandler` built without the container creates the class with `new` and no argument, and every call fails |
 
 ---
 
@@ -245,6 +387,12 @@ the `Discovery` from the caller of each request, as in the HTTP example.
   array before calling `callTool()`, as every example does. A JSON array
   passes that check too; the library refuses it with `isError` before your
   gate sees it, so `authorize()` and `call()` always get named arguments.
+- **A list that is still right.** When the tools change, the next request
+  sees them; the list a client already holds may not, depending on the mode
+  ([When the tools change](#when-the-tools-change)).
+- **Pages, if the list is long.** `listTools()` answers in one piece.
+  A host that pages its list calls `listPage()` instead
+  ([A list in pages](#a-list-in-pages)).
 
 The stateless revision `2026-07-28` has no `initialize` handshake and no
 session at all, which suits one process per request. The HTTP example serves
@@ -263,3 +411,110 @@ Once the host has read the revision, it goes to `Revision::fromString()` like
 any other, and the library adds the `resultType`, `ttlMs` and `cacheScope`
 that revision asks for. The stdio example keeps to the revisions with a
 handshake.
+
+---
+
+## A list in pages
+
+`tools/list` may be paged: the client sends the `cursor` of the last answer,
+and the server answers with a `nextCursor` while tools remain. A client reads
+every page before it uses the list, so paging saves no token; it keeps each
+answer short, for a transport or a proxy that limits its size, or a server in
+direct mode with hundreds of tools.
+
+```php
+use Novalo\McpToolDiscovery\Exception\InvalidCursor;
+
+try {
+    $result = $discovery->listPage($tools, $revision, $params['cursor'] ?? null, 50, ttlMs: 300000);
+} catch (InvalidCursor $error) {
+    // The specification asks for invalid params.
+    return ['jsonrpc' => '2.0', 'id' => $id, 'error' => ['code' => -32602, 'message' => $error->getMessage()]];
+}
+```
+
+The pages put together are the answer of `listTools()`, in every mode and
+every revision, each one with the same `ttlMs` and `cacheScope`. The cursor
+names the last tool of its page rather than a position, so a tool that comes
+or goes elsewhere in the list between two pages neither skips nor repeats
+one. A cursor whose tool has gone, or that names a tool the gate hides from
+this caller, is refused with `InvalidCursor`, in the same words as a cursor
+the list never gave: the client starts again from the first page. The
+modes other than direct list a handful of tools, where a page of 50 is the
+whole list and carries no `nextCursor`.
+[ListPageTest](../tests/Unit/ListPageTest.php) holds all of this. The
+examples on the official SDK page this way, through the SDK's own request,
+and the SDK tests hold a refused cursor to error -32602.
+
+---
+
+## When the tools change
+
+A module installed, a permission granted, a tool renamed: the library holds
+nothing from one request to the next, so the `ToolSet` and the gate a request
+hands over are the whole truth for that request. A search finds a new tool at
+once, and a tool that went away, or that the gate now hides, is refused at
+once, whatever an earlier search showed or the learning store kept.
+[ToolsChangeTest](../tests/Unit/ToolsChangeTest.php) holds this and the table
+below.
+
+What the client may still hold is its copy of `tools/list`. Whether that copy
+is now wrong depends on the mode:
+
+| Mode | Its list changes when | Its list stays the same when |
+|---|---|---|
+| Compact | a pinned tool comes, goes or changes | any other tool comes, goes or changes: it is found by a search |
+| Gateway | the first tool that changes something comes or the last one goes; with `changesApart`, any tool that changes something comes, goes or changes | a tool that only reads comes, goes or changes |
+| Grouped | a tool outside the groups changes in any way, or a grouped one comes, goes, or changes its name, its title, or whether it only reads | a grouped tool changes only its description or its schema: `describe` gives it as it is now |
+| Direct | any tool changes in any way | never |
+
+A host need not know this table by heart: `listFingerprint()` gives a short
+string that changes when, and only when, the list a caller would be given
+changes. It covers every page at once and leaves out `nextCursor`, `ttlMs`
+and `cacheScope`, so a host that pages its list compares the whole of it,
+not the page it last answered. It is taken for the client's revision: a
+title changed for a client of `2024-11-05`, whose tools have none, tells
+it nothing. To keep a client's list right:
+
+- **With a session**, declare `"tools": {"listChanged": true}` in the
+  capabilities of `initialize`, keep the `listFingerprint()` of the list
+  the session was given, and send `notifications/tools/list_changed` when
+  the next one differs. In compact mode that is rare: hundreds of tools can
+  come and go behind the mode's own, which never move. The
+  [stdio server](#a-server-over-stdio) does this, and its tests grant and take
+  back a role while a client is connected: in direct mode the client is told
+  once each time, in compact mode never, and its next search finds the tool.
+  The [ReactPHP server](#a-server-that-stays-up-on-reactphp) does it over
+  HTTP, on the stream a session opens with `GET`.
+- **In the stateless revision `2026-07-28`**, the same notification goes only
+  on a `subscriptions/listen` stream the client opened with
+  `toolsListChanged`, and the capability is declared in `server/discover`.
+  A client that opened none keeps its copy for the `ttlMs` given to
+  `listTools()`: a short one costs a list now and then, a long one is safe in
+  compact mode as long as the pinned tools stay as they are. The
+  [server on the SDK's HTTP transport](#over-the-sdks-http-transport) does
+  this: the host publishes that the tools changed, and each stream compares
+  the `listFingerprint()` of its own caller.
+
+In a session, it takes a few lines around the handlers the host already has:
+
+```php
+// When the session answers tools/list, whether in one piece or in pages:
+$session['tools'] = $discovery->listFingerprint($tools, $revision);
+
+// When the next message of the session comes, before answering it:
+if (isset($session['tools']) && $discovery->listFingerprint($tools, $revision) !== $session['tools']) {
+    $send(['jsonrpc' => '2.0', 'method' => 'notifications/tools/list_changed']);
+    // Told once: the client asks again, and the list it gets is held then.
+    $session['tools'] = $discovery->listFingerprint($tools, $revision);
+}
+```
+
+A cached index is keyed by the tools it holds, so a change builds a new one on
+the next search, and the old one is read again only if the tools go back to
+what they were. `MemoryIndexCache` drops
+the oldest past its size. `FileIndexCache` leaves the old files where they
+are: emptying its directory when the server is deployed is safe, and the next
+search writes the index it needs. What the learning store kept for a tool
+only reorders tools a search already found, so a removed tool's counts lift
+nothing; a renamed tool starts learning again under its new name.
