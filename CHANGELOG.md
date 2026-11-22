@@ -181,6 +181,19 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A word the tools do not use counts as the tool words alike it.** A
+  request that writes "reservation" where the tools say "reserve" met them
+  only by trigrams pooled with the rest of the request, so a tool sharing
+  pieces of the word ("service") could come first. Each tool word whose
+  trigrams are alike the whole word now also counts as a word match, at half
+  the weight. On the test half of the benchmark: 883 requests in fields find
+  the right tool first instead of 879, 628 as one sentence instead of 600
+  (825 in the top 3 instead of 793). A cached search costs a few hundredths
+  of a millisecond more. An `IndexCache` now keeps the inverted trigrams
+  with every index, not only for a host that learns, so the saved index of
+  a host that does not learn is about a quarter larger, and its cache
+  entries are rebuilt once.
+
 - **The ReactPHP example bounds the sessions it keeps.** The process kept
   every session `initialize` opened for as long as it ran, so a caller that
   initialized again and again, or a client that left without a word, grew

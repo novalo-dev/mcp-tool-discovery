@@ -351,8 +351,8 @@ final class ToolSearchTest extends TestCase
         $learning = ToolIndex::build($documents, $weights, nearby: true);
         $restored = ToolIndex::fromArray($learning->toArray());
 
-        // Kept with the index only for a host that learns, so the cache of
-        // one that does not stays as small as it was.
+        // Built with the index only when asked (a host with a cache asks),
+        // otherwise at the first word no tool uses.
         self::assertNull($plain->toArray()['nearby']);
         self::assertNotNull($learning->toArray()['nearby']);
         self::assertNotNull($restored);
@@ -363,6 +363,17 @@ final class ToolSearchTest extends TestCase
         }
         self::assertSame('rollback', $plain->nearest('rollbak'));
         self::assertNull($plain->nearest('zzzz'));
+    }
+
+    public function testAWordAlikeAsAWholeCountsAsThatWord(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $query = new SearchQuery('resolve', 'ticket', 'mark the wifi issue as fixed');
+
+        // "resolve" and "fixed" are in no tool. By the trigrams of the whole
+        // request alone, the tool that labels a ticket came first; the
+        // status tool holds "solved", alike "resolve" as a whole.
+        self::assertSame('acme_set_ticket_status', self::names((new ToolSearch($tools))->search($query))[0]);
     }
 
     public function testLearningLiftsTheToolThatWorked(): void

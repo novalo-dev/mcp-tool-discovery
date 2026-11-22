@@ -329,10 +329,10 @@ score:
 
 | Test half, 1149 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **879** | **1023** |
-| The same request as one sentence | 600 | 793 |
-| In fields, after learning from the other half | 883 | 1023 |
-| In fields, asked a second time | 961 | 1059 |
+| The request in fields | **883** | **1023** |
+| The same request as one sentence | 628 | 825 |
+| In fields, after learning from the other half | 884 | 1023 |
+| In fields, asked a second time | 961 | 1060 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 879 times
-out of 1149 in fields, and 600 times as one sentence.
+On the benchmark below, the same requests find the right tool first 883 times
+out of 1149 in fields, and 628 times as one sentence.
 
 ## How a tool is scored
 
@@ -78,6 +78,24 @@ Each word also gives its trigrams, padded: "status" gives ` st`, `sta`, `tat`,
 `atu`, `tus`, `us `. Trigram matches count at 0.6 of word matches. They let
 "statuses" meet "status" and "categories" meet "category" with no rule of any
 language.
+
+**A word the tools do not use also counts as the tool words alike it.** The
+trigrams of a request are pooled, so a word no tool holds meets any tool
+sharing a piece of it: "reservation" meets "service" by `ser` and `vic` as
+much as "reserve" by `res` and `ser`. Each tool word whose trigrams are alike
+the whole word (a Dice coefficient of 0.3 at least, the threshold learning
+already uses) now also counts as a word match, at half the weight and by how
+alike it is, on top of the trigrams. Chosen on the train half: from 0.25 to 1
+the requests in fields moved by 1 to 3 first places, as one sentence they
+gained 17 to 33, most around 0.5 to 0.75; 0.5 was kept, which also gave the
+most in the top 3. On the test half, the requests in fields go from 879 to
+883 first (1023 in the top 3, unchanged), as one sentence from 600 to 628
+(793 to 825), learned from the other half from 883 to 884, asked again 961
+(1059 to 1060 in the top 3). In fields, 10 test requests come first that did
+not and 6 no longer do, where the word alike in form is not the one meant.
+In place of the trigrams of
+those words, rather than on top, it lost 25 first places on train: rejected.
+A cached search over 150 tools takes 0.27 ms against 0.25 ms.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are
@@ -274,9 +292,9 @@ taken for a tool word they only half resemble. The closest word is only
 looked for when the host learns, and only for words the tools do not use. It
 reads the trigrams of the tool words inverted, each pointing to the words
 that hold it, so only the words sharing a trigram are compared. With an
-`IndexCache`, they are built with the index of a host that learns and kept
-with it (its saved index is about a quarter larger; a host that does not
-learn keeps the same). Cutting every tool word again at each request made a
+`IndexCache`, they are built with the index and kept with it, since the
+search reads them too (see "Words and trigrams"): the saved index is about a
+quarter larger. Cutting every tool word again at each request made a
 search that learns over 176 tools take more than 6 ms, ten times the search
 itself; it now takes about 0.6 ms against 0.4 ms, and 1.9 ms against 1.8 ms
 over 706 tools, the closest word being the same for each of the 15 944 words
@@ -315,10 +333,10 @@ and gives the score.
 
 | Test half, 1149 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 879 | 1023 |
-| The same request as one sentence | 600 | 793 |
-| In fields, after every train request was run once | 883 | 1023 |
-| In fields, after the test requests were run once, then asked again | 961 | 1059 |
+| The request in fields | 883 | 1023 |
+| The same request as one sentence | 628 | 825 |
+| In fields, after every train request was run once | 884 | 1023 |
+| In fields, after the test requests were run once, then asked again | 961 | 1060 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure

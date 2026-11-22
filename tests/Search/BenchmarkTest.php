@@ -31,7 +31,7 @@ final class BenchmarkTest extends TestCase
     {
         $scores = Benchmark::run();
 
-        self::assertGreaterThanOrEqual(879, $scores['fields']['first'], implode("\n", $scores['fields']['misses']));
+        self::assertGreaterThanOrEqual(883, $scores['fields']['first'], implode("\n", $scores['fields']['misses']));
         self::assertGreaterThanOrEqual(1023, $scores['fields']['top3'], implode("\n", $scores['fields']['misses']));
     }
 
