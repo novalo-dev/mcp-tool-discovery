@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace Example\Notes\Sdk;
 
+use Mcp\Schema\JsonRpc\Error;
 use Mcp\Schema\JsonRpc\Request;
 use Mcp\Schema\JsonRpc\Response;
 use Mcp\Schema\JsonRpc\ResultInterface;
@@ -31,20 +32,26 @@ use Mcp\Server\Handler\Request\RequestHandlerInterface;
 use Mcp\Server\RequestContext;
 use Mcp\Server\Session\SessionInterface;
 use Novalo\McpToolDiscovery\Discovery;
+use Novalo\McpToolDiscovery\Exception\InvalidCursor;
 use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * Answers tools/list and tools/call from the library. The SDK asks the
- * handlers a host adds before its own, so its registry of tools is never
+ * Answers tools/list, in pages, and tools/call from the library. The SDK asks
+ * the handlers a host adds before its own, so its registry of tools is never
  * reached and stays empty.
  *
  * @implements RequestHandlerInterface<Answer>
  */
 final class ToolsHandler implements RequestHandlerInterface
 {
-    public function __construct(private readonly Discovery $discovery, private readonly ToolSet $tools) {}
+    /**
+     * @param int<1, max> $pageSize the most tools one tools/list answer holds;
+     *        50 is the SDK's own setPaginationLimit() default, so its other
+     *        lists and this one page alike
+     */
+    public function __construct(private readonly Discovery $discovery, private readonly ToolSet $tools, private readonly int $pageSize = 50) {}
 
     public function supports(Request $request): bool
     {
@@ -52,17 +59,36 @@ final class ToolsHandler implements RequestHandlerInterface
     }
 
     /**
-     * @return Response<Answer>
+     * @return Response<Answer>|Error
      */
-    public function handle(Request $request, SessionInterface $session): Response
+    public function handle(Request $request, SessionInterface $session): Response|Error
     {
         $revision = revision($request, $session);
 
         if ($request instanceof CallToolRequest) {
             return new Response($request->getId(), new Answer($this->discovery->callTool($request->name, arguments($request), $this->tools, $revision)));
         }
+        \assert($request instanceof ListToolsRequest);
 
-        return new Response($request->getId(), new Answer($this->discovery->listTools($this->tools, $revision)));
+        return page($this->discovery, $this->tools, $request, $revision, $this->pageSize);
+    }
+}
+
+/**
+ * One page of tools/list, from the cursor the client sent. A cursor the
+ * list did not give is the client's mistake, so it gets the invalid params
+ * error the specification asks for instead of an internal one.
+ *
+ * @param int<1, max> $pageSize
+ *
+ * @return Response<Answer>|Error
+ */
+function page(Discovery $discovery, ToolSet $tools, ListToolsRequest $request, Revision $revision, int $pageSize): Response|Error
+{
+    try {
+        return new Response($request->getId(), new Answer($discovery->listPage($tools, $revision, $request->cursor, $pageSize)));
+    } catch (InvalidCursor $error) {
+        return Error::forInvalidParams($error->getMessage(), $request->getId());
     }
 }
 

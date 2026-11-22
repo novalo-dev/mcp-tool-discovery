@@ -10,6 +10,13 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The examples on the official PHP SDK page `tools/list`.** `ToolsHandler`
+  and `RegistryToolsHandler` hand the `cursor` of the SDK's `ListToolsRequest`
+  to `listPage()` and answer a cursor the list did not give with the SDK's
+  invalid params error, -32602, instead of an internal one. Both take a
+  `pageSize`, 50 by default like the SDK's `setPaginationLimit()`, so a host
+  that copies them pages its tools as the SDK pages its other lists.
+
 - **`Discovery::listPage()`, for a host that pages `tools/list`.** It takes
   the `cursor` of the request and a page size, and answers one page with a
   `nextCursor` while tools remain; the pages put together are the answer of

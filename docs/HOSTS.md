@@ -219,7 +219,8 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 
 | Part | On the SDK | Why |
 |---|---|---|
-| The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` and `CallToolRequest` from `listTools()` and `callTool()`; the SDK's registry of tools stays empty |
+| The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` from `listPage()`, with the request's `cursor`, and `CallToolRequest` from `callTool()`; the SDK's registry of tools stays empty |
+| The pages | the handler's `pageSize`, 50 by default | the SDK's own `setPaginationLimit()` default, so pass the number you give it there; a cursor the list did not give gets the SDK's `Error::forInvalidParams()` |
 | The capability | `setCapabilities(new ServerCapabilities(tools: true, ...))` | with an empty registry the SDK would not announce tools by itself |
 | The revision | `RequestContext::getProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
 | The arguments | decoded again as arrays | the SDK keeps nested objects as `stdClass`; without this, every item of a batch is refused as not an object |
@@ -387,7 +388,9 @@ this caller, is refused with `InvalidCursor`, in the same words as a cursor
 the list never gave: the client starts again from the first page. The
 modes other than direct list a handful of tools, where a page of 50 is the
 whole list and carries no `nextCursor`.
-[ListPageTest](../tests/Unit/ListPageTest.php) holds all of this.
+[ListPageTest](../tests/Unit/ListPageTest.php) holds all of this. The
+examples on the official SDK page this way, through the SDK's own request,
+and the SDK tests hold a refused cursor to error -32602.
 
 ---
 

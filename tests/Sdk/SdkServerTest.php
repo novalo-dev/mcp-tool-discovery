@@ -100,6 +100,21 @@ final class SdkServerTest extends TestCase
         self::assertSame(1, $batch['failed']);
     }
 
+    // The SDK reads the cursor into its request and the example hands it to
+    // listPage(). This one names notes_add, which the compact mode never
+    // lists, so it is refused as a cursor the list did not give.
+    public function testACursorTheListDidNotGiveIsInvalidParams(): void
+    {
+        $replies = self::session([self::INITIALIZE, self::INITIALIZED, ['method' => 'tools/list'], ['method' => 'tools/list', 'params' => ['cursor' => 'bm90ZXNfYWRk']]]);
+
+        // The four tools of the mode fit one page of the SDK's default size.
+        self::assertCount(4, $replies[3]['result']['tools']);
+        self::assertArrayNotHasKey('nextCursor', $replies[3]['result']);
+        self::assertArrayNotHasKey('result', $replies[4]);
+        self::assertSame(-32602, $replies[4]['error']['code']);
+        self::assertSame('Invalid cursor: start the list again without one.', $replies[4]['error']['message']);
+    }
+
     public function testTheStatelessRevisionIsServedWithoutAHandshake(): void
     {
         $replies = self::session([

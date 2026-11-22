@@ -112,12 +112,16 @@ final class RegistryToolsHandler implements RequestHandlerInterface
 
     /**
      * @param Closure(Tool): bool $visible
+     * @param int<1, max> $pageSize the most tools one tools/list answer holds;
+     *        50 is the SDK's own setPaginationLimit() default, so its other
+     *        lists and this one page alike
      */
     public function __construct(
         private readonly RegistryInterface $registry,
         private readonly CallToolHandler $sdk,
         private readonly Closure $visible,
         private readonly SearchSetup $search,
+        private readonly int $pageSize = 50,
     ) {}
 
     public function supports(Request $request): bool
@@ -126,9 +130,9 @@ final class RegistryToolsHandler implements RequestHandlerInterface
     }
 
     /**
-     * @return Response<Answer>
+     * @return Response<Answer>|Error
      */
-    public function handle(Request $request, SessionInterface $session): Response
+    public function handle(Request $request, SessionInterface $session): Response|Error
     {
         $revision = revision($request, $session);
         // The gate runs the tool with this request's session, so it is built
@@ -144,7 +148,9 @@ final class RegistryToolsHandler implements RequestHandlerInterface
             return new Response($request->getId(), new Answer($discovery->callTool($request->name, arguments($request), $this->tools(), $revision)));
         }
 
-        return new Response($request->getId(), new Answer($discovery->listTools($this->tools(), $revision)));
+        \assert($request instanceof ListToolsRequest);
+
+        return page($discovery, $this->tools(), $request, $revision, $this->pageSize);
     }
 
     // Read once the SDK has loaded the registry, and in its order. A host
