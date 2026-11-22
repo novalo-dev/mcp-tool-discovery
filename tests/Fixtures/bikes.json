@@ -1,0 +1,804 @@
+[
+ {
+  "name": "stations_list",
+  "title": "Stacje",
+  "description": "Wyświetla stacje rowerowe z liczbą wolnych rowerów i stojaków.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "station_get",
+  "title": "Szczegóły stacji",
+  "description": "Pokazuje adres stacji, stan stojaków i rowery, które na niej stoją.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "station_add",
+  "title": "Dodaj stację",
+  "description": "Dodaje nową stację rowerową w podanym miejscu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "address": {
+     "type": "string",
+     "description": "Adres"
+    },
+    "docks": {
+     "type": "number",
+     "description": "Liczba stojaków"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "station_close",
+  "title": "Zamknij stację",
+  "description": "Zamyka stację na czas remontu lub imprezy; nie można na niej oddać roweru.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Powód"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "station_reopen",
+  "title": "Otwórz stację ponownie",
+  "description": "Ponownie otwiera zamkniętą stację dla klientów.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bikes_list",
+  "title": "Rowery",
+  "description": "Wyświetla rowery floty: zwykłe, elektryczne, dziecięce i tandemy, z ich stanem.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "Rodzaj"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bike_get",
+  "title": "Szczegóły roweru",
+  "description": "Pokazuje, gdzie jest rower, stan baterii, przebieg i ostatnie wypożyczenia.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bike_add",
+  "title": "Dodaj rower",
+  "description": "Wprowadza nowy rower do floty i przypisuje go do stacji.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "Rodzaj"
+    },
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bike_retire",
+  "title": "Wycofaj rower",
+  "description": "Trwale wycofuje zniszczony lub skradziony rower z floty.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Powód"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "bike_move",
+  "title": "Przewieź rower",
+  "description": "Zleca przewiezienie roweru na inną stację, gdy tam brakuje rowerów.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    },
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bike_lock",
+  "title": "Zablokuj rower",
+  "description": "Zdalnie blokuje zamek roweru, na przykład gdy klient zgłosi kradzież.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bike_unlock",
+  "title": "Odblokuj rower",
+  "description": "Zdalnie otwiera zamek roweru, gdy aplikacja klienta nie działa.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rental_start",
+  "title": "Rozpocznij wypożyczenie",
+  "description": "Wypożycza rower klientowi ze stacji.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rental_end",
+  "title": "Zakończ wypożyczenie",
+  "description": "Kończy wypożyczenie, gdy klient nie mógł oddać roweru w stojaku.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rental_id": {
+     "type": "string",
+     "description": "Numer wypożyczenia"
+    },
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rental_get",
+  "title": "Szczegóły wypożyczenia",
+  "description": "Pokazuje trasę, czas, opłatę i stację zwrotu jednego wypożyczenia.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rental_id": {
+     "type": "string",
+     "description": "Numer wypożyczenia"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rentals_list",
+  "title": "Wypożyczenia",
+  "description": "Wyświetla wypożyczenia klienta lub roweru z wybranego okresu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rental_fee_refund",
+  "title": "Zwróć opłatę",
+  "description": "Zwraca klientowi opłatę za wypożyczenie, na przykład gdy rower się zepsuł.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rental_id": {
+     "type": "string",
+     "description": "Numer wypożyczenia"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Kwota zł"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_register",
+  "title": "Załóż konto",
+  "description": "Zakłada konto nowemu klientowi z numerem telefonu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Imię i nazwisko"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Telefon"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_get",
+  "title": "Konto klienta",
+  "description": "Pokazuje dane klienta, saldo, abonament i kary.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_update",
+  "title": "Zmień dane klienta",
+  "description": "Zmienia telefon, e-mail lub kartę miejską klienta.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "fields": {
+     "type": "object",
+     "description": "Pola"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_block",
+  "title": "Zablokuj konto",
+  "description": "Blokuje konto klienta, który nie płaci kar lub niszczy rowery.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Powód"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "customer_unblock",
+  "title": "Odblokuj konto",
+  "description": "Przywraca dostęp do zablokowanego konta klienta.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "balance_topup",
+  "title": "Doładuj saldo",
+  "description": "Doładowuje saldo klienta kwotą zapłaconą kartą lub przelewem.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Kwota zł"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "subscription_buy",
+  "title": "Kup abonament",
+  "description": "Sprzedaje klientowi abonament miesięczny lub roczny.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "plan": {
+     "type": "string",
+     "description": "Plan"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "subscription_cancel",
+  "title": "Anuluj abonament",
+  "description": "Anuluje abonament klienta przed końcem okresu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "penalty_issue",
+  "title": "Nałóż karę",
+  "description": "Nalicza klientowi karę za zostawienie roweru poza stacją lub za spóźniony zwrot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Kwota zł"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Powód"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "penalty_waive",
+  "title": "Anuluj karę",
+  "description": "Umarza klientowi naliczoną karę, gdy była niesłuszna.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "penalty_id": {
+     "type": "string",
+     "description": "Numer kary"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fault_report",
+  "title": "Zgłoś usterkę",
+  "description": "Zapisuje usterkę roweru: przebita dętka, hamulce, łańcuch, światła.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    },
+    "problem": {
+     "type": "string",
+     "description": "Usterka"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "faults_list",
+  "title": "Usterki",
+  "description": "Wyświetla otwarte zgłoszenia usterek rowerów i stacji.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "Stan"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_assign",
+  "title": "Przydziel naprawę",
+  "description": "Przydziela zgłoszoną usterkę serwisantowi.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "report_id": {
+     "type": "string",
+     "description": "Numer zgłoszenia"
+    },
+    "staff_id": {
+     "type": "string",
+     "description": "Numer pracownika"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "repair_done",
+  "title": "Zakończ naprawę",
+  "description": "Oznacza naprawę jako wykonaną i przywraca rower do jazdy.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "report_id": {
+     "type": "string",
+     "description": "Numer zgłoszenia"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "battery_swap",
+  "title": "Wymień baterię",
+  "description": "Zleca wymianę rozładowanej baterii roweru elektrycznego.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bike_id": {
+     "type": "string",
+     "description": "Numer roweru"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_list",
+  "title": "Pracownicy",
+  "description": "Wyświetla serwisantów i kierowców z ich zmianami.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shift_assign",
+  "title": "Przydziel zmianę",
+  "description": "Przydziela pracownikowi zmianę i rejon miasta.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Numer pracownika"
+    },
+    "shift": {
+     "type": "string",
+     "description": "Zmiana"
+    },
+    "zone": {
+     "type": "string",
+     "description": "Rejon"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rebalancing_plan",
+  "title": "Plan rozwozu",
+  "description": "Układa trasę samochodu, który rozwozi rowery między pełnymi a pustymi stacjami.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Dzień"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "usage_report",
+  "title": "Raport wypożyczeń",
+  "description": "Podsumowuje liczbę wypożyczeń i przejechane kilometry według stacji.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Miesiąc"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "revenue_report",
+  "title": "Raport przychodów",
+  "description": "Podsumowuje przychody z opłat, abonamentów i kar w miesiącu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Miesiąc"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_open",
+  "title": "Przyjmij reklamację",
+  "description": "Zapisuje reklamację klienta dotyczącą opłaty, roweru lub obsługi.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "Numer klienta"
+    },
+    "text": {
+     "type": "string",
+     "description": "Treść"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_answer",
+  "title": "Odpowiedz na reklamację",
+  "description": "Wysyła klientowi odpowiedź na jego reklamację.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "Numer reklamacji"
+    },
+    "text": {
+     "type": "string",
+     "description": "Odpowiedź"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notice_send",
+  "title": "Wyślij komunikat",
+  "description": "Wysyła klientom komunikat w aplikacji lub SMS, na przykład o zamkniętej stacji.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Treść"
+    },
+    "station_id": {
+     "type": "string",
+     "description": "Kod stacji"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

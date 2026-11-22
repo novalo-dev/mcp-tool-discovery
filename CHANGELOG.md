@@ -10,6 +10,16 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A Polish city bike rental on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Polish, many of them
+  neighbours (lock and unlock a bike, block and unblock an account, close
+  and reopen a station, issue and waive a penalty), and 100 requests written
+  before any of them was run, alternating with and without the Polish
+  letters so that both halves hold both. It is the first server where a
+  request drops letters no decomposition gives a base to ("zglos" for
+  "zgłoś"). The benchmark now holds 1997 requests over nineteen servers; its
+  floors move to 762 and 897 in fields and 839 asked again.
+
 - **The ReactPHP example sends `notifications/tools/list_changed` over
   HTTP.** `initialize` opens a session with an `Mcp-Session-Id`, bound to
   the token that opened it, and declares `listChanged`; a `GET` naming the

@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 723 times
-out of 949 in fields, and 471 times as one sentence.
+On the benchmark below, the same requests find the right tool first 762 times
+out of 999 in fields, and 502 times as one sentence.
 
 ## How a tool is scored
 
@@ -305,18 +305,19 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 `BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
 tools, `appointment_move`) a water supply office written in Khmer (40
 tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
-`paddy_receive`) and an archaeological museum written in Greek (40 tools,
-`loan_approve`). 1897 requests, each written as one
+`paddy_receive`), an archaeological museum written in Greek (40 tools,
+`loan_approve`) and a city bike rental written in Polish (40 tools,
+`bike_unlock`). 1997 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 949 requests | Right tool first | Top 3 |
+| Test half, 999 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 723 | 851 |
-| The same request as one sentence | 471 | 637 |
-| In fields, after every train request was run once | 728 | 851 |
-| In fields, after the test requests were run once, then asked again | 795 | 879 |
+| The request in fields | 762 | 897 |
+| The same request as one sentence | 502 | 675 |
+| In fields, after every train request was run once | 767 | 897 |
+| In fields, after the test requests were run once, then asked again | 839 | 926 |
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -534,6 +535,21 @@ It is what showed that PHP 8.2 and 8.3 lowered its capitals differently
 on every version, against 17 on 8.3 and 16 on 8.2 before. What it misses is
 mostly accents again (`συντηρησεις` asked, `συντήρηση` in the tool) and
 neighbours of one object (asking for a loan finds the list of loans).
+
+The bike rental is written in Polish, the first Latin script whose letters
+are typed away as often as its accents: "zglos" for "zgłoś", where no
+decomposition gives "ł" a base. Its tools are neighbours by design (lock and
+unlock a bike, block and unblock an account, close and reopen a station,
+issue and waive a penalty), and its 100 requests were written before any of
+them was run, alternating with and without the Polish letters, so that each
+half holds both (27 of the train half and 30 of the test half are plain
+ASCII). Nothing was tuned on it: 39 of its 50 test requests find the right
+tool first in fields, 46 in the top 3, 31 as one sentence, with 2.24 tools
+returned; learned from its train half, 39 and 46 again. Long Polish words
+keep enough trigrams to meet without their letters ("rowerow" finds
+"rowerów"); what it misses is short ones that do not ("doladuj" against
+"doładuj") and neighbours of one object (closing a lock remotely finds the
+tool that opens it).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
