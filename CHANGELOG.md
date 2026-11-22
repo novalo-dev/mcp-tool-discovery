@@ -170,6 +170,15 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A full learning store no longer sorts every count at each run.** Once
+  `MemoryLearningStore` or `FileLearningStore` held its 20,000 counts, each
+  run that learned a new word or pair sorted them all to drop the least run:
+  about 19 ms on every such run, for every caller. Going past the limit now
+  cuts the store to 18,000, so the next 2,000 new pairs need no sort; a full
+  memory store learns in 0.7 ms a run instead of 19, a file store in 12 ms
+  instead of 34. What goes is still the least run, the oldest first among
+  equals, and the benchmark, which never fills a store, is unchanged.
+
 - **Burmese is searched by pairs of what is seen, as Thai is.** A run of
   Burmese was one token that met tools only by its trigrams. It is now cut
   into overlapping pairs of grapheme clusters, the run kept beside them. On

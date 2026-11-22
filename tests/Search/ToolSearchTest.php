@@ -501,6 +501,36 @@ final class ToolSearchTest extends TestCase
         unlink($file);
     }
 
+    public function testAFullStoreMakesRoomForManyPairsAtOnce(): void
+    {
+        $file = self::temporary('learning') . '.json';
+        $words = array_map(static fn(int $i): string => 'word' . $i, range(1, Counts::LIMIT));
+        foreach ([new MemoryLearningStore(), new FileLearningStore($file)] as $store) {
+            foreach (array_chunk($words, 500) as $chunk) {
+                $store->record($chunk, 'acme_get_ticket');
+            }
+            self::assertSame(Counts::LIMIT, self::total($store, $file), 'a store at its limit drops nothing');
+
+            $store->record(['past the limit'], 'acme_get_ticket');
+            self::assertSame(Counts::KEPT, self::total($store, $file), 'going past the limit cuts below it');
+
+            // The room made is what spares a full store a sort at every run.
+            $store->record(['next', 'pair'], 'acme_get_ticket');
+            self::assertSame(Counts::KEPT + 2, self::total($store, $file), 'the next pairs fit without a cut');
+            $counts = $store instanceof FileLearningStore ? (new FileLearningStore($file))->load() : $store->load();
+            self::assertArrayHasKey('past the limit', $counts, 'the pair that went past the limit is kept');
+            self::assertArrayNotHasKey('word1', $counts, 'the oldest of the least run went first');
+        }
+        unlink($file);
+    }
+
+    private static function total(MemoryLearningStore|FileLearningStore $store, string $file): int
+    {
+        $counts = $store instanceof FileLearningStore ? (new FileLearningStore($file))->load() : $store->load();
+
+        return array_sum(array_map('count', $counts));
+    }
+
     public function testAToolWithANumericNameIsFoundAndLearned(): void
     {
         $tools = ToolSet::of([
