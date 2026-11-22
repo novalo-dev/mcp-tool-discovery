@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.6.0 - 2026-11-22
+
 ### Added
 
 - **An airline operations centre on the search benchmark, with 150 tools.**
