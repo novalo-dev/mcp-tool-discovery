@@ -11,6 +11,8 @@ parameters:
         - bridge.php
         - server.php
         - http-server.php
+        - notifications.php
+        - grant.php
         - registry-bridge.php
         - registry.php
         - attributes.php

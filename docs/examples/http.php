@@ -58,6 +58,22 @@ function roleOf(callable $header): ?string
 }
 
 /**
+ * The role whose rights a caller has now. MCP_NOTES_GRANTS names a JSON file,
+ * read again at each call, that gives a role the rights of another, such as
+ * {"reader": "admin"}: it stands for the user store a real server reads at
+ * each request, so that a test can change a caller's rights while a client
+ * is connected.
+ */
+function grantedRole(string $role): string
+{
+    $file = getenv('MCP_NOTES_GRANTS');
+    $grants = is_string($file) && is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
+    $granted = is_array($grants) ? ($grants[$role] ?? null) : null;
+
+    return is_string($granted) ? $granted : $role;
+}
+
+/**
  * The answer to one HTTP request: its status, its JSON body if it has one,
  * and its headers.
  *

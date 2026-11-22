@@ -8,6 +8,7 @@
         "mcp/sdk": "0.10.0",
         "novalo/mcp-tool-discovery": "*@dev",
         "nyholm/psr7": "^1.8",
+        "symfony/cache": "^7.4",
         "symfony/finder": "^7.4"
     },
     "autoload": {

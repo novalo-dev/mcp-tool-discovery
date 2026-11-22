@@ -10,6 +10,20 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The SDK HTTP example tells a client of `2026-07-28` that its list
+  changed.** A `subscriptions/listen` stream opened with `toolsListChanged`
+  is sent `notifications/tools/list_changed` once when the list its caller
+  may see moves. The host publishes on the SDK's shared bus that the tools
+  changed (`docs/examples/sdk/grant.php` does, for a right granted or taken
+  back); `CallerNotifications` reads that bus for one caller and passes the
+  change on only when `listFingerprint()` differs, so a reader is never told
+  of an admin's tools and compact mode tells no one. The bus is a
+  `Psr6NotificationBus` in files, shared by PHP-FPM workers, which adds
+  `symfony/cache` to the example's `composer.json`. `toolsListChanged` is
+  declared only to clients of that revision. `grantedRole()` in
+  `docs/examples/http.php` now reads the grants file for the ReactPHP
+  example and this one.
+
 - **A Polish city bike rental on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Polish, many of them
   neighbours (lock and unlock a bike, block and unblock an account, close

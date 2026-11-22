@@ -33,7 +33,8 @@ declare(strict_types=1);
  *
  * To watch a list change: MCP_NOTES_MODE=direct lists every tool as itself,
  * and MCP_NOTES_GRANTS names a JSON file, read again at each look, that gives
- * a role the rights of another, such as {"reader": "admin"}.
+ * a role the rights of another, such as {"reader": "admin"} (grantedRole() of
+ * http.php).
  */
 
 namespace Example\Notes\React;
@@ -55,6 +56,7 @@ use React\Stream\ThroughStream;
 
 use function Example\Notes\answerHttp;
 use function Example\Notes\encode;
+use function Example\Notes\grantedRole;
 use function Example\Notes\originAllowed;
 use function Example\Notes\roleOf;
 use function Example\Notes\tools;
@@ -87,13 +89,10 @@ $discoveryOf = static function (callable $header) use ($notes, $search, $mode): 
     if ($role === null) {
         return null;
     }
-    $file = getenv('MCP_NOTES_GRANTS');
-    $grants = is_string($file) && is_file($file) ? json_decode((string) file_get_contents($file), true) : null;
-    $granted = is_array($grants) ? ($grants[$role] ?? null) : null;
 
     // Built for this request or this look, never once above them: a
     // Discovery holds the gate of one caller, and the process serves them all.
-    return new Discovery($mode, new NotesGate(is_string($granted) ? $granted : $role, $notes), $search);
+    return new Discovery($mode, new NotesGate(grantedRole($role), $notes), $search);
 };
 
 /**

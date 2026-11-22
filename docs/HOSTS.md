@@ -283,6 +283,31 @@ The stateless revision `2026-07-28` needs no session: the SDK reads its
 revision from `_meta` and asks for the `Mcp-Method` header, and the handler
 answers as it does for the others.
 
+A client of that revision that opens a `subscriptions/listen` stream with
+`toolsListChanged` is told when its caller's list changes. The SDK carries
+notifications through a bus every process shares, and the host that changes
+a right or a tool publishes on it that the tools changed, without knowing
+whose list moved. [examples/sdk/grant.php](examples/sdk/grant.php) is that
+host: it changes a role's rights in the grants file of `grantedRole()` and
+publishes. [tests/Sdk/SdkListenTest.php](../tests/Sdk/SdkListenTest.php)
+opens a reader's stream and an admin's, then grants and takes back.
+
+```
+MCP_NOTES_MODE=direct MCP_NOTES_GRANTS=grants.json PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
+MCP_NOTES_GRANTS=grants.json php docs/examples/sdk/grant.php reader admin
+```
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The bus | `Psr6NotificationBus` over a `FilesystemAdapter` of `symfony/cache`, given to `setNotificationBus()` | under PHP-FPM the request that changes rights and the stream are different workers: they share files, not memory |
+| The stream of a caller | `CallerNotifications`, in [examples/sdk/notifications.php](examples/sdk/notifications.php), around the bus, built per request with the caller's `Discovery` | the SDK asks for its cursor when a stream opens, so the `listFingerprint()` of that moment is held; a published change is passed on once, and only when the fingerprint of the caller's rights now differs |
+| The capability | `toolsListChanged` declared only when the request is of `2026-07-28` | the SDK sends these notifications on a listen stream alone; a client with a session would be promised them for nothing |
+| The mode | `MCP_NOTES_MODE=direct` to watch it | in compact mode a right granted moves no line of the list, so the stream is told nothing |
+
+A reader is never told of a tool only an admin may see, and a change in
+compact mode tells no one: the bus says the tools may have changed, and the
+library says for whom.
+
 ### Tools already in the SDK's registry
 
 A server written for the SDK often has its tools there already, as handlers
@@ -465,7 +490,10 @@ it nothing. To keep a client's list right:
   `toolsListChanged`, and the capability is declared in `server/discover`.
   A client that opened none keeps its copy for the `ttlMs` given to
   `listTools()`: a short one costs a list now and then, a long one is safe in
-  compact mode as long as the pinned tools stay as they are.
+  compact mode as long as the pinned tools stay as they are. The
+  [server on the SDK's HTTP transport](#over-the-sdks-http-transport) does
+  this: the host publishes that the tools changed, and each stream compares
+  the `listFingerprint()` of its own caller.
 
 In a session, it takes a few lines around the handlers the host already has:
 
