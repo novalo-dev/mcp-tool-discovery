@@ -118,7 +118,7 @@ $mode = getenv('MCP_NOTES_MODE') === 'direct' ? new DirectMode() : new CompactMo
 // caller's tools, for as long as the session lasts.
 $search = new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore());
 $revision = null;
-// The tools/list answer the client last received, encoded, or null before it
+// The fingerprint of the list the client last received, or null before it
 // asked for one.
 $held = null;
 $encode = static fn(mixed $value): string => json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
@@ -135,11 +135,11 @@ while (($line = fgets(STDIN)) !== false) {
 
     // A server written around a loop that waits for the next line can only
     // see a change when a message comes; one that hears of its changes on
-    // its own sends the notification then. Comparing the answers is enough:
-    // in compact mode it differs only when a pinned tool changes, so a role
-    // that shows one more tool sends nothing, and a search finds the tool.
+    // its own sends the notification then. In compact mode the fingerprint
+    // moves only when a pinned tool changes, so a role that shows one more
+    // tool sends nothing, and a search finds the tool.
     if ($held !== null && is_array($message) && ($message['method'] ?? null) !== 'tools/list') {
-        $now = $encode($discovery->listTools($tools, $revision ?? Revision::latestWithHandshake()));
+        $now = $discovery->listFingerprint($tools, $revision ?? Revision::latestWithHandshake());
         if ($now !== $held) {
             fwrite(STDOUT, $encode(['jsonrpc' => '2.0', 'method' => 'notifications/tools/list_changed']) . "\n");
             // Told once: the client asks again, and a list that changes back
@@ -153,7 +153,7 @@ while (($line = fgets(STDIN)) !== false) {
         : ['jsonrpc' => '2.0', 'id' => null, 'error' => ['code' => -32700, 'message' => 'Parse error.']];
     if ($reply !== null) {
         if (is_array($message) && ($message['method'] ?? null) === 'tools/list' && isset($reply['result'])) {
-            $held = $encode($reply['result']);
+            $held = $discovery->listFingerprint($tools, $revision ?? Revision::latestWithHandshake());
         }
         // The answers are already shaped for the revision, empty objects
         // included: encoding them as they are is enough.

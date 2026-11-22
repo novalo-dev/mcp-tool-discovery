@@ -89,6 +89,31 @@ final class Discovery
     }
 
     /**
+     * A short string that changes when, and only when, the whole list this
+     * caller would be given changes, for a host that tells its clients with
+     * `notifications/tools/list_changed`.
+     *
+     * Keep the one of the list a session was given, and compare it with the
+     * one of the next request. It covers every page at once and leaves out
+     * what is not the list (`nextCursor`, `ttlMs`, `cacheScope`), so a host
+     * that pages its list or changes its cache times is not misled by them.
+     * It is taken for one revision, because a client holds the list shaped
+     * for its own: a change to a field its revision leaves out tells it
+     * nothing.
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
+     */
+    public function listFingerprint(ToolSet $tools, Revision $revision): string
+    {
+        $shaped = array_map(static fn(Tool $tool): array => Shaper::tool($tool, $revision), $this->mode->listTools($this->visible($tools)));
+
+        // serialize() rather than JSON: a host tool with bytes JSON cannot
+        // encode still gets a fingerprint, and the mode's order is kept, as
+        // the client sees it.
+        return hash('sha256', serialize($shaped));
+    }
+
+    /**
      * The `result` member of the `tools/call` answer.
      *
      * A host tool called by its own name is still accepted in every mode: an

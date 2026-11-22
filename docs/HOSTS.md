@@ -43,7 +43,7 @@ Its parts, in the order a host writes them:
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
 
-| A changed list | the loop, with the `tools/list` answer the client holds | `listChanged` declared at `initialize`, and the notification sent when the list built for the next message differs from that answer |
+| A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
 ignoring notifications, the JSON-RPC errors for a method it does not serve or
@@ -422,14 +422,19 @@ is now wrong depends on the mode:
 | Grouped | a tool outside the groups changes in any way, or a grouped one comes, goes, or changes its name, its title, or whether it only reads | a grouped tool changes only its description or its schema: `describe` gives it as it is now |
 | Direct | any tool changes in any way | never |
 
-A host need not know this table by heart: comparing two answers of
-`listTools()` is enough. To keep a client's list right:
+A host need not know this table by heart: `listFingerprint()` gives a short
+string that changes when, and only when, the list a caller would be given
+changes. It covers every page at once and leaves out `nextCursor`, `ttlMs`
+and `cacheScope`, so a host that pages its list compares the whole of it,
+not the page it last answered. It is taken for the client's revision: a
+title changed for a client of `2024-11-05`, whose tools have none, tells
+it nothing. To keep a client's list right:
 
 - **With a session**, declare `"tools": {"listChanged": true}` in the
-  capabilities of `initialize`, keep the encoded `listTools()` answer of the
-  session, and send `notifications/tools/list_changed` when the next one
-  differs. In compact mode that is rare: hundreds of tools can come and go
-  behind the mode's own, which never move. The
+  capabilities of `initialize`, keep the `listFingerprint()` of the list
+  the session was given, and send `notifications/tools/list_changed` when
+  the next one differs. In compact mode that is rare: hundreds of tools can
+  come and go behind the mode's own, which never move. The
   [stdio server](#a-server-over-stdio) does this, and its tests grant and take
   back a role while a client is connected: in direct mode the client is told
   once each time, in compact mode never, and its next search finds the tool.
@@ -439,6 +444,20 @@ A host need not know this table by heart: comparing two answers of
   A client that opened none keeps its copy for the `ttlMs` given to
   `listTools()`: a short one costs a list now and then, a long one is safe in
   compact mode as long as the pinned tools stay as they are.
+
+In a session, it takes a few lines around the handlers the host already has:
+
+```php
+// When the session answers tools/list, whether in one piece or in pages:
+$session['tools'] = $discovery->listFingerprint($tools, $revision);
+
+// When the next message of the session comes, before answering it:
+if (isset($session['tools']) && $discovery->listFingerprint($tools, $revision) !== $session['tools']) {
+    $send(['jsonrpc' => '2.0', 'method' => 'notifications/tools/list_changed']);
+    // Told once: the client asks again, and the list it gets is held then.
+    $session['tools'] = $discovery->listFingerprint($tools, $revision);
+}
+```
 
 A cached index is keyed by the tools it holds, so a change builds a new one on
 the next search, and the old one is read again only if the tools go back to

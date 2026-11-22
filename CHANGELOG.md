@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **`Discovery::listFingerprint()`, to know when to send
+  `notifications/tools/list_changed`.** A short string that changes when,
+  and only when, the list a caller would be given changes, in the client's
+  revision. It covers every page at once and leaves out `nextCursor`,
+  `ttlMs` and `cacheScope`, so a host that pages its list no longer
+  compares only the page it last answered, and a host that keeps it in a
+  session keeps a hash instead of the whole answer. The stdio example and
+  docs/HOSTS.md use it.
+
 - **The stdio example sends `notifications/tools/list_changed`.** It
   declares `listChanged` at `initialize`, keeps the `tools/list` answer the
   client last received, and sends the notification once when the list built

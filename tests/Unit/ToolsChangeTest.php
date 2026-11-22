@@ -57,10 +57,23 @@ final class ToolsChangeTest extends TestCase
      */
     private static function moves(DiscoveryMode $mode, ToolSet $before, array $added): bool
     {
-        $after = ToolSet::of([...$before->all(), Tool::fromArray($added)]);
-        $list = static fn(ToolSet $tools): string => (string) json_encode((new Discovery($mode, new RecordingGate()))->listTools($tools, Revision::latest()));
+        return self::changed($mode, $before, ToolSet::of([...$before->all(), Tool::fromArray($added)]));
+    }
 
-        return $list($before) !== $list($after);
+    /**
+     * Whether the list moves from one set to the other, asked both ways a
+     * host can ask it: the two answers compared, and the two fingerprints.
+     * They must agree, or a host keeping the fingerprint would tell its
+     * client too much or too little.
+     */
+    private static function changed(DiscoveryMode $mode, ToolSet $before, ToolSet $after): bool
+    {
+        $discovery = new Discovery($mode, new RecordingGate());
+        $list = static fn(ToolSet $tools): string => (string) json_encode($discovery->listTools($tools, Revision::latest()));
+        $moved = $list($before) !== $list($after);
+        self::assertSame($moved, $discovery->listFingerprint($before, Revision::latest()) !== $discovery->listFingerprint($after, Revision::latest()), 'the fingerprint must move with the list');
+
+        return $moved;
     }
 
     /**
@@ -99,21 +112,46 @@ final class ToolsChangeTest extends TestCase
     {
         $tools = RecordingGate::fixtureTools();
         $file = ['name' => 'acme_get_folder_size', 'title' => 'Get the size of a folder', 'description' => 'The size of one folder.', 'inputSchema' => ['type' => 'object'], 'annotations' => ['readOnlyHint' => true]];
-        $list = static fn(ToolSet $tools): string => (string) json_encode((new Discovery(Groups::mode(), new RecordingGate()))->listTools($tools, Revision::latest()));
 
         self::assertTrue(self::moves(Groups::mode(), $tools, $file), 'an action joins its group');
         self::assertTrue(self::moves(Groups::mode(), $tools, self::READ), 'a tool outside the groups is listed as itself');
-        self::assertNotSame($list($tools), $list(self::edited(['title' => 'Read a file'])));
-        self::assertSame($list($tools), $list(self::edited(['description' => 'Another description.', 'inputSchema' => ['type' => 'object', 'properties' => ['path' => ['type' => 'string']]]])));
+        self::assertTrue(self::changed(Groups::mode(), $tools, self::edited(['title' => 'Read a file'])));
+        self::assertFalse(self::changed(Groups::mode(), $tools, self::edited(['description' => 'Another description.', 'inputSchema' => ['type' => 'object', 'properties' => ['path' => ['type' => 'string']]]])));
     }
 
     public function testTheDirectListMovesWithEveryTool(): void
     {
         $tools = RecordingGate::fixtureTools();
-        $list = static fn(ToolSet $tools): string => (string) json_encode((new Discovery(new DirectMode(), new RecordingGate()))->listTools($tools, Revision::latest()));
 
         self::assertTrue(self::moves(new DirectMode(), $tools, self::READ));
-        self::assertNotSame($list($tools), $list(self::edited(['description' => 'Another description.'])));
+        self::assertTrue(self::changed(new DirectMode(), $tools, self::edited(['description' => 'Another description.'])));
+    }
+
+    public function testTheFingerprintIsTheWholeListInTheClientsRevision(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $discovery = new Discovery(new DirectMode(), new RecordingGate());
+        $now = $discovery->listFingerprint($tools, Revision::V2025_11_25);
+
+        // A page is not the list: the fingerprint is the same whatever page
+        // the host answers with, and is built again the same way.
+        self::assertNotSame((string) json_encode($discovery->listPage($tools, Revision::V2025_11_25, null, 3)), (string) json_encode($discovery->listTools($tools, Revision::V2025_11_25)));
+        self::assertSame($now, $discovery->listFingerprint(ToolSet::of($tools->all()), Revision::V2025_11_25));
+
+        // A tool past the first page still moves it.
+        $last = $tools->all()[count($tools) - 1]->name;
+        $edited = ToolSet::of(array_map(static fn(Tool $tool): Tool => $tool->name === $last ? Tool::fromArray([...$tool->toArray(), 'description' => 'Another description.']) : $tool, $tools->all()));
+        self::assertNotSame($now, $discovery->listFingerprint($edited, Revision::V2025_11_25));
+
+        // A title is a field of its own only from 2025-06-18; before that
+        // the annotations carry it, and the oldest revision has neither.
+        $retitled = ToolSet::of(array_map(static fn(Tool $tool): Tool => $tool->name === $last ? Tool::fromArray([...$tool->toArray(), 'title' => 'Another title']) : $tool, $tools->all()));
+        self::assertNotSame($discovery->listFingerprint($tools, Revision::V2025_11_25), $discovery->listFingerprint($retitled, Revision::V2025_11_25));
+        self::assertSame($discovery->listFingerprint($tools, Revision::V2024_11_05), $discovery->listFingerprint($retitled, Revision::V2024_11_05));
+
+        // The gate decides it too: a caller who sees one tool fewer holds another list.
+        $hidden = new RecordingGate(hidden: [$last]);
+        self::assertNotSame($now, (new Discovery(new DirectMode(), $hidden))->listFingerprint($tools, Revision::V2025_11_25));
     }
 
     public function testASearchAndARunFollowTheNewToolsAtOnce(): void
