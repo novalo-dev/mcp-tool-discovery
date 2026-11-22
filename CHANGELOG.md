@@ -10,6 +10,16 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The stdio example sends `notifications/tools/list_changed`.** It
+  declares `listChanged` at `initialize`, keeps the `tools/list` answer the
+  client last received, and sends the notification once when the list built
+  for the next message differs. With `MCP_NOTES_ROLE_FILE` it reads the role
+  again at each message, as a server reads its user store at each request,
+  and `MCP_NOTES_MODE=direct` lists every tool as itself. Its tests grant and
+  take back a role while a client is connected: in direct mode the client is
+  told once each time, in compact mode never, and its next search finds the
+  tool the role now shows.
+
 - **A Greek archaeological museum on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Greek, many of them
   neighbours (register, correct, move and strike off a find; request,

@@ -25,7 +25,13 @@ library ([tests/Examples/StdioServerTest.php](../tests/Examples/StdioServerTest.
 ```
 php docs/examples/stdio-server.php
 MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
+MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php docs/examples/stdio-server.php
 ```
+
+The third reads the role again from `role.txt` at each message and lists
+every tool as itself: write `admin` in the file while a client is connected
+and the server sends `notifications/tools/list_changed`, as
+[When the tools change](#when-the-tools-change) describes.
 
 Its parts, in the order a host writes them:
 
@@ -36,6 +42,8 @@ Its parts, in the order a host writes them:
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
+
+| A changed list | the loop, with the `tools/list` answer the client holds | `listChanged` declared at `initialize`, and the notification sent when the list built for the next message differs from that answer |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
 ignoring notifications, the JSON-RPC errors for a method it does not serve or
@@ -421,7 +429,10 @@ A host need not know this table by heart: comparing two answers of
   capabilities of `initialize`, keep the encoded `listTools()` answer of the
   session, and send `notifications/tools/list_changed` when the next one
   differs. In compact mode that is rare: hundreds of tools can come and go
-  behind the mode's own, which never move.
+  behind the mode's own, which never move. The
+  [stdio server](#a-server-over-stdio) does this, and its tests grant and take
+  back a role while a client is connected: in direct mode the client is told
+  once each time, in compact mode never, and its next search finds the tool.
 - **In the stateless revision `2026-07-28`**, the same notification goes only
   on a `subscriptions/listen` stream the client opened with
   `toolsListChanged`, and the capability is declared in `server/discover`.
