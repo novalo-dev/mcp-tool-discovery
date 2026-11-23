@@ -10,13 +10,22 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A city theatre written in Ukrainian on the search benchmark.** The
+  second server in Cyrillic, after the Russian hotel: 40 tools, mostly
+  neighbours on one object (move and cancel a performance; book a seat,
+  release a booking, refund and exchange a ticket), and words that change
+  their endings or carry an apostrophe inside. Its 100 requests were
+  written before any of them was run and split as the airline's; both
+  halves score alike (40 of 49 and 40 of 51 first in fields). The benchmark
+  now holds 2397 requests over twenty-one servers; its floors move to 923
+  and 1069 in fields and 1005 asked again.
 - **The benchmark measures the search a PHP host may already have.**
   laravel/mcp v1.2.1, Laravel's official MCP package, ships a substring
   score over the name, the description and the input schema; it is written
   again in `tests/Fixtures/SubstringSearch.php` and run on the same test
-  half. As one sentence it finds the right tool first 329 times out of
-  1149, against 628 for this library; given the words of the fields joined,
-  637, against 883 in fields. `composer benchmark` prints both, the README
+  half. As one sentence it finds the right tool first 353 times out of
+  1200, against 665 for this library; given the words of the fields joined,
+  662, against 923 in fields. `composer benchmark` prints both, the README
   and docs/SEARCH.md give them, and `BenchmarkTest` fails if the library
   stops beating it on either line. It lowers text letter by letter, as
   the Analyzer does, so its score is the same on every PHP version.

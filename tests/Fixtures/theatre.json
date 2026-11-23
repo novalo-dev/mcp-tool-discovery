@@ -1,0 +1,825 @@
+[
+ {
+  "name": "shows_list",
+  "title": "Репертуар",
+  "description": "Показує вистави репертуару театру з жанром і тривалістю.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "genre": {
+     "type": "string",
+     "description": "Жанр"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "show_get",
+  "title": "Про виставу",
+  "description": "Показує опис вистави, режисера, акторський склад і вікове обмеження.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "show_add",
+  "title": "Додати виставу",
+  "description": "Додає нову виставу до репертуару.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Назва"
+    },
+    "director": {
+     "type": "string",
+     "description": "Режисер"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "show_remove",
+  "title": "Зняти виставу",
+  "description": "Знімає виставу з репертуару назавжди; майбутні покази скасовуються.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "performances_list",
+  "title": "Афіша",
+  "description": "Показує покази вистав за датами: що грають, коли і в якому залі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Місяць"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "performance_schedule",
+  "title": "Призначити показ",
+  "description": "Призначає показ вистави на дату, час і зал.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    },
+    "hall": {
+     "type": "string",
+     "description": "Зал"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "performance_move",
+  "title": "Перенести показ",
+  "description": "Переносить показ на іншу дату або в інший зал; квитки лишаються дійсними.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "date": {
+     "type": "string",
+     "description": "Нова дата"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "performance_cancel",
+  "title": "Скасувати показ",
+  "description": "Скасовує показ вистави і повертає глядачам гроші за квитки.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Причина"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "premiere_announce",
+  "title": "Оголосити прем'єру",
+  "description": "Оголошує прем'єру нової вистави на сайті та в розсилці.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seats_map",
+  "title": "Схема залу",
+  "description": "Показує схему залу на показ: вільні, заброньовані та продані місця.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "seat_book",
+  "title": "Забронювати місце",
+  "description": "Бронює місця на показ для глядача на добу.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "seats": {
+     "type": "array",
+     "description": "Місця"
+    },
+    "name": {
+     "type": "string",
+     "description": "Ім'я глядача"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking_release",
+  "title": "Зняти бронь",
+  "description": "Звільняє заброньовані місця, якщо глядач не викупив квитки.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронювання"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "booking_get",
+  "title": "Бронювання",
+  "description": "Показує місця, глядача і термін одного бронювання.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking_id": {
+     "type": "string",
+     "description": "Номер бронювання"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_sell",
+  "title": "Продати квиток",
+  "description": "Продає квитки на показ у касі за готівку або карткою.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "seats": {
+     "type": "array",
+     "description": "Місця"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_refund",
+  "title": "Повернути квиток",
+  "description": "Приймає повернення квитка і віддає глядачеві гроші.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Номер квитка"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_exchange",
+  "title": "Обміняти квиток",
+  "description": "Обмінює квиток на інший показ тієї ж вистави.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Номер квитка"
+    },
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "invitation_issue",
+  "title": "Видати запрошення",
+  "description": "Видає безкоштовні запрошення для преси, гостей чи родин акторів.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "count": {
+     "type": "number",
+     "description": "Кількість"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prices_set",
+  "title": "Ціни на квитки",
+  "description": "Встановлює ціни квитків за зонами залу для показу.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "prices": {
+     "type": "object",
+     "description": "Ціни за зонами"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "discount_create",
+  "title": "Створити знижку",
+  "description": "Створює знижку для студентів, пенсіонерів чи груп.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Назва"
+    },
+    "percent": {
+     "type": "number",
+     "description": "Відсоток"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sales_report",
+  "title": "Звіт продажу",
+  "description": "Підсумовує продані квитки і виручку за показами місяця.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Місяць"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "attendance_report",
+  "title": "Звіт відвідуваності",
+  "description": "Показує заповненість залу на кожному показі у відсотках.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Місяць"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "actors_list",
+  "title": "Трупа",
+  "description": "Показує акторів трупи з їхніми ролями.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "actor_get",
+  "title": "Про актора",
+  "description": "Показує ролі, контакти і зайнятість одного актора.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "actor_id": {
+     "type": "string",
+     "description": "Номер актора"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "actor_hire",
+  "title": "Прийняти актора",
+  "description": "Приймає нового актора до трупи.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Ім'я"
+    },
+    "contract": {
+     "type": "string",
+     "description": "Договір"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "actor_dismiss",
+  "title": "Звільнити актора",
+  "description": "Звільняє актора з трупи і знімає його з усіх ролей.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "actor_id": {
+     "type": "string",
+     "description": "Номер актора"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "role_assign",
+  "title": "Призначити роль",
+  "description": "Призначає актора на роль у виставі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "actor_id": {
+     "type": "string",
+     "description": "Номер актора"
+    },
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "role": {
+     "type": "string",
+     "description": "Роль"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "role_unassign",
+  "title": "Зняти з ролі",
+  "description": "Знімає актора з ролі у виставі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "actor_id": {
+     "type": "string",
+     "description": "Номер актора"
+    },
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "role": {
+     "type": "string",
+     "description": "Роль"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "understudy_call",
+  "title": "Викликати дублера",
+  "description": "Викликає дублера на показ, коли актор захворів.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    },
+    "role": {
+     "type": "string",
+     "description": "Роль"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rehearsal_schedule",
+  "title": "Призначити репетицію",
+  "description": "Призначає репетицію вистави на сцені чи в репетиційній залі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "date": {
+     "type": "string",
+     "description": "Дата"
+    },
+    "hall": {
+     "type": "string",
+     "description": "Зал"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rehearsal_cancel",
+  "title": "Скасувати репетицію",
+  "description": "Скасовує призначену репетицію і повідомляє акторів.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rehearsal_id": {
+     "type": "string",
+     "description": "Номер репетиції"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "rehearsals_list",
+  "title": "Репетиції",
+  "description": "Показує розклад репетицій на тиждень.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Тиждень"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "costume_order",
+  "title": "Замовити костюм",
+  "description": "Замовляє в цеху пошиття костюма для ролі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "role": {
+     "type": "string",
+     "description": "Роль"
+    },
+    "size": {
+     "type": "string",
+     "description": "Розмір"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "costumes_list",
+  "title": "Костюмерна",
+  "description": "Показує костюми костюмерної та де вони зараз.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "props_request",
+  "title": "Реквізит",
+  "description": "Замовляє в бутафорському цеху реквізит для вистави.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "item": {
+     "type": "string",
+     "description": "Предмет"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "stage_equipment_check",
+  "title": "Перевірка сцени",
+  "description": "Записує перевірку світла, звуку і машинерії сцени перед показом.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "performance_id": {
+     "type": "string",
+     "description": "Номер показу"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tour_plan",
+  "title": "Гастролі",
+  "description": "Планує гастролі вистави в інше місто: дати, переїзд, проживання.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    },
+    "city": {
+     "type": "string",
+     "description": "Місто"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "newsletter_send",
+  "title": "Надіслати розсилку",
+  "description": "Надсилає глядачам розсилку з афішею місяця.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Текст"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "subscription_sell",
+  "title": "Продати абонемент",
+  "description": "Продає абонемент на кілька вистав сезону.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Ім'я глядача"
+    },
+    "plan": {
+     "type": "string",
+     "description": "Абонемент"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "feedback_list",
+  "title": "Відгуки глядачів",
+  "description": "Показує відгуки глядачів про покази.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "show_id": {
+     "type": "string",
+     "description": "Номер вистави"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_item_record",
+  "title": "Загублені речі",
+  "description": "Записує річ, забуту глядачем у залі чи гардеробі.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item": {
+     "type": "string",
+     "description": "Річ"
+    },
+    "place": {
+     "type": "string",
+     "description": "Де знайдено"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

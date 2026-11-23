@@ -45,7 +45,8 @@ The benchmark says where the search still misses, in
   requests in capitals (an archaeological museum) and a Polish one, typed
   with and without its letters (a city bike rental) and a second large
   English one, with 150 tools that are mostly neighbours (an airline
-  operations centre) are in. Lao, written the
+  operations centre) and a Ukrainian one, the second in Cyrillic (a city
+  theatre) are in. Lao, written the
   same way as Thai, is not measured yet.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
