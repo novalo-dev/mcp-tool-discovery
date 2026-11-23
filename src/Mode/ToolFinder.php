@@ -116,7 +116,7 @@ final class ToolFinder
         if ($unknown !== []) {
             $answer['unknown'] = $unknown;
         }
-        if ($runner->learns() && $result !== null && $result->searchId !== null && $result->tools !== []) {
+        if ($runner->followsSearches() && $result !== null && $result->searchId !== null && $result->tools !== []) {
             $answer['search_id'] = $result->searchId;
         }
         if ($result !== null && ($found === [] || $result->unmatched !== [])) {

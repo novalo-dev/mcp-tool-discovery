@@ -1,0 +1,792 @@
+[
+ {
+  "name": "Berths-List",
+  "title": "מקומות עגינה",
+  "description": "מציג את מקומות העגינה במרינה עם האורך והסטטוס של כל מקום.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pier": {
+     "type": "string",
+     "description": "רציף"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Berth-Get",
+  "title": "מקום עגינה",
+  "description": "מציג פרטי מקום עגינה אחד: אורך, עומק, חשמל ומים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "berth_id": {
+     "type": "string",
+     "description": "מספר מקום העגינה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Berth-Reserve",
+  "title": "הזמנת מקום עגינה",
+  "description": "מזמין מקום עגינה לסירה לתאריכים מסוימים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "berth_id": {
+     "type": "string",
+     "description": "מספר מקום העגינה"
+    },
+    "from_date": {
+     "type": "string",
+     "description": "תאריך"
+    },
+    "to_date": {
+     "type": "string",
+     "description": "תאריך"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Berth-Release",
+  "title": "שחרור מקום עגינה",
+  "description": "משחרר מקום עגינה שהוזמן כשהסירה לא הגיעה או שההזמנה בוטלה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "berth_id": {
+     "type": "string",
+     "description": "מספר מקום העגינה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Berth-Extend",
+  "title": "הארכת עגינה",
+  "description": "מאריך את תקופת העגינה של סירה שכבר נמצאת במרינה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "to_date": {
+     "type": "string",
+     "description": "תאריך"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Berth-Move",
+  "title": "העברת סירה",
+  "description": "מעביר סירה למקום עגינה אחר במרינה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "berth_id": {
+     "type": "string",
+     "description": "מספר מקום העגינה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Boats-List",
+  "title": "סירות",
+  "description": "מציג את הסירות הרשומות במרינה עם הבעלים שלהן.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "description": "סוג הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Boat-Get",
+  "title": "פרטי סירה",
+  "description": "מציג את פרטי הסירה: שם, אורך, דגל, ביטוח ובעלים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Boat-Register",
+  "title": "רישום סירה",
+  "description": "רושם סירה חדשה במרינה עם הבעלים שלה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "שם הסירה"
+    },
+    "length": {
+     "type": "number",
+     "description": "אורך במטרים"
+    },
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Boat-Remove",
+  "title": "מחיקת סירה",
+  "description": "מוחק סירה מרישומי המרינה לצמיתות.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "Owners-List",
+  "title": "בעלי סירות",
+  "description": "מציג את בעלי הסירות ופרטי הקשר שלהם.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Owner-Update",
+  "title": "עדכון בעלים",
+  "description": "מעדכן טלפון, כתובת או דואר אלקטרוני של בעל סירה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    },
+    "phone": {
+     "type": "string",
+     "description": "טלפון"
+    },
+    "address": {
+     "type": "string",
+     "description": "כתובת"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Arrival-Record",
+  "title": "רישום הגעה",
+  "description": "רושם הגעה של סירה אורחת לנמל.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "origin": {
+     "type": "string",
+     "description": "נמל מוצא"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Departure-Record",
+  "title": "רישום יציאה",
+  "description": "רושם יציאה של סירה מהנמל ואת יעד ההפלגה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "destination": {
+     "type": "string",
+     "description": "יעד"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Invoice-Create",
+  "title": "הפקת חשבונית",
+  "description": "מפיק חשבונית לבעל סירה על עגינה, חשמל ושירותים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    },
+    "period": {
+     "type": "string",
+     "description": "תקופה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Invoice-Cancel",
+  "title": "ביטול חשבונית",
+  "description": "מבטל חשבונית שהופקה בטעות.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "מספר החשבונית"
+    },
+    "reason": {
+     "type": "string",
+     "description": "סיבה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "Payment-Record",
+  "title": "רישום תשלום",
+  "description": "רושם תשלום שהתקבל עבור חשבונית.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "מספר החשבונית"
+    },
+    "amount": {
+     "type": "number",
+     "description": "סכום"
+    },
+    "method": {
+     "type": "string",
+     "description": "אמצעי תשלום"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Debts-List",
+  "title": "חובות פתוחים",
+  "description": "מציג בעלי סירות עם חשבוניות שלא שולמו.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Prices-Set",
+  "title": "מחירון עגינה",
+  "description": "קובע מחיר ללילה לפי אורך הסירה והעונה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "length": {
+     "type": "number",
+     "description": "אורך עד"
+    },
+    "season": {
+     "type": "string",
+     "description": "עונה"
+    },
+    "price": {
+     "type": "number",
+     "description": "מחיר"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Fuel-Sell",
+  "title": "מכירת דלק",
+  "description": "מוכר סולר או בנזין בתחנת התדלוק של המרינה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "liters": {
+     "type": "number",
+     "description": "ליטרים"
+    },
+    "kind": {
+     "type": "string",
+     "description": "סוג דלק"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Fuel-Stock",
+  "title": "מלאי דלק",
+  "description": "מציג כמה סולר ובנזין נשארו במכלים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Repair-Open",
+  "title": "פתיחת קריאת תיקון",
+  "description": "פותח קריאת תיקון לסירה במספנה: מנוע, גוף או מפרש.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "problem": {
+     "type": "string",
+     "description": "תיאור התקלה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Repair-Close",
+  "title": "סגירת קריאת תיקון",
+  "description": "סוגר קריאת תיקון כשהעבודה הסתיימה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "repair_id": {
+     "type": "string",
+     "description": "מספר קריאת התיקון"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Repairs-List",
+  "title": "תיקונים",
+  "description": "מציג את קריאות התיקון הפתוחות במספנה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Haulout-Schedule",
+  "title": "הוצאה ליבשה",
+  "description": "קובע מועד להוצאת סירה מהמים במנוף לצביעה או לניקוי.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "date": {
+     "type": "string",
+     "description": "תאריך"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Launch-Schedule",
+  "title": "הורדה למים",
+  "description": "קובע מועד להורדת סירה חזרה למים במנוף.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "boat_id": {
+     "type": "string",
+     "description": "מספר הסירה"
+    },
+    "date": {
+     "type": "string",
+     "description": "תאריך"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Weather-Get",
+  "title": "תחזית ים",
+  "description": "מציג תחזית רוח, גלים ומזג אוויר בים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "תאריך"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Warning-Issue",
+  "title": "אזהרת סערה",
+  "description": "שולח אזהרת סערה לכל הסירות ולבעלים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "נוסח האזהרה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Harbor-Close",
+  "title": "סגירת הנמל",
+  "description": "סוגר את הנמל ליציאות בזמן סערה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "reason": {
+     "type": "string",
+     "description": "סיבה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Harbor-Reopen",
+  "title": "פתיחת הנמל",
+  "description": "פותח מחדש את הנמל ליציאות אחרי הסערה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Incident-Report",
+  "title": "דיווח אירוע",
+  "description": "מדווח על אירוע בנמל: התנגשות, דליפת שמן או אדם במים.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "סוג האירוע"
+    },
+    "place": {
+     "type": "string",
+     "description": "מקום"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Incidents-List",
+  "title": "אירועים",
+  "description": "מציג את האירועים שדווחו בנמל.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "חודש"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Staff-List",
+  "title": "צוות המרינה",
+  "description": "מציג את עובדי המרינה ואת המשמרות שלהם.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Shift-Assign",
+  "title": "שיבוץ משמרת",
+  "description": "משבץ עובד למשמרת במגדל הפיקוח או ברציף.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee": {
+     "type": "string",
+     "description": "עובד"
+    },
+    "date": {
+     "type": "string",
+     "description": "תאריך"
+    },
+    "post": {
+     "type": "string",
+     "description": "עמדה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Waitlist-Add",
+  "title": "רשימת המתנה",
+  "description": "מוסיף בעל סירה לרשימת ההמתנה למקום עגינה קבוע.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Contract-Renew",
+  "title": "חידוש חוזה עגינה",
+  "description": "מחדש את חוזה העגינה השנתי של בעל סירה.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Contract-Terminate",
+  "title": "סיום חוזה עגינה",
+  "description": "מסיים את חוזה העגינה השנתי ומפנה את המקום.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "Access-Card",
+  "title": "כרטיס כניסה",
+  "description": "מנפיק כרטיס כניסה לשער המרינה ולמקלחות.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "owner_id": {
+     "type": "string",
+     "description": "מספר בעל הסירה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Occupancy-Report",
+  "title": "דוח תפוסה",
+  "description": "מציג את אחוז התפוסה של מקומות העגינה לפי חודש.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "חודש"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "Notice-Send",
+  "title": "הודעה לבעלים",
+  "description": "שולח הודעה בדואר אלקטרוני או במסרון לבעלי הסירות.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "תוכן ההודעה"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

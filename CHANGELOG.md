@@ -8,6 +8,146 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.7.0 - 2026-11-23
+
+### Added
+
+- **A fleet of field sensors generated from OpenAPI on the search
+  benchmark.** 40 tools exposed as OpenAPI-to-MCP generators write them:
+  the method and the path for a name (`post_devices_device_id_reboot`), no
+  title, the summary, longer text and route as description, and the same
+  `page` and `per_page` on every list. Most are neighbours on one object.
+  Its 100 requests were written before any of them was run and split as
+  the airline's. The benchmark now holds 2697 requests over twenty-four
+  servers; its floors move to 1037 and 1207 in fields and 1134 asked
+  again, and the laravel/mcp line to 408 as one sentence and 764 with the
+  fields joined.
+
+- **Every mode on the example servers.** `MCP_NOTES_MODE` now takes
+  `grouped` and `gateway` beside `direct`, on the stdio, ReactPHP and SDK
+  servers alike, through one `mode()` in `docs/examples/notes.php`, so the
+  two modes that are not the default can be tried on a real client with
+  the same tools and the same gate. The tests run both over stdio as a
+  client would: a role granted in grouped mode adds the deletion to the
+  change tool and the client is told, a change sent to the read tool is
+  refused with the name of the tool that runs it, and in gateway mode the
+  one tool stays as it was while a search marks the deletion as a change.
+- **A post office written in Lao on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Lao, written as Thai is,
+  with no space between words, most of them neighbours on one object (send,
+  track, hold, return and redirect a parcel; send, cancel and pay out a
+  money transfer; rent, renew and close a post office box). Its 100 requests
+  were written before any of them was run and split as the airline's. The
+  benchmark now holds 2597 requests over twenty-three servers; its floors
+  move to 998 and 1159 in fields and 1088 asked again, and the laravel/mcp
+  line to 385 as one sentence and 726 with the fields joined.
+- **A marina written in Hebrew on the search benchmark.** The first
+  language that glues its particles to the start of a word ("במרינה", in
+  the marina), and the first names in Train-Case (`Berth-Reserve`): 40
+  tools, most of them neighbours on one object (reserve, release, extend
+  and move a berth; close and reopen the harbour). Its 100 requests were
+  written before any of them was run and split as the airline's; both
+  halves score alike in fields (40 of 50 first on each). The benchmark now
+  holds 2497 requests over twenty-two servers; its floors move to 963 and
+  1115 in fields and 1047 asked again, and the laravel/mcp line to 374 as
+  one sentence and 696 with the fields joined.
+- **A log of what clients search.** `SearchSetup` takes a `SearchLog`, an
+  interface of two methods: `searched()` receives each search a mode runs,
+  with its answer (the tools found, the words no tool uses), and `ran()`
+  each run of a visible, authorized tool, whether it succeeded, and the
+  `search_id` the client gave back with it. With a log, the compact and
+  gateway modes hand out a `search_id` even when nothing is learned, so a
+  host can tie a run to its search and read its misses. A mode written
+  outside the library asks `ToolRunner::followsSearches()` instead of
+  `learns()` to know whether to hand one out. A `search_id` a search could
+  not have written reaches the log as null. The library writes nothing
+  itself; docs/SEARCH.md has an example that writes JSON lines.
+- **A search log in the stdio example.** `docs/examples/stdio-server.php`
+  keeps one line of JSON per search and per run in the file
+  `MCP_NOTES_SEARCH_LOG` names, and nothing when it names none:
+  `NotesSearchLog`, in `docs/examples/notes.php`, is a log a host can copy.
+  A line it cannot write is lost without failing the client's call. Its
+  test holds it to what the log promises: the run carries the id of its
+  search, a tool the gate hides is never written, and an id no search
+  wrote reaches the log as null.
+- **A report of the search log.** `docs/examples/search-log-report.php`
+  reads the log the stdio example writes and prints, most frequent first,
+  the words no tool uses with the tools that ran after them (the host's
+  synonyms to write), the runs of a tool the search did not put first, with
+  its rank, and the searches that found nothing. A failed run is counted
+  but ranks nothing; a line cut short is counted and skipped. It needs
+  nothing but PHP, and its test reads the log the stdio server wrote in the
+  same test.
+- **An example of a server written with laravel/mcp.** Laravel's official
+  MCP package lets a server replace any of its methods with `addMethod()`:
+  `docs/examples/laravel-mcp` replaces `tools/list` and `tools/call` with
+  two methods that hand them to the library, and keeps laravel/mcp's tools,
+  transports and other methods as they are. The library is given only the
+  tools `ServerContext::tools()` keeps for the request, so a tool hidden by
+  its `shouldRegister()` can be neither found nor run through a runner; a
+  tool runs through laravel/mcp's `ToolInvoker` with its own request, so
+  its validation and error results are unchanged. docs/HOSTS.md has the
+  section, and a CI job installs laravel/framework 13.43.0 and laravel/mcp
+  1.2.1 there and runs its tests, as part of CI passed.
+- **A city theatre written in Ukrainian on the search benchmark.** The
+  second server in Cyrillic, after the Russian hotel: 40 tools, mostly
+  neighbours on one object (move and cancel a performance; book a seat,
+  release a booking, refund and exchange a ticket), and words that change
+  their endings or carry an apostrophe inside. Its 100 requests were
+  written before any of them was run and split as the airline's; both
+  halves score alike (40 of 49 and 40 of 51 first in fields). The benchmark
+  now holds 2397 requests over twenty-one servers; its floors move to 923
+  and 1069 in fields and 1005 asked again.
+- **The benchmark measures the search a PHP host may already have.**
+  laravel/mcp v1.2.1, Laravel's official MCP package, ships a substring
+  score over the name, the description and the input schema; it is written
+  again in `tests/Fixtures/SubstringSearch.php` and run on the same test
+  half. As one sentence it finds the right tool first 353 times out of
+  1200, against 665 for this library; given the words of the fields joined,
+  662, against 923 in fields. `composer benchmark` prints both, the README
+  and docs/SEARCH.md give them, and `BenchmarkTest` fails if the library
+  stops beating it on either line. It lowers text letter by letter, as
+  the Analyzer does, so its score is the same on every PHP version.
+
+### Changed
+
+- **Learning barely moves a neighbour.** The lift of a learned tool is
+  now also scaled by the share of the request's pairs of words that
+  reached it. Run once, "add a site address" lifted the tool that creates
+  a site for "change a site address", which shares one pair of three; it
+  now lifts it a ninth as much, while the same request asked again keeps
+  its whole lift. Learned from the train half, the test half no longer
+  loses first places to learning: 1038 against 1037 in fields, where the
+  plain mean found 1035, and 1134 asked again either way. Stores keep
+  their format.
+- **The guide header names the pinned tools.** A prompt that names a pinned
+  tool beside tools behind the runners used to have its pinned tool left
+  out of `CompactMode::guideHeader()`, under a header that says the
+  prompt's tools are not in the list, so a client could search for a tool
+  it already holds. The header now ends with "directly, as they are in
+  your list:" and those names, and its first line says so. A host that
+  added that line itself can drop it.
+
+- **Lao is searched by pairs of what is seen, as Thai and Burmese are.** A
+  run of Lao was one token that met tools only by its trigrams. It is now
+  cut into overlapping pairs of grapheme clusters, the run kept beside
+  them. On the test half of the new post office, 35 of 48 requests find the
+  right tool first in fields against 33, 44 are in the top 3 against 43,
+  fewer tools are returned (2.40 against 2.48), learning loses nothing, and
+  41 come first asked again against 37; as one sentence, one request leaves
+  the first place and two enter the top 3. Chosen on its train half: 47 of
+  52 first against 42. No other server moves by a single request. The index
+  format changes, so a cached index is rebuilt once.
+
+### Security
+
+- A search scores at most 32 words of a request that no tool uses, and for
+  each at most the 32 indexed words most alike it, so the cost of a search
+  stays small however many words of a large index look alike. The ranking
+  of every request of the benchmark is unchanged.
+- The search log report prints the words of a request as text only: a
+  control or direction character shows as `?`.
+
 ## 0.6.0 - 2026-11-22
 
 ### Added

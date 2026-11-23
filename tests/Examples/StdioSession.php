@@ -25,10 +25,11 @@ trait StdioSession
      * position as id (none for a notification), and returns the replies by id.
      *
      * @param list<array<string, mixed>> $messages
+     * @param array<string, string>      $env      more of the server's settings
      *
      * @return array<int, array<string, mixed>>
      */
-    private static function exchange(string $script, array $messages, string $role): array
+    private static function exchange(string $script, array $messages, string $role, array $env = []): array
     {
         $input = '';
         foreach ($messages as $i => $message) {
@@ -42,7 +43,7 @@ trait StdioSession
             [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
             $pipes,
             null,
-            ['MCP_NOTES_ROLE' => $role] + getenv(),
+            ['MCP_NOTES_ROLE' => $role] + $env + getenv(),
         );
         self::assertIsResource($process);
         fwrite($pipes[0], $input);

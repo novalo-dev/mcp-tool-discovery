@@ -1,0 +1,807 @@
+[
+ {
+  "name": "parcels_list",
+  "title": "ພັດສະດຸໃນສາງ",
+  "description": "ສະແດງພັດສະດຸທີ່ຢູ່ໃນສາງຂອງສາຂາ ພ້ອມສະຖານະຂອງແຕ່ລະອັນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "ສະຖານະ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_get",
+  "title": "ລາຍລະອຽດພັດສະດຸ",
+  "description": "ສະແດງລາຍລະອຽດຂອງພັດສະດຸ: ຜູ້ສົ່ງ, ຜູ້ຮັບ, ນ້ຳໜັກ ແລະ ຄ່າສົ່ງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_send",
+  "title": "ສົ່ງພັດສະດຸ",
+  "description": "ຮັບພັດສະດຸຈາກລູກຄ້າທີ່ເຄົາເຕີ ແລະ ອອກໃບຮັບສົ່ງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sender_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "address": {
+     "type": "string",
+     "description": "ທີ່ຢູ່ຜູ້ຮັບ"
+    },
+    "weight": {
+     "type": "number",
+     "description": "ນ້ຳໜັກເປັນກິໂລ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_track",
+  "title": "ຕິດຕາມພັດສະດຸ",
+  "description": "ບອກວ່າພັດສະດຸຢູ່ໃສ ແລະ ຈະໄປເຖິງຜູ້ຮັບເມື່ອໃດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_hold",
+  "title": "ຝາກພັດສະດຸໄວ້ທີ່ສາຂາ",
+  "description": "ເກັບພັດສະດຸໄວ້ທີ່ສາຂາ ໃຫ້ຜູ້ຮັບມາເອົາເອງ ແທນການສົ່ງຮອດບ້ານ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "until": {
+     "type": "string",
+     "description": "ວັນທີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_return",
+  "title": "ສົ່ງພັດສະດຸຄືນ",
+  "description": "ສົ່ງພັດສະດຸຄືນໃຫ້ຜູ້ສົ່ງ ເມື່ອບໍ່ມີຄົນຮັບ ຫຼື ຜູ້ຮັບປະຕິເສດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "reason": {
+     "type": "string",
+     "description": "ເຫດຜົນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_redirect",
+  "title": "ປ່ຽນທີ່ຢູ່ສົ່ງ",
+  "description": "ປ່ຽນທີ່ຢູ່ປາຍທາງຂອງພັດສະດຸທີ່ຍັງບໍ່ທັນສົ່ງຮອດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "address": {
+     "type": "string",
+     "description": "ທີ່ຢູ່ໃໝ່"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_deliver",
+  "title": "ບັນທຶກການສົ່ງຮອດ",
+  "description": "ບັນທຶກວ່າພັດສະດຸສົ່ງຮອດມືຜູ້ຮັບແລ້ວ ພ້ອມລາຍເຊັນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "signed_by": {
+     "type": "string",
+     "description": "ຊື່ຜູ້ເຊັນຮັບ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_quote",
+  "title": "ຄິດໄລ່ຄ່າສົ່ງ",
+  "description": "ຄິດໄລ່ຄ່າສົ່ງຕາມນ້ຳໜັກ ຂະໜາດ ແລະ ປາຍທາງ ກ່ອນລູກຄ້າຈະສົ່ງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "weight": {
+     "type": "number",
+     "description": "ນ້ຳໜັກເປັນກິໂລ"
+    },
+    "destination": {
+     "type": "string",
+     "description": "ປາຍທາງ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parcel_lost_report",
+  "title": "ແຈ້ງພັດສະດຸເສຍ",
+  "description": "ແຈ້ງວ່າພັດສະດຸເສຍ ຫຼື ເປ່ເພ ແລະ ເລີ່ມການຊົດເຊີຍ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "damage": {
+     "type": "string",
+     "description": "ລັກສະນະຄວາມເສຍຫາຍ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "letter_register",
+  "title": "ຈົດໝາຍລົງທະບຽນ",
+  "description": "ຮັບຈົດໝາຍລົງທະບຽນ ທີ່ຜູ້ຮັບຕ້ອງເຊັນຮັບ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sender_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "address": {
+     "type": "string",
+     "description": "ທີ່ຢູ່ຜູ້ຮັບ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "letters_list",
+  "title": "ລາຍການຈົດໝາຍລົງທະບຽນ",
+  "description": "ສະແດງຈົດໝາຍລົງທະບຽນທີ່ຍັງລໍຖ້າຜູ້ຮັບມາເອົາ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "box_rent",
+  "title": "ເຊົ່າຕູ້ໄປສະນີ",
+  "description": "ໃຫ້ລູກຄ້າເຊົ່າຕູ້ໄປສະນີທີ່ສາຂາເປັນປີ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "size": {
+     "type": "string",
+     "description": "ຂະໜາດຕູ້"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "box_renew",
+  "title": "ຕໍ່ສັນຍາຕູ້ໄປສະນີ",
+  "description": "ຕໍ່ອາຍຸການເຊົ່າຕູ້ໄປສະນີອີກໜຶ່ງປີ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "box_id": {
+     "type": "string",
+     "description": "ເລກຕູ້ໄປສະນີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "box_close",
+  "title": "ຍົກເລີກຕູ້ໄປສະນີ",
+  "description": "ຍົກເລີກການເຊົ່າຕູ້ໄປສະນີ ແລະ ເອົາກະແຈຄືນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "box_id": {
+     "type": "string",
+     "description": "ເລກຕູ້ໄປສະນີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "boxes_list",
+  "title": "ຕູ້ໄປສະນີ",
+  "description": "ສະແດງຕູ້ໄປສະນີຂອງສາຂາ ຕູ້ທີ່ວ່າງ ແລະ ຕູ້ທີ່ໃກ້ໝົດສັນຍາ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transfer_send",
+  "title": "ໂອນເງິນ",
+  "description": "ຮັບເງິນຈາກລູກຄ້າ ເພື່ອໂອນໄປໃຫ້ຜູ້ຮັບຢູ່ສາຂາອື່ນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sender_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ຈຳນວນເງິນ"
+    },
+    "receiver": {
+     "type": "string",
+     "description": "ຊື່ຜູ້ຮັບ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transfer_cancel",
+  "title": "ຍົກເລີກການໂອນເງິນ",
+  "description": "ຍົກເລີກການໂອນເງິນທີ່ຜູ້ຮັບຍັງບໍ່ທັນມາເອົາ ແລະ ຄືນເງິນໃຫ້ຜູ້ສົ່ງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "transfer_id": {
+     "type": "string",
+     "description": "ເລກການໂອນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "transfer_payout",
+  "title": "ຈ່າຍເງິນໂອນ",
+  "description": "ຈ່າຍເງິນທີ່ໂອນມາໃຫ້ຜູ້ຮັບ ເມື່ອລາວສະແດງບັດປະຈຳຕົວ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "transfer_id": {
+     "type": "string",
+     "description": "ເລກການໂອນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transfers_list",
+  "title": "ລາຍການໂອນເງິນ",
+  "description": "ສະແດງການໂອນເງິນຂອງມື້ ທັງທີ່ຈ່າຍແລ້ວ ແລະ ທີ່ຍັງລໍຖ້າ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "ວັນທີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "stamps_sell",
+  "title": "ຂາຍສະແຕມ",
+  "description": "ຂາຍສະແຕມ ແລະ ຊອງຈົດໝາຍທີ່ເຄົາເຕີ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quantity": {
+     "type": "number",
+     "description": "ຈຳນວນ"
+    },
+    "value": {
+     "type": "number",
+     "description": "ລາຄາສະແຕມ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "stamps_stock",
+  "title": "ສະແຕມທີ່ເຫຼືອ",
+  "description": "ບອກວ່າສະແຕມແຕ່ລະລາຄາເຫຼືອຢູ່ຈັກດວງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prices_list",
+  "title": "ອັດຕາຄ່າບໍລິການ",
+  "description": "ສະແດງອັດຕາຄ່າສົ່ງຈົດໝາຍ ແລະ ພັດສະດຸ ພາຍໃນ ແລະ ຕ່າງປະເທດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_get",
+  "title": "ຂໍ້ມູນລູກຄ້າ",
+  "description": "ສະແດງຂໍ້ມູນຂອງລູກຄ້າ: ຊື່, ເບີໂທ, ທີ່ຢູ່ ແລະ ຕູ້ໄປສະນີ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_create",
+  "title": "ລູກຄ້າໃໝ່",
+  "description": "ສ້າງລູກຄ້າໃໝ່ ພ້ອມຊື່, ເບີໂທ ແລະ ທີ່ຢູ່.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "ຊື່"
+    },
+    "phone": {
+     "type": "string",
+     "description": "ເບີໂທ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customer_update",
+  "title": "ແກ້ໄຂຂໍ້ມູນລູກຄ້າ",
+  "description": "ແກ້ໄຂເບີໂທ ຫຼື ທີ່ຢູ່ຂອງລູກຄ້າ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "phone": {
+     "type": "string",
+     "description": "ເບີໂທ"
+    },
+    "address": {
+     "type": "string",
+     "description": "ທີ່ຢູ່"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_open",
+  "title": "ຮັບຄຳຮ້ອງທຸກ",
+  "description": "ບັນທຶກຄຳຮ້ອງທຸກຂອງລູກຄ້າ ກ່ຽວກັບການບໍລິການ ຫຼື ພັດສະດຸ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "text": {
+     "type": "string",
+     "description": "ເນື້ອໃນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_close",
+  "title": "ປິດຄຳຮ້ອງທຸກ",
+  "description": "ປິດຄຳຮ້ອງທຸກທີ່ແກ້ໄຂແລ້ວ ພ້ອມຄຳຕອບ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "ເລກຄຳຮ້ອງທຸກ"
+    },
+    "answer": {
+     "type": "string",
+     "description": "ຄຳຕອບ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaints_list",
+  "title": "ຄຳຮ້ອງທຸກ",
+  "description": "ສະແດງຄຳຮ້ອງທຸກທີ່ຍັງເປີດຢູ່.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customs_declare",
+  "title": "ແຈ້ງພາສີ",
+  "description": "ອອກໃບແຈ້ງພາສີສຳລັບພັດສະດຸທີ່ສົ່ງໄປຕ່າງປະເທດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "contents": {
+     "type": "string",
+     "description": "ສິ່ງຂອງໃນພັດສະດຸ"
+    },
+    "value": {
+     "type": "number",
+     "description": "ຈຳນວນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "customs_pay",
+  "title": "ຈ່າຍພາສີ",
+  "description": "ຮັບເງິນພາສີຂາເຂົ້າ ຂອງພັດສະດຸທີ່ມາຈາກຕ່າງປະເທດ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parcel_id": {
+     "type": "string",
+     "description": "ເລກພັດສະດຸ"
+    },
+    "amount": {
+     "type": "number",
+     "description": "ຈຳນວນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "routes_list",
+  "title": "ເສັ້ນທາງສົ່ງ",
+  "description": "ສະແດງເສັ້ນທາງລົດສົ່ງພັດສະດຸ ແລະ ບ້ານທີ່ແຕ່ລະເສັ້ນຜ່ານ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "route_assign",
+  "title": "ມອບໝາຍເສັ້ນທາງ",
+  "description": "ມອບເສັ້ນທາງສົ່ງໃຫ້ຄົນຂັບລົດ ຫຼື ຄົນຂີ່ລົດຈັກ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route": {
+     "type": "string",
+     "description": "ເສັ້ນທາງ"
+    },
+    "driver": {
+     "type": "string",
+     "description": "ຄົນຂັບ"
+    },
+    "day": {
+     "type": "string",
+     "description": "ວັນທີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "staff_list",
+  "title": "ພະນັກງານ",
+  "description": "ສະແດງພະນັກງານຂອງສາຂາ ແລະ ໜ້າທີ່ຂອງແຕ່ລະຄົນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shift_assign",
+  "title": "ຈັດເວນເຮັດວຽກ",
+  "description": "ຈັດພະນັກງານເຂົ້າເວນທີ່ເຄົາເຕີ ຫຼື ໃນສາງ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "employee": {
+     "type": "string",
+     "description": "ພະນັກງານ"
+    },
+    "day": {
+     "type": "string",
+     "description": "ວັນທີ"
+    },
+    "post": {
+     "type": "string",
+     "description": "ບ່ອນເຮັດວຽກ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "counter_open",
+  "title": "ເປີດເຄົາເຕີ",
+  "description": "ເປີດເຄົາເຕີໃນຕອນເຊົ້າ ພ້ອມເງິນທອນເລີ່ມຕົ້ນ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "counter": {
+     "type": "string",
+     "description": "ເຄົາເຕີ"
+    },
+    "float_amount": {
+     "type": "number",
+     "description": "ຈຳນວນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "counter_close",
+  "title": "ປິດເຄົາເຕີ",
+  "description": "ປິດເຄົາເຕີໃນຕອນແລງ ແລະ ນັບເງິນສົດໃນລິ້ນຊັກ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "counter": {
+     "type": "string",
+     "description": "ເຄົາເຕີ"
+    },
+    "cash": {
+     "type": "number",
+     "description": "ຈຳນວນເງິນ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cash_report",
+  "title": "ລາຍງານເງິນສົດ",
+  "description": "ສະຫຼຸບເງິນສົດທີ່ຮັບ ແລະ ຈ່າຍໃນມື້ ແຍກຕາມບໍລິການ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "ວັນທີ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hours_set",
+  "title": "ເວລາເປີດປິດ",
+  "description": "ກຳນົດເວລາເປີດ ແລະ ປິດຂອງສາຂາ ລວມທັງວັນພັກ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "ວັນທີ"
+    },
+    "opens": {
+     "type": "string",
+     "description": "ເວລາເປີດ"
+    },
+    "closes": {
+     "type": "string",
+     "description": "ເວລາປິດ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notice_send",
+  "title": "ແຈ້ງລູກຄ້າ",
+  "description": "ສົ່ງຂໍ້ຄວາມ SMS ບອກລູກຄ້າວ່າພັດສະດຸມາຮອດແລ້ວ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "customer_id": {
+     "type": "string",
+     "description": "ລະຫັດລູກຄ້າ"
+    },
+    "text": {
+     "type": "string",
+     "description": "ຂໍ້ຄວາມ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

@@ -45,8 +45,11 @@ The benchmark says where the search still misses, in
   requests in capitals (an archaeological museum) and a Polish one, typed
   with and without its letters (a city bike rental) and a second large
   English one, with 150 tools that are mostly neighbours (an airline
-  operations centre) are in. Lao, written the
-  same way as Thai, is not measured yet.
+  operations centre) and a Ukrainian one, the second in Cyrillic (a city
+  theatre) and a Hebrew one, whose particles start its words (a marina)
+  and a Lao one, cut into pairs of clusters as Thai is (a post office)
+  and one generated from an OpenAPI description, with a method and a path
+  for names and no titles (a fleet of field sensors) are in.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension
@@ -57,11 +60,14 @@ A change to the search comes with the benchmark before and after.
 ## Hosts
 
 - Examples on other hosts, beside the servers written by hand over stdio and
-  HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications
-  and the four on the official PHP SDK in
+  HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications,
+  the server written with laravel/mcp and the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
-  what was missed. They decide what the search learns next.
+  what was missed, as a `SearchLog` keeps it
+  ([docs/SEARCH.md](docs/SEARCH.md#log)) and as
+  `docs/examples/search-log-report.php` reads it. They decide what the
+  search learns next.
 
 ## Tests
 

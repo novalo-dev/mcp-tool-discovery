@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 883 times
-out of 1149 in fields, and 628 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1037 times
+out of 1352 in fields, and 756 times as one sentence.
 
 ## How a tool is scored
 
@@ -108,7 +108,7 @@ still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修
 when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
 synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
 
-**Thai and Burmese are cut into pairs of what is seen.** Thai is written
+**Thai, Lao and Burmese are cut into pairs of what is seen.** Thai is written
 without spaces too, but its vowels and tone marks are marks, so a pair of code points would
 hold a consonant and the vowel it carries, a fragment that means nothing. A
 run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
@@ -122,8 +122,10 @@ is found as many tools first, returned more, and learning lost one more
 request. Burmese, measured on the rice mill (below), is cut as Thai is:
 on its train half, pairs kept beside the run found 45 of 50 tools first
 against 43, and 39 as one sentence against 36, with fewer tools returned
-(1.9 against 2.0); pairs alone found 44. Lao is not measured on the
-benchmark yet, so it is read as before.
+(1.9 against 2.0); pairs alone found 44. Lao, measured on the post office
+(below), is cut as Thai is too: on its train half, pairs kept beside the run
+found 47 of 52 tools first against 42; pairs alone found 47 as well, but
+learning from the other half then lost two.
 
 **A Korean word is cut into pairs.** Korean puts spaces between words, but
 glues to each word the particles that mark its role: "레슨을 취소해 줘"
@@ -226,7 +228,13 @@ every mode learns the same way and none can skip the checks:
 Next time, a tool is lifted by the share of the request's pairs of words that
 led to it (its single word, for a request of one word), each pair counting
 fully after `learningCap` (5) runs, by at most `learningWeight` (0.75) of the
-best score.
+best score. That share is then multiplied by the share of the request's
+pairs that reached the tool at all: a request that agrees with a learned
+one on one pair of three lifts its tool a ninth as much as the same request
+asked again, which keeps every pair. Neighbours share pairs without the
+verb: "add a site address", run once, lifted the tool that creates a site
+before the one that changes an address for "change a site address", with
+the plain mean of the pairs.
 
 Pairs, not single words, because of servers with many tools about the same
 thing. Word by word, "get the certificate" run once taught "certificate" to
@@ -240,7 +248,7 @@ of a request are taken from its first 16 words in alphabetical order, so a
 long request costs at most 120 keys.
 
 Two pairs of characters of one word are not a pair. Japanese, Chinese,
-Korean, Thai and Burmese are cut into pairs of characters (above), so one word of a
+Korean, Thai, Lao and Burmese are cut into pairs of characters (above), so one word of a
 request gives several terms: "飼い主" (owner) gives "飼い" and "い主". Paired
 with each other, they only said the object again, and a search for an
 owner's address then lifted that tool for every request about an owner. When
@@ -305,9 +313,103 @@ locked while it is written.
 
 ---
 
+## Log
+
+What the benchmark cannot say is what a host's own clients ask. A `SearchLog`
+in the `SearchSetup` is told each search a mode runs, with its answer, and
+each run of a tool after it:
+
+```php
+use Novalo\McpToolDiscovery\Search\SearchLog;
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\SearchResult;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Tool\Tool;
+
+final class JsonLinesLog implements SearchLog
+{
+    public function __construct(private readonly string $file) {}
+
+    public function searched(SearchQuery $query, SearchResult $result): void
+    {
+        $this->write(['search' => $result->searchId, 'fields' => $query->fields(), 'found' => array_map(static fn(Tool $tool): string => $tool->name, $result->tools), 'unmatched' => $result->unmatched]);
+    }
+
+    public function ran(Tool $tool, bool $succeeded, ?string $searchId): void
+    {
+        $this->write(['search' => $searchId, 'ran' => $tool->name, 'succeeded' => $succeeded]);
+    }
+
+    /**
+     * @param array<string, mixed> $line
+     */
+    private function write(array $line): void
+    {
+        file_put_contents($this->file, json_encode($line) . "\n", FILE_APPEND | LOCK_EX);
+    }
+}
+
+new SearchSetup(log: new JsonLinesLog($logFile));
+```
+
+- **A search and its run share an id.** With a log, a mode hands out a
+  `search_id` even when nothing is learned, and the run that carries it back
+  is logged with it: a search whose first tool is not the one that ran, or
+  that found nothing, is a miss to read.
+- **Only what the caller may see.** A run is logged once the host's gate has
+  shown and authorized the tool, never before, and a search only ever holds
+  the visible tools. A `search_id` the client sends back is passed on only
+  if a search could have written it: base64url, 2048 characters at most;
+  otherwise the run is logged with none.
+- **The host keeps it.** The library writes nothing. The words of a request
+  can hold what a person wrote, so what is kept, where and for how long is
+  the host's choice. Both calls are made during the client's request: keep
+  them cheap, and do not throw, as an exception fails the call.
+
+Read together, the lines show the words to add to the host's synonyms, the
+titles to write again, and the requests worth adding to the benchmark.
+
+The stdio example keeps such a log when `MCP_NOTES_SEARCH_LOG` names a file
+(`NotesSearchLog`, in [examples/notes.php](examples/notes.php)). A search for
+"open a note" by a reader, then the note read with its `search_id`:
+
+```
+{"at":"2026-11-23T09:26:36Z","search":"YSBub3Rl","fields":{"text":"open a note"},"found":["notes_add","notes_get"],"unmatched":["open"]}
+{"at":"2026-11-23T09:26:37Z","search":"YSBub3Rl","ran":"notes_get","succeeded":true}
+```
+
+The tool that ran is the second one found, and "open" is a word no tool
+uses: a synonym of "read" for this host.
+
+[examples/search-log-report.php](examples/search-log-report.php) reads such a
+log and prints those leads, most frequent first: the words no tool uses with
+the tools that ran after them, the runs of a tool the search did not put
+first, and the searches that found nothing. On the two lines above:
+
+```
+php docs/examples/search-log-report.php search.log
+1 searches, 1 runs (0 failed), 0 unreadable lines
+0 of 1 successful runs after a search ran the first tool found
+
+Words no tool uses, and what ran after them
+  open                    1  notes_get (1)
+
+Runs of a tool the search did not put first
+  notes_get            2nd           1  text: open a note
+
+Searches that found nothing
+  (none)
+```
+
+A failed run is counted but ranks nothing, since it says more about its
+arguments than about the search, and a line cut short is counted and
+skipped.
+
+---
+
 ## The measures
 
-Seventeen fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-four fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -320,23 +422,43 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 (40 tools, `court_book`), a music school written in Korean (40 tools,
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
 `estimate_send`), the front desk of a hotel written in Russian (40 tools,
-`BOOKING_CHANGE_DATES`), a veterinary clinic written in Japanese (40
+`BOOKING_CHANGE_DATES`), a city theatre written in Ukrainian (40 tools,
+`performance_move`), a marina written in Hebrew (40 tools,
+`Berth-Extend`), a veterinary clinic written in Japanese (40
 tools, `appointment_move`) a water supply office written in Khmer (40
-tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
+tools, `outage_schedule`), a post office written in Lao (40 tools,
+`parcel_redirect`), a rice mill written in Burmese (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
-`bike_unlock`) and an airline operations centre (150 tools,
-`flight.change-aircraft`). 2297 requests, each written as one
+`bike_unlock`), an airline operations centre (150 tools,
+`flight.change-aircraft`) and a fleet of field sensors generated from
+OpenAPI (40 tools, `post_devices_device_id_reboot`). 2697 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1149 requests | Right tool first | Top 3 |
+| Test half, 1352 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 883 | 1023 |
-| The same request as one sentence | 628 | 825 |
-| In fields, after every train request was run once | 884 | 1023 |
-| In fields, after the test requests were run once, then asked again | 961 | 1060 |
+| The request in fields | 1037 | 1207 |
+| The same request as one sentence | 756 | 985 |
+| In fields, after every train request was run once | 1038 | 1207 |
+| In fields, after the test requests were run once, then asked again | 1134 | 1253 |
+
+The same requests ranked by the search of laravel/mcp, Laravel's official MCP
+package, which a PHP host may already have: a substring score on the name,
+the description and the input schema, with no title, no index and no
+learning (`tests/Fixtures/SubstringSearch.php`). It takes one string, so the
+fields are joined into one:
+
+| The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
+|---|---|---|
+| The request as one sentence | 408 | 622 |
+| The fields joined into one sentence | 764 | 979 |
+
+As one sentence it trails on each of the twenty-four servers, the English ones
+included, and finds nothing first on the Chinese and Japanese ones: it cuts
+words at spaces, which those languages do not write. The test that guards
+the floors also checks that the library stays ahead on both lines.
 
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
@@ -588,6 +710,77 @@ finds the upgrade) and words its tools do not use ("reservation" for a
 booking, "luggage" for a bag, "plane" for an aircraft), where trigrams then
 meet the wrong word ("reservation" lands on "reserve" and "service").
 
+The city theatre is the second server written in Cyrillic, in Ukrainian,
+whose words change their endings as Russian ones do and some carry an
+apostrophe inside (прем'єра, сім'я) that cuts them in two. Most of its 40
+tools are neighbours on one object (schedule, move and cancel a
+performance; book a seat, release a booking, sell, refund and exchange a
+ticket; hire, dismiss and cast an actor). Its 100 requests were written
+before any of them was run and split as the airline's. Nothing was tuned on
+it: 40 of its 51 test requests find the right tool first in fields, 46 in
+the top 3, 37 as one sentence; learned from its train half, 40; asked
+again, 44. Its train half also scores 40 of 49 in fields. What it misses is
+neighbours again ("find" a booking by name finds the tool that releases
+one, "take on" an actor finds the list of the company, ending an actor's
+contract finds the hiring, whose contract field shares the word) and a
+word a neighbour owns ("розклад", a schedule, of the performances finds the
+schedule of the rehearsals).
+
+The marina is written in Hebrew, which glues its particles to the start of
+a word ("במרינה", in the marina; "לסירה", to the boat; "מהמים", from the
+water) where every other server changes the end. Its names are an object
+and an action in Train-Case (`Berth-Reserve`), a style no other server
+uses, and most of its 40 tools are neighbours (reserve, release, extend and
+move a berth; open and close a repair; close and reopen the harbour). Its
+100 requests were written before any of them was run and split as the
+airline's. Nothing was tuned on it: 40 of its 50 test requests find the
+right tool first in fields, 46 in the top 3, 37 as one sentence; learned
+from its train half, 40; asked again, 42. Its train half also scores 40 of
+50 in fields, but 28 as one sentence. The particles cost little: a word
+with one keeps most of its trigrams, so it is already alike the bare word,
+and taking a word that ends with a tool word for that word, tried on the
+train half, moved nothing in fields. What it misses is neighbours ("end"
+a contract finds its renewal, "finish" a repair finds its opening) and
+words the tools do not use ("יאכטה", a yacht, for a boat).
+
+The post office is written in Lao, behind snake_case names: as Thai, with
+no space between words, a space between phrases, and vowels and tone marks
+written as marks around a consonant ("ພັດສະດຸ", a parcel). Most of its 40
+tools are neighbours on one object (send, track, hold, return and redirect
+a parcel; send, cancel and pay out a money transfer; rent, renew and close
+a post office box; open and close a complaint or a counter). Its 100
+requests were written before any of them was run and split as the
+airline's, 52 in train and 48 in test. Its train half chose one thing, how
+Lao is cut (above); no weight or cut changed for it. On its test half, read
+by its trigrams as before, 33 of 48 requests found the right tool first in
+fields and 43 in the top 3, with 2.48 tools returned, 26 as one sentence,
+and 37 asked again. Cut into pairs of clusters, 35 come first and 44 in the
+top 3, with 2.40 tools returned; 25 as one sentence (35 in the top 3
+against 33), learning from the train half loses nothing (35 and 44), and 41
+come first asked again. What it misses is mostly neighbours of one object
+(closing a box finds the list of boxes, asking for a new one finds the
+tool that creates a customer) and
+words the tools do not use ("ເຄື່ອງ", goods, or "ກ່ອງ", a box, where the
+tools write "ພັດສະດຸ", a parcel).
+
+The fleet of field sensors is exposed as many real servers are: its 40
+tools were generated from an OpenAPI description. Each name is the method
+and the path (`get_devices_device_id`, `post_devices_device_id_reboot`), no
+tool has a title, each description is the summary of the operation, its
+longer text and the method and path, and every list takes the same `page`
+and `per_page`. Most tools are neighbours on one object (list, get, create,
+update and delete a device; reboot, calibrate, read it, update its
+firmware). Its 100 requests were written before any of them was run and
+split as the airline's, 46 in train and 54 in test. Nothing was tuned on
+it: 39 of its 54 test requests find the right tool first in fields, 48 in
+the top 3, 29 as one sentence; asked again, 46. Taking the first line of a
+multi-line description as the title of a tool that has none, tried on its
+train half, found one more request in fields and lost two to three as one
+sentence: it was not kept. Learning from its train half, with the plain
+mean of the pairs, lost 3 first places, all neighbours ("change a site
+address" found the creation of a site, learned from "add a site address");
+scaled by the share of pairs that reached the tool (above), it loses none.
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
 Learning by pairs of words, measured before the town hall came in, loses
@@ -626,6 +819,14 @@ kind is what `vocabulary` and the host's synonyms are for.
   (862 to 854) while the test half gains 5 (762 to 767), and a lift scaled
   by the share of the request's pairs ever learned won 5 on the folds and
   lost 4 on test. A setting of learning waits for servers split as above.
+  The share of the pairs that reached each tool, which is not that one, was
+  chosen on two folds of the whole train half, all servers together: the
+  plain mean lost 8 first places there (1138 to 1130), the share 3 (to
+  1135), and on test it turned a loss of 2 into a gain of 1 (1035 and 1038
+  against 1037), the requests asked again unchanged (1134). Squaring the
+  share (1135) and keeping only the pairs of the action field (1133; 1136
+  with the share) were measured on the same folds and not kept: no better,
+  or one request for a rule that ties learning to one field.
 - Give the numbers before and after in the pull request, and update this page
   and the README: `BenchmarkTest` fails until their tables, and the sentence
   that sums the fields up, give the scores the benchmark measures.

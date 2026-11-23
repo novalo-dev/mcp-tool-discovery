@@ -135,7 +135,8 @@ written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [
 complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
 HTTP server kept up in one ReactPHP process, the same as a Symfony application
-and as a Laravel one, and four on the official PHP SDK: over stdio and over
+and as a Laravel one, a server written with laravel/mcp whose `tools/list`
+and `tools/call` the library answers, and four on the official PHP SDK: over stdio and over
 its HTTP transport, and two with their tools left in the SDK's registry,
 added by hand or found by their attribute.
 
@@ -215,7 +216,8 @@ $mode = new CompactMode(
 
 An MCP prompt that names tools should tell the client they are not in its
 list: `$mode->guideHeader($toolNames, $visible)` returns the block to put at
-the top of the prompt text.
+the top of the prompt text. A pinned tool the prompt names gets a line of
+its own, to be called directly.
 
 ### Grouped
 
@@ -294,7 +296,7 @@ client gives its request **in fields**, and each field is scored on its own:
   tool, each with its weight. A rare word counts more than a common one, so a
   prefix or a verb every tool shares weighs almost nothing.
 - **Whole words and trigrams**, so `statuses` meets `status` and `categories`
-  meets `category` without a stemmer. Chinese, Japanese, Thai and Burmese,
+  meets `category` without a stemmer. Chinese, Japanese, Thai, Lao and Burmese,
   written without spaces, are cut into pairs of characters, with no dictionary, and
   so is each Korean word, which carries its particles.
 - **No list, no convention.** No stop words, no table of verbs, no prefix
@@ -309,8 +311,11 @@ client gives its request **in fields**, and each field is scored on its own:
   with it lifts that tool for those pairs of words, within a cap. Only words
   the tools use are kept: a word written another way is kept as the tool
   word closest to it.
+- **A log, opt in.** A `SearchLog` is told each search and each run after
+  it, under one id, so a host sees what its clients asked and missed. The
+  library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-2297 requests over twenty fictional servers, a workspace (snake_case), a
+2697 requests over twenty-four fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -319,20 +324,34 @@ no title and long descriptions, as many real servers write them, the
 office of a residential estate written in Chinese, a bus depot written
 in Hindi, a sports centre written in Thai, a music school written in
 Korean, a car repair workshop written in Arabic, the front desk of a
-hotel written in Russian (SCREAMING_SNAKE_CASE), a veterinary clinic
-written in Japanese, a water supply office written in Khmer, a rice
+hotel written in Russian (SCREAMING_SNAKE_CASE), a city theatre written
+in Ukrainian, a marina written in Hebrew (Train-Case), a veterinary clinic
+written in Japanese, a water supply office written in Khmer, a post
+office written in Lao, a rice
 mill written in Burmese, an archaeological museum written in Greek, a
-city bike rental written in Polish and an airline operations centre with
-150 tools, many of them neighbours.
+city bike rental written in Polish, an airline operations centre with
+150 tools, many of them neighbours, and a fleet of field sensors whose
+tools were generated from an OpenAPI description.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1149 requests | Right tool first | Right tool in the top 3 |
+| Test half, 1352 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **883** | **1023** |
-| The same request as one sentence | 628 | 825 |
-| In fields, after learning from the other half | 884 | 1023 |
-| In fields, asked a second time | 961 | 1060 |
+| The request in fields | **1037** | **1207** |
+| The same request as one sentence | 756 | 985 |
+| In fields, after learning from the other half | 1038 | 1207 |
+| In fields, asked a second time | 1134 | 1253 |
+
+The same requests ranked by the search of laravel/mcp, Laravel's official MCP
+package, which a PHP host may already have: a substring score on the name,
+the description and the input schema, with no title, no index and no
+learning (`tests/Fixtures/SubstringSearch.php`). It takes one string, so the
+fields are joined into one:
+
+| The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
+|---|---|---|
+| The request as one sentence | 408 | 622 |
+| The fields joined into one sentence | 764 | 979 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
@@ -363,7 +382,7 @@ explains.
 | Document | For |
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | the layers, the flow of a call, the protocol revisions |
-| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application, a Laravel application and the official PHP SDK, over stdio or HTTP, with tools outside or inside its registry |
+| [docs/HOSTS.md](docs/HOSTS.md) | wiring the library into a server, with complete examples over stdio, HTTP, a ReactPHP process that stays up, a Symfony application, a Laravel application, laravel/mcp and the official PHP SDK, over stdio or HTTP, with tools outside or inside its registry |
 | [docs/MODES.md](docs/MODES.md) | choosing a mode, what each costs, how a mode works, writing one |
 | [docs/SEARCH.md](docs/SEARCH.md) | the ranking, the benchmark, tuning |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | setup, branches, checks, pull requests |

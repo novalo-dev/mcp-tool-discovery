@@ -23,18 +23,21 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * Given once to Discovery, not to a mode: a server that changes modes keeps
  * its settings, its cache and what it learned, and a mode never has to wire
  * them itself. The cache and the learning store are both optional; without
- * them the index is built per request and nothing is learned.
+ * them the index is built per request and nothing is learned. So is the
+ * log, which tells the host what its clients searched.
  */
 final class SearchSetup
 {
     /**
      * @param IndexCache|null $cache keeps the index between requests
      * @param LearningStore|null $learning learns which tool answered which words; none by default
+     * @param SearchLog|null $log is told each search and each run after it; none by default
      */
     public function __construct(
         public readonly SearchOptions $options = new SearchOptions(),
         public readonly ?IndexCache $cache = null,
         public readonly ?LearningStore $learning = null,
+        public readonly ?SearchLog $log = null,
     ) {}
 
     /**

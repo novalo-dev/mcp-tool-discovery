@@ -13,17 +13,25 @@ declare(strict_types=1);
 
 /*
  * What the example servers share: the notes tools, where the notes are kept,
- * and the gate. Only the transport differs between
- * docs/examples/stdio-server.php, docs/examples/http-server.php,
- * docs/examples/react/server.php, docs/examples/symfony, docs/examples/laravel
- * and docs/examples/sdk, which is the part a host writes itself or
- * takes from an SDK or a framework.
+ * the gate, and a log of what the clients searched. Only the transport
+ * differs between docs/examples/stdio-server.php,
+ * docs/examples/http-server.php, docs/examples/react/server.php,
+ * docs/examples/symfony, docs/examples/laravel and docs/examples/sdk, which
+ * is the part a host writes itself or takes from an SDK or a framework.
  */
 
 namespace Example\Notes;
 
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+use Novalo\McpToolDiscovery\Search\SearchLog;
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\SearchResult;
 use Novalo\McpToolDiscovery\Tool\Tool;
 
 /**
@@ -64,6 +72,31 @@ function definitions(): array
             'annotations' => ['destructiveHint' => true],
         ],
     ];
+}
+
+/**
+ * The mode the servers show their tools in, by the name MCP_NOTES_MODE gives.
+ * Four tools would fit in a list on their own; compact is the default because
+ * it is the one a large server uses, and the other three are here so each can
+ * be tried on a real client with the same tools and the same gate.
+ */
+function mode(string|false $name): DiscoveryMode
+{
+    return match ($name) {
+        // Every tool as itself: a role granted moves the list.
+        'direct' => new DirectMode(),
+        // One group holds the four tools: "notes" runs and describes the
+        // reads, "notes_change" the changes, and its actions are the changes
+        // the caller may see, so an admin's list names the deletion.
+        'grouped' => new GroupedMode(
+            groupOf: static fn(Tool $tool): string => 'notes',
+            groups: ['notes' => 'Notes'],
+        ),
+        // One tool that searches, describes and runs. Adding a note is a
+        // change every role may make, so it is marked destructive for all.
+        'gateway' => new GatewayMode(prefix: 'notes_'),
+        default => new CompactMode(prefix: 'notes_', batchLimit: 20),
+    };
 }
 
 /**
@@ -230,5 +263,51 @@ final class NotesTools
         }
 
         return CallResult::error('Unknown tool.');
+    }
+}
+
+/**
+ * What the clients searched and ran after, one JSON object per line, so the
+ * misses can be read with any tool that reads lines: a search whose found
+ * list is empty, the words left unmatched, a run whose tool is not the first
+ * one its search found.
+ *
+ * Kept only when the host names a file: the words of a request may hold
+ * what a person wrote, so a server keeps them only where it chose to. No
+ * caller is written, only what was asked and what ran.
+ */
+final class NotesSearchLog implements SearchLog
+{
+    public function __construct(private readonly string $file) {}
+
+    public function searched(SearchQuery $query, SearchResult $result): void
+    {
+        $this->write([
+            'search' => $result->searchId,
+            'fields' => $query->fields(),
+            'found' => array_map(static fn(Tool $tool): string => $tool->name, $result->tools),
+            'unmatched' => $result->unmatched,
+        ]);
+    }
+
+    public function ran(Tool $tool, bool $succeeded, ?string $searchId): void
+    {
+        $this->write(['search' => $searchId, 'ran' => $tool->name, 'succeeded' => $succeeded]);
+    }
+
+    /**
+     * @param array<string, mixed> $line
+     */
+    private function write(array $line): void
+    {
+        // The log is called during the client's request and an exception
+        // would fail it: a line that cannot be written is lost, the call is
+        // not, and a warning is silenced because over stdio PHP prints it on
+        // the output the client reads. LOCK_EX keeps the lines of two
+        // processes apart, as behind PHP-FPM.
+        $json = json_encode(['at' => gmdate('Y-m-d\TH:i:s\Z')] + $line, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE);
+        if ($json !== false) {
+            @file_put_contents($this->file, $json . "\n", FILE_APPEND | LOCK_EX);
+        }
     }
 }

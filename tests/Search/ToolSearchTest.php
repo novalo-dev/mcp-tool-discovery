@@ -120,6 +120,23 @@ final class ToolSearchTest extends TestCase
         self::assertSame('truck_book', $search->search('ဗုဒ္ဓဟူးနေ့ ကွင်းကြီးရွာကစပါးသယ်ဖို့ ကားငှားပါ')[0]->name ?? null);
     }
 
+    public function testLaoIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ຍົກ', 'ກເ', 'ເລີ', 'ລີກ', 'ຍົກເລີກ'], $analyzer->words('ຍົກເລີກ'), 'a vowel or a tone mark stays on its consonant, the run is kept');
+        self::assertSame(['ຍົກເລີກ'], $analyzer->tokens('ຍົກເລີກ'), 'the caller is shown the word it wrote');
+    }
+
+    public function testASentenceInLaoFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('post'));
+
+        // Both found another tool first while a run of Lao met tools by its trigrams only.
+        self::assertSame('parcel_track', $search->search('ພັດສະດຸຂອງຂ້ອຍຢູ່ໃສແລ້ວ')[0]->name ?? null);
+        self::assertSame('box_renew', $search->search('ຕູ້ຂອງຂ້ອຍໝົດອາຍຸເດືອນໜ້າ')[0]->name ?? null);
+    }
+
     public function testAKoreanWordIsCutInPairs(): void
     {
         $analyzer = new Analyzer();
@@ -238,6 +255,32 @@ final class ToolSearchTest extends TestCase
         self::assertSame(self::names($search->search('webhooks')), self::names($search->search($padded)), 'words far past the start are not read');
         $result = $search->find(SearchQuery::text('webhooks ' . str_repeat('é', 1000)));
         self::assertTrue(preg_match('//u', implode(' ', $result->unmatched)) === 1, 'the cut falls between two characters');
+    }
+
+    public function testWordsNoToolUsesCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words all begin alike, so every word of the
+        // request is alike thousands of indexed words.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $words[] = 'rec' . substr(md5($tool . '-' . $word), 0, 4);
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recx'));
+        $field = '';
+        for ($word = 0; $word < 146; ++$word) {
+            $field .= sprintf('rec%03d ', $word);
+        }
+
+        $start = microtime(true);
+        $result = $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertNotSame([], $result->tools);
+        self::assertLessThan(1.0, microtime(true) - $start, 'the words alike each unknown word are bounded');
     }
 
     public function testAHugeRequestCostsLittleMemory(): void
@@ -436,6 +479,22 @@ final class ToolSearchTest extends TestCase
         // assign one.
         self::assertSame(self::names((new ToolSearch($tools))->search($assign)), self::names((new ToolSearch($tools, learning: $store))->search($assign)));
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
+    }
+
+    public function testAPairSharedWithANeighbourBarelyMovesIt(): void
+    {
+        $tools = RecordingGate::server('sensors');
+        $store = new MemoryLearningStore();
+        $search = new ToolSearch($tools, learning: $store);
+        $search->learn((string) $search->find(new SearchQuery('add', 'site', 'address'))->searchId, 'post_sites');
+        $change = new SearchQuery('change', 'site', 'address');
+
+        // Adding a site and changing its address share "site address", one
+        // pair of three: the site that was added once must not take the
+        // place of the update, while the same request asked again finds it.
+        self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools))->search($change))[0]);
+        self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools, learning: $store))->search($change))[0]);
+        self::assertSame('post_sites', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('add', 'site', 'address')))[0]);
     }
 
     public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void

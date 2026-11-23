@@ -44,7 +44,7 @@ final class ToolIndex
      * changes, so an old cache entry is rebuilt rather than compared with
      * terms it never held.
      */
-    private const FORMAT = 9;
+    private const FORMAT = 10;
 
     /**
      * How alike a word the tools do not use and a word they do must be to be
@@ -60,6 +60,25 @@ final class ToolIndex
      * sentence they gain the most around 0.5 to 0.75.
      */
     private const ALIKE_WEIGHT = 0.5;
+
+    /**
+     * How many indexed words alike one query word are kept, the most alike
+     * first. Each is scored on its own, so without a bound the cost of a
+     * query grows with how many words of the index share a few trigrams,
+     * which a large host can hold by the thousand. No request of the
+     * benchmark meets more than 24.
+     */
+    private const MAX_ALIKE = 32;
+
+    /**
+     * How many words of one query no tool uses are looked up in full, the
+     * first ones written. Finding the words alike one visits every word of
+     * the index sharing a trigram with it, so a field of a thousand unknown
+     * words would cost a thousand of those visits; past this many, the
+     * words still count by their trigrams. No request of the benchmark
+     * holds more than 18.
+     */
+    private const MAX_UNKNOWN = 32;
 
     /**
      * The words of the index in index order, built the first time a query
@@ -191,10 +210,8 @@ final class ToolIndex
         // alike they are, so the tool that holds one is told from the tools
         // that only share pieces of it. Added to the trigrams, not in place
         // of them: alone they lost the requests a trigram still found.
-        foreach ($words as $word) {
-            if (isset($this->words[$word])) {
-                continue;
-            }
+        $unknown = array_slice(array_values(array_filter($words, fn(string $word): bool => !isset($this->words[$word]))), 0, self::MAX_UNKNOWN);
+        foreach ($unknown as $word) {
             foreach ($this->alike($word) as $alike => $dice) {
                 foreach ($this->bm25f([(string) $alike], $this->words) as $id => $score) {
                     $wordScores[$id] = ($wordScores[$id] ?? 0.0) + self::ALIKE_WEIGHT * $dice * $score;
@@ -285,21 +302,23 @@ final class ToolIndex
     {
         $nearest = null;
         $best = 0.0;
-        // alike() lists the words in index order, so the first of equals
-        // wins whatever order the trigrams visited them in.
-        foreach ($this->alike($word) as $alike => $dice) {
-            if ($dice > $best) {
-                $nearest = $alike;
+        // The lower position on a tie, whatever order the trigrams of the
+        // word visited them in. A pass rather than alike(): learning asks
+        // for every word a request leaves unmatched, and sorting what alike()
+        // sorts cost several times the pass on a large index.
+        foreach ($this->dices($word) as $position => $dice) {
+            if ($dice > $best || ($dice === $best && $nearest !== null && $position < $nearest)) {
+                $nearest = $position;
                 $best = $dice;
             }
         }
 
-        return $nearest === null ? null : (string) $nearest;
+        return $nearest === null ? null : $this->wordList[$nearest] ?? null;
     }
 
     /**
      * The indexed words alike a word, by the Dice coefficient of their
-     * trigrams, at least NEAREST, in index order.
+     * trigrams, at least NEAREST, the MAX_ALIKE most alike, in index order.
      *
      * Only the words sharing a trigram with it are visited, through the
      * inverted trigrams kept with the index: a word sharing none is not
@@ -308,6 +327,32 @@ final class ToolIndex
      * @return array<array-key, float> word => Dice coefficient; PHP keys a word such as "123" as an integer
      */
     private function alike(string $word): array
+    {
+        $dices = $this->dices($word);
+        ksort($dices);
+        if (count($dices) > self::MAX_ALIKE) {
+            // arsort is stable since PHP 8.0: among equals the first indexed
+            // stays, as in nearest().
+            arsort($dices);
+            $dices = array_slice($dices, 0, self::MAX_ALIKE, true);
+            ksort($dices);
+        }
+        $words = $this->wordList ?? [];
+        $alike = [];
+        foreach ($dices as $position => $dice) {
+            $alike[$words[$position]] = $dice;
+        }
+
+        return $alike;
+    }
+
+    /**
+     * The position of each indexed word sharing a trigram with a word, with
+     * its Dice coefficient, at least NEAREST, in no set order.
+     *
+     * @return array<int, float>
+     */
+    private function dices(string $word): array
     {
         $grams = array_unique(Analyzer::trigrams($word));
         if ($grams === []) {
@@ -320,17 +365,16 @@ final class ToolIndex
                 $shared[$position] = ($shared[$position] ?? 0) + 1;
             }
         }
-        ksort($shared);
         $this->wordList ??= array_map('strval', array_keys($this->words));
-        $alike = [];
+        $dices = [];
         foreach ($shared as $position => $count) {
             $dice = 2 * $count / (count($grams) + ($gramCounts[$position] ?? 0));
             if ($dice >= self::NEAREST && isset($this->wordList[$position])) {
-                $alike[$this->wordList[$position]] = $dice;
+                $dices[$position] = $dice;
             }
         }
 
-        return $alike;
+        return $dices;
     }
 
     /**

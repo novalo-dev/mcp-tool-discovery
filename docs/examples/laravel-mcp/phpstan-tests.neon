@@ -1,0 +1,11 @@
+parameters:
+    # The test of the laravel/mcp example, at the level of the other tests,
+    # read with Laravel installed in this directory and PHPUnit in the
+    # library's own vendor.
+    level: 6
+    phpVersion: 80300
+    paths:
+        - ../../../tests/LaravelMcp
+    bootstrapFiles:
+        - ../../../vendor/autoload.php
+        - vendor/autoload.php

@@ -42,6 +42,10 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,414 |
 | bikes | 40 | 12,966 | 2,871 | 1,839 | - | 994 |
 | ops | 150 | 50,720 | 2,871 | 1,839 | - | 1,015 |
+| theatre | 40 | 15,392 | 2,871 | 1,839 | - | 1,253 |
+| marina | 40 | 13,812 | 2,871 | 1,839 | - | 1,001 |
+| post | 40 | 17,780 | 2,871 | 1,839 | - | 1,232 |
+| sensors | 40 | 17,209 | 2,871 | 1,839 | - | 1,578 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
@@ -70,6 +74,11 @@ tools stay outside them, listed as themselves.
 - **Direct** lists every tool as itself, the first column. It suits a server
   with a few tools, where a search would cost more than it saves, and the
   host that lets its users turn the other modes off.
+
+To see each one on a client of your own before choosing, the example server
+over stdio takes the mode by name, on the same four tools:
+`MCP_NOTES_MODE=grouped php docs/examples/stdio-server.php`, or `gateway`,
+`direct`, or nothing for compact ([HOSTS.md](HOSTS.md#a-server-over-stdio)).
 
 ---
 
@@ -100,9 +109,10 @@ interface DiscoveryMode
   own call with `ToolRunner::isObject()`, the same rule: a JSON array decodes
   to a PHP array too.
 - A mode that searches calls `$runner->search()`, never a `ToolSearch` of its
-  own: the host's settings, cache and learning store come with it. A mode
-  that hands out a `search_id` passes it back to `$runner->run()`, which
-  learns only from a visible, authorized run that succeeded.
+  own: the host's settings, cache, learning store and log come with it. A
+  mode hands out a `search_id` when `$runner->followsSearches()` is true,
+  and passes it back to `$runner->run()`, which learns only from a visible,
+  authorized run that succeeded, and tells the host's log of the run.
 - Build your tool definitions with `Tool::fromArray()`, so they are validated,
   and let `Shaper` adapt them to each revision.
 
@@ -146,7 +156,9 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   batch, from the first item that succeeds.
 - `pinned` tools are listed as themselves, next to the three.
 - `guideHeader()` gives the block to put at the top of a prompt that names
-  tools, saying which runner each one goes through.
+  tools, saying which runner each one goes through, and which of them are
+  pinned and called directly. It is empty when the prompt names only tools
+  of the list.
 
 ## Grouped
 

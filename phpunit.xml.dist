@@ -42,6 +42,10 @@
         <testsuite name="laravel">
             <directory>tests/Laravel</directory>
         </testsuite>
+        <!-- Needs composer install in docs/examples/laravel-mcp; CI runs it in its own job. -->
+        <testsuite name="laravel-mcp">
+            <directory>tests/LaravelMcp</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

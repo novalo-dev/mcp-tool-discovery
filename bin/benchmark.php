@@ -13,15 +13,17 @@ declare(strict_types=1);
 
 
 /*
- * Prints the scores of the search benchmark and what each mode's list costs
- * on the same servers, and writes the shields.io endpoint file of the score
- * that counts, the requests in fields, into build/badges/.
+ * Prints the scores of the search benchmark, beside those of the search a
+ * host may already have, and what each mode's list costs on the same
+ * servers, and writes the shields.io endpoint file of the score that
+ * counts, the requests in fields, into build/badges/.
  */
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 use Novalo\McpToolDiscovery\Tests\Fixtures\Benchmark;
 use Novalo\McpToolDiscovery\Tests\Fixtures\ListCost;
+use Novalo\McpToolDiscovery\Tests\Fixtures\SubstringSearch;
 
 $labels = [
     'fields' => 'In fields, nothing learned',
@@ -33,6 +35,11 @@ $scores = Benchmark::run();
 echo "Test half, requests kept aside while the settings were chosen:\n";
 foreach ($labels as $key => $label) {
     printf("  %-46s first %3d/%d   top 3 %3d/%d\n", $label, $scores[$key]['first'], $scores[$key]['queries'], $scores[$key]['top3'], $scores[$key]['queries']);
+}
+$baseline = Benchmark::baseline();
+echo "\nThe same half, ranked as ", SubstringSearch::VERSION, " ranks:\n";
+foreach (['sentence' => 'The request as one sentence', 'fields' => 'The fields joined into one sentence'] as $key => $label) {
+    printf("  %-46s first %3d/%d   top 3 %3d/%d\n", $label, $baseline[$key]['first'], $baseline[$key]['queries'], $baseline[$key]['top3'], $baseline[$key]['queries']);
 }
 foreach ($scores['fields']['misses'] as $miss) {
     echo '  missed ', $miss, "\n";

@@ -42,8 +42,6 @@ use Mcp\Server\Session\FileSessionLock;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
-use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -52,6 +50,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
 use function Example\Notes\grantedRole;
+use function Example\Notes\mode;
 use function Example\Notes\roleOf;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -89,8 +88,9 @@ $notes = new Notes($data . '/notes.json');
 $search = new SearchSetup(cache: new FileIndexCache($data . '/index'));
 // Compact by default. In compact mode a change of rights moves no line of
 // the list, only what the search finds, so there would be nothing to send:
-// MCP_NOTES_MODE=direct lists every tool as itself, and the list moves.
-$mode = getenv('MCP_NOTES_MODE') === 'direct' ? new DirectMode() : new CompactMode(prefix: 'notes_', batchLimit: 20);
+// MCP_NOTES_MODE=direct lists every tool as itself, and the list moves;
+// grouped and gateway are the other two modes, on the same tools.
+$mode = mode(getenv('MCP_NOTES_MODE'));
 // One Discovery per caller, built with the rights the caller has now. The
 // cache is keyed by the tools a caller may see, so callers share it safely.
 // No learning store: it would be shared by every caller, which is a choice

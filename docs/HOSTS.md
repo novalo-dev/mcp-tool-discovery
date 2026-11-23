@@ -5,9 +5,11 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in four
-on the official PHP SDK. All nine serve the same notes tools, kept with their
-gate in [examples/notes.php](examples/notes.php): only the transport differs.
+on ReactPHP, in a Symfony application, in a Laravel application, in a server
+written with laravel/mcp, and in four on the official PHP SDK. All ten serve
+the same notes tools, kept with their gate in
+[examples/notes.php](examples/notes.php) (the laravel/mcp server writes them
+as its own tool classes): only the transport differs.
 Two of the SDK servers keep their tools outside the SDK, over stdio and over
 HTTP; the other two keep them in the SDK's own registry, added with
 `addTool()` or found by their `#[McpTool]` attribute.
@@ -26,12 +28,26 @@ library ([tests/Examples/StdioServerTest.php](../tests/Examples/StdioServerTest.
 php docs/examples/stdio-server.php
 MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
 MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php docs/examples/stdio-server.php
+MCP_NOTES_SEARCH_LOG=search.log php docs/examples/stdio-server.php
+MCP_NOTES_MODE=grouped php docs/examples/stdio-server.php
 ```
 
 The third reads the role again from `role.txt` at each message and lists
 every tool as itself: write `admin` in the file while a client is connected
 and the server sends `notifications/tools/list_changed`, as
-[When the tools change](#when-the-tools-change) describes.
+[When the tools change](#when-the-tools-change) describes. The fourth writes
+each search and each run after it as a line of `search.log`, as
+[the log](SEARCH.md#log) describes;
+`php docs/examples/search-log-report.php search.log` then prints its misses.
+The last shows the same tools in grouped mode: `MCP_NOTES_MODE` takes
+`compact` (the default), `direct`, `grouped` or `gateway`, chosen by
+`mode()` in `notes.php`, which the ReactPHP and SDK servers read too, so each
+mode can be tried on a real client with the same tools and the same gate. The
+tests hold the two that do not search to what [MODES.md](MODES.md) says: in
+grouped mode a role granted adds the deletion to `notes_change` and the client
+is told; in gateway mode the one tool stays as it was, already destructive
+since a reader may add a note, and a search marks the deletion with
+`"changes": true`.
 
 Its parts, in the order a host writes them:
 
@@ -41,7 +57,9 @@ Its parts, in the order a host writes them:
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony and Laravel examples reuse behind their own gates |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
+| The mode | `mode()`, in `notes.php`, from `MCP_NOTES_MODE` | one line a host writes once; compact unless the variable names another |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
+| The log | `NotesSearchLog`, in `notes.php`, when `MCP_NOTES_SEARCH_LOG` names a file | one JSON line per search (the fields the client filled, the tools found, the words no tool uses) and per run (the tool, whether it succeeded, the `search_id` of its search); nothing is kept unless a file is named |
 | A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |
 
 Everything else in the file is the host's: reading lines, answering `ping`,
@@ -224,6 +242,58 @@ A guard keeps the user it found. Octane forgets the guards after each
 request; a worker that keeps one application without Octane must call
 `forgetGuards()` on the auth manager after each request too, as the test
 does, or the next request that names no one is served as the last caller.
+
+---
+
+## A server written with laravel/mcp
+
+[examples/laravel-mcp](examples/laravel-mcp) is a server written as
+laravel/mcp, Laravel's official MCP package, documents one: a `Server` class
+with its list of `Tool` classes, routed by `Mcp::web()`. The library answers
+two of its methods and nothing else; the tools, the transports,
+`initialize` and every other method stay laravel/mcp's. The whole wiring is
+the `boot()` of [NotesServer](examples/laravel-mcp/app/NotesServer.php):
+
+```php
+final class NotesServer extends Server
+{
+    protected array $tools = [ListNotes::class, GetNote::class, AddNote::class, DeleteNote::class];
+
+    protected function boot(): void
+    {
+        $this->addMethod('tools/list', ListToolsMethod::class);
+        $this->addMethod('tools/call', CallToolMethod::class);
+    }
+}
+```
+
+Both methods extend [DiscoveryMethod](examples/laravel-mcp/app/DiscoveryMethod.php),
+which builds the Discovery of the request from what laravel/mcp's
+`ServerContext::tools()` keeps for it, and
+[ContextGate](examples/laravel-mcp/app/ContextGate.php) runs a tool the way
+laravel/mcp's own `tools/call` does. The tests send every request through the
+application's HTTP kernel, callers in turn
+([tests/LaravelMcp/LaravelMcpServerTest.php](../tests/LaravelMcp/LaravelMcpServerTest.php)).
+The example pins `laravel/framework` and `laravel/mcp` in
+[examples/laravel-mcp/composer.json](examples/laravel-mcp/composer.json), and
+a CI job installs them there and runs those tests.
+
+```
+cd docs/examples/laravel-mcp && composer install && cd -
+php -S 127.0.0.1:8080 docs/examples/laravel-mcp/public/app.php
+```
+
+| Part | In the server | Why |
+|---|---|---|
+| Who sees a tool | the tool's own `shouldRegister()`, as in [DeleteNote](examples/laravel-mcp/app/Tools/DeleteNote.php) | it is how laravel/mcp hides a tool; the library is only given what `ServerContext::tools()` keeps, so a hidden tool can be neither found nor run through a runner |
+| Running a tool | `ToolInvoker`, with `mcp.request` bound to the tool's own call for its time, as laravel/mcp's `ToolSearch` does | the tool's `Request`, its `validate()`, the container's injection and its error results behave as under laravel/mcp's `tools/call` |
+| What a call may carry | the tool's `handle()`, so `authorize()` lets every call through | laravel/mcp tools validate their arguments themselves and answer an error result |
+| The revision | `io.modelcontextprotocol/protocolVersion` of the request's `_meta` on 2026-07-28, else the `MCP-Protocol-Version` header, else 2025-03-26 over HTTP | laravel/mcp keeps no session; over stdio, where there is no header, the methods answer in the newest revision with a handshake |
+| Progress notifications | dropped | a tool run through a runner would stream them under a request the client did not send |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
+
+laravel/mcp also ships a `ToolSearch` of its own; the README compares the two
+searches on the same benchmark.
 
 ---
 
