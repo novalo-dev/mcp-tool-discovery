@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 998 times
-out of 1298 in fields, and 727 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1037 times
+out of 1352 in fields, and 756 times as one sentence.
 
 ## How a tool is scored
 
@@ -228,7 +228,13 @@ every mode learns the same way and none can skip the checks:
 Next time, a tool is lifted by the share of the request's pairs of words that
 led to it (its single word, for a request of one word), each pair counting
 fully after `learningCap` (5) runs, by at most `learningWeight` (0.75) of the
-best score.
+best score. That share is then multiplied by the share of the request's
+pairs that reached the tool at all: a request that agrees with a learned
+one on one pair of three lifts its tool a ninth as much as the same request
+asked again, which keeps every pair. Neighbours share pairs without the
+verb: "add a site address", run once, lifted the tool that creates a site
+before the one that changes an address for "change a site address", with
+the plain mean of the pairs.
 
 Pairs, not single words, because of servers with many tools about the same
 thing. Word by word, "get the certificate" run once taught "certificate" to
@@ -403,7 +409,7 @@ skipped.
 
 ## The measures
 
-Twenty-three fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-four fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -424,18 +430,19 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `parcel_redirect`), a rice mill written in Burmese (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
-`bike_unlock`) and an airline operations centre (150 tools,
-`flight.change-aircraft`). 2597 requests, each written as one
+`bike_unlock`), an airline operations centre (150 tools,
+`flight.change-aircraft`) and a fleet of field sensors generated from
+OpenAPI (40 tools, `post_devices_device_id_reboot`). 2697 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1298 requests | Right tool first | Top 3 |
+| Test half, 1352 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 998 | 1159 |
-| The same request as one sentence | 727 | 943 |
-| In fields, after every train request was run once | 999 | 1159 |
-| In fields, after the test requests were run once, then asked again | 1088 | 1201 |
+| The request in fields | 1037 | 1207 |
+| The same request as one sentence | 756 | 985 |
+| In fields, after every train request was run once | 1038 | 1207 |
+| In fields, after the test requests were run once, then asked again | 1134 | 1253 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -445,10 +452,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 385 | 592 |
-| The fields joined into one sentence | 726 | 934 |
+| The request as one sentence | 408 | 622 |
+| The fields joined into one sentence | 764 | 979 |
 
-As one sentence it trails on each of the twenty-three servers, the English ones
+As one sentence it trails on each of the twenty-four servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -756,6 +763,24 @@ tool that creates a customer) and
 words the tools do not use ("ເຄື່ອງ", goods, or "ກ່ອງ", a box, where the
 tools write "ພັດສະດຸ", a parcel).
 
+The fleet of field sensors is exposed as many real servers are: its 40
+tools were generated from an OpenAPI description. Each name is the method
+and the path (`get_devices_device_id`, `post_devices_device_id_reboot`), no
+tool has a title, each description is the summary of the operation, its
+longer text and the method and path, and every list takes the same `page`
+and `per_page`. Most tools are neighbours on one object (list, get, create,
+update and delete a device; reboot, calibrate, read it, update its
+firmware). Its 100 requests were written before any of them was run and
+split as the airline's, 46 in train and 54 in test. Nothing was tuned on
+it: 39 of its 54 test requests find the right tool first in fields, 48 in
+the top 3, 29 as one sentence; asked again, 46. Taking the first line of a
+multi-line description as the title of a tool that has none, tried on its
+train half, found one more request in fields and lost two to three as one
+sentence: it was not kept. Learning from its train half, with the plain
+mean of the pairs, lost 3 first places, all neighbours ("change a site
+address" found the creation of a site, learned from "add a site address");
+scaled by the share of pairs that reached the tool (above), it loses none.
+
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
 Learning by pairs of words, measured before the town hall came in, loses
@@ -794,6 +819,14 @@ kind is what `vocabulary` and the host's synonyms are for.
   (862 to 854) while the test half gains 5 (762 to 767), and a lift scaled
   by the share of the request's pairs ever learned won 5 on the folds and
   lost 4 on test. A setting of learning waits for servers split as above.
+  The share of the pairs that reached each tool, which is not that one, was
+  chosen on two folds of the whole train half, all servers together: the
+  plain mean lost 8 first places there (1138 to 1130), the share 3 (to
+  1135), and on test it turned a loss of 2 into a gain of 1 (1035 and 1038
+  against 1037), the requests asked again unchanged (1134). Squaring the
+  share (1135) and keeping only the pairs of the action field (1133; 1136
+  with the share) were measured on the same folds and not kept: no better,
+  or one request for a rule that ties learning to one field.
 - Give the numbers before and after in the pull request, and update this page
   and the README: `BenchmarkTest` fails until their tables, and the sentence
   that sums the fields up, give the scores the benchmark measures.

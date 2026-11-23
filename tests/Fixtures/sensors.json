@@ -1,0 +1,861 @@
+[
+ {
+  "name": "get_devices",
+  "description": "List devices\n\nReturns a paginated list of the devices of the organization. Results can be filtered by site and by status.\n\nGET /v2/devices",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "Only devices of this site"
+    },
+    "status": {
+     "type": "string",
+     "description": "online, offline or retired"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_devices_device_id",
+  "description": "Retrieve a device\n\nReturns a device with its model, serial number, site, last contact and battery level.\n\nGET /v2/devices/{device_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_devices",
+  "description": "Create a device\n\nRegisters a new device with its serial number and assigns it to a site.\n\nPOST /v2/devices",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "serial": {
+     "type": "string",
+     "description": "Serial number printed on the device"
+    },
+    "model": {
+     "type": "string",
+     "description": "Model of the device"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patch_devices_device_id",
+  "description": "Update a device\n\nUpdates the name, the site or the reporting interval of a device. Only the fields given are changed.\n\nPATCH /v2/devices/{device_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    },
+    "name": {
+     "type": "string",
+     "description": "Display name"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    },
+    "interval": {
+     "type": "integer",
+     "description": "Reporting interval in seconds"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_devices_device_id",
+  "description": "Delete a device\n\nDeletes a device and its configuration. Its past readings are kept.\n\nDELETE /v2/devices/{device_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "post_devices_device_id_reboot",
+  "description": "Reboot a device\n\nSends a reboot command to the device. It takes effect at its next contact.\n\nPOST /v2/devices/{device_id}/reboot",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_devices_device_id_calibrate",
+  "description": "Calibrate a device\n\nStarts the calibration of the sensors of a device against a reference value.\n\nPOST /v2/devices/{device_id}/calibrate",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    },
+    "reference": {
+     "type": "number",
+     "description": "Reference value measured on site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_devices_device_id_readings",
+  "description": "List readings\n\nReturns the measurements a device sent over a time range: temperature, humidity, pressure and the other values of its sensors.\n\nGET /v2/devices/{device_id}/readings",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    },
+    "from": {
+     "type": "string",
+     "description": "Start of the time range (ISO 8601)"
+    },
+    "to": {
+     "type": "string",
+     "description": "End of the time range (ISO 8601)"
+    },
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_devices_device_id_firmware",
+  "description": "Retrieve firmware status\n\nReturns the firmware version a device runs and whether a newer version is available.\n\nGET /v2/devices/{device_id}/firmware",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "put_devices_device_id_firmware",
+  "description": "Update firmware\n\nSchedules the installation of a firmware version on a device.\n\nPUT /v2/devices/{device_id}/firmware",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    },
+    "version": {
+     "type": "string",
+     "description": "Firmware version to install"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_gateways",
+  "description": "List gateways\n\nReturns a paginated list of the gateways that relay the devices of each site to the platform.\n\nGET /v2/gateways",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "Only gateways of this site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_gateways_gateway_id",
+  "description": "Retrieve a gateway\n\nReturns a gateway with its connection state, signal strength and the devices it relays.\n\nGET /v2/gateways/{gateway_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "gateway_id": {
+     "type": "string",
+     "description": "The ID of the gateway"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_gateways",
+  "description": "Create a gateway\n\nRegisters a new gateway on a site.\n\nPOST /v2/gateways",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "serial": {
+     "type": "string",
+     "description": "Serial number of the gateway"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_gateways_gateway_id",
+  "description": "Delete a gateway\n\nDeletes a gateway. The devices it relayed stay registered but stop reporting until another gateway reaches them.\n\nDELETE /v2/gateways/{gateway_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "gateway_id": {
+     "type": "string",
+     "description": "The ID of the gateway"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_sites",
+  "description": "List sites\n\nReturns a paginated list of the sites of the organization, with their address and number of devices.\n\nGET /v2/sites",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_sites",
+  "description": "Create a site\n\nCreates a site, a place where devices are installed, with its name, address and time zone.\n\nPOST /v2/sites",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name of the site"
+    },
+    "address": {
+     "type": "string",
+     "description": "Postal address"
+    },
+    "timezone": {
+     "type": "string",
+     "description": "Time zone of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patch_sites_site_id",
+  "description": "Update a site\n\nUpdates the name, the address or the time zone of a site.\n\nPATCH /v2/sites/{site_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name of the site"
+    },
+    "address": {
+     "type": "string",
+     "description": "Postal address"
+    },
+    "timezone": {
+     "type": "string",
+     "description": "Time zone of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_sites_site_id",
+  "description": "Delete a site\n\nDeletes a site. It must hold no device and no gateway.\n\nDELETE /v2/sites/{site_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_alerts",
+  "description": "List alerts\n\nReturns a paginated list of the alerts raised by the alert rules, open or acknowledged.\n\nGET /v2/alerts",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    },
+    "state": {
+     "type": "string",
+     "description": "open or acknowledged"
+    },
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_alerts_alert_id_acknowledge",
+  "description": "Acknowledge an alert\n\nMarks an alert as acknowledged, so it stops notifying, with an optional comment.\n\nPOST /v2/alerts/{alert_id}/acknowledge",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "alert_id": {
+     "type": "string",
+     "description": "The ID of the alert"
+    },
+    "comment": {
+     "type": "string",
+     "description": "Comment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_alerts_alert_id",
+  "description": "Delete an alert\n\nDeletes an alert from the history.\n\nDELETE /v2/alerts/{alert_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "alert_id": {
+     "type": "string",
+     "description": "The ID of the alert"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_alert_rules",
+  "description": "List alert rules\n\nReturns the rules that raise an alert when a reading crosses a threshold or a device goes silent.\n\nGET /v2/alert-rules",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_alert_rules",
+  "description": "Create an alert rule\n\nCreates a rule that raises an alert when a measure of a device crosses a threshold for a given time.\n\nPOST /v2/alert-rules",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "metric": {
+     "type": "string",
+     "description": "Measure watched, such as temperature"
+    },
+    "threshold": {
+     "type": "number",
+     "description": "Threshold value"
+    },
+    "duration": {
+     "type": "integer",
+     "description": "Seconds above the threshold before the alert is raised"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patch_alert_rules_rule_id",
+  "description": "Update an alert rule\n\nUpdates the threshold, the duration or the recipients of an alert rule, or pauses it.\n\nPATCH /v2/alert-rules/{rule_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rule_id": {
+     "type": "string",
+     "description": "The ID of the alert rule"
+    },
+    "threshold": {
+     "type": "number",
+     "description": "Threshold value"
+    },
+    "enabled": {
+     "type": "boolean",
+     "description": "Whether the rule is active"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_alert_rules_rule_id",
+  "description": "Delete an alert rule\n\nDeletes an alert rule. The alerts it raised are kept.\n\nDELETE /v2/alert-rules/{rule_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rule_id": {
+     "type": "string",
+     "description": "The ID of the alert rule"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_users",
+  "description": "List users\n\nReturns a paginated list of the users of the organization with their role.\n\nGET /v2/users",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_users_invitations",
+  "description": "Invite a user\n\nSends an invitation by email to join the organization with a role.\n\nPOST /v2/users/invitations",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "Email address"
+    },
+    "role": {
+     "type": "string",
+     "description": "admin, operator or viewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "patch_users_user_id",
+  "description": "Update a user\n\nChanges the role of a user.\n\nPATCH /v2/users/{user_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "The ID of the user"
+    },
+    "role": {
+     "type": "string",
+     "description": "admin, operator or viewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_users_user_id",
+  "description": "Remove a user\n\nRemoves a user from the organization. Their API keys are revoked.\n\nDELETE /v2/users/{user_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user_id": {
+     "type": "string",
+     "description": "The ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_api_keys",
+  "description": "List API keys\n\nReturns the API keys of the organization, with their scopes and when each was last used. The secret is never returned.\n\nGET /v2/api-keys",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_api_keys",
+  "description": "Create an API key\n\nCreates an API key with the given scopes. The secret is returned once, in this response only.\n\nPOST /v2/api-keys",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name of the key"
+    },
+    "scopes": {
+     "type": "string",
+     "description": "Scopes, separated by commas"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_api_keys_key_id",
+  "description": "Revoke an API key\n\nRevokes an API key at once. Calls made with it are refused from then on.\n\nDELETE /v2/api-keys/{key_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "key_id": {
+     "type": "string",
+     "description": "The ID of the API key"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get_webhooks",
+  "description": "List webhooks\n\nReturns the webhooks that send events of the platform to an URL.\n\nGET /v2/webhooks",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_webhooks",
+  "description": "Create a webhook\n\nCreates a webhook that posts the chosen events, such as new alerts, to an URL.\n\nPOST /v2/webhooks",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": "string",
+     "description": "URL that receives the events"
+    },
+    "events": {
+     "type": "string",
+     "description": "Events sent, separated by commas"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete_webhooks_webhook_id",
+  "description": "Delete a webhook\n\nDeletes a webhook. No more events are sent to its URL.\n\nDELETE /v2/webhooks/{webhook_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "webhook_id": {
+     "type": "string",
+     "description": "The ID of the webhook"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "post_webhooks_webhook_id_test",
+  "description": "Test a webhook\n\nSends a sample event to the URL of a webhook and returns the response it got.\n\nPOST /v2/webhooks/{webhook_id}/test",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "webhook_id": {
+     "type": "string",
+     "description": "The ID of the webhook"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post_exports",
+  "description": "Create an export\n\nStarts an export of the readings of a site or of a device over a time range, as a CSV file.\n\nPOST /v2/exports",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "site_id": {
+     "type": "string",
+     "description": "The ID of the site"
+    },
+    "device_id": {
+     "type": "string",
+     "description": "The ID of the device"
+    },
+    "from": {
+     "type": "string",
+     "description": "Start of the time range (ISO 8601)"
+    },
+    "to": {
+     "type": "string",
+     "description": "End of the time range (ISO 8601)"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_exports_export_id",
+  "description": "Retrieve an export\n\nReturns the state of an export and, once it is ready, the link to download the file.\n\nGET /v2/exports/{export_id}",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "export_id": {
+     "type": "string",
+     "description": "The ID of the export"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_audit_events",
+  "description": "List audit events\n\nReturns the changes made in the organization: who changed what and when.\n\nGET /v2/audit-events",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "page": {
+     "type": "integer",
+     "description": "Page number, starting at 1"
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Number of items per page (max 100)"
+    },
+    "from": {
+     "type": "string",
+     "description": "Start of the time range (ISO 8601)"
+    },
+    "to": {
+     "type": "string",
+     "description": "End of the time range (ISO 8601)"
+    },
+    "user_id": {
+     "type": "string",
+     "description": "Only changes by this user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get_usage",
+  "description": "Retrieve usage\n\nReturns the usage of the organization for the current billing period: active devices, readings stored and API calls.\n\nGET /v2/usage",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

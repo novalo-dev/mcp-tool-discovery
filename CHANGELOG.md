@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A fleet of field sensors generated from OpenAPI on the search
+  benchmark.** 40 tools exposed as OpenAPI-to-MCP generators write them:
+  the method and the path for a name (`post_devices_device_id_reboot`), no
+  title, the summary, longer text and route as description, and the same
+  `page` and `per_page` on every list. Most are neighbours on one object.
+  Its 100 requests were written before any of them was run and split as
+  the airline's. The benchmark now holds 2697 requests over twenty-four
+  servers; its floors move to 1037 and 1207 in fields and 1134 asked
+  again, and the laravel/mcp line to 408 as one sentence and 764 with the
+  fields joined.
+
 - **Every mode on the example servers.** `MCP_NOTES_MODE` now takes
   `grouped` and `gateway` beside `direct`, on the stdio, ReactPHP and SDK
   servers alike, through one `mode()` in `docs/examples/notes.php`, so the
@@ -98,6 +109,15 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **Learning barely moves a neighbour.** The lift of a learned tool is
+  now also scaled by the share of the request's pairs of words that
+  reached it. Run once, "add a site address" lifted the tool that creates
+  a site for "change a site address", which shares one pair of three; it
+  now lifts it a ninth as much, while the same request asked again keeps
+  its whole lift. Learned from the train half, the test half no longer
+  loses first places to learning: 1038 against 1037 in fields, where the
+  plain mean found 1035, and 1134 asked again either way. Stores keep
+  their format.
 - **The guide header names the pinned tools.** A prompt that names a pinned
   tool beside tools behind the runners used to have its pinned tool left
   out of `CompactMode::guideHeader()`, under a header that says the

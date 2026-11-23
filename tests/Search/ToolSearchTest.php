@@ -481,6 +481,22 @@ final class ToolSearchTest extends TestCase
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
     }
 
+    public function testAPairSharedWithANeighbourBarelyMovesIt(): void
+    {
+        $tools = RecordingGate::server('sensors');
+        $store = new MemoryLearningStore();
+        $search = new ToolSearch($tools, learning: $store);
+        $search->learn((string) $search->find(new SearchQuery('add', 'site', 'address'))->searchId, 'post_sites');
+        $change = new SearchQuery('change', 'site', 'address');
+
+        // Adding a site and changing its address share "site address", one
+        // pair of three: the site that was added once must not take the
+        // place of the update, while the same request asked again finds it.
+        self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools))->search($change))[0]);
+        self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools, learning: $store))->search($change))[0]);
+        self::assertSame('post_sites', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('add', 'site', 'address')))[0]);
+    }
+
     public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void
     {
         $tools = ToolSet::of([

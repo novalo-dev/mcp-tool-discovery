@@ -217,6 +217,10 @@ final class ToolSearch
      * more than the thing. A query of one word has no pair and uses the
      * single words.
      *
+     * The mean lift is then multiplied by the share of the query's pairs
+     * that reached the tool at all, so a search that agrees on one pair out
+     * of three lifts it a ninth as much as the same search asked again.
+     *
      * @param list<list<string>> $groups the known terms of each token
      *
      * @return array<string, float>
@@ -232,13 +236,24 @@ final class ToolSearch
         if (count($words) > 1) {
             $words = self::pairs($groups);
         }
+        $hits = [];
         foreach ($words as $word) {
             foreach ($counts[$word] ?? [] as $tool => $runs) {
                 $lift[$tool] = ($lift[$tool] ?? 0.0) + min($runs, $this->options->learningCap) / $this->options->learningCap;
+                $hits[$tool] = ($hits[$tool] ?? 0) + 1;
             }
         }
+        $total = count($words);
+        foreach ($lift as $tool => $sum) {
+            // Scaled again by the share of the pairs that hit the tool: a
+            // search learned for a neighbour ("add a site address") shares
+            // one pair with a new one ("change a site address") and should
+            // barely move it, while the same request asked again hits every
+            // pair and keeps its whole lift.
+            $lift[$tool] = $sum / $total * ($hits[$tool] / $total);
+        }
 
-        return array_map(static fn(float $sum): float => $sum / count($words), $lift);
+        return $lift;
     }
 
     /**
