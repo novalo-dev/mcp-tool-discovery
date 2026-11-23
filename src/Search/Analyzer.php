@@ -32,14 +32,14 @@ final class Analyzer
     private const UNSPACED = '(?:(?=\p{L})[\p{Han}\p{Hiragana}\p{Katakana}])';
 
     /**
-     * Thai and Burmese, also written without spaces between words, but whose
-     * vowels and tone marks are marks: their runs are cut into pairs of
+     * Thai, Lao and Burmese, also written without spaces between words, but
+     * whose vowels and tone marks are marks: their runs are cut into pairs of
      * characters as they are seen (grapheme clusters), not into pairs of
      * code points. Khmer is written the same way, but on the train half of
      * the water supply office pairs gained nothing (docs/SEARCH.md), so a run
      * of Khmer stays one token met by its trigrams.
      */
-    private const CLUSTERED = '[\p{Thai}\p{Myanmar}]';
+    private const CLUSTERED = '[\p{Thai}\p{Myanmar}\p{Lao}]';
 
     /**
      * A Hangul letter. Korean puts spaces between words, but glues to each
@@ -64,8 +64,8 @@ final class Analyzer
     /**
      * The terms the index compares: the tokens of the text, with each run of
      * Han or kana and each Korean word cut into overlapping pairs of
-     * characters, and each run of Thai or Burmese into pairs of grapheme
-     * clusters (see clusters()).
+     * characters, and each run of Thai, Lao or Burmese into pairs of
+     * grapheme clusters (see clusters()).
      *
      * Chinese and Japanese are written without spaces, so a whole sentence is
      * one token and would only ever meet a tool by its trigrams, while most of
@@ -101,7 +101,7 @@ final class Analyzer
      *
      * snake_case, kebab-case, dotted names and camelCase are split, so a tool
      * named set_ticket_status or setTicketStatus matches "ticket status". A
-     * run of Han, kana, Thai or Burmese is a token of its own, apart from the letters
+     * run of Han, kana, Thai, Lao or Burmese is a token of its own, apart from the letters
      * and digits around it ("5栋101").
      *
      * @return list<string>
@@ -140,7 +140,7 @@ final class Analyzer
     /**
      * The terms of one token: itself, or its pairs of characters when it is a
      * run of Han or kana or a Korean word longer than one character, or a run
-     * of Thai or Burmese.
+     * of Thai, Lao or Burmese.
      *
      * @return list<string>
      */
@@ -168,8 +168,8 @@ final class Analyzer
     }
 
     /**
-     * The terms of a run of Thai or Burmese: its overlapping pairs of grapheme
-     * clusters, and the run itself.
+     * The terms of a run of Thai, Lao or Burmese: its overlapping pairs of
+     * grapheme clusters, and the run itself.
      *
      * A pair of code points would pair a consonant with the vowel or tone
      * mark it carries, a fragment that means nothing; a cluster is a
@@ -178,7 +178,9 @@ final class Analyzer
      * Thai tools before, and measured on the train half of the sports centre,
      * keeping it found as many tools first with fewer tools returned. On the
      * train half of the rice mill, Burmese kept its run too: pairs alone found
-     * one tool first less and returned more.
+     * one tool first less and returned more. On the train half of the post
+     * office, Lao did as well: pairs alone found as many first, but learning
+     * from the other half then lost two.
      *
      * @return list<string>
      */

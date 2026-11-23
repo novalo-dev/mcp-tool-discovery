@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 963 times
-out of 1250 in fields, and 702 times as one sentence.
+On the benchmark below, the same requests find the right tool first 998 times
+out of 1298 in fields, and 727 times as one sentence.
 
 ## How a tool is scored
 
@@ -108,7 +108,7 @@ still shown the words it wrote, never the pairs: `unmatched` holds "帮我报修
 when no pair of it meets a tool, and `vocabulary` holds whole titles. Host
 synonyms match a token or a pair, so `'派单' => '派工'` works inside a sentence.
 
-**Thai and Burmese are cut into pairs of what is seen.** Thai is written
+**Thai, Lao and Burmese are cut into pairs of what is seen.** Thai is written
 without spaces too, but its vowels and tone marks are marks, so a pair of code points would
 hold a consonant and the vowel it carries, a fragment that means nothing. A
 run of Thai is cut into overlapping pairs of grapheme clusters (`\X`, a
@@ -122,8 +122,10 @@ is found as many tools first, returned more, and learning lost one more
 request. Burmese, measured on the rice mill (below), is cut as Thai is:
 on its train half, pairs kept beside the run found 45 of 50 tools first
 against 43, and 39 as one sentence against 36, with fewer tools returned
-(1.9 against 2.0); pairs alone found 44. Lao is not measured on the
-benchmark yet, so it is read as before.
+(1.9 against 2.0); pairs alone found 44. Lao, measured on the post office
+(below), is cut as Thai is too: on its train half, pairs kept beside the run
+found 47 of 52 tools first against 42; pairs alone found 47 as well, but
+learning from the other half then lost two.
 
 **A Korean word is cut into pairs.** Korean puts spaces between words, but
 glues to each word the particles that mark its role: "레슨을 취소해 줘"
@@ -240,7 +242,7 @@ of a request are taken from its first 16 words in alphabetical order, so a
 long request costs at most 120 keys.
 
 Two pairs of characters of one word are not a pair. Japanese, Chinese,
-Korean, Thai and Burmese are cut into pairs of characters (above), so one word of a
+Korean, Thai, Lao and Burmese are cut into pairs of characters (above), so one word of a
 request gives several terms: "飼い主" (owner) gives "飼い" and "い主". Paired
 with each other, they only said the object again, and a search for an
 owner's address then lifted that tool for every request about an owner. When
@@ -401,7 +403,7 @@ skipped.
 
 ## The measures
 
-Twenty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-three fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -418,21 +420,22 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 `performance_move`), a marina written in Hebrew (40 tools,
 `Berth-Extend`), a veterinary clinic written in Japanese (40
 tools, `appointment_move`) a water supply office written in Khmer (40
-tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
+tools, `outage_schedule`), a post office written in Lao (40 tools,
+`parcel_redirect`), a rice mill written in Burmese (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
 `bike_unlock`) and an airline operations centre (150 tools,
-`flight.change-aircraft`). 2497 requests, each written as one
+`flight.change-aircraft`). 2597 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1250 requests | Right tool first | Top 3 |
+| Test half, 1298 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 963 | 1115 |
-| The same request as one sentence | 702 | 908 |
-| In fields, after every train request was run once | 964 | 1115 |
-| In fields, after the test requests were run once, then asked again | 1047 | 1155 |
+| The request in fields | 998 | 1159 |
+| The same request as one sentence | 727 | 943 |
+| In fields, after every train request was run once | 999 | 1159 |
+| In fields, after the test requests were run once, then asked again | 1088 | 1201 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -442,10 +445,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 374 | 572 |
-| The fields joined into one sentence | 696 | 896 |
+| The request as one sentence | 385 | 592 |
+| The fields joined into one sentence | 726 | 934 |
 
-As one sentence it trails on each of the twenty-two servers, the English ones
+As one sentence it trails on each of the twenty-three servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -732,6 +735,26 @@ and taking a word that ends with a tool word for that word, tried on the
 train half, moved nothing in fields. What it misses is neighbours ("end"
 a contract finds its renewal, "finish" a repair finds its opening) and
 words the tools do not use ("יאכטה", a yacht, for a boat).
+
+The post office is written in Lao, behind snake_case names: as Thai, with
+no space between words, a space between phrases, and vowels and tone marks
+written as marks around a consonant ("ພັດສະດຸ", a parcel). Most of its 40
+tools are neighbours on one object (send, track, hold, return and redirect
+a parcel; send, cancel and pay out a money transfer; rent, renew and close
+a post office box; open and close a complaint or a counter). Its 100
+requests were written before any of them was run and split as the
+airline's, 52 in train and 48 in test. Its train half chose one thing, how
+Lao is cut (above); no weight or cut changed for it. On its test half, read
+by its trigrams as before, 33 of 48 requests found the right tool first in
+fields and 43 in the top 3, with 2.48 tools returned, 26 as one sentence,
+and 37 asked again. Cut into pairs of clusters, 35 come first and 44 in the
+top 3, with 2.40 tools returned; 25 as one sentence (35 in the top 3
+against 33), learning from the train half loses nothing (35 and 44), and 41
+come first asked again. What it misses is mostly neighbours of one object
+(closing a box finds the list of boxes, asking for a new one finds the
+tool that creates a customer) and
+words the tools do not use ("ເຄື່ອງ", goods, or "ກ່ອງ", a box, where the
+tools write "ພັດສະດຸ", a parcel).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

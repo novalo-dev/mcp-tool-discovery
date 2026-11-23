@@ -47,8 +47,8 @@ The benchmark says where the search still misses, in
   English one, with 150 tools that are mostly neighbours (an airline
   operations centre) and a Ukrainian one, the second in Cyrillic (a city
   theatre) and a Hebrew one, whose particles start its words (a marina)
-  are in. Lao, written the
-  same way as Thai, is not measured yet.
+  and a Lao one, cut into pairs of clusters as Thai is (a post office)
+  are in.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension

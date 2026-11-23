@@ -44,7 +44,7 @@ final class ToolIndex
      * changes, so an old cache entry is rebuilt rather than compared with
      * terms it never held.
      */
-    private const FORMAT = 9;
+    private const FORMAT = 10;
 
     /**
      * How alike a word the tools do not use and a word they do must be to be

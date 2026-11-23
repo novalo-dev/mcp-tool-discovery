@@ -120,6 +120,23 @@ final class ToolSearchTest extends TestCase
         self::assertSame('truck_book', $search->search('ဗုဒ္ဓဟူးနေ့ ကွင်းကြီးရွာကစပါးသယ်ဖို့ ကားငှားပါ')[0]->name ?? null);
     }
 
+    public function testLaoIsCutInPairsOfWhatIsSeen(): void
+    {
+        $analyzer = new Analyzer();
+
+        self::assertSame(['ຍົກ', 'ກເ', 'ເລີ', 'ລີກ', 'ຍົກເລີກ'], $analyzer->words('ຍົກເລີກ'), 'a vowel or a tone mark stays on its consonant, the run is kept');
+        self::assertSame(['ຍົກເລີກ'], $analyzer->tokens('ຍົກເລີກ'), 'the caller is shown the word it wrote');
+    }
+
+    public function testASentenceInLaoFindsItsTool(): void
+    {
+        $search = new ToolSearch(RecordingGate::server('post'));
+
+        // Both found another tool first while a run of Lao met tools by its trigrams only.
+        self::assertSame('parcel_track', $search->search('ພັດສະດຸຂອງຂ້ອຍຢູ່ໃສແລ້ວ')[0]->name ?? null);
+        self::assertSame('box_renew', $search->search('ຕູ້ຂອງຂ້ອຍໝົດອາຍຸເດືອນໜ້າ')[0]->name ?? null);
+    }
+
     public function testAKoreanWordIsCutInPairs(): void
     {
         $analyzer = new Analyzer();

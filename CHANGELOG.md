@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A post office written in Lao on the search benchmark.** 40 tools named
+  in snake_case with titles and descriptions in Lao, written as Thai is,
+  with no space between words, most of them neighbours on one object (send,
+  track, hold, return and redirect a parcel; send, cancel and pay out a
+  money transfer; rent, renew and close a post office box). Its 100 requests
+  were written before any of them was run and split as the airline's. The
+  benchmark now holds 2597 requests over twenty-three servers; its floors
+  move to 998 and 1159 in fields and 1088 asked again, and the laravel/mcp
+  line to 385 as one sentence and 726 with the fields joined.
 - **A marina written in Hebrew on the search benchmark.** The first
   language that glues its particles to the start of a word ("במרינה", in
   the marina), and the first names in Train-Case (`Berth-Reserve`): 40
@@ -77,6 +86,19 @@ becomes the next version's section when it is published.
   and docs/SEARCH.md give them, and `BenchmarkTest` fails if the library
   stops beating it on either line. It lowers text letter by letter, as
   the Analyzer does, so its score is the same on every PHP version.
+
+### Changed
+
+- **Lao is searched by pairs of what is seen, as Thai and Burmese are.** A
+  run of Lao was one token that met tools only by its trigrams. It is now
+  cut into overlapping pairs of grapheme clusters, the run kept beside
+  them. On the test half of the new post office, 35 of 48 requests find the
+  right tool first in fields against 33, 44 are in the top 3 against 43,
+  fewer tools are returned (2.40 against 2.48), learning loses nothing, and
+  41 come first asked again against 37; as one sentence, one request leaves
+  the first place and two enter the top 3. Chosen on its train half: 47 of
+  52 first against 42. No other server moves by a single request. The index
+  format changes, so a cached index is rebuilt once.
 
 ### Security
 
