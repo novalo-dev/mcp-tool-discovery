@@ -146,8 +146,11 @@ function describeFields(array $fields): string
     $parts = [];
     foreach ($fields as $name => $value) {
         // A request holds what a person typed: one line each, so a newline
-        // in it cannot pass for a line of the report.
-        $parts[] = $name . ': ' . preg_replace('/\s+/u', ' ', $value);
+        // in it cannot pass for a line of the report, and every other
+        // control or direction character shown as "?", since the report is
+        // read in a terminal that would act on it rather than print it.
+        $line = preg_replace(['/\s+/u', '/[\p{Cc}\x{061C}\x{200E}\x{200F}\x{202A}-\x{202E}\x{2066}-\x{2069}]/u'], [' ', '?'], $value);
+        $parts[] = $name . ': ' . ($line ?? '?');
     }
 
     return implode(' | ', $parts);

@@ -84,6 +84,8 @@ becomes the next version's section when it is published.
   each at most the 32 indexed words most alike it, so the cost of a search
   stays small however many words of a large index look alike. The ranking
   of every request of the benchmark is unchanged.
+- The search log report prints the words of a request as text only: a
+  control or direction character shows as `?`.
 
 ## 0.6.0 - 2026-11-22
 

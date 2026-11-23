@@ -115,14 +115,7 @@ final class StdioServerTest extends TestCase
             // A line cut short, as a crash leaves it, is counted and skipped.
             file_put_contents($file, '{"search":', FILE_APPEND);
 
-            $process = proc_open([PHP_BINARY, dirname(__DIR__, 2) . '/docs/examples/search-log-report.php', $file], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
-            self::assertIsResource($process);
-            $report = (string) stream_get_contents($pipes[1]);
-            $errors = (string) stream_get_contents($pipes[2]);
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-            self::assertSame(0, proc_close($process), $errors);
-            self::assertSame('', $errors);
+            $report = self::report($file);
         } finally {
             unlink($file);
         }
@@ -134,6 +127,24 @@ final class StdioServerTest extends TestCase
         self::assertContains(\sprintf('  %-20s %4d  %s', 'zzqx', 1, '-'), $lines);
         self::assertContains(\sprintf('  %-20s %-10s %4d  %s', 'notes_get', '2nd', 1, 'text: open a note'), $lines);
         self::assertSame(\sprintf('  %4d  %s', 1, 'text: zzqx'), end($lines));
+    }
+
+    public function testTheReportPrintsARequestWithoutItsControlCharacters(): void
+    {
+        $file = (string) tempnam(sys_get_temp_dir(), 'log');
+
+        try {
+            self::session([
+                self::INITIALIZE,
+                ['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['query' => "zzqx\u{1b}[2J\u{9b}1m \u{202e}qqzz\u{7} é"]]],
+            ], 'reader', ['MCP_NOTES_SEARCH_LOG' => $file]);
+            $report = self::report($file);
+        } finally {
+            unlink($file);
+        }
+
+        $lines = explode("\n", rtrim($report));
+        self::assertSame(\sprintf('  %4d  %s', 1, 'text: zzqx?[2J?1m ?qqzz? é'), end($lines));
     }
 
     public function testAToolTheGateHidesIsUnknownUntilTheRoleAllowsIt(): void
@@ -273,6 +284,23 @@ final class StdioServerTest extends TestCase
         unlink($file);
 
         return $lines;
+    }
+
+    /**
+     * The report the example prints for a log file.
+     */
+    private static function report(string $file): string
+    {
+        $process = proc_open([PHP_BINARY, dirname(__DIR__, 2) . '/docs/examples/search-log-report.php', $file], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+        self::assertIsResource($process);
+        $report = (string) stream_get_contents($pipes[1]);
+        $errors = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        self::assertSame(0, proc_close($process), $errors);
+        self::assertSame('', $errors);
+
+        return $report;
     }
 
     /**
