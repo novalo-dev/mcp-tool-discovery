@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Mode\Compact;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\GuideHeader;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -39,7 +40,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * goes through the runner on its own, so the host's gate judges it exactly
  * as a single call.
  */
-final class CompactMode implements DiscoveryMode
+final class CompactMode implements DiscoveryMode, GuideHeader
 {
     public const SEARCH = 'search_tools';
     public const RUN_READ = 'run_read_tool';

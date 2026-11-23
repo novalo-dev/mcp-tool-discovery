@@ -245,4 +245,27 @@ final class GroupedModeTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new GroupedMode([Groups::class, 'of'], ['files' => 'Files', 'files_change' => 'Other']);
     }
+
+    public function testTheGuideHeaderSaysWhichGroupToolRunsEachAction(): void
+    {
+        $header = Groups::mode('acme_')->guideHeader(['acme_get_file', 'acme_set_ticket_status', 'acme_list_users', 'acme_nope'], RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));
+
+        self::assertStringContainsString("- through acme_files: acme_get_file\n", $header);
+        self::assertStringContainsString("- through acme_tickets_change: acme_set_ticket_status\n", $header);
+        self::assertStringContainsString('describe on that tool (the one without _change)', $header);
+        self::assertStringNotContainsString('acme_list_users', $header);
+        self::assertStringNotContainsString('acme_nope', $header);
+        self::assertStringNotContainsString('directly', $header);
+        self::assertStringEndsWith("\n\n", $header);
+    }
+
+    public function testTheGuideHeaderSaysAToolOutsideTheGroupsIsCalledDirectly(): void
+    {
+        $header = Groups::mode()->guideHeader(['acme_get_file', 'acme_list_deployments'], RecordingGate::fixtureTools());
+
+        self::assertStringContainsString("- directly, as they are in your list: acme_list_deployments\n", $header);
+        self::assertStringContainsString('except the ones it says to call directly', $header);
+        // A guide that names only tools listed as themselves needs no header.
+        self::assertSame('', Groups::mode()->guideHeader(['acme_list_deployments', 'files'], RecordingGate::fixtureTools()));
+    }
 }

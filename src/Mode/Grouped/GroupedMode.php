@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Mode\Grouped;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\GuideHeader;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Protocol\Json;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -38,7 +39,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * whose group is not declared is listed as itself, so it is never out of
  * the assistant's reach.
  */
-final class GroupedMode implements DiscoveryMode
+final class GroupedMode implements DiscoveryMode, GuideHeader
 {
     public const CHANGE_SUFFIX = '_change';
 
@@ -131,6 +132,49 @@ final class GroupedMode implements DiscoveryMode
         }
 
         return $this->run($group, false, $arguments, $runner);
+    }
+
+    /**
+     * The block a host puts at the top of a guide that names tools: a tool
+     * of a declared group is an action of its group's tool, not a tool of
+     * the list, and without it the assistant looks for a tool it cannot see.
+     * A tool outside every group is in the list as itself and gets a line
+     * of its own, so the assistant does not look for it in a group.
+     */
+    public function guideHeader(iterable $names, ToolSet $visible): string
+    {
+        $through = [];
+        $direct = [];
+        foreach ($names as $name) {
+            $tool = $visible->get($name);
+            if ($tool === null || $this->owns($name)) {
+                continue;
+            }
+            $runner = $this->runnerFor($tool);
+            if ($runner === $tool->name) {
+                $direct[] = $name;
+            } else {
+                $through[$runner][] = $name;
+            }
+        }
+        if ($through === []) {
+            return '';
+        }
+        $lines = [
+            '## How to call the tools of this guide',
+            '',
+            'This server lists its tools by group: the tools this guide names are not in your tool list'
+                . ($direct === [] ? '. ' : ', except the ones it says to call directly. ')
+                . sprintf('Each is an action of the tool of its group. Read the parameters of the ones you need with describe on that tool (the one without %s), then run them with action and arguments:', self::CHANGE_SUFFIX),
+        ];
+        foreach ($through as $runner => $actions) {
+            $lines[] = sprintf('- through %s: %s', $runner, implode(', ', $actions));
+        }
+        if ($direct !== []) {
+            $lines[] = '- directly, as they are in your list: ' . implode(', ', $direct);
+        }
+
+        return implode("\n", $lines) . "\n\n";
     }
 
     /**

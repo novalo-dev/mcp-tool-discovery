@@ -8,6 +8,22 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **A guide header in every mode, from `Discovery::guideHeader()`.** A
+  prompt that names tools now gets its header in Grouped and Gateway too:
+  in Grouped, each tool is named with the group tool that runs it and read
+  with `describe`; in Gateway, it is read with `operation` `describe` and
+  run with `operation` `run`, and with `changesApart` the changes are
+  called directly. Before, only `CompactMode::guideHeader()` existed, and a
+  host that switched a client to another mode lost the header of its
+  guides. Call it on `Discovery` with the host's whole `ToolSet`: it keeps
+  only the tools the caller may see, so a hidden tool a prompt names is
+  never written in its header, and it gives `""` in Direct or in a mode
+  without a header. A mode of your own gets one by implementing the new
+  `Mode\GuideHeader` interface, kept apart from `DiscoveryMode` so existing
+  modes are not broken.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

@@ -112,7 +112,11 @@ abstract class ModeContractTestCase extends TestCase
     public function testAHiddenToolIsNeverNamedByTheModesOwnTools(): void
     {
         $discovery = new Discovery($this->mode(), $this->gate());
-        $outputs = [json_encode($discovery->listTools($this->tools(), Revision::latest()))];
+        $outputs = [
+            json_encode($discovery->listTools($this->tools(), Revision::latest())),
+            // A guide may name a tool the caller may not see.
+            $discovery->guideHeader($this->tools()->names(), $this->tools()),
+        ];
         foreach ($this->probes() as [$name, $arguments]) {
             $outputs[] = json_encode($discovery->callTool($name, $arguments, $this->tools(), Revision::latest()));
         }

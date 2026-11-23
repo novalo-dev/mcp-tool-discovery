@@ -19,6 +19,7 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\GuideHeader;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Protocol\Shaper;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -175,6 +176,24 @@ final class Discovery
         }
 
         throw InvalidCursor::given();
+    }
+
+    /**
+     * The block to put at the top of a guide (an MCP prompt) that names
+     * tools, saying how the current mode reaches them; "" when the mode
+     * lists them as themselves. Asked here rather than of the mode, so the
+     * header is built from the tools the caller may see and never names
+     * one the gate hides, whatever the host passes.
+     *
+     * @param iterable<string> $names the tool names the guide uses
+     *
+     * @throws InvalidTool when a host tool carries the name of one of the mode's own tools
+     */
+    public function guideHeader(iterable $names, ToolSet $tools): string
+    {
+        $visible = $this->visible($tools);
+
+        return $this->mode instanceof GuideHeader ? $this->mode->guideHeader($names, $visible) : '';
     }
 
     private function visible(ToolSet $tools): ToolSet

@@ -116,6 +116,12 @@ interface DiscoveryMode
 - Build your tool definitions with `Tool::fromArray()`, so they are validated,
   and let `Shaper` adapt them to each revision.
 
+A mode that does not list every tool as itself can also implement
+`Mode\GuideHeader`, apart from the contract so a mode written elsewhere keeps
+working without it: `guideHeader(iterable $names, ToolSet $visible)` returns
+the block to put at the top of a prompt that names tools, or `""`. See
+[Guides](#guides).
+
 The rules a mode must keep are in
 [ModeContractTestCase](../tests/Contract/ModeContractTestCase.php). Read it
 before writing a line: it is the review your mode will get.
@@ -155,10 +161,9 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   the whole list before the one confirmation. The search learns once per
   batch, from the first item that succeeds.
 - `pinned` tools are listed as themselves, next to the three.
-- `guideHeader()` gives the block to put at the top of a prompt that names
-  tools, saying which runner each one goes through, and which of them are
-  pinned and called directly. It is empty when the prompt names only tools
-  of the list.
+- The guide header (see [Guides](#guides)) says which runner each tool a
+  prompt names goes through, and which of them are pinned and called
+  directly.
 
 ## Grouped
 
@@ -279,6 +284,31 @@ settings, and its cache and learning store wait, unused, for the day it
 switches back. The mode does not search, so it hands out no `search_id`.
 
 ---
+
+## Guides
+
+An MCP prompt that names tools reads wrong in any mode but Direct: the tools
+it names are not in the client's list as themselves, and the client looks for
+tools it cannot see. `$discovery->guideHeader($toolNames, $tools)` returns
+the block to put at the top of the prompt text, written for the current mode:
+
+| Mode | What the header says |
+|---|---|
+| Compact | read the parameters with `search_tools` (names), run each through `run_read_tool` or `run_write_tool`; pinned tools are called directly |
+| Grouped | each tool is an action of its group: read it with `describe` on the group's tool, run it through `<group>` or `<group>_change`; tools outside every group are called directly |
+| Gateway | read with `operation` `describe`, run with `operation` `run`, all through `use_tools`; with `changesApart`, the changes are called directly |
+| Direct | nothing: `""` |
+
+```php
+$text = $discovery->guideHeader(['acme_get_file', 'acme_set_ticket_status'], $tools) . $myPromptText;
+```
+
+It is `""` when every tool the prompt names is in the list as itself, so a
+host can call it for every prompt. Pass the host's whole `ToolSet`, as for
+`listTools()`: `Discovery` keeps only the tools the caller may see, and a
+hidden tool the prompt names is left out of the header. A mode of your own
+gets a header by implementing `Mode\GuideHeader`; one that does not gets
+`""`.
 
 ## What a mode never does
 

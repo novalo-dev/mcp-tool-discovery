@@ -214,10 +214,11 @@ $mode = new CompactMode(
 );
 ```
 
-An MCP prompt that names tools should tell the client they are not in its
-list: `$mode->guideHeader($toolNames, $visible)` returns the block to put at
-the top of the prompt text. A pinned tool the prompt names gets a line of
-its own, to be called directly.
+An MCP prompt that names tools should tell the client how to reach them, in
+every mode but Direct: `$discovery->guideHeader($toolNames, $tools)` returns
+the block to put at the top of the prompt text, written for the current mode
+and naming only the tools the caller may see
+([docs/MODES.md](docs/MODES.md#guides)).
 
 ### Grouped
 

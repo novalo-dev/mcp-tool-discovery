@@ -232,4 +232,26 @@ final class GatewayModeTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new GatewayMode(maxDescribed: 0);
     }
+
+    public function testTheGuideHeaderSendsEveryToolThroughTheGateway(): void
+    {
+        $header = (new GatewayMode(prefix: 'acme_'))->guideHeader(['acme_get_file', 'acme_set_ticket_status', 'acme_list_users', 'acme_use_tools'], RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));
+
+        self::assertStringContainsString("- through acme_use_tools: acme_get_file, acme_set_ticket_status\n", $header);
+        self::assertStringContainsString('operation describe (names)', $header);
+        self::assertStringNotContainsString('acme_list_users', $header);
+        self::assertStringNotContainsString('directly', $header);
+        self::assertSame('', (new GatewayMode())->guideHeader(['acme_nope'], RecordingGate::fixtureTools()));
+    }
+
+    public function testWithChangesApartTheGuideHeaderSaysAChangeIsCalledDirectly(): void
+    {
+        $mode = new GatewayMode(changesApart: true);
+        $header = $mode->guideHeader(['acme_get_file', 'acme_set_ticket_status'], RecordingGate::fixtureTools());
+
+        self::assertStringContainsString("- through use_tools: acme_get_file\n", $header);
+        self::assertStringContainsString("- directly, as they are in your list: acme_set_ticket_status\n", $header);
+        // Changes alone are all in the list: nothing to say.
+        self::assertSame('', $mode->guideHeader(['acme_set_ticket_status'], RecordingGate::fixtureTools()));
+    }
 }
