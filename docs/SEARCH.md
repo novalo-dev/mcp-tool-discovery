@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 923 times
-out of 1200 in fields, and 665 times as one sentence.
+On the benchmark below, the same requests find the right tool first 963 times
+out of 1250 in fields, and 702 times as one sentence.
 
 ## How a tool is scored
 
@@ -377,7 +377,7 @@ uses: a synonym of "read" for this host.
 
 ## The measures
 
-Twenty-one fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -391,23 +391,24 @@ written in Hindi (40 tools, `pass_renew`), a sports centre written in Thai
 `lesson_move`), a car repair workshop written in Arabic (40 tools,
 `estimate_send`), the front desk of a hotel written in Russian (40 tools,
 `BOOKING_CHANGE_DATES`), a city theatre written in Ukrainian (40 tools,
-`performance_move`), a veterinary clinic written in Japanese (40
+`performance_move`), a marina written in Hebrew (40 tools,
+`Berth-Extend`), a veterinary clinic written in Japanese (40
 tools, `appointment_move`) a water supply office written in Khmer (40
 tools, `outage_schedule`), a rice mill written in Burmese (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
 `bike_unlock`) and an airline operations centre (150 tools,
-`flight.change-aircraft`). 2397 requests, each written as one
+`flight.change-aircraft`). 2497 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1200 requests | Right tool first | Top 3 |
+| Test half, 1250 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 923 | 1069 |
-| The same request as one sentence | 665 | 867 |
-| In fields, after every train request was run once | 924 | 1069 |
-| In fields, after the test requests were run once, then asked again | 1005 | 1107 |
+| The request in fields | 963 | 1115 |
+| The same request as one sentence | 702 | 908 |
+| In fields, after every train request was run once | 964 | 1115 |
+| In fields, after the test requests were run once, then asked again | 1047 | 1155 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -417,10 +418,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 353 | 542 |
-| The fields joined into one sentence | 662 | 853 |
+| The request as one sentence | 374 | 572 |
+| The fields joined into one sentence | 696 | 896 |
 
-As one sentence it trails on each of the twenty-one servers, the English ones
+As one sentence it trails on each of the twenty-two servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -690,6 +691,23 @@ one, "take on" an actor finds the list of the company, ending an actor's
 contract finds the hiring, whose contract field shares the word) and a
 word a neighbour owns ("розклад", a schedule, of the performances finds the
 schedule of the rehearsals).
+
+The marina is written in Hebrew, which glues its particles to the start of
+a word ("במרינה", in the marina; "לסירה", to the boat; "מהמים", from the
+water) where every other server changes the end. Its names are an object
+and an action in Train-Case (`Berth-Reserve`), a style no other server
+uses, and most of its 40 tools are neighbours (reserve, release, extend and
+move a berth; open and close a repair; close and reopen the harbour). Its
+100 requests were written before any of them was run and split as the
+airline's. Nothing was tuned on it: 40 of its 50 test requests find the
+right tool first in fields, 46 in the top 3, 37 as one sentence; learned
+from its train half, 40; asked again, 42. Its train half also scores 40 of
+50 in fields, but 28 as one sentence. The particles cost little: a word
+with one keeps most of its trigrams, so it is already alike the bare word,
+and taking a word that ends with a tool word for that word, tried on the
+train half, moved nothing in fields. What it misses is neighbours ("end"
+a contract finds its renewal, "finish" a repair finds its opening) and
+words the tools do not use ("יאכטה", a yacht, for a boat).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

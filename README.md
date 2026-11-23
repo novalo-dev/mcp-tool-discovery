@@ -314,7 +314,7 @@ client gives its request **in fields**, and each field is scored on its own:
   it, under one id, so a host sees what its clients asked and missed. The
   library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-2397 requests over twenty-one fictional servers, a workspace (snake_case), a
+2497 requests over twenty-two fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -324,7 +324,7 @@ office of a residential estate written in Chinese, a bus depot written
 in Hindi, a sports centre written in Thai, a music school written in
 Korean, a car repair workshop written in Arabic, the front desk of a
 hotel written in Russian (SCREAMING_SNAKE_CASE), a city theatre written
-in Ukrainian, a veterinary clinic
+in Ukrainian, a marina written in Hebrew (Train-Case), a veterinary clinic
 written in Japanese, a water supply office written in Khmer, a rice
 mill written in Burmese, an archaeological museum written in Greek, a
 city bike rental written in Polish and an airline operations centre with
@@ -332,12 +332,12 @@ city bike rental written in Polish and an airline operations centre with
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1200 requests | Right tool first | Right tool in the top 3 |
+| Test half, 1250 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **923** | **1069** |
-| The same request as one sentence | 665 | 867 |
-| In fields, after learning from the other half | 924 | 1069 |
-| In fields, asked a second time | 1005 | 1107 |
+| The request in fields | **963** | **1115** |
+| The same request as one sentence | 702 | 908 |
+| In fields, after learning from the other half | 964 | 1115 |
+| In fields, asked a second time | 1047 | 1155 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -347,8 +347,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 353 | 542 |
-| The fields joined into one sentence | 662 | 853 |
+| The request as one sentence | 374 | 572 |
+| The fields joined into one sentence | 696 | 896 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

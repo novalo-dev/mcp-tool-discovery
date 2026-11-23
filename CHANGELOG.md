@@ -10,6 +10,16 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A marina written in Hebrew on the search benchmark.** The first
+  language that glues its particles to the start of a word ("במרינה", in
+  the marina), and the first names in Train-Case (`Berth-Reserve`): 40
+  tools, most of them neighbours on one object (reserve, release, extend
+  and move a berth; close and reopen the harbour). Its 100 requests were
+  written before any of them was run and split as the airline's; both
+  halves score alike in fields (40 of 50 first on each). The benchmark now
+  holds 2497 requests over twenty-two servers; its floors move to 963 and
+  1115 in fields and 1047 asked again, and the laravel/mcp line to 374 as
+  one sentence and 696 with the fields joined.
 - **A log of what clients search.** `SearchSetup` takes a `SearchLog`, an
   interface of two methods: `searched()` receives each search a mode runs,
   with its answer (the tools found, the words no tool uses), and `ran()`
