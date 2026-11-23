@@ -240,6 +240,32 @@ final class ToolSearchTest extends TestCase
         self::assertTrue(preg_match('//u', implode(' ', $result->unmatched)) === 1, 'the cut falls between two characters');
     }
 
+    public function testWordsNoToolUsesCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words all begin alike, so every word of the
+        // request is alike thousands of indexed words.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $words[] = 'rec' . substr(md5($tool . '-' . $word), 0, 4);
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recx'));
+        $field = '';
+        for ($word = 0; $word < 146; ++$word) {
+            $field .= sprintf('rec%03d ', $word);
+        }
+
+        $start = microtime(true);
+        $result = $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertNotSame([], $result->tools);
+        self::assertLessThan(1.0, microtime(true) - $start, 'the words alike each unknown word are bounded');
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

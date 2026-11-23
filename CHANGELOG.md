@@ -41,6 +41,13 @@ becomes the next version's section when it is published.
   stops beating it on either line. It lowers text letter by letter, as
   the Analyzer does, so its score is the same on every PHP version.
 
+### Security
+
+- A search scores at most 32 words of a request that no tool uses, and for
+  each at most the 32 indexed words most alike it, so the cost of a search
+  stays small however many words of a large index look alike. The ranking
+  of every request of the benchmark is unchanged.
+
 ## 0.6.0 - 2026-11-22
 
 ### Added
