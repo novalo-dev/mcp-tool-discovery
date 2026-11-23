@@ -342,7 +342,7 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 329 | 509 |
+| The request as one sentence | 329 | 508 |
 | The fields joined into one sentence | 637 | 821 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a

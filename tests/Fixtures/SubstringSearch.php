@@ -60,9 +60,9 @@ final class SubstringSearch
      */
     private static function score(Tool $tool, array $terms): int
     {
-        $name = mb_strtolower($tool->name);
-        $description = mb_strtolower($tool->description());
-        $schema = mb_strtolower(json_encode($tool->inputSchema(), JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE));
+        $name = self::lower($tool->name);
+        $description = self::lower($tool->description());
+        $schema = self::lower(json_encode($tool->inputSchema(), JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE | JSON_UNESCAPED_UNICODE));
         $score = $terms !== [] && $terms === self::terms($name) ? 8 : 0;
         foreach ($terms as $term) {
             $score += str_contains($name, $term) ? 4 : 0;
@@ -79,8 +79,20 @@ final class SubstringSearch
     private static function terms(string $text): array
     {
         return array_values(array_filter(
-            preg_split('/[^\pL\pN]+/u', mb_strtolower($text)) ?: [],
+            preg_split('/[^\pL\pN]+/u', self::lower($text)) ?: [],
             static fn(string $term): bool => $term !== '',
         ));
+    }
+
+    /**
+     * Laravel lowers with mb_strtolower(), whose full mapping picks the Greek
+     * final sigma by context from PHP 8.3 on: the Greek museum then scored
+     * one request apart between 8.2 and 8.3, and the docs can only hold one
+     * number. Letter by letter, as the library's Analyzer lowers, gives the
+     * same terms on every PHP the library supports.
+     */
+    private static function lower(string $text): string
+    {
+        return mb_convert_case($text, MB_CASE_LOWER_SIMPLE, 'UTF-8');
     }
 }

@@ -18,7 +18,8 @@ becomes the next version's section when it is published.
   1149, against 628 for this library; given the words of the fields joined,
   637, against 883 in fields. `composer benchmark` prints both, the README
   and docs/SEARCH.md give them, and `BenchmarkTest` fails if the library
-  stops beating it on either line.
+  stops beating it on either line. It lowers text letter by letter, as
+  the Analyzer does, so its score is the same on every PHP version.
 
 ## 0.6.0 - 2026-11-22
 
