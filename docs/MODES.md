@@ -101,9 +101,10 @@ interface DiscoveryMode
   own call with `ToolRunner::isObject()`, the same rule: a JSON array decodes
   to a PHP array too.
 - A mode that searches calls `$runner->search()`, never a `ToolSearch` of its
-  own: the host's settings, cache and learning store come with it. A mode
-  that hands out a `search_id` passes it back to `$runner->run()`, which
-  learns only from a visible, authorized run that succeeded.
+  own: the host's settings, cache, learning store and log come with it. A
+  mode hands out a `search_id` when `$runner->followsSearches()` is true,
+  and passes it back to `$runner->run()`, which learns only from a visible,
+  authorized run that succeeded, and tells the host's log of the run.
 - Build your tool definitions with `Tool::fromArray()`, so they are validated,
   and let `Shaper` adapt them to each revision.
 

@@ -310,6 +310,9 @@ client gives its request **in fields**, and each field is scored on its own:
   with it lifts that tool for those pairs of words, within a cap. Only words
   the tools use are kept: a word written another way is kept as the tool
   word closest to it.
+- **A log, opt in.** A `SearchLog` is told each search and each run after
+  it, under one id, so a host sees what its clients asked and missed. The
+  library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
 2397 requests over twenty-one fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network

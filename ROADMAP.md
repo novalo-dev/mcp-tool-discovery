@@ -62,7 +62,9 @@ A change to the search comes with the benchmark before and after.
   the server written with laravel/mcp and the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
-  what was missed. They decide what the search learns next.
+  what was missed, as a `SearchLog` keeps it
+  ([docs/SEARCH.md](docs/SEARCH.md#log)). They decide what the search
+  learns next.
 
 ## Tests
 

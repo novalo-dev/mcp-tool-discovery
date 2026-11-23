@@ -305,6 +305,64 @@ locked while it is written.
 
 ---
 
+## Log
+
+What the benchmark cannot say is what a host's own clients ask. A `SearchLog`
+in the `SearchSetup` is told each search a mode runs, with its answer, and
+each run of a tool after it:
+
+```php
+use Novalo\McpToolDiscovery\Search\SearchLog;
+use Novalo\McpToolDiscovery\Search\SearchQuery;
+use Novalo\McpToolDiscovery\Search\SearchResult;
+use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Novalo\McpToolDiscovery\Tool\Tool;
+
+final class JsonLinesLog implements SearchLog
+{
+    public function __construct(private readonly string $file) {}
+
+    public function searched(SearchQuery $query, SearchResult $result): void
+    {
+        $this->write(['search' => $result->searchId, 'fields' => $query->fields(), 'found' => array_map(static fn(Tool $tool): string => $tool->name, $result->tools), 'unmatched' => $result->unmatched]);
+    }
+
+    public function ran(Tool $tool, bool $succeeded, ?string $searchId): void
+    {
+        $this->write(['search' => $searchId, 'ran' => $tool->name, 'succeeded' => $succeeded]);
+    }
+
+    /**
+     * @param array<string, mixed> $line
+     */
+    private function write(array $line): void
+    {
+        file_put_contents($this->file, json_encode($line) . "\n", FILE_APPEND | LOCK_EX);
+    }
+}
+
+new SearchSetup(log: new JsonLinesLog($logFile));
+```
+
+- **A search and its run share an id.** With a log, a mode hands out a
+  `search_id` even when nothing is learned, and the run that carries it back
+  is logged with it: a search whose first tool is not the one that ran, or
+  that found nothing, is a miss to read.
+- **Only what the caller may see.** A run is logged once the host's gate has
+  shown and authorized the tool, never before, and a search only ever holds
+  the visible tools. A `search_id` the client sends back is passed on only
+  if a search could have written it: base64url, 2048 characters at most;
+  otherwise the run is logged with none.
+- **The host keeps it.** The library writes nothing. The words of a request
+  can hold what a person wrote, so what is kept, where and for how long is
+  the host's choice. Both calls are made during the client's request: keep
+  them cheap, and do not throw, as an exception fails the call.
+
+Read together, the lines show the words to add to the host's synonyms, the
+titles to write again, and the requests worth adding to the benchmark.
+
+---
+
 ## The measures
 
 Twenty-one fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a

@@ -51,7 +51,10 @@ final class ToolRunner
      */
     public function search(SearchQuery $query, ?int $limit = null): SearchResult
     {
-        return $this->toolSearch()->find($query, $limit);
+        $result = $this->toolSearch()->find($query, $limit);
+        $this->searchSetup->log?->searched($query, $result);
+
+        return $result;
     }
 
     /**
@@ -71,6 +74,16 @@ final class ToolRunner
     public function learns(): bool
     {
         return $this->searchSetup->learns();
+    }
+
+    /**
+     * Whether a search id given back to run() is of use at all: the search
+     * learns from it, or the host's log ties the run to its search. A mode
+     * hands one out when this is true.
+     */
+    public function followsSearches(): bool
+    {
+        return $this->learns() || $this->searchSetup->log !== null;
     }
 
     /**
@@ -102,8 +115,21 @@ final class ToolRunner
         if ($searchId !== null && $searchId !== '' && !$result->isError && $this->learns()) {
             $this->toolSearch()->learn($searchId, $tool->name);
         }
+        $this->searchSetup->log?->ran($tool, !$result->isError, self::searchIdOf($searchId));
 
         return $result;
+    }
+
+    /**
+     * A search id as a search writes it, or null.
+     *
+     * The client sends it back, so it may be anything: a log is handed only
+     * the characters a search writes, and no longer than the search reads of
+     * one, so a host can store it as it comes.
+     */
+    private static function searchIdOf(?string $searchId): ?string
+    {
+        return $searchId !== null && preg_match('/^[A-Za-z0-9_-]{1,2048}$/D', $searchId) === 1 ? $searchId : null;
     }
 
     private function toolSearch(): ToolSearch

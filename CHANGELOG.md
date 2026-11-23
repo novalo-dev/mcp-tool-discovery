@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A log of what clients search.** `SearchSetup` takes a `SearchLog`, an
+  interface of two methods: `searched()` receives each search a mode runs,
+  with its answer (the tools found, the words no tool uses), and `ran()`
+  each run of a visible, authorized tool, whether it succeeded, and the
+  `search_id` the client gave back with it. With a log, the compact and
+  gateway modes hand out a `search_id` even when nothing is learned, so a
+  host can tie a run to its search and read its misses. A mode written
+  outside the library asks `ToolRunner::followsSearches()` instead of
+  `learns()` to know whether to hand one out. A `search_id` a search could
+  not have written reaches the log as null. The library writes nothing
+  itself; docs/SEARCH.md has an example that writes JSON lines.
 - **An example of a server written with laravel/mcp.** Laravel's official
   MCP package lets a server replace any of its methods with `addMethod()`:
   `docs/examples/laravel-mcp` replaces `tools/list` and `tools/call` with
