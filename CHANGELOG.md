@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.7.0 - 2026-11-23
+
 ### Added
 
 - **A fleet of field sensors generated from OpenAPI on the search
