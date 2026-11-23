@@ -120,7 +120,10 @@ final class CompactMode implements DiscoveryMode
      * The block a host puts at the top of a guide (an MCP prompt) that names
      * tools: in compact mode those tools are not in the assistant's list, and
      * without it the assistant looks for tools it cannot see. Empty when the
-     * guide names none of the visible tools.
+     * guide names none of the visible tools that go through a runner. The
+     * pinned tools it names get a line of their own: the header says the
+     * guide's tools are not in the list, and an assistant that believed it of
+     * a pinned tool would search for a tool it already holds.
      *
      * @param iterable<string> $names the tool names the guide uses
      */
@@ -128,12 +131,15 @@ final class CompactMode implements DiscoveryMode
     {
         $reads = [];
         $writes = [];
+        $direct = [];
         foreach ($names as $name) {
             $tool = $visible->get($name);
-            if ($tool === null || in_array($name, $this->pinned, true) || $this->owns($name)) {
+            if ($tool === null || $this->owns($name)) {
                 continue;
             }
-            if ($tool->readsOnly()) {
+            if (in_array($name, $this->pinned, true)) {
+                $direct[] = $name;
+            } elseif ($tool->readsOnly()) {
                 $reads[] = $name;
             } else {
                 $writes[] = $name;
@@ -145,7 +151,8 @@ final class CompactMode implements DiscoveryMode
         $lines = [
             '## How to call the tools of this guide',
             '',
-            'This server lists its tools in compact form: the tools this guide names are not in your tool list. '
+            'This server lists its tools in compact form: the tools this guide names are not in your tool list'
+                . ($direct === [] ? '. ' : ', except the ones it says to call directly. ')
                 . sprintf('Read the parameters of the ones you need with %s (names), then run them:', $this->searchName),
         ];
         if ($reads !== []) {
@@ -156,6 +163,9 @@ final class CompactMode implements DiscoveryMode
             if ($this->batchLimit > 0) {
                 $lines[] = sprintf('- the same change on several items: %s, once for the whole list', $this->batchName);
             }
+        }
+        if ($direct !== []) {
+            $lines[] = '- directly, as they are in your list: ' . implode(', ', $direct);
         }
 
         return implode("\n", $lines) . "\n\n";

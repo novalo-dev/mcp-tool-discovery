@@ -98,6 +98,14 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **The guide header names the pinned tools.** A prompt that names a pinned
+  tool beside tools behind the runners used to have its pinned tool left
+  out of `CompactMode::guideHeader()`, under a header that says the
+  prompt's tools are not in the list, so a client could search for a tool
+  it already holds. The header now ends with "directly, as they are in
+  your list:" and those names, and its first line says so. A host that
+  added that line itself can drop it.
+
 - **Lao is searched by pairs of what is seen, as Thai and Burmese are.** A
   run of Lao was one token that met tools only by its trigrams. It is now
   cut into overlapping pairs of grapheme clusters, the run kept beside

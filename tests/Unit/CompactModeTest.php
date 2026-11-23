@@ -264,4 +264,18 @@ final class CompactModeTest extends TestCase
         self::assertStringNotContainsString('acme_list_users', $header);
         self::assertSame('', $mode->guideHeader(['acme_nope'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheGuideHeaderSaysAPinnedToolIsCalledDirectly(): void
+    {
+        $mode = new CompactMode(pinned: ['acme_get_file']);
+        $header = $mode->guideHeader(['acme_get_file', 'acme_set_ticket_status'], RecordingGate::fixtureTools());
+
+        self::assertStringContainsString("- directly, as they are in your list: acme_get_file\n", $header);
+        self::assertStringContainsString('except the ones it says to call directly', $header);
+        self::assertStringNotContainsString('run_read_tool: acme_get_file', $header);
+        // A guide that names only tools of the list needs no header at all.
+        self::assertSame('', $mode->guideHeader(['acme_get_file'], RecordingGate::fixtureTools()));
+        // Without a pinned tool named, the header reads as before.
+        self::assertStringNotContainsString('directly', (new CompactMode())->guideHeader(['acme_set_ticket_status'], RecordingGate::fixtureTools()));
+    }
 }

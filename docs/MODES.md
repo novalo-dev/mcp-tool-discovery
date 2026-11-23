@@ -155,7 +155,9 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   batch, from the first item that succeeds.
 - `pinned` tools are listed as themselves, next to the three.
 - `guideHeader()` gives the block to put at the top of a prompt that names
-  tools, saying which runner each one goes through.
+  tools, saying which runner each one goes through, and which of them are
+  pinned and called directly. It is empty when the prompt names only tools
+  of the list.
 
 ## Grouped
 
