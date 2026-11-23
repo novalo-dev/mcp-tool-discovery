@@ -21,6 +21,14 @@ becomes the next version's section when it is published.
   `learns()` to know whether to hand one out. A `search_id` a search could
   not have written reaches the log as null. The library writes nothing
   itself; docs/SEARCH.md has an example that writes JSON lines.
+- **A search log in the stdio example.** `docs/examples/stdio-server.php`
+  keeps one line of JSON per search and per run in the file
+  `MCP_NOTES_SEARCH_LOG` names, and nothing when it names none:
+  `NotesSearchLog`, in `docs/examples/notes.php`, is a log a host can copy.
+  A line it cannot write is lost without failing the client's call. Its
+  test holds it to what the log promises: the run carries the id of its
+  search, a tool the gate hides is never written, and an id no search
+  wrote reaches the log as null.
 - **An example of a server written with laravel/mcp.** Laravel's official
   MCP package lets a server replace any of its methods with `addMethod()`:
   `docs/examples/laravel-mcp` replaces `tools/list` and `tools/call` with

@@ -62,6 +62,43 @@ final class StdioServerTest extends TestCase
         self::assertARunTeachesTheSession(dirname(__DIR__, 2) . '/docs/examples/stdio-server.php', [self::INITIALIZE]);
     }
 
+    public function testTheLogTiesEachRunToTheSearchBeforeIt(): void
+    {
+        $file = (string) tempnam(sys_get_temp_dir(), 'log');
+        $search = ['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['query' => 'open a note']]];
+
+        try {
+            $first = self::session([self::INITIALIZE, $search], 'reader', ['MCP_NOTES_SEARCH_LOG' => $file]);
+            $id = $first[2]['result']['structuredContent']['search_id'];
+            self::assertIsString($id);
+            self::session([
+                self::INITIALIZE,
+                ['method' => 'tools/call', 'params' => ['name' => 'notes_run_read_tool', 'arguments' => ['name' => 'notes_get', 'arguments' => ['id' => 1], 'search_id' => $id]]],
+                // Hidden from a reader: the log learns nothing of it.
+                ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_delete', 'arguments' => ['id' => 1]]]],
+                ['method' => 'tools/call', 'params' => ['name' => 'notes_run_read_tool', 'arguments' => ['name' => 'notes_get', 'arguments' => ['id' => 9], 'search_id' => 'not an id']]],
+            ], 'reader', ['MCP_NOTES_SEARCH_LOG' => $file]);
+
+            $lines = array_map(
+                static fn(string $line): mixed => json_decode($line, true, 512, JSON_THROW_ON_ERROR),
+                explode("\n", trim((string) file_get_contents($file))),
+            );
+        } finally {
+            unlink($file);
+        }
+
+        self::assertCount(3, $lines);
+        foreach ($lines as $line) {
+            self::assertIsArray($line);
+            self::assertIsString($line['at'] ?? null);
+            self::assertMatchesRegularExpression('/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$/', $line['at']);
+        }
+        unset($lines[0]['at'], $lines[1]['at'], $lines[2]['at']);
+        self::assertSame(['search' => $id, 'fields' => ['text' => 'open a note'], 'found' => ['notes_add', 'notes_get'], 'unmatched' => ['open']], $lines[0]);
+        self::assertSame(['search' => $id, 'ran' => 'notes_get', 'succeeded' => true], $lines[1]);
+        self::assertSame(['search' => null, 'ran' => 'notes_get', 'succeeded' => false], $lines[2]);
+    }
+
     public function testAToolTheGateHidesIsUnknownUntilTheRoleAllowsIt(): void
     {
         $delete = ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_delete', 'arguments' => ['id' => 1]]]];
@@ -203,11 +240,12 @@ final class StdioServerTest extends TestCase
 
     /**
      * @param list<array<string, mixed>> $messages
+     * @param array<string, string>      $env
      *
      * @return array<int, array<string, mixed>>
      */
-    private static function session(array $messages, string $role = 'reader'): array
+    private static function session(array $messages, string $role = 'reader', array $env = []): array
     {
-        return self::exchange(dirname(__DIR__, 2) . '/docs/examples/stdio-server.php', $messages, $role);
+        return self::exchange(dirname(__DIR__, 2) . '/docs/examples/stdio-server.php', $messages, $role, $env);
     }
 }

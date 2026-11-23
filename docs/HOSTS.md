@@ -28,12 +28,15 @@ library ([tests/Examples/StdioServerTest.php](../tests/Examples/StdioServerTest.
 php docs/examples/stdio-server.php
 MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
 MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php docs/examples/stdio-server.php
+MCP_NOTES_SEARCH_LOG=search.log php docs/examples/stdio-server.php
 ```
 
 The third reads the role again from `role.txt` at each message and lists
 every tool as itself: write `admin` in the file while a client is connected
 and the server sends `notifications/tools/list_changed`, as
-[When the tools change](#when-the-tools-change) describes.
+[When the tools change](#when-the-tools-change) describes. The fourth writes
+each search and each run after it as a line of `search.log`, as
+[the log](SEARCH.md#log) describes.
 
 Its parts, in the order a host writes them:
 
@@ -44,6 +47,7 @@ Its parts, in the order a host writes them:
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
+| The log | `NotesSearchLog`, in `notes.php`, when `MCP_NOTES_SEARCH_LOG` names a file | one JSON line per search (the fields the client filled, the tools found, the words no tool uses) and per run (the tool, whether it succeeded, the `search_id` of its search); nothing is kept unless a file is named |
 | A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |
 
 Everything else in the file is the host's: reading lines, answering `ping`,

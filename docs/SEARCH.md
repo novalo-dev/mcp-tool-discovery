@@ -361,6 +361,18 @@ new SearchSetup(log: new JsonLinesLog($logFile));
 Read together, the lines show the words to add to the host's synonyms, the
 titles to write again, and the requests worth adding to the benchmark.
 
+The stdio example keeps such a log when `MCP_NOTES_SEARCH_LOG` names a file
+(`NotesSearchLog`, in [examples/notes.php](examples/notes.php)). A search for
+"open a note" by a reader, then the note read with its `search_id`:
+
+```
+{"at":"2026-11-23T09:26:36Z","search":"YSBub3Rl","fields":{"text":"open a note"},"found":["notes_add","notes_get"],"unmatched":["open"]}
+{"at":"2026-11-23T09:26:37Z","search":"YSBub3Rl","ran":"notes_get","succeeded":true}
+```
+
+The tool that ran is the second one found, and "open" is a word no tool
+uses: a synonym of "read" for this host.
+
 ---
 
 ## The measures

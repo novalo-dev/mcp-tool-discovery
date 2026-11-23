@@ -22,6 +22,8 @@ declare(strict_types=1);
  * As admin: MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
  * The role read again at each message from a file, every tool listed as
  * itself:   MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php ...
+ * What the client searched and ran after, one line each, kept in a file:
+ *           MCP_NOTES_SEARCH_LOG=search.log php docs/examples/stdio-server.php
  *
  * It speaks the revisions that open with an `initialize` handshake. The
  * stateless revision 2026-07-28 has none: how a request gives its version
@@ -115,8 +117,14 @@ $notes = new Notes();
 $mode = getenv('MCP_NOTES_MODE') === 'direct' ? new DirectMode() : new CompactMode(prefix: 'notes_', batchLimit: 20);
 // The index is built at the first search instead of at every one. The process
 // serves one caller, so what its runs teach the search lifts only that
-// caller's tools, for as long as the session lasts.
-$search = new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore());
+// caller's tools, for as long as the session lasts. The log is kept only
+// when a file is named: the words of a request are the client's.
+$logFile = getenv('MCP_NOTES_SEARCH_LOG');
+$search = new SearchSetup(
+    cache: new MemoryIndexCache(),
+    learning: new MemoryLearningStore(),
+    log: is_string($logFile) && $logFile !== '' ? new NotesSearchLog($logFile) : null,
+);
 $revision = null;
 // The fingerprint of the list the client last received, or null before it
 // asked for one.
