@@ -46,6 +46,7 @@ Every pull request runs:
 | CI | Example on ReactPHP | installs `react/http` at the version `docs/examples/react/composer.json` pins, PHPStan level max on the example, and the `react` test suite; part of **CI passed**, since ReactPHP is stable and pinned |
 | CI | Example on Symfony | installs `symfony/framework-bundle` at the version `docs/examples/symfony/composer.json` pins, PHPStan level max on the example and level 6 on its test, and the `symfony` test suite; part of **CI passed**, since Symfony 6.4 is a long-term release and pinned |
 | CI | Example on Laravel | installs `laravel/framework` at the version `docs/examples/laravel/composer.json` pins, on PHP 8.3, PHPStan level max on the example and level 6 on its test, and the `laravel` test suite; part of **CI passed**, since the version is pinned |
+| CI | Example on laravel/mcp | installs `laravel/framework` and `laravel/mcp` at the versions `docs/examples/laravel-mcp/composer.json` pins, on PHP 8.3, PHPStan level max on the example and level 6 on its test, and the `laravel-mcp` test suite; part of **CI passed**, since laravel/mcp is past 1.0 and both are pinned |
 | Conformance | Protocol conformance and search benchmark | the scores the README badges show |
 | Security | Dependencies, Secrets, Semgrep, Psalm taint analysis | `composer audit`, Gitleaks over the whole history, Semgrep rules for PHP and secrets, and Psalm following what a client sends (`tests/Security/entry.php`) to a file, a query, a command or an output |
 

@@ -20,8 +20,7 @@ becomes the next version's section when it is published.
   tool runs through laravel/mcp's `ToolInvoker` with its own request, so
   its validation and error results are unchanged. docs/HOSTS.md has the
   section, and a CI job installs laravel/framework 13.43.0 and laravel/mcp
-  1.2.1 there and runs its tests, out of CI passed until it has run green
-  once.
+  1.2.1 there and runs its tests, as part of CI passed.
 - **A city theatre written in Ukrainian on the search benchmark.** The
   second server in Cyrillic, after the Russian hotel: 40 tools, mostly
   neighbours on one object (move and cancel a performance; book a seat,

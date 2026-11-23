@@ -219,9 +219,8 @@ jobs:
   laravel-mcp:
     # The example written with laravel/mcp, Laravel's official MCP package,
     # installed at the exact versions of laravel/framework and laravel/mcp
-    # the example pins. Out of CI passed until it has run green here once:
-    # it was proved against those versions from their sources, and the
-    # other packages Composer picks may still differ.
+    # the example pins. laravel/mcp is past 1.0 and both are pinned, so a
+    # failure here comes from this repository: it is part of CI passed.
     name: Example on laravel/mcp
     runs-on: ubuntu-24.04
     steps:
@@ -248,9 +247,9 @@ jobs:
     name: CI passed
     # One stable name for the required check, whatever the matrix becomes.
     if: always()
-    needs: [quality, compatibility, tests, package, react, symfony, laravel]
+    needs: [quality, compatibility, tests, package, react, symfony, laravel, laravel-mcp]
     runs-on: ubuntu-24.04
     steps:
       - name: Every job is green
         run: |
-          [ "${{ needs.quality.result }}" = success ] && [ "${{ needs.compatibility.result }}" = success ] && [ "${{ needs.tests.result }}" = success ] && [ "${{ needs.package.result }}" = success ] && [ "${{ needs.react.result }}" = success ] && [ "${{ needs.symfony.result }}" = success ] && [ "${{ needs.laravel.result }}" = success ]
+          [ "${{ needs.quality.result }}" = success ] && [ "${{ needs.compatibility.result }}" = success ] && [ "${{ needs.tests.result }}" = success ] && [ "${{ needs.package.result }}" = success ] && [ "${{ needs.react.result }}" = success ] && [ "${{ needs.symfony.result }}" = success ] && [ "${{ needs.laravel.result }}" = success ] && [ "${{ needs.laravel-mcp.result }}" = success ]
