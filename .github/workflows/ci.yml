@@ -93,9 +93,9 @@ jobs:
       - name: PHPUnit
         # Skipped tests fail the run: a conformance test skipped for a missing
         # schema would otherwise look like a pass.
-        # The SDK, ReactPHP, Symfony and Laravel suites need their example
-        # installed: their own jobs run them.
-        run: vendor/bin/phpunit --fail-on-skipped --exclude-testsuite sdk,react,symfony,laravel
+        # The SDK, ReactPHP, Symfony, Laravel and laravel/mcp suites need
+        # their example installed: their own jobs run them.
+        run: vendor/bin/phpunit --fail-on-skipped --exclude-testsuite sdk,react,symfony,laravel,laravel-mcp
 
   package:
     name: What Composer installs
@@ -215,6 +215,34 @@ jobs:
           vendor/bin/phpstan analyse -c docs/examples/laravel/phpstan-tests.neon --no-progress --error-format=github --memory-limit=1G
       - name: PHPUnit
         run: vendor/bin/phpunit --testsuite laravel --fail-on-skipped
+
+  laravel-mcp:
+    # The example written with laravel/mcp, Laravel's official MCP package,
+    # installed at the exact versions of laravel/framework and laravel/mcp
+    # the example pins. Out of CI passed until it has run green here once:
+    # it was proved against those versions from their sources, and the
+    # other packages Composer picks may still differ.
+    name: Example on laravel/mcp
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: shivammathur/setup-php@v2
+        with:
+          # The lowest PHP Laravel 13 runs on.
+          php-version: '8.3'
+          coverage: none
+          tools: composer:v2
+      - name: Install the library's tools
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Install the example
+        working-directory: docs/examples/laravel-mcp
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: PHPStan on the example
+        run: |
+          vendor/bin/phpstan analyse -c docs/examples/laravel-mcp/phpstan.neon --no-progress --error-format=github --memory-limit=1G
+          vendor/bin/phpstan analyse -c docs/examples/laravel-mcp/phpstan-tests.neon --no-progress --error-format=github --memory-limit=1G
+      - name: PHPUnit
+        run: vendor/bin/phpunit --testsuite laravel-mcp --fail-on-skipped
 
   passed:
     name: CI passed

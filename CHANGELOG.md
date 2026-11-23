@@ -10,6 +10,18 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **An example of a server written with laravel/mcp.** Laravel's official
+  MCP package lets a server replace any of its methods with `addMethod()`:
+  `docs/examples/laravel-mcp` replaces `tools/list` and `tools/call` with
+  two methods that hand them to the library, and keeps laravel/mcp's tools,
+  transports and other methods as they are. The library is given only the
+  tools `ServerContext::tools()` keeps for the request, so a tool hidden by
+  its `shouldRegister()` can be neither found nor run through a runner; a
+  tool runs through laravel/mcp's `ToolInvoker` with its own request, so
+  its validation and error results are unchanged. docs/HOSTS.md has the
+  section, and a CI job installs laravel/framework 13.43.0 and laravel/mcp
+  1.2.1 there and runs its tests, out of CI passed until it has run green
+  once.
 - **A city theatre written in Ukrainian on the search benchmark.** The
   second server in Cyrillic, after the Russian hotel: 40 tools, mostly
   neighbours on one object (move and cancel a performance; book a seat,

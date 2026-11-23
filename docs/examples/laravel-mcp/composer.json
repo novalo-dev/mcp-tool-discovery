@@ -1,0 +1,30 @@
+{
+    "name": "example/notes-laravel-mcp-server",
+    "description": "The notes server written with laravel/mcp, with its tools shown through novalo/mcp-tool-discovery.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.3",
+        "laravel/framework": "13.43.0",
+        "laravel/mcp": "1.2.1",
+        "novalo/mcp-tool-discovery": "*@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Example\\Notes\\LaravelMcp\\": "app/"
+        },
+        "files": [
+            "../notes.php",
+            "../http.php"
+        ]
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../.."
+        }
+    ],
+    "config": {
+        "sort-packages": true
+    }
+}

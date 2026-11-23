@@ -5,9 +5,11 @@ keeps all three. What it asks of a host is small: its tool definitions, a gate,
 the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
-on ReactPHP, in a Symfony application, in a Laravel application, and in four
-on the official PHP SDK. All nine serve the same notes tools, kept with their
-gate in [examples/notes.php](examples/notes.php): only the transport differs.
+on ReactPHP, in a Symfony application, in a Laravel application, in a server
+written with laravel/mcp, and in four on the official PHP SDK. All ten serve
+the same notes tools, kept with their gate in
+[examples/notes.php](examples/notes.php) (the laravel/mcp server writes them
+as its own tool classes): only the transport differs.
 Two of the SDK servers keep their tools outside the SDK, over stdio and over
 HTTP; the other two keep them in the SDK's own registry, added with
 `addTool()` or found by their `#[McpTool]` attribute.
@@ -224,6 +226,58 @@ A guard keeps the user it found. Octane forgets the guards after each
 request; a worker that keeps one application without Octane must call
 `forgetGuards()` on the auth manager after each request too, as the test
 does, or the next request that names no one is served as the last caller.
+
+---
+
+## A server written with laravel/mcp
+
+[examples/laravel-mcp](examples/laravel-mcp) is a server written as
+laravel/mcp, Laravel's official MCP package, documents one: a `Server` class
+with its list of `Tool` classes, routed by `Mcp::web()`. The library answers
+two of its methods and nothing else; the tools, the transports,
+`initialize` and every other method stay laravel/mcp's. The whole wiring is
+the `boot()` of [NotesServer](examples/laravel-mcp/app/NotesServer.php):
+
+```php
+final class NotesServer extends Server
+{
+    protected array $tools = [ListNotes::class, GetNote::class, AddNote::class, DeleteNote::class];
+
+    protected function boot(): void
+    {
+        $this->addMethod('tools/list', ListToolsMethod::class);
+        $this->addMethod('tools/call', CallToolMethod::class);
+    }
+}
+```
+
+Both methods extend [DiscoveryMethod](examples/laravel-mcp/app/DiscoveryMethod.php),
+which builds the Discovery of the request from what laravel/mcp's
+`ServerContext::tools()` keeps for it, and
+[ContextGate](examples/laravel-mcp/app/ContextGate.php) runs a tool the way
+laravel/mcp's own `tools/call` does. The tests send every request through the
+application's HTTP kernel, callers in turn
+([tests/LaravelMcp/LaravelMcpServerTest.php](../tests/LaravelMcp/LaravelMcpServerTest.php)).
+The example pins `laravel/framework` and `laravel/mcp` in
+[examples/laravel-mcp/composer.json](examples/laravel-mcp/composer.json), and
+a CI job installs them there and runs those tests.
+
+```
+cd docs/examples/laravel-mcp && composer install && cd -
+php -S 127.0.0.1:8080 docs/examples/laravel-mcp/public/app.php
+```
+
+| Part | In the server | Why |
+|---|---|---|
+| Who sees a tool | the tool's own `shouldRegister()`, as in [DeleteNote](examples/laravel-mcp/app/Tools/DeleteNote.php) | it is how laravel/mcp hides a tool; the library is only given what `ServerContext::tools()` keeps, so a hidden tool can be neither found nor run through a runner |
+| Running a tool | `ToolInvoker`, with `mcp.request` bound to the tool's own call for its time, as laravel/mcp's `ToolSearch` does | the tool's `Request`, its `validate()`, the container's injection and its error results behave as under laravel/mcp's `tools/call` |
+| What a call may carry | the tool's `handle()`, so `authorize()` lets every call through | laravel/mcp tools validate their arguments themselves and answer an error result |
+| The revision | `io.modelcontextprotocol/protocolVersion` of the request's `_meta` on 2026-07-28, else the `MCP-Protocol-Version` header, else 2025-03-26 over HTTP | laravel/mcp keeps no session; over stdio, where there is no header, the methods answer in the newest revision with a handshake |
+| Progress notifications | dropped | a tool run through a runner would stream them under a request the client did not send |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
+
+laravel/mcp also ships a `ToolSearch` of its own; the README compares the two
+searches on the same benchmark.
 
 ---
 
