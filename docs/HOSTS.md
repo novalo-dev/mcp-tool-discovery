@@ -36,7 +36,8 @@ every tool as itself: write `admin` in the file while a client is connected
 and the server sends `notifications/tools/list_changed`, as
 [When the tools change](#when-the-tools-change) describes. The fourth writes
 each search and each run after it as a line of `search.log`, as
-[the log](SEARCH.md#log) describes.
+[the log](SEARCH.md#log) describes;
+`php docs/examples/search-log-report.php search.log` then prints its misses.
 
 Its parts, in the order a host writes them:
 

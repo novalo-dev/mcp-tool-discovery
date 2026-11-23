@@ -373,6 +373,30 @@ The stdio example keeps such a log when `MCP_NOTES_SEARCH_LOG` names a file
 The tool that ran is the second one found, and "open" is a word no tool
 uses: a synonym of "read" for this host.
 
+[examples/search-log-report.php](examples/search-log-report.php) reads such a
+log and prints those leads, most frequent first: the words no tool uses with
+the tools that ran after them, the runs of a tool the search did not put
+first, and the searches that found nothing. On the two lines above:
+
+```
+php docs/examples/search-log-report.php search.log
+1 searches, 1 runs (0 failed), 0 unreadable lines
+0 of 1 successful runs after a search ran the first tool found
+
+Words no tool uses, and what ran after them
+  open                    1  notes_get (1)
+
+Runs of a tool the search did not put first
+  notes_get            2nd           1  text: open a note
+
+Searches that found nothing
+  (none)
+```
+
+A failed run is counted but ranks nothing, since it says more about its
+arguments than about the search, and a line cut short is counted and
+skipped.
+
 ---
 
 ## The measures

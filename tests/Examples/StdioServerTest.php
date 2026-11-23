@@ -99,6 +99,43 @@ final class StdioServerTest extends TestCase
         self::assertSame(['search' => null, 'ran' => 'notes_get', 'succeeded' => false], $lines[2]);
     }
 
+    public function testTheReportReadsTheMissesOfTheLogTheServerWrote(): void
+    {
+        $file = (string) tempnam(sys_get_temp_dir(), 'log');
+        $search = static fn(array $arguments): array => ['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => $arguments]];
+
+        try {
+            $first = self::session([self::INITIALIZE, $search(['query' => 'open a note']), $search(['query' => 'zzqx'])], 'reader', ['MCP_NOTES_SEARCH_LOG' => $file]);
+            $id = $first[2]['result']['structuredContent']['search_id'];
+            self::assertIsString($id);
+            self::session([
+                self::INITIALIZE,
+                ['method' => 'tools/call', 'params' => ['name' => 'notes_run_read_tool', 'arguments' => ['name' => 'notes_get', 'arguments' => ['id' => 1], 'search_id' => $id]]],
+            ], 'reader', ['MCP_NOTES_SEARCH_LOG' => $file]);
+            // A line cut short, as a crash leaves it, is counted and skipped.
+            file_put_contents($file, '{"search":', FILE_APPEND);
+
+            $process = proc_open([PHP_BINARY, dirname(__DIR__, 2) . '/docs/examples/search-log-report.php', $file], [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes);
+            self::assertIsResource($process);
+            $report = (string) stream_get_contents($pipes[1]);
+            $errors = (string) stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            self::assertSame(0, proc_close($process), $errors);
+            self::assertSame('', $errors);
+        } finally {
+            unlink($file);
+        }
+
+        $lines = explode("\n", rtrim($report));
+        self::assertSame('2 searches, 1 runs (0 failed), 1 unreadable lines', $lines[0]);
+        self::assertSame('0 of 1 successful runs after a search ran the first tool found', $lines[1]);
+        self::assertContains(\sprintf('  %-20s %4d  %s', 'open', 1, 'notes_get (1)'), $lines);
+        self::assertContains(\sprintf('  %-20s %4d  %s', 'zzqx', 1, '-'), $lines);
+        self::assertContains(\sprintf('  %-20s %-10s %4d  %s', 'notes_get', '2nd', 1, 'text: open a note'), $lines);
+        self::assertSame(\sprintf('  %4d  %s', 1, 'text: zzqx'), end($lines));
+    }
+
     public function testAToolTheGateHidesIsUnknownUntilTheRoleAllowsIt(): void
     {
         $delete = ['method' => 'tools/call', 'params' => ['name' => 'notes_run_write_tool', 'arguments' => ['name' => 'notes_delete', 'arguments' => ['id' => 1]]]];

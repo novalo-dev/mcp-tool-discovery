@@ -39,6 +39,14 @@ becomes the next version's section when it is published.
   test holds it to what the log promises: the run carries the id of its
   search, a tool the gate hides is never written, and an id no search
   wrote reaches the log as null.
+- **A report of the search log.** `docs/examples/search-log-report.php`
+  reads the log the stdio example writes and prints, most frequent first,
+  the words no tool uses with the tools that ran after them (the host's
+  synonyms to write), the runs of a tool the search did not put first, with
+  its rank, and the searches that found nothing. A failed run is counted
+  but ranks nothing; a line cut short is counted and skipped. It needs
+  nothing but PHP, and its test reads the log the stdio server wrote in the
+  same test.
 - **An example of a server written with laravel/mcp.** Laravel's official
   MCP package lets a server replace any of its methods with `addMethod()`:
   `docs/examples/laravel-mcp` replaces `tools/list` and `tools/call` with
