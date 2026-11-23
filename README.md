@@ -334,6 +334,17 @@ score:
 | In fields, after learning from the other half | 884 | 1023 |
 | In fields, asked a second time | 961 | 1060 |
 
+The same requests ranked by the search of laravel/mcp, Laravel's official MCP
+package, which a PHP host may already have: a substring score on the name,
+the description and the input schema, with no title, no index and no
+learning (`tests/Fixtures/SubstringSearch.php`). It takes one string, so the
+fields are joined into one:
+
+| The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
+|---|---|---|
+| The request as one sentence | 329 | 509 |
+| The fields joined into one sentence | 637 | 821 |
+
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures
 and how to change them.

@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Novalo\McpToolDiscovery\Tests\Search;
 
 use Novalo\McpToolDiscovery\Tests\Fixtures\Benchmark;
+use Novalo\McpToolDiscovery\Tests\Fixtures\SubstringSearch;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -52,6 +53,22 @@ final class BenchmarkTest extends TestCase
     }
 
     /**
+     * The search a PHP host most likely has already, that of laravel/mcp,
+     * is the line a host compares against: given the same words, the
+     * library finds the right tool first more often, and in the top 3.
+     */
+    public function testBeatsTheSearchAHostHasAlready(): void
+    {
+        $ours = Benchmark::run();
+        $theirs = Benchmark::baseline();
+
+        foreach (['sentence', 'fields'] as $input) {
+            self::assertGreaterThan($theirs[$input]['first'], $ours[$input]['first'], $input . ', right tool first');
+            self::assertGreaterThan($theirs[$input]['top3'], $ours[$input]['top3'], $input . ', top 3');
+        }
+    }
+
+    /**
      * The README and docs/SEARCH.md give the scores a host reads before
      * choosing the library. Each change to the search moves them, and a page
      * left behind keeps telling hosts about a benchmark that no longer exists:
@@ -74,6 +91,16 @@ final class BenchmarkTest extends TestCase
             self::assertSame((string) $queries, $table[1], $page . ': the number of test requests');
             preg_match_all('/^\|[^|]+\| \**(\d+)\** \| \**(\d+)\** \|$/m', $table[2], $rows, PREG_SET_ORDER);
             self::assertSame($measured, array_map(static fn(array $r): array => [(int) $r[1], (int) $r[2]], $rows), $page . ': the table of the test half');
+        }
+
+        $baseline = Benchmark::baseline();
+        $compared = [[$baseline['sentence']['first'], $baseline['sentence']['top3']], [$baseline['fields']['first'], $baseline['fields']['top3']]];
+        foreach (['README.md', 'docs/SEARCH.md'] as $page) {
+            $text = (string) file_get_contents($root . '/' . $page);
+            self::assertSame(1, preg_match('/^\| The same half, ranked as (.+?) ranks \|.*\n\|[-| ]+\|\n((?:\|.*\|\n){2})/m', $text, $table), $page . ': no table of the search a host has already');
+            self::assertSame(SubstringSearch::VERSION, $table[1], $page . ': the version compared against');
+            preg_match_all('/^\|[^|]+\| (\d+) \| (\d+) \|$/m', $table[2], $rows, PREG_SET_ORDER);
+            self::assertSame($compared, array_map(static fn(array $r): array => [(int) $r[1], (int) $r[2]], $rows), $page . ': the table of the search a host has already');
         }
 
         $search = (string) file_get_contents($root . '/docs/SEARCH.md');

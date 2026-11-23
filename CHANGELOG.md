@@ -8,6 +8,18 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **The benchmark measures the search a PHP host may already have.**
+  laravel/mcp v1.2.1, Laravel's official MCP package, ships a substring
+  score over the name, the description and the input schema; it is written
+  again in `tests/Fixtures/SubstringSearch.php` and run on the same test
+  half. As one sentence it finds the right tool first 329 times out of
+  1149, against 628 for this library; given the words of the fields joined,
+  637, against 883 in fields. `composer benchmark` prints both, the README
+  and docs/SEARCH.md give them, and `BenchmarkTest` fails if the library
+  stops beating it on either line.
+
 ## 0.6.0 - 2026-11-22
 
 ### Added

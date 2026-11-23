@@ -338,6 +338,22 @@ and gives the score.
 | In fields, after every train request was run once | 884 | 1023 |
 | In fields, after the test requests were run once, then asked again | 961 | 1060 |
 
+The same requests ranked by the search of laravel/mcp, Laravel's official MCP
+package, which a PHP host may already have: a substring score on the name,
+the description and the input schema, with no title, no index and no
+learning (`tests/Fixtures/SubstringSearch.php`). It takes one string, so the
+fields are joined into one:
+
+| The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
+|---|---|---|
+| The request as one sentence | 329 | 509 |
+| The fields joined into one sentence | 637 | 821 |
+
+As one sentence it trails on each of the twenty servers, the English ones
+included, and finds nothing first on the Chinese and Japanese ones: it cuts
+words at spaces, which those languages do not write. The test that guards
+the floors also checks that the library stays ahead on both lines.
+
 The library and school servers came after the settings were chosen, each
 with its 100 requests written before any of them was run, so they measure
 what the search does on a server nobody tuned it for: 39 and 38 of their 50

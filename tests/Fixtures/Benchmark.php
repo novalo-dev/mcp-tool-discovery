@@ -80,6 +80,39 @@ final class Benchmark
     }
 
     /**
+     * The same test half ranked by the search a PHP host most likely has
+     * already (SubstringSearch, that of laravel/mcp):
+     * - sentence: each request as one sentence, the only input it takes;
+     * - fields: the fields of each request joined into one string, so it
+     *   is given every word the fields give this library.
+     *
+     * @return array{sentence: array{queries: int, first: int, top3: int}, fields: array{queries: int, first: int, top3: int}}
+     */
+    public static function baseline(): array
+    {
+        $servers = array_map([RecordingGate::class, 'server'], self::SERVERS);
+        $test = array_values(array_filter(self::queries(), static fn(array $case): bool => $case['half'] === 'test'));
+        $scores = [];
+        foreach (['sentence', 'fields'] as $input) {
+            $first = 0;
+            $top3 = 0;
+            foreach ($test as $case) {
+                $query = $input === 'sentence' ? $case['query'] : implode(' ', [$case['action'], $case['object'], $case['description']]);
+                $names = array_slice(SubstringSearch::rank($servers[$case['server']], $query), 0, 3);
+                if (($names[0] ?? null) === $case['expected']) {
+                    ++$first;
+                }
+                if (in_array($case['expected'], $names, true)) {
+                    ++$top3;
+                }
+            }
+            $scores[$input] = ['queries' => count($test), 'first' => $first, 'top3' => $top3];
+        }
+
+        return $scores;
+    }
+
+    /**
      * @param array<string, ToolSet> $servers
      * @param list<array{server: string, half: string, action: string, object: string, description: string, query: string, expected: string}> $cases
      * @param list<array{server: string, half: string, action: string, object: string, description: string, query: string, expected: string}> $learnFrom
