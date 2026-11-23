@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Every mode on the example servers.** `MCP_NOTES_MODE` now takes
+  `grouped` and `gateway` beside `direct`, on the stdio, ReactPHP and SDK
+  servers alike, through one `mode()` in `docs/examples/notes.php`, so the
+  two modes that are not the default can be tried on a real client with
+  the same tools and the same gate. The tests run both over stdio as a
+  client would: a role granted in grouped mode adds the deletion to the
+  change tool and the client is told, a change sent to the read tool is
+  refused with the name of the tool that runs it, and in gateway mode the
+  one tool stays as it was while a search marks the deletion as a change.
 - **A post office written in Lao on the search benchmark.** 40 tools named
   in snake_case with titles and descriptions in Lao, written as Thai is,
   with no space between words, most of them neighbours on one object (send,

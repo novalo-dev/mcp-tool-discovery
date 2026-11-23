@@ -43,8 +43,6 @@ namespace Example\Notes\React;
 use Example\Notes\Notes;
 use Example\Notes\NotesGate;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
-use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -58,6 +56,7 @@ use React\Stream\ThroughStream;
 use function Example\Notes\answerHttp;
 use function Example\Notes\encode;
 use function Example\Notes\grantedRole;
+use function Example\Notes\mode;
 use function Example\Notes\originAllowed;
 use function Example\Notes\roleOf;
 use function Example\Notes\tools;
@@ -74,8 +73,9 @@ $notes = new Notes();
 $search = new SearchSetup(cache: new MemoryIndexCache());
 // Compact by default. In compact mode a change of rights moves no line of
 // the list, only what the search finds, so there would be nothing to send:
-// MCP_NOTES_MODE=direct lists every tool as itself, and the list moves.
-$mode = getenv('MCP_NOTES_MODE') === 'direct' ? new DirectMode() : new CompactMode(prefix: 'notes_', batchLimit: 20);
+// MCP_NOTES_MODE=direct lists every tool as itself, and the list moves;
+// grouped and gateway are the other two modes, on the same tools.
+$mode = mode(getenv('MCP_NOTES_MODE'));
 $tools = tools();
 
 /**

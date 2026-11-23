@@ -231,16 +231,109 @@ final class StdioServerTest extends TestCase
         self::assertSame('notes_delete', $lines[5][0]['result']['structuredContent']['tools'][0]['name']);
     }
 
+    public function testARoleGrantedInGroupedModeAddsTheDeletionToTheChangeTool(): void
+    {
+        $lines = self::liveSession('grouped', ['name' => 'notes', 'arguments' => ['describe' => ['notes_delete']]]);
+
+        $reader = $lines[1][0]['result']['tools'];
+        self::assertSame(['notes', 'notes_change'], array_column($reader, 'name'));
+        self::assertSame(['notes_list', 'notes_get'], $reader[0]['inputSchema']['properties']['action']['enum']);
+        self::assertSame(['notes_add'], $reader[1]['inputSchema']['properties']['action']['enum']);
+        self::assertTrue($reader[0]['annotations']['readOnlyHint']);
+        self::assertTrue($reader[1]['annotations']['destructiveHint']);
+        // The change tool now names one more action: the list moved, and
+        // the client is told before the reply to the ping.
+        self::assertSame('notifications/tools/list_changed', $lines[2][0]['method']);
+        self::assertCount(1, $lines[3]);
+        $admin = $lines[4][0]['result']['tools'];
+        self::assertSame(['notes_add', 'notes_delete'], $admin[1]['inputSchema']['properties']['action']['enum']);
+        // Describing a change goes through the read tool, so it never asks
+        // the person anything.
+        $described = $lines[5][0]['result']['structuredContent']['tools'][0];
+        self::assertSame(['notes_delete', 'notes_change'], [$described['name'], $described['run_with']]);
+        self::assertSame('notifications/tools/list_changed', $lines[6][0]['method']);
+    }
+
+    public function testAReaderAddsAndReadsANoteThroughTheGroupTools(): void
+    {
+        $replies = self::session([
+            self::INITIALIZE,
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_change', 'arguments' => ['action' => 'notes_add', 'arguments' => ['text' => 'Grouped']]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes', 'arguments' => ['action' => 'notes_get', 'arguments' => ['id' => 2]]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes', 'arguments' => ['action' => 'notes_add', 'arguments' => ['text' => 'Sent to the read tool']]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_change', 'arguments' => ['action' => 'notes_delete', 'arguments' => ['id' => 1]]]],
+        ], env: ['MCP_NOTES_MODE' => 'grouped']);
+
+        // The example starts with one note, so the one added is the second.
+        self::assertSame(['id' => 2], $replies[2]['result']['structuredContent']);
+        self::assertSame('Grouped', $replies[3]['result']['content'][0]['text']);
+        // A change sent to the read tool is refused before the gate is
+        // asked, with the tool that runs it.
+        self::assertTrue($replies[4]['result']['isError']);
+        self::assertStringContainsString('notes_change', $replies[4]['result']['content'][0]['text']);
+        // A tool the gate hides from a reader is not one of the group's
+        // actions, and nothing tells the reader it exists.
+        self::assertTrue($replies[5]['result']['isError']);
+        self::assertStringNotContainsString('Deletes', json_encode($replies[5], JSON_THROW_ON_ERROR));
+    }
+
+    public function testARoleGrantedInGatewayModeLeavesTheOneToolAsItWas(): void
+    {
+        $lines = self::liveSession('gateway', ['name' => 'notes_use_tools', 'arguments' => ['operation' => 'search', 'action' => 'delete', 'object' => 'note']]);
+
+        $tools = $lines[1][0]['result']['tools'];
+        self::assertSame(['notes_use_tools'], array_column($tools, 'name'));
+        // A reader may already add a note, so the one tool is destructive
+        // before the role changes, and the admin's list is the same.
+        self::assertTrue($tools[0]['annotations']['destructiveHint']);
+        foreach ([2, 3, 5, 6] as $step) {
+            self::assertCount(1, $lines[$step], 'No notification: the gateway never moved.');
+        }
+        self::assertSame($tools, $lines[4][0]['result']['tools']);
+        // The search finds the tool the role now shows, marked as a change,
+        // since the gateway's own annotations cannot tell.
+        $found = $lines[5][0]['result']['structuredContent']['tools'][0];
+        self::assertSame('notes_delete', $found['name']);
+        self::assertTrue($found['changes']);
+    }
+
+    public function testAToolFoundThroughTheGatewayRunsThroughIt(): void
+    {
+        $replies = self::session([
+            self::INITIALIZE,
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_use_tools', 'arguments' => ['operation' => 'search', 'action' => 'add', 'object' => 'note']]],
+        ], env: ['MCP_NOTES_MODE' => 'gateway']);
+        $found = $replies[2]['result']['structuredContent'];
+        self::assertSame('notes_add', $found['tools'][0]['name']);
+        self::assertTrue($found['tools'][0]['changes']);
+        self::assertArrayNotHasKey('changes', array_column($found['tools'], null, 'name')['notes_list'] ?? []);
+
+        $replies = self::session([
+            self::INITIALIZE,
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_use_tools', 'arguments' => ['operation' => 'run', 'name' => 'notes_add', 'arguments' => ['text' => 'Through the gateway']]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_use_tools', 'arguments' => ['operation' => 'run', 'name' => 'notes_get', 'arguments' => ['id' => 2]]]],
+            ['method' => 'tools/call', 'params' => ['name' => 'notes_use_tools', 'arguments' => ['operation' => 'run', 'name' => 'notes_delete', 'arguments' => ['id' => 1]]]],
+        ], env: ['MCP_NOTES_MODE' => 'gateway']);
+        self::assertSame(['id' => 2], $replies[2]['result']['structuredContent']);
+        self::assertSame('Through the gateway', $replies[3]['result']['content'][0]['text']);
+        // Hidden from a reader: refused as a name that does not exist.
+        self::assertTrue($replies[4]['result']['isError']);
+        self::assertStringNotContainsString('Deletes', json_encode($replies[4], JSON_THROW_ON_ERROR));
+    }
+
     /**
      * Runs the server with its role in a file and changes the file between
      * two messages, as an administrator would while the client is connected.
      * The steps: initialize, list as a reader, ping twice as an admin, list
-     * again, search for deletion, ping as a reader again. Each step gives the lines
-     * the server wrote before its reply, then the reply.
+     * again, the call given (a search for deletion in compact mode), ping as
+     * a reader again. Each step gives the lines the server wrote before its
+     * reply, then the reply.
+     *
+     * @param array<string, mixed> $call the params of the tools/call step
      *
      * @return list<list<array<string, mixed>>>
      */
-    private static function liveSession(string $mode): array
+    private static function liveSession(string $mode, array $call = ['name' => 'notes_search_tools', 'arguments' => ['action' => 'delete', 'object' => 'note']]): array
     {
         $file = (string) tempnam(sys_get_temp_dir(), 'role');
         file_put_contents($file, 'reader');
@@ -259,7 +352,7 @@ final class StdioServerTest extends TestCase
             ['admin', ['method' => 'ping']],
             ['admin', ['method' => 'ping']],
             ['admin', ['method' => 'tools/list']],
-            ['admin', ['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['action' => 'delete', 'object' => 'note']]]],
+            ['admin', ['method' => 'tools/call', 'params' => $call]],
             ['reader', ['method' => 'ping']],
         ];
         $lines = [];

@@ -74,6 +74,11 @@ tools stay outside them, listed as themselves.
   with a few tools, where a search would cost more than it saves, and the
   host that lets its users turn the other modes off.
 
+To see each one on a client of your own before choosing, the example server
+over stdio takes the mode by name, on the same four tools:
+`MCP_NOTES_MODE=grouped php docs/examples/stdio-server.php`, or `gateway`,
+`direct`, or nothing for compact ([HOSTS.md](HOSTS.md#a-server-over-stdio)).
+
 ---
 
 ## The contract

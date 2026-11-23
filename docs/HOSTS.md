@@ -29,6 +29,7 @@ php docs/examples/stdio-server.php
 MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
 MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php docs/examples/stdio-server.php
 MCP_NOTES_SEARCH_LOG=search.log php docs/examples/stdio-server.php
+MCP_NOTES_MODE=grouped php docs/examples/stdio-server.php
 ```
 
 The third reads the role again from `role.txt` at each message and lists
@@ -38,6 +39,15 @@ and the server sends `notifications/tools/list_changed`, as
 each search and each run after it as a line of `search.log`, as
 [the log](SEARCH.md#log) describes;
 `php docs/examples/search-log-report.php search.log` then prints its misses.
+The last shows the same tools in grouped mode: `MCP_NOTES_MODE` takes
+`compact` (the default), `direct`, `grouped` or `gateway`, chosen by
+`mode()` in `notes.php`, which the ReactPHP and SDK servers read too, so each
+mode can be tried on a real client with the same tools and the same gate. The
+tests hold the two that do not search to what [MODES.md](MODES.md) says: in
+grouped mode a role granted adds the deletion to `notes_change` and the client
+is told; in gateway mode the one tool stays as it was, already destructive
+since a reader may add a note, and a search marks the deletion with
+`"changes": true`.
 
 Its parts, in the order a host writes them:
 
@@ -47,6 +57,7 @@ Its parts, in the order a host writes them:
 | The gate | `NotesGate`, in `notes.php` | `visible()` for who may know a tool exists, `authorize()` for the call with its arguments, `call()` to run it; the last two come from `NotesTools`, which the Symfony and Laravel examples reuse behind their own gates |
 | The revision | `initialize` in `answer()`, through `Revision::negotiate()` | the client's revision when the library shapes it, otherwise the latest revision with a handshake, as the specification asks |
 | The two methods | `tools/list`, `tools/call` in `answer()` | `listTools()` and `callTool()` return the `result` member; the host wraps it |
+| The mode | `mode()`, in `notes.php`, from `MCP_NOTES_MODE` | one line a host writes once; compact unless the variable names another |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore` | the index is built at the first search, not at every one; the process serves one caller, so what a successful run teaches lifts only that caller's tools, for its session |
 | The log | `NotesSearchLog`, in `notes.php`, when `MCP_NOTES_SEARCH_LOG` names a file | one JSON line per search (the fields the client filled, the tools found, the words no tool uses) and per run (the tool, whether it succeeded, the `search_id` of its search); nothing is kept unless a file is named |
 | A changed list | the loop, with the `listFingerprint()` of the list the client holds | `listChanged` declared at `initialize`, and the notification sent when the fingerprint of the next message differs |

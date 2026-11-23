@@ -22,6 +22,8 @@ declare(strict_types=1);
  * As admin: MCP_NOTES_ROLE=admin php docs/examples/stdio-server.php
  * The role read again at each message from a file, every tool listed as
  * itself:   MCP_NOTES_ROLE_FILE=role.txt MCP_NOTES_MODE=direct php ...
+ * The same tools in another mode (direct, grouped or gateway):
+ *           MCP_NOTES_MODE=grouped php docs/examples/stdio-server.php
  * What the client searched and ran after, one line each, kept in a file:
  *           MCP_NOTES_SEARCH_LOG=search.log php docs/examples/stdio-server.php
  *
@@ -34,8 +36,6 @@ declare(strict_types=1);
 namespace Example\Notes;
 
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
-use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
@@ -111,10 +111,8 @@ function role(): string
 
 $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 $notes = new Notes();
-// Four tools would fit in a list on their own; the compact mode is shown here
-// because it is the one a large server uses. MCP_NOTES_MODE=direct lists
-// every tool as itself.
-$mode = getenv('MCP_NOTES_MODE') === 'direct' ? new DirectMode() : new CompactMode(prefix: 'notes_', batchLimit: 20);
+// Compact unless MCP_NOTES_MODE names direct, grouped or gateway.
+$mode = mode(getenv('MCP_NOTES_MODE'));
 // The index is built at the first search instead of at every one. The process
 // serves one caller, so what its runs teach the search lifts only that
 // caller's tools, for as long as the session lasts. The log is kept only

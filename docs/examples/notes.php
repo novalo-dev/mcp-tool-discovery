@@ -24,6 +24,11 @@ namespace Example\Notes;
 
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
+use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
+use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Search\SearchLog;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
 use Novalo\McpToolDiscovery\Search\SearchResult;
@@ -67,6 +72,31 @@ function definitions(): array
             'annotations' => ['destructiveHint' => true],
         ],
     ];
+}
+
+/**
+ * The mode the servers show their tools in, by the name MCP_NOTES_MODE gives.
+ * Four tools would fit in a list on their own; compact is the default because
+ * it is the one a large server uses, and the other three are here so each can
+ * be tried on a real client with the same tools and the same gate.
+ */
+function mode(string|false $name): DiscoveryMode
+{
+    return match ($name) {
+        // Every tool as itself: a role granted moves the list.
+        'direct' => new DirectMode(),
+        // One group holds the four tools: "notes" runs and describes the
+        // reads, "notes_change" the changes, and its actions are the changes
+        // the caller may see, so an admin's list names the deletion.
+        'grouped' => new GroupedMode(
+            groupOf: static fn(Tool $tool): string => 'notes',
+            groups: ['notes' => 'Notes'],
+        ),
+        // One tool that searches, describes and runs. Adding a note is a
+        // change every role may make, so it is marked destructive for all.
+        'gateway' => new GatewayMode(prefix: 'notes_'),
+        default => new CompactMode(prefix: 'notes_', batchLimit: 20),
+    };
 }
 
 /**
