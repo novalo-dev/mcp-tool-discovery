@@ -355,7 +355,7 @@ final class ToolIndex
      *
      * The letters that match outright must be at least as many as those
      * taken on trust, so "đơn" is not spelled by any three letters ending
-     * in "n".
+     * in "n". At most MAX_ALIKE words, the first in index order.
      *
      * @return list<string>
      */
@@ -414,8 +414,14 @@ final class ToolIndex
                     continue 2;
                 }
             }
+            // Bounded as the words alike are: each is scored on its own, and
+            // a word whose letters are half marks is spelled by every word
+            // of the index sharing the other half.
             if ($same >= $trusted) {
                 $spelled[] = $indexed;
+                if (count($spelled) >= self::MAX_ALIKE) {
+                    break;
+                }
             }
         }
 

@@ -284,6 +284,37 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(1.0, microtime(true) - $start, 'the words alike each unknown word are bounded');
     }
 
+    public function testWordsWithMarksCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words all share their first half, so a word
+        // whose second half is marks is spelled by every word of the index.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = 'recx';
+                for ($letter = 0; $letter < 4; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        foreach (['ǎ', 'ä', 'á', 'à', 'â', 'ã', 'å', 'ā', 'ă', 'ą', 'ȁ', 'ȃ', 'ạ', 'ả', 'ấ', 'ầ', 'ẩ', 'ẫ', 'ậ', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'ǻ', 'ǟ', 'ǡ', 'ḁ', 'ẚ', 'ⱥ', 'ɐ', 'ɑ'] as $mark) {
+            $field .= 'recx' . str_repeat($mark, 4) . ' ';
+        }
+
+        $start = microtime(true);
+        $result = $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertNotSame([], $result->tools);
+        self::assertLessThan(1.0, microtime(true) - $start, 'the words a word spells but for its marks are bounded');
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

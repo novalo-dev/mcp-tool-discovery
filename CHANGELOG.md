@@ -101,6 +101,13 @@ becomes the next version's section when it is published.
   every key of the store once more: about 0.55 ms against 0.35 ms over 176
   tools.
 
+### Security
+
+- A word of a request counts as at most 32 tool words it spells but for its
+  marks, as for the words alike it, so the cost of a search stays small
+  however many words of a large index share most of their letters. The
+  ranking of every request of the benchmark is unchanged.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added
