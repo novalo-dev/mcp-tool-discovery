@@ -116,6 +116,7 @@ abstract class ModeContractTestCase extends TestCase
             json_encode($discovery->listTools($this->tools(), Revision::latest())),
             // A guide may name a tool the caller may not see.
             $discovery->guideHeader($this->tools()->names(), $this->tools()),
+            $discovery->instructions(),
         ];
         foreach ($this->probes() as [$name, $arguments]) {
             $outputs[] = json_encode($discovery->callTool($name, $arguments, $this->tools(), Revision::latest()));
@@ -124,6 +125,16 @@ abstract class ModeContractTestCase extends TestCase
         foreach ($outputs as $output) {
             self::assertIsString($output);
             self::assertStringNotContainsString(self::HIDDEN, $output);
+        }
+    }
+
+    public function testTheInstructionsNameNoToolOfTheHost(): void
+    {
+        // Shared by every caller, and possibly cached for all of them: a host
+        // tool named there could be one the gate hides from some.
+        $instructions = (new Discovery($this->mode(), $this->gate()))->instructions();
+        foreach ($this->tools() as $tool) {
+            self::assertStringNotContainsString($tool->name, $instructions);
         }
     }
 

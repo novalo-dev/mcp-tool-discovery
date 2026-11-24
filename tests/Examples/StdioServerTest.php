@@ -43,6 +43,16 @@ final class StdioServerTest extends TestCase
         self::assertSame('2025-11-25', $replies[1]['result']['protocolVersion']);
     }
 
+    public function testTheInstructionsSayHowTheModeReachesTheTools(): void
+    {
+        $instructions = self::session([self::INITIALIZE])[1]['result']['instructions'] ?? null;
+
+        self::assertIsString($instructions);
+        self::assertStringStartsWith('Notes kept for the team.', $instructions);
+        self::assertStringContainsString('notes_search_tools', $instructions);
+        self::assertStringContainsString('notes_run_write_batch', $instructions);
+    }
+
     public function testAToolFoundBySearchRunsThroughTheWriteRunner(): void
     {
         $replies = self::session([

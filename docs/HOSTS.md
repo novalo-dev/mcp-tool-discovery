@@ -460,6 +460,11 @@ What changes from the registry server:
 - **A list that is still right.** When the tools change, the next request
   sees them; the list a client already holds may not, depending on the mode
   ([When the tools change](#when-the-tools-change)).
+- **Instructions that say how to reach the tools.** In every mode but
+  Direct, the list is not the whole server. Add `$discovery->instructions()`
+  after your own words in the `instructions` of the `initialize` answer, or
+  of `server/discover`, as the stdio and HTTP examples do
+  ([Instructions](MODES.md#instructions)).
 - **Pages, if the list is long.** `listTools()` answers in one piece.
   A host that pages its list calls `listPage()` instead
   ([A list in pages](#a-list-in-pages)).

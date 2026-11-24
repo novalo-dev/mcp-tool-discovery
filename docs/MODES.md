@@ -312,6 +312,32 @@ hidden tool the prompt names is left out of the header. A mode of your own
 gets a header by implementing `Mode\GuideHeader`; one that does not gets
 `""`.
 
+## Instructions
+
+Clients put the `instructions` of the `initialize` answer (of
+`server/discover` from `2026-07-28`) in the model's system prompt, read
+before any tool. In every mode but Direct the list is not the whole server,
+and a model shown three tools for three hundred concludes the one it needs
+is missing. `$discovery->instructions()` returns one or two sentences that
+say how the current mode reaches the others, to put after the host's own:
+
+| Mode | What the instructions say |
+|---|---|
+| Compact | most tools are not in the list: find them with `search_tools`, run each with `run_read_tool` or `run_write_tool` (and `run_write_batch` when it is on); a tool in the list is called directly |
+| Grouped | each tool of a group is an action of the group's tool: read it with `describe`, run a read with `action` and `arguments`, a change on `<group>_change`; any other tool is called directly |
+| Gateway | every tool goes through `use_tools`, with `operation` `search`, `describe` and `run`; with `changesApart`, only the reads, and the changes are called directly |
+| Direct | nothing: `""` |
+
+```php
+$result['instructions'] = trim('Files and tickets of the team. ' . $discovery->instructions());
+```
+
+They are the same for every caller: they name the mode's own tools, never
+one of the host's, not even a pinned one, since the gate may hide it from
+some. So they can go in a `server/discover` answer cached with
+`cacheScope` `public`. A mode of your own gets them by implementing
+`Mode\Instructions`; one that does not gets `""`.
+
 ## What a mode never does
 
 - show, find or describe a tool the gate hides;

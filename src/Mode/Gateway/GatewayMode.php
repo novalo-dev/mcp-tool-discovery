@@ -17,6 +17,7 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -33,7 +34,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * search, sets $changesApart: the changes are then listed as themselves, with
  * their own annotations, and the gateway only reads.
  */
-final class GatewayMode implements DiscoveryMode, GuideHeader
+final class GatewayMode implements DiscoveryMode, GuideHeader, Instructions
 {
     public const NAME = 'use_tools';
 
@@ -106,6 +107,20 @@ final class GatewayMode implements DiscoveryMode, GuideHeader
             self::RUN => $this->run($arguments, $runner),
             default => CallResult::error(sprintf('operation is required: %s, %s or %s.', self::SEARCH, self::DESCRIBE, self::RUN)),
         };
+    }
+
+    /**
+     * The sentences for the server's instructions: one tool stands for the
+     * whole server, and with the changes apart, the changes are called as
+     * themselves and refused by the gateway.
+     */
+    public function instructions(): string
+    {
+        if ($this->changesApart) {
+            return sprintf('The tools of this server that only read go through %s: find the ones you need with operation %s, read their parameters with operation %s, and run each with operation %s. A tool that changes something is in your tool list: call it directly.', $this->toolName, self::SEARCH, self::DESCRIBE, self::RUN);
+        }
+
+        return sprintf('Every tool of this server goes through %s: find the ones you need with operation %s, read their parameters with operation %s, and run each with operation %s.', $this->toolName, self::SEARCH, self::DESCRIBE, self::RUN);
     }
 
     /**

@@ -254,4 +254,21 @@ final class GatewayModeTest extends TestCase
         // Changes alone are all in the list: nothing to say.
         self::assertSame('', $mode->guideHeader(['acme_set_ticket_status'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheInstructionsSendEveryToolThroughTheGateway(): void
+    {
+        $instructions = (new GatewayMode(prefix: 'acme_'))->instructions();
+
+        self::assertStringContainsString('Every tool of this server goes through acme_use_tools', $instructions);
+        self::assertStringContainsString('operation describe', $instructions);
+        self::assertStringNotContainsString('directly', $instructions);
+    }
+
+    public function testWithChangesApartTheInstructionsSayAChangeIsCalledDirectly(): void
+    {
+        $instructions = (new GatewayMode(changesApart: true))->instructions();
+
+        self::assertStringContainsString('only read go through use_tools', $instructions);
+        self::assertStringContainsString('changes something is in your tool list: call it directly', $instructions);
+    }
 }

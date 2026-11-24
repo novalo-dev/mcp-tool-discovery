@@ -56,6 +56,8 @@ abstract class HttpServerTestCase extends TestCase
         [$status, $body] = self::post(['method' => 'initialize', 'params' => ['protocolVersion' => '2025-06-18']], self::READER, null);
         self::assertSame(200, $status);
         self::assertSame('2025-06-18', $body['result']['protocolVersion'] ?? null);
+        // The model is told the list holds the search, not the notes tools.
+        self::assertStringContainsString('notes_search_tools', $body['result']['instructions'] ?? '');
 
         [, $listed] = self::post(['method' => 'tools/list'], self::READER, '2025-06-18');
         self::assertSame(
@@ -84,6 +86,7 @@ abstract class HttpServerTestCase extends TestCase
         self::assertContains('2026-07-28', $discovered['result']['supportedVersions'] ?? []);
         self::assertContains('2025-11-25', $discovered['result']['supportedVersions'] ?? []);
         self::assertSame('complete', $discovered['result']['resultType'] ?? null);
+        self::assertStringContainsString('notes_search_tools', $discovered['result']['instructions'] ?? '');
 
         [, $listed] = self::post(['method' => 'tools/list', 'params' => self::stateless()], self::READER, '2026-07-28');
         self::assertSame('complete', $listed['result']['resultType'] ?? null);

@@ -121,4 +121,12 @@ final class DiscoveryTest extends TestCase
     {
         self::assertSame('', (new Discovery(new DirectMode(), new RecordingGate()))->guideHeader(['acme_get_file'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheInstructionsAreTheModesAndEmptyWhenItListsEveryTool(): void
+    {
+        $mode = new CompactMode(prefix: 'acme_');
+
+        self::assertSame($mode->instructions(), (new Discovery($mode, new RecordingGate()))->instructions());
+        self::assertSame('', (new Discovery(new DirectMode(), new RecordingGate()))->instructions());
+    }
 }

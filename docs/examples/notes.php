@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace Example\Notes;
 
+use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
@@ -97,6 +98,18 @@ function mode(string|false $name): DiscoveryMode
         'gateway' => new GatewayMode(prefix: 'notes_'),
         default => new CompactMode(prefix: 'notes_', batchLimit: 20),
     };
+}
+
+/**
+ * The instructions of the initialize or server/discover answer: what the
+ * server is, then how its mode reaches the tools it does not list. A client
+ * puts them in the model's system prompt, read before any tool, so a model
+ * shown three tools knows the server has more. The same for every caller,
+ * so the discover answer stays public.
+ */
+function instructions(Discovery $discovery): string
+{
+    return trim('Notes kept for the team. ' . $discovery->instructions());
 }
 
 /**

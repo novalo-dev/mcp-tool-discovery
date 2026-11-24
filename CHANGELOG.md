@@ -10,6 +10,20 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Server instructions from the mode, with `Discovery::instructions()`.**
+  Clients put the `instructions` of the `initialize` answer (of
+  `server/discover` from 2026-07-28) in the model's system prompt, before
+  any tool. In Compact, Grouped and Gateway the list is not the whole
+  server, and a model that is not told so concludes the tool it needs is
+  missing; every host had to write that sentence itself and keep it in step
+  with its prefix and its options. It now gets one or two sentences for the
+  current mode, to put after its own words, and `""` in Direct. They name
+  the mode's own tools only, never one of the host's, so they are the same
+  for every caller and can go in a discover answer cached as `public`. A
+  mode of your own gets them by implementing the new `Mode\Instructions`
+  interface, kept apart from `DiscoveryMode` so existing modes are not
+  broken. The stdio and HTTP examples send them.
+
 - **A tool set that leaves out a bad tool instead of failing.**
   `ToolSet::of($tools, $refused)` takes a callback: a definition the
   library cannot work with, or a later tool under a name already taken, is

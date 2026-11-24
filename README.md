@@ -226,6 +226,10 @@ every mode but Direct: `$discovery->guideHeader($toolNames, $tools)` returns
 the block to put at the top of the prompt text, written for the current mode
 and naming only the tools the caller may see
 ([docs/MODES.md](docs/MODES.md#guides)).
+The server's instructions should say it too, since clients read them
+before any tool: `$discovery->instructions()` gives the sentences to add to
+the `instructions` of the `initialize` answer, the same for every caller
+([docs/MODES.md](docs/MODES.md#instructions)).
 
 ### Grouped
 

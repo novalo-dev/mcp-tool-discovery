@@ -250,4 +250,10 @@ final class CompactBatchTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new CompactMode(batchLimit: -1);
     }
+
+    public function testTheInstructionsNameTheBatchRunnerOnlyWhenItIsOn(): void
+    {
+        self::assertStringContainsString(CompactMode::RUN_WRITE_BATCH, (new CompactMode(batchLimit: 5))->instructions());
+        self::assertStringNotContainsString(CompactMode::RUN_WRITE_BATCH, (new CompactMode())->instructions());
+    }
 }

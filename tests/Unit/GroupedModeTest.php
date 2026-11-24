@@ -268,4 +268,14 @@ final class GroupedModeTest extends TestCase
         // A guide that names only tools listed as themselves needs no header.
         self::assertSame('', Groups::mode()->guideHeader(['acme_list_deployments', 'files'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheInstructionsSayHowAGroupToolRunsItsActions(): void
+    {
+        $instructions = Groups::mode('acme_')->instructions();
+
+        self::assertStringContainsString('lists its tools by group', $instructions);
+        self::assertStringContainsString('ending in _change', $instructions);
+        // A group whose tools a caller may not see is not in that caller's list.
+        self::assertStringNotContainsString('acme_files', $instructions);
+    }
 }

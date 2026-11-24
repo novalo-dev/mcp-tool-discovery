@@ -17,6 +17,7 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -40,7 +41,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * goes through the runner on its own, so the host's gate judges it exactly
  * as a single call.
  */
-final class CompactMode implements DiscoveryMode, GuideHeader
+final class CompactMode implements DiscoveryMode, GuideHeader, Instructions
 {
     public const SEARCH = 'search_tools';
     public const RUN_READ = 'run_read_tool';
@@ -115,6 +116,22 @@ final class CompactMode implements DiscoveryMode, GuideHeader
             $this->batchLimit > 0 && $name === $this->batchName => $this->runBatch($arguments, $runner),
             default => $this->run($name === $this->writeName, $arguments, $runner),
         };
+    }
+
+    /**
+     * The sentences for the server's instructions: the list holds the
+     * search and the runners, not the tools, and a pinned tool is called as
+     * itself. The pinned tools are not named, since the gate may hide one
+     * from a caller the instructions are shared with.
+     */
+    public function instructions(): string
+    {
+        $runs = sprintf('run each with %s if it only reads or %s if it changes something', $this->readName, $this->writeName);
+        if ($this->batchLimit > 0) {
+            $runs .= sprintf(', or with %s to make the same change on several items in one call', $this->batchName);
+        }
+
+        return sprintf('This server lists its tools in compact form: most of them are not in your tool list. Find the ones you need with %s, then %s. A tool that is in your list is called directly.', $this->searchName, $runs);
     }
 
     /**

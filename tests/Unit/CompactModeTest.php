@@ -278,4 +278,16 @@ final class CompactModeTest extends TestCase
         // Without a pinned tool named, the header reads as before.
         self::assertStringNotContainsString('directly', (new CompactMode())->guideHeader(['acme_set_ticket_status'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheInstructionsNameTheSearchAndTheRunners(): void
+    {
+        $instructions = (new CompactMode(prefix: 'acme_', pinned: ['acme_get_file']))->instructions();
+
+        self::assertStringContainsString('acme_search_tools', $instructions);
+        self::assertStringContainsString('acme_run_read_tool if it only reads', $instructions);
+        self::assertStringContainsString('acme_run_write_tool if it changes something', $instructions);
+        self::assertStringContainsString('called directly', $instructions);
+        // A pinned tool may be hidden from some callers, who share these.
+        self::assertStringNotContainsString('acme_get_file', $instructions);
+    }
 }

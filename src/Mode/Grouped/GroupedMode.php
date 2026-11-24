@@ -17,6 +17,7 @@ use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Protocol\Json;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -39,7 +40,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * whose group is not declared is listed as itself, so it is never out of
  * the assistant's reach.
  */
-final class GroupedMode implements DiscoveryMode, GuideHeader
+final class GroupedMode implements DiscoveryMode, GuideHeader, Instructions
 {
     public const CHANGE_SUFFIX = '_change';
 
@@ -132,6 +133,17 @@ final class GroupedMode implements DiscoveryMode, GuideHeader
         }
 
         return $this->run($group, false, $arguments, $runner);
+    }
+
+    /**
+     * The sentences for the server's instructions: a group's tools are the
+     * actions of its tool, not tools of the list. No group is named, since
+     * a group whose tools the gate hides from a caller is not in that
+     * caller's list.
+     */
+    public function instructions(): string
+    {
+        return sprintf('This server lists its tools by group: each tool of a group is an action of the group\'s tool, not a tool of your list. Read an action\'s parameters with describe on the group\'s tool, run a read with action and arguments on that tool, and a change on the tool of the same name ending in %s. Any other tool in your list is called directly.', self::CHANGE_SUFFIX);
     }
 
     /**

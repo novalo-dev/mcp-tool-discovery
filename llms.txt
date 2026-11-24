@@ -5,6 +5,7 @@
 - Answers shaped and validated for the MCP revisions 2024-11-05, 2025-03-26, 2025-06-18, 2025-11-25 and 2026-07-28.
 - Modes are packs in src/Mode/: Compact (search and runners), Grouped (one read tool and one change tool per declared group) and Gateway (a single tool, use_tools, with an operation of search, describe or run) and Direct (every tool as itself, for small servers and hosts that let users turn the others off) are shipped.
 - A hidden tool is never listed, found, described or run; nothing runs without the host's authorize(); a tool counts as a read only with readOnlyHint: true.
+- Discovery::instructions() gives the sentences for the server's instructions, and Discovery::guideHeader() the block for the top of a prompt, both saying how the current mode reaches the tools it does not list.
 - Plain PHP arrays in and out, in the shape of the specification: works with the official PHP SDK, a framework, or a handler written by hand.
 
 ## Docs

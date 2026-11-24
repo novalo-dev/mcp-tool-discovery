@@ -20,6 +20,7 @@ use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Protocol\Shaper;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -194,6 +195,18 @@ final class Discovery
         $visible = $this->visible($tools);
 
         return $this->mode instanceof GuideHeader ? $this->mode->guideHeader($names, $visible) : '';
+    }
+
+    /**
+     * The sentences to put in the `instructions` of the `initialize` answer
+     * (of `server/discover` from 2026-07-28), after the host's own, saying
+     * how the current mode reaches the tools it does not list as
+     * themselves; "" when it lists them all. The same for every caller, so
+     * it may go in an answer cached for all of them.
+     */
+    public function instructions(): string
+    {
+        return $this->mode instanceof Instructions ? $this->mode->instructions() : '';
     }
 
     private function visible(ToolSet $tools): ToolSet
