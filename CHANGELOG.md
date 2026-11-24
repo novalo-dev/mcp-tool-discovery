@@ -147,6 +147,15 @@ becomes the next version's section when it is published.
   every key of the store once more: about 0.55 ms against 0.35 ms over 176
   tools.
 
+### Fixed
+
+- **docs/MODES.md gives the bytes of one compact search as measured.**
+  The changes to the search since the table was written had moved the
+  answer on seven servers, the kindergarten from 1,438 to 1,222 bytes, and
+  nothing checked it. `ListCostTest` now compares the whole table, and the
+  README sentence on the largest server, with what the benchmark measures,
+  and its failure shows the table to paste.
+
 ### Security
 
 - A word of a request counts as at most 32 tool words it spells but for its
