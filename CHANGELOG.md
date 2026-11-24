@@ -163,6 +163,11 @@ becomes the next version's section when it is published.
   however many words of a large index share most of their letters. The
   ranking of every request of the benchmark is unchanged.
 
+- A word of a request whose letters with marks outnumber its plain letters
+  is no longer held against the plain words of the index, which can never
+  spell it, so its search costs as little as any other on a large index.
+  The ranking of every request of the benchmark is unchanged.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

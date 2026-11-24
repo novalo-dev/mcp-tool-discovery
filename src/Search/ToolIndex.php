@@ -398,10 +398,16 @@ final class ToolIndex
         }
         // A plain word can only be spelled by a word with marks; a word
         // with marks by a word with or without them.
-        $hasMarks = preg_match(self::MARKED, $word) === 1;
+        $marks = (int) preg_match_all(self::MARKED, $word);
+        $hasMarks = $marks > 0;
         if (!$hasMarks && preg_match(self::PLAIN, $word) !== 1) {
             return [];
         }
+        // Against a plain word, every letter with marks is taken on trust
+        // and every other one must match outright, so the plain words can
+        // spell it only when its letters with marks are at most half: past
+        // that, each would pass the pattern below and fail the count.
+        $againstPlain = $hasMarks && 2 * $marks <= count($characters);
         // Built from the index at the first word that needs them, each with
         // one pass of PCRE over every word: an index read back from the
         // cache at each request pays for them only when a request holds a
@@ -416,7 +422,7 @@ final class ToolIndex
                 $this->marked[(int) preg_match_all('/./su', $indexed)][] = $indexed;
             }
         }
-        if ($hasMarks && $this->plain === null) {
+        if ($againstPlain && $this->plain === null) {
             $this->plain = [];
             /** @var array<int, string>|false $plain */
             $plain = preg_grep(self::PLAIN, $this->wordList);
@@ -441,7 +447,7 @@ final class ToolIndex
                 $pattern .= self::stands($character);
             }
         }
-        $candidates = array_merge($hasMarks ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
+        $candidates = array_merge($againstPlain ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
         $spelled = [];
         // In slices, so the pass stops once MAX_ALIKE are found, as the loop
         // did before it, rather than reading the rest of the index.

@@ -346,6 +346,38 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(0.25, microtime(true) - $start, 'one pass of PCRE keeps the words that could be spelled');
     }
 
+    public function testWordsMostlyOfMarksCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words are plain and eight letters long, and
+        // words of eight letters with marks only: every plain word of the
+        // index has their letters but for the marks, and none spells them,
+        // so the plain words are not read at all.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = '';
+                for ($letter = 0; $letter < 8; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        foreach (['ǎ', 'ä', 'á', 'à', 'â', 'ã', 'å', 'ā', 'ă', 'ą', 'ȁ', 'ȃ', 'ạ', 'ả', 'ấ', 'ầ', 'ά', 'έ', 'ή', 'ί', 'ό', 'ύ', 'ώ', 'ϊ', 'ё', 'ї', 'ў', 'є', 'і', 'ђ', 'ћ', 'џ'] as $mark) {
+            $field .= str_repeat($mark, 8) . ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a word with more letters of marks than plain ones is held against no plain word');
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());
