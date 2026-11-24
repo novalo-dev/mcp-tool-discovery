@@ -10,6 +10,14 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Greek requests in capitals and without accents on the search
+  benchmark.** Twelve more on the town hall and twelve on the museum, written
+  before any of them was run, typed as Greek is typed in capitals or in
+  haste: no accent, and a plain `σ` where the tools end a word with `ς`.
+  The benchmark now holds 2921 requests; its floors move to 1109 and 1303
+  in fields and 1217 asked again, and the laravel/mcp line to 431 and 663
+  as one sentence and 800 and 1034 with the fields joined.
+
 - **Server instructions from the mode, with `Discovery::instructions()`.**
   Clients put the `instructions` of the `initialize` answer (of
   `server/discover` from 2026-07-28) in the model's system prompt, before

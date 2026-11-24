@@ -329,7 +329,7 @@ client gives its request **in fields**, and each field is scored on its own:
   it, under one id, so a host sees what its clients asked and missed. The
   library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-2897 requests over twenty-six fictional servers, a workspace (snake_case), a
+2921 requests over twenty-six fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -350,12 +350,12 @@ written in Turkish and a kindergarten written in Vietnamese.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1452 requests | Right tool first | Right tool in the top 3 |
+| Test half, 1464 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1099** | **1291** |
-| The same request as one sentence | 807 | 1056 |
-| In fields, after learning from the other half | 1102 | 1291 |
-| In fields, asked a second time | 1206 | 1348 |
+| The request in fields | **1109** | **1303** |
+| The same request as one sentence | 815 | 1065 |
+| In fields, after learning from the other half | 1112 | 1303 |
+| In fields, asked a second time | 1217 | 1360 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -365,8 +365,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 431 | 662 |
-| The fields joined into one sentence | 800 | 1031 |
+| The request as one sentence | 431 | 663 |
+| The fields joined into one sentence | 800 | 1034 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1099 times
-out of 1452 in fields, and 807 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1109 times
+out of 1464 in fields, and 815 times as one sentence.
 
 ## How a tool is scored
 
@@ -490,17 +490,17 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `flight.change-aircraft`), a fleet of field sensors generated from
 OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
 written in Turkish (40 tools, `ticket_refund`) and a kindergarten written
-in Vietnamese (40 tools, `absence_notice_cancel`). 2897 requests, each written as one
+in Vietnamese (40 tools, `absence_notice_cancel`). 2921 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1452 requests | Right tool first | Top 3 |
+| Test half, 1464 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1099 | 1291 |
-| The same request as one sentence | 807 | 1056 |
-| In fields, after every train request was run once | 1102 | 1291 |
-| In fields, after the test requests were run once, then asked again | 1206 | 1348 |
+| The request in fields | 1109 | 1303 |
+| The same request as one sentence | 815 | 1065 |
+| In fields, after every train request was run once | 1112 | 1303 |
+| In fields, after the test requests were run once, then asked again | 1217 | 1360 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -510,8 +510,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 431 | 662 |
-| The fields joined into one sentence | 800 | 1031 |
+| The request as one sentence | 431 | 663 |
+| The fields joined into one sentence | 800 | 1034 |
 
 As one sentence it trails on each of the twenty-six servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
@@ -734,6 +734,13 @@ It is what showed that PHP 8.2 and 8.3 lowered its capitals differently
 on every version, against 17 on 8.3 and 16 on 8.2 before. What it misses is
 mostly accents again (`συντηρησεις` asked, `συντήρηση` in the tool) and
 neighbours of one object (asking for a loan finds the list of loans).
+
+Twelve requests more on each of the two Greek servers were written later,
+again before any of them was run, typed as Greek is typed in capitals or in
+haste: with no accent at all, and so with a plain `σ` where the tools end a
+word with `ς` (`ΚΡΑΤΗΣΕΙΣ` lowers to `κρατησεισ`, never to `κρατήσεις`).
+Half of them went to each half; on the test half, 10 of the 12 come first
+in fields as they stood.
 
 The bike rental is written in Polish, the first Latin script whose letters
 are typed away as often as its accents: "zglos" for "zgłoś", where no
