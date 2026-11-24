@@ -52,7 +52,8 @@ The benchmark says where the search still misses, in
   for names and no titles (a fleet of field sensors) and a Turkish one,
   whose words take their suffixes and are often typed without `ş` or `ı`
   (a ferry line) and a Vietnamese one, typed with and without its tone
-  marks (a kindergarten) are in.
+  marks (a kindergarten) and a Spanish one, typed without its accents and
+  with its pronouns joined to the verb (a fire station) are in.
 - **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
   marks now meets the tool word it spells, a Greek word typed in capitals
   and a Russian `е` for `ё` included. `й` typed as `и` lies within the

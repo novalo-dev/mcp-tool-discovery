@@ -339,7 +339,7 @@ client gives its request **in fields**, and each field is scored on its own:
   it, under one id, so a host sees what its clients asked and missed. The
   library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-2945 requests over twenty-six fictional servers, a workspace (snake_case), a
+3045 requests over twenty-seven fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -356,16 +356,17 @@ mill written in Burmese, an archaeological museum written in Greek, a
 city bike rental written in Polish, an airline operations centre with
 150 tools, many of them neighbours, a fleet of field sensors whose
 tools were generated from an OpenAPI description, a ferry line
-written in Turkish and a kindergarten written in Vietnamese.
+written in Turkish, a kindergarten written in Vietnamese and a fire
+station written in Spanish.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1476 requests | Right tool first | Right tool in the top 3 |
+| Test half, 1526 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1120** | **1315** |
-| The same request as one sentence | 830 | 1080 |
-| In fields, after learning from the other half | 1123 | 1315 |
-| In fields, asked a second time | 1229 | 1372 |
+| The request in fields | **1163** | **1360** |
+| The same request as one sentence | 867 | 1122 |
+| In fields, after learning from the other half | 1166 | 1360 |
+| In fields, asked a second time | 1273 | 1419 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -375,8 +376,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 436 | 672 |
-| The fields joined into one sentence | 806 | 1043 |
+| The request as one sentence | 456 | 699 |
+| The fields joined into one sentence | 833 | 1081 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

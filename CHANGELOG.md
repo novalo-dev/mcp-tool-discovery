@@ -10,6 +10,18 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A fire station written in Spanish on the search benchmark.** 40 tools
+  named in Spanish snake_case, most of them neighbours on one object (take
+  a vehicle out of service and put it back, send a crew and call it back,
+  schedule and cancel an inspection). Its 100 requests were written before
+  any of them was run, most typed as Spanish is in a hurry: without
+  accents, and with the pronoun joined to the verb (`quitala`). Nothing was
+  tuned on it: 43 of its 50 test requests come first in fields, 37 as one
+  sentence. The benchmark now holds 3045 requests over twenty-seven
+  servers; its floors move to 1163 and 1360 in fields and 1273 asked
+  again, and the laravel/mcp line to 456 and 699 as one sentence and 833
+  and 1081 with the fields joined.
+
 - **Russian requests typed without `ё` on the search benchmark.** Twelve
   more on each half of the hotel, written before any of them was run, typed
   with `е` where the tools write `ё` (`счет` for `счёт`), as Russian is most
