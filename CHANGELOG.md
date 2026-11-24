@@ -84,6 +84,14 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **The quick start answers `initialize` with the mode's instructions.**
+  It only said which `protocolVersion` to answer, so a host that copied it
+  and nothing more sent no `instructions`, and the model read the three
+  tools of Compact as the whole server. Its third block now builds the
+  whole `initialize` result, with `$discovery->instructions()` after the
+  host's own words, and says where they go in `2026-07-28`; the test that
+  runs the quick start checks them.
+
 - **A Greek word typed without its accents finds the tool word it
   spells.** As for a Latin letter outside ASCII, a Greek letter outside α
   to ω (a tonos, a dialytika, polytonic marks) may be met by any letter of

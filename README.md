@@ -125,8 +125,15 @@ use Novalo\McpToolDiscovery\Protocol\Revision;
 
 $discovery = new Discovery(new CompactMode(), new MyGate($user, $myTools));
 
-// initialize: answer with $revision->value as protocolVersion, keep it for the session
+// initialize: keep the revision for the session, and tell the model how to
+// reach the tools the list leaves out, after your own words
 $revision = Revision::negotiate($params['protocolVersion'] ?? null);
+$initialize = [
+    'protocolVersion' => $revision->value,
+    'capabilities' => ['tools' => new \stdClass()],
+    'serverInfo' => ['name' => 'my-server', 'version' => '1.0.0'],
+    'instructions' => trim('Files and tickets of the team. ' . $discovery->instructions()),
+];
 
 // tools/list
 $result = $discovery->listTools($tools, $revision, ttlMs: 300000);
@@ -136,7 +143,10 @@ $result = $discovery->callTool($params['name'], $params['arguments'] ?? [], $too
 ```
 
 Both return the `result` member of the JSON-RPC answer. Your server keeps the
-envelope, the transport and the session. A host that pages `tools/list`
+envelope, the transport and the session. Without the `instructions`, a model
+shown three tools for a server of three hundred concludes the one it needs is
+missing; in the stateless revision `2026-07-28` they go in the
+`server/discover` answer instead ([docs/HOSTS.md](docs/HOSTS.md)). A host that pages `tools/list`
 calls `listPage()` with the request's `cursor` instead. These blocks run in CI as they are
 written here ([tests/Docs/QuickStartTest.php](tests/Docs/QuickStartTest.php)). [docs/HOSTS.md](docs/HOSTS.md) shows
 complete servers that the tests run as a client would: two written by hand,
