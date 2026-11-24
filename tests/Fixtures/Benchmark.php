@@ -22,10 +22,10 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 2697 requests over twenty-four servers named in six
+ * The search benchmark: 2797 requests over twenty-five servers named in six
  * styles, one of them in French, one in German, two in Greek, one in Chinese,
  * one in Hindi, one in Thai, one in Korean, one in Arabic, one in Russian, one in Ukrainian, one in Hebrew, one
- * in Japanese, one in Khmer, one in Lao, one in Burmese, one in Polish, one with 176 tools,
+ * in Japanese, one in Khmer, one in Lao, one in Burmese, one in Polish, one in Turkish, one with 176 tools,
  * one with 150 tools that are mostly neighbours,
  * one whose tools have no title and long descriptions
  * and one generated from an OpenAPI description.
@@ -34,7 +34,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * (action, object, description), with the tool a person would expect. Half
  * of them (train) were used to choose the settings; the other half (test)
  * was kept aside and is the score that counts. The library, school, hosting,
- * city, newsroom, estate, depot, arena, academy, garage, hotel, clinic, water, mill, museum, bikes, ops, theatre, marina, post and sensors servers came
+ * city, newsroom, estate, depot, arena, academy, garage, hotel, clinic, water, mill, museum, bikes, ops, theatre, marina, post, sensors and ferry servers came
  * after the settings were chosen, so none of their halves shaped them; the train half
  * of estate only chose how a sentence without spaces is cut into terms, that
  * of depot whether a mark is kept in its word or dropped, that of arena how
@@ -53,7 +53,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors', 'ferry' => 'ferry'];
 
     /**
      * Four measures on the test half:

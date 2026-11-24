@@ -49,7 +49,9 @@ The benchmark says where the search still misses, in
   theatre) and a Hebrew one, whose particles start its words (a marina)
   and a Lao one, cut into pairs of clusters as Thai is (a post office)
   and one generated from an OpenAPI description, with a method and a path
-  for names and no titles (a fleet of field sensors) are in.
+  for names and no titles (a fleet of field sensors) and a Turkish one,
+  whose words take their suffixes and are often typed without `ş` or `ı`
+  (a ferry line) are in.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension

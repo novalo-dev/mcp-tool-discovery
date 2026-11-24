@@ -1,0 +1,784 @@
+[
+ {
+  "name": "sailings_list",
+  "title": "Seferler",
+  "description": "Bir iskeleden kalkan günün seferlerini saatleriyle listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pier": {
+     "type": "string",
+     "description": "İskele"
+    },
+    "day": {
+     "type": "string",
+     "description": "Tarih"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sailing_get",
+  "title": "Sefer ayrıntısı",
+  "description": "Bir seferin gemisini, kaptanını, doluluğunu ve gecikmesini gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sailing_add",
+  "title": "Sefer ekle",
+  "description": "Tarifeye ek bir sefer ekler, örneğin maç ya da konser çıkışı için.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route": {
+     "type": "string",
+     "description": "Hat"
+    },
+    "at": {
+     "type": "string",
+     "description": "Kalkış saati"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sailing_cancel",
+  "title": "Seferi iptal et",
+  "description": "Fırtına, arıza ya da başka bir nedenle bir seferi iptal eder ve yolculara bildirir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Neden"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "sailing_delay",
+  "title": "Seferi ertele",
+  "description": "Bir seferin kalkış saatini ileri alır ve gecikmeyi duyurur.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    },
+    "minutes": {
+     "type": "number",
+     "description": "Dakika"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "timetable_update",
+  "title": "Tarifeyi güncelle",
+  "description": "Bir hattın kış ya da yaz tarifesini değiştirir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "route": {
+     "type": "string",
+     "description": "Hat"
+    },
+    "times": {
+     "type": "array",
+     "description": "Kalkış saatleri"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "routes_list",
+  "title": "Hatlar",
+  "description": "Tüm vapur hatlarını ve uğradıkları iskeleleri listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "piers_list",
+  "title": "İskeleler",
+  "description": "İskeleleri, açılış saatlerini ve turnike sayılarını listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_sell",
+  "title": "Bilet sat",
+  "description": "Bir sefer için tam, öğrenci ya da engelli bileti satar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    },
+    "kind": {
+     "type": "string",
+     "description": "Bilet türü"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_cancel",
+  "title": "Bileti iptal et",
+  "description": "Kullanılmamış bir bileti iptal eder; ücret iadesi yapılmaz.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Bilet numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "ticket_refund",
+  "title": "Bilet ücretini iade et",
+  "description": "İptal edilen bir seferin biletinin ücretini yolcuya geri öder.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Bilet numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_change",
+  "title": "Bileti başka sefere aktar",
+  "description": "Bir bileti aynı gün başka bir sefere ya da başka bir tarihe taşır.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Bilet numarası"
+    },
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ticket_get",
+  "title": "Bilet sorgula",
+  "description": "Bir biletin seferini, türünü ve kullanılıp kullanılmadığını gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ticket_id": {
+     "type": "string",
+     "description": "Bilet numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "card_issue",
+  "title": "Yeni kart çıkar",
+  "description": "Yolcuya yeni bir İstanbulkart ya da abonman kartı verir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Ad soyad"
+    },
+    "kind": {
+     "type": "string",
+     "description": "Kart türü"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "card_topup",
+  "title": "Karta bakiye yükle",
+  "description": "Bir karta nakit ya da kredi kartıyla bakiye yükler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card_id": {
+     "type": "string",
+     "description": "Kart numarası"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Tutar TL"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "card_block",
+  "title": "Kartı kapat",
+  "description": "Kaybolan ya da çalınan bir kartı kullanıma kapatır.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card_id": {
+     "type": "string",
+     "description": "Kart numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "card_unblock",
+  "title": "Kartı yeniden aç",
+  "description": "Kapatılmış bir kartı, bulunduğunda yeniden kullanıma açar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card_id": {
+     "type": "string",
+     "description": "Kart numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "card_balance",
+  "title": "Kart bakiyesi",
+  "description": "Bir kartın bakiyesini ve son biniş hareketlerini gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card_id": {
+     "type": "string",
+     "description": "Kart numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "season_pass_renew",
+  "title": "Abonmanı yenile",
+  "description": "Aylık öğrenci ya da tam abonmanı bir ay daha uzatır.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card_id": {
+     "type": "string",
+     "description": "Kart numarası"
+    },
+    "months": {
+     "type": "number",
+     "description": "Ay"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ferries_list",
+  "title": "Gemiler",
+  "description": "Filodaki gemileri, kapasitelerini ve durumlarını listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ferry_maintenance_report",
+  "title": "Arıza bildir",
+  "description": "Bir gemideki motor, iskele rampası ya da can yeleği arızasını kaydeder ve tersaneye bildirir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ferry_id": {
+     "type": "string",
+     "description": "Gemi kodu"
+    },
+    "problem": {
+     "type": "string",
+     "description": "Arıza"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ferry_maintenance_done",
+  "title": "Bakımı tamamla",
+  "description": "Tersanede onarılan gemiyi yeniden sefere hazır olarak işaretler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ferry_id": {
+     "type": "string",
+     "description": "Gemi kodu"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fuel_log",
+  "title": "Yakıt kaydı",
+  "description": "Bir gemiye alınan mazot miktarını ve fiyatını kaydeder.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ferry_id": {
+     "type": "string",
+     "description": "Gemi kodu"
+    },
+    "liters": {
+     "type": "number",
+     "description": "Litre"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_list",
+  "title": "Personel",
+  "description": "Kaptanları, makinistleri ve gemi adamlarını görevleriyle listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_shift_assign",
+  "title": "Vardiya ata",
+  "description": "Bir personeli bir gemiye ve bir vardiyaya atar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Personel numarası"
+    },
+    "ferry_id": {
+     "type": "string",
+     "description": "Gemi kodu"
+    },
+    "shift": {
+     "type": "string",
+     "description": "Vardiya"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_shift_swap",
+  "title": "Vardiya değiştir",
+  "description": "İki personelin vardiyalarını birbiriyle değiştirir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Personel numarası"
+    },
+    "other_id": {
+     "type": "string",
+     "description": "Personel numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_leave_record",
+  "title": "İzin kaydet",
+  "description": "Bir personelin yıllık iznini ya da raporunu kaydeder.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff_id": {
+     "type": "string",
+     "description": "Personel numarası"
+    },
+    "days": {
+     "type": "number",
+     "description": "Gün"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "crew_schedule",
+  "title": "Vardiya çizelgesi",
+  "description": "Haftanın vardiya çizelgesini gemi gemi gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Hafta"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_open",
+  "title": "Şikâyet kaydet",
+  "description": "Bir yolcunun şikâyetini kaydeder: gecikme, temizlik, personel davranışı.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Şikâyet metni"
+    },
+    "sailing_id": {
+     "type": "string",
+     "description": "Sefer numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_answer",
+  "title": "Şikâyeti yanıtla",
+  "description": "Bir şikâyete yolcuya gidecek bir yanıt yazar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "Şikâyet numarası"
+    },
+    "text": {
+     "type": "string",
+     "description": "Yanıt"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_close",
+  "title": "Şikâyeti kapat",
+  "description": "Çözülen bir şikâyeti kapatır.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "complaint_id": {
+     "type": "string",
+     "description": "Şikâyet numarası"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaints_list",
+  "title": "Şikâyetler",
+  "description": "Açık şikâyetleri tarihleriyle ve konularıyla listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "Durum"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_item_register",
+  "title": "Kayıp eşya kaydet",
+  "description": "Gemide ya da iskelede bulunan bir eşyayı kayıt altına alır.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item": {
+     "type": "string",
+     "description": "Eşya"
+    },
+    "place": {
+     "type": "string",
+     "description": "Bulunduğu yer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_item_return",
+  "title": "Kayıp eşyayı teslim et",
+  "description": "Bulunan bir eşyayı, kimliğini gösteren sahibine teslim eder.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string",
+     "description": "Kayıp eşya numarası"
+    },
+    "owner": {
+     "type": "string",
+     "description": "Sahibi"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lost_items_list",
+  "title": "Kayıp eşyalar",
+  "description": "Teslim edilmeyi bekleyen kayıp eşyaları listeler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "announcement_send",
+  "title": "Duyuru yap",
+  "description": "Yolculara iskele ekranlarından, uygulamadan ve SMS ile duyuru gönderir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Duyuru metni"
+    },
+    "pier": {
+     "type": "string",
+     "description": "İskele"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "weather_warning",
+  "title": "Hava uyarısı",
+  "description": "Meteorolojinin rüzgâr ve sis uyarılarını, etkilenen hatlarla birlikte gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "passenger_counts",
+  "title": "Yolcu sayıları",
+  "description": "Sefer sefer taşınan yolcu sayısını turnike verilerinden gösterir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Tarih"
+    },
+    "route": {
+     "type": "string",
+     "description": "Hat"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "revenue_report",
+  "title": "Gelir raporu",
+  "description": "Bilet, kart yükleme ve abonman gelirlerini aylık olarak özetler.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Ay"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "accessibility_request",
+  "title": "Engelli yardımı iste",
+  "description": "Tekerlekli sandalyeli bir yolcu için iskelede görevli yardımı ayarlar.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pier": {
+     "type": "string",
+     "description": "İskele"
+    },
+    "at": {
+     "type": "string",
+     "description": "Saat"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1037 times
-out of 1352 in fields, and 756 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1071 times
+out of 1402 in fields, and 787 times as one sentence.
 
 ## How a tool is scored
 
@@ -409,7 +409,7 @@ skipped.
 
 ## The measures
 
-Twenty-four fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-five fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -431,18 +431,19 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
 `bike_unlock`), an airline operations centre (150 tools,
-`flight.change-aircraft`) and a fleet of field sensors generated from
-OpenAPI (40 tools, `post_devices_device_id_reboot`). 2697 requests, each written as one
+`flight.change-aircraft`), a fleet of field sensors generated from
+OpenAPI (40 tools, `post_devices_device_id_reboot`) and a ferry line
+written in Turkish (40 tools, `ticket_refund`). 2797 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1352 requests | Right tool first | Top 3 |
+| Test half, 1402 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1037 | 1207 |
-| The same request as one sentence | 756 | 985 |
-| In fields, after every train request was run once | 1038 | 1207 |
-| In fields, after the test requests were run once, then asked again | 1134 | 1253 |
+| The request in fields | 1071 | 1249 |
+| The same request as one sentence | 787 | 1023 |
+| In fields, after every train request was run once | 1072 | 1249 |
+| In fields, after the test requests were run once, then asked again | 1171 | 1298 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -452,10 +453,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 408 | 622 |
-| The fields joined into one sentence | 764 | 979 |
+| The request as one sentence | 426 | 649 |
+| The fields joined into one sentence | 791 | 1017 |
 
-As one sentence it trails on each of the twenty-four servers, the English ones
+As one sentence it trails on each of the twenty-five servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -780,6 +781,25 @@ sentence: it was not kept. Learning from its train half, with the plain
 mean of the pairs, lost 3 first places, all neighbours ("change a site
 address" found the creation of a site, learned from "add a site address");
 scaled by the share of pairs that reached the tool (above), it loses none.
+
+The ferry line is written in Turkish, whose words take one suffix after
+another ("biletini", "seferlerin") and which people often type without its
+letters ("sikayet" for "şikâyet"). Its titles start with a capital `İ` where
+a request writes `i` ("İzin kaydet", "İskeleler"), the case that each letter
+lowered on its own (above) settles. Most of its 40 tools are neighbours on
+one object (sell, cancel, refund and move a ticket; add, cancel and delay a
+sailing; block and unblock a card). Its 100 requests were written before any
+of them was run and split as the servers before the airline's: the first
+and third request of a tool in train, the second in test. Nothing was tuned
+on it: 34 of its 50 test requests find the right tool first in fields, 42 in
+the top 3, 31 as one sentence, with 2.14 tools returned; learned from its
+train half, 34 and 42 again; asked again, 37. When it was first measured,
+before learning was scaled by the share of pairs (above), learning lost it
+one first place. Its train half scores 43 in fields, so its test half is the
+harder one. What it misses is neighbours ("sil", delete, a ticket finds its
+sale; "kaldır", call off, a sailing because the ship broke down finds the
+report of a breakdown) and words the tools do not use ("nöbet", a
+watch, for "vardiya", a shift; "anons" for "duyuru").
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

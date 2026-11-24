@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A ferry line written in Turkish on the search benchmark.** 40 tools
+  named in snake_case with titles and descriptions in Turkish, whose words
+  take one suffix after another and are often typed without `ş` or `ı`,
+  and whose titles start with the capital `İ` that each letter lowered on
+  its own now meets. Most are neighbours on one object (sell, cancel,
+  refund and move a ticket; block and unblock a card). Its 100 requests
+  were written before any of them was run; learning lost it a first place
+  until a learned lift was scaled by the share of pairs that reached the
+  tool, and now loses none. The benchmark now holds 2797 requests over
+  twenty-five servers; its floors move to 1071 and 1249 in fields and 1171
+  asked again, and the laravel/mcp line to 426 as one sentence and 791
+  with the fields joined.
+
 - **A guide header in every mode, from `Discovery::guideHeader()`.** A
   prompt that names tools now gets its header in Grouped and Gateway too:
   in Grouped, each tool is named with the group tool that runs it and read
