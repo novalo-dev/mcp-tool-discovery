@@ -77,6 +77,36 @@ final class ToolTest extends TestCase
         ]);
     }
 
+    public function testASetHandsARefusedToolToTheHostAndKeepsTheOthers(): void
+    {
+        $badName = ['name' => 'get file', 'inputSchema' => ['type' => 'object']];
+        $later = ['name' => 'a', 'description' => 'Second', 'inputSchema' => ['type' => 'object']];
+        $twice = Tool::fromArray(['name' => 'b', 'description' => 'Second', 'inputSchema' => ['type' => 'object']]);
+        $refused = [];
+
+        $set = ToolSet::of([
+            ['name' => 'a', 'description' => 'First', 'inputSchema' => ['type' => 'object']],
+            $badName,
+            ['name' => 'b', 'description' => 'First', 'inputSchema' => ['type' => 'object']],
+            $later,
+            $twice,
+            ['name' => 'c', 'inputSchema' => ['type' => 'string']],
+        ], static function (InvalidTool $error, Tool|array $definition) use (&$refused): void {
+            $refused[] = [$error->getMessage(), $definition];
+        });
+
+        self::assertSame(['a', 'b'], $set->names());
+        self::assertSame('First', $set->get('a')?->description(), 'the first tool under a name is kept');
+        self::assertSame('First', $set->get('b')?->description());
+        self::assertCount(4, $refused);
+        self::assertSame($badName, $refused[0][1], 'the host gets back what it gave');
+        self::assertStringContainsString('the name must be', $refused[0][0]);
+        self::assertSame($later, $refused[1][1]);
+        self::assertSame('Tool "a": the name is used twice', $refused[1][0]);
+        self::assertSame($twice, $refused[2][1]);
+        self::assertStringContainsString('Tool "c": inputSchema', $refused[3][0]);
+    }
+
     public function testASetKeepsTheHostOrder(): void
     {
         $set = ToolSet::of([

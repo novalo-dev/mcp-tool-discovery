@@ -10,6 +10,14 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A tool set that leaves out a bad tool instead of failing.**
+  `ToolSet::of($tools, $refused)` takes a callback: a definition the
+  library cannot work with, or a later tool under a name already taken, is
+  left out and handed to it with its `InvalidTool`, and every other tool is
+  kept. A host that gathers tools from plugins no longer has to build each
+  `Tool` itself and catch the exception one by one. Without the callback,
+  the first bad tool still throws, as before.
+
 - **A ferry line written in Turkish on the search benchmark.** 40 tools
   named in snake_case with titles and descriptions in Turkish, whose words
   take one suffix after another and are often typed without `ş` or `ı`,

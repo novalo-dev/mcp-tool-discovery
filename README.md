@@ -109,6 +109,13 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 $tools = ToolSet::of($myToolDefinitions); // list of MCP Tool arrays
 ```
 
+A malformed definition, or a second tool under a name already taken, throws
+`InvalidTool`. If your tools come from parts you do not write (plugins,
+other packages), pass a callback as the second argument,
+`ToolSet::of($myToolDefinitions, $refused)`: such a tool is left out, the
+first one under a name is kept, and `$refused` gets the `InvalidTool` and
+the definition, to log.
+
 **3. Answer the two methods** with a mode:
 
 ```php
