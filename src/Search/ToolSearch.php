@@ -48,6 +48,13 @@ final class ToolSearch
      */
     private const MAX_PAIRED_WORDS = 16;
 
+    /**
+     * Starts the key of a whole learned search, its words in alphabetical
+     * order after it. The Analyzer never keeps a tab or a space inside a
+     * word, so such a key is never taken for a word or a pair.
+     */
+    private const SEARCH_KEY = "\t";
+
     private readonly ToolIndex $index;
     private readonly Analyzer $analyzer;
 
@@ -178,7 +185,7 @@ final class ToolSearch
             }
         }
         if ($groups !== []) {
-            $this->learning->record([...self::flat($groups), ...self::pairs($groups)], $tool);
+            $this->learning->record([...self::flat($groups), ...self::pairs($groups), self::searchKey($groups)], $tool);
         }
     }
 
@@ -244,6 +251,7 @@ final class ToolSearch
             }
         }
         $total = count($words);
+        $coverage = $lift === [] ? [] : self::coverage($counts, self::flat($groups), $lift);
         foreach ($lift as $tool => $sum) {
             // Scaled again by the share of the pairs that hit the tool: a
             // search learned for a neighbour ("add a site address") shares
@@ -251,9 +259,63 @@ final class ToolSearch
             // barely move it, while the same request asked again hits every
             // pair and keeps its whole lift.
             $lift[$tool] = $sum / $total * ($hits[$tool] / $total);
+            // And by the square of the share of a learned search's words the
+            // query holds: "view the instruments to lend" taught the list
+            // the pair "instrument lend", which "lend an instrument" holds
+            // whole, but the view it does not. A tool learned before whole
+            // searches were kept has none, and keeps its lift.
+            $lift[$tool] *= ($coverage[$tool] ?? 1.0) ** 2;
         }
 
         return $lift;
+    }
+
+    /**
+     * For each tool lifted, the largest share of the words of one search
+     * learned for it that the query holds.
+     *
+     * The whole searches are only found by reading every key of the store,
+     * as load() has already read them; a key that is not a search, or a
+     * search of no lifted tool, is passed over before it is cut.
+     *
+     * @param array<string, array<string, int>> $counts
+     * @param list<string> $words the terms of the query
+     * @param array<string, float> $lift
+     *
+     * @return array<string, float>
+     */
+    private static function coverage(array $counts, array $words, array $lift): array
+    {
+        $query = array_flip($words);
+        $coverage = [];
+        foreach ($counts as $key => $tools) {
+            // Cast back: PHP keys a word such as "123" as an integer.
+            $key = (string) $key;
+            if (!str_starts_with($key, self::SEARCH_KEY) || array_intersect_key($tools, $lift) === []) {
+                continue;
+            }
+            $learned = explode(' ', substr($key, strlen(self::SEARCH_KEY)));
+            $held = count(array_intersect_key(array_flip($learned), $query)) / count($learned);
+            foreach (array_keys(array_intersect_key($tools, $lift)) as $tool) {
+                $coverage[$tool] = max($coverage[$tool] ?? 0.0, $held);
+            }
+        }
+
+        return $coverage;
+    }
+
+    /**
+     * The key under which a whole search is learned: its words, cut as for
+     * pairs, in alphabetical order.
+     *
+     * @param list<list<string>> $groups
+     */
+    private static function searchKey(array $groups): string
+    {
+        $words = array_values(array_unique(self::flat($groups)));
+        sort($words);
+
+        return self::SEARCH_KEY . implode(' ', array_slice($words, 0, self::MAX_PAIRED_WORDS));
     }
 
     /**

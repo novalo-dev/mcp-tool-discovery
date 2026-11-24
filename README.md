@@ -348,8 +348,8 @@ score:
 |---|---|---|
 | The request in fields | **1071** | **1249** |
 | The same request as one sentence | 787 | 1023 |
-| In fields, after learning from the other half | 1072 | 1249 |
-| In fields, asked a second time | 1171 | 1298 |
+| In fields, after learning from the other half | 1074 | 1249 |
+| In fields, asked a second time | 1175 | 1302 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

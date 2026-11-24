@@ -236,6 +236,28 @@ verb: "add a site address", run once, lifted the tool that creates a site
 before the one that changes an address for "change a site address", with
 the plain mean of the pairs.
 
+Last, the lift is multiplied by the square of the largest share of the
+words of one search learned for that tool that the request holds. Each run
+also keeps its whole search, its words in alphabetical order, under a key
+that starts with a tab, which no word or pair can hold. The share of pairs
+reads the request, not the search learned: "view the instruments free to
+lend", run once for the list, taught it the pair "instrument lend", which is
+the only pair of "lend an instrument, a cello", so the list took the place
+of the loan. The request holds two of the three words of that search, so the
+list keeps four ninths of its lift, and the loan comes first again; the same
+search asked again holds all its words and keeps its whole lift. A tool
+learned before whole searches were kept has none, and keeps its lift as
+before. Chosen on the train half, in two folds: learning from one fold to
+the other found 1178 first against 1181 without learning, and 1182 with the
+square of the share (1180 with the share, 1181 with its cube, 1178 to 1181
+with a Dice coefficient of the two searches instead); asked again, 1239 to
+1245. On the test half, read once: learned from the other half, 1072 to
+1074, so learning no longer costs the airline operations centre its first
+place, and asked again, 1171 to 1175; no server loses a request. The whole
+searches are found by reading every key of the store, as loading it has
+already done: a search that learns over the 176 hosting tools, with every
+request of that server learned, takes about 0.55 ms against 0.35 ms.
+
 Pairs, not single words, because of servers with many tools about the same
 thing. Word by word, "get the certificate" run once taught "certificate" to
 the tool that shows a certificate, and "delete the unused certificate" then
@@ -442,8 +464,8 @@ and gives the score.
 |---|---|---|
 | The request in fields | 1071 | 1249 |
 | The same request as one sentence | 787 | 1023 |
-| In fields, after every train request was run once | 1072 | 1249 |
-| In fields, after the test requests were run once, then asked again | 1171 | 1298 |
+| In fields, after every train request was run once | 1074 | 1249 |
+| In fields, after the test requests were run once, then asked again | 1175 | 1302 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

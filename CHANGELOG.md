@@ -45,6 +45,20 @@ becomes the next version's section when it is published.
   `Mode\GuideHeader` interface, kept apart from `DiscoveryMode` so existing
   modes are not broken.
 
+### Changed
+
+- **What was learned for a neighbour lifts it less.** A learned lift is now
+  also multiplied by the square of the share of a learned search's words
+  that the new request holds, so "view the instruments free to lend", run
+  for the list, no longer puts the list before the loan for "lend an
+  instrument". Each run keeps its whole search in the store, under a key
+  that starts with a tab; a store written before keeps working, its tools
+  lifted as before until new runs come. On the benchmark, learned from the
+  other half 1072 to 1074 first, asked again 1171 to 1175 (floor moved),
+  and no server loses a request to learning. A search that learns reads
+  every key of the store once more: about 0.55 ms against 0.35 ms over 176
+  tools.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

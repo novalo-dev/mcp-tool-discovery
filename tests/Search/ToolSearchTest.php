@@ -497,6 +497,26 @@ final class ToolSearchTest extends TestCase
         self::assertSame('post_sites', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('add', 'site', 'address')))[0]);
     }
 
+    public function testASearchLearnedForANeighbourLiftsItOnlyAsFarAsTheQueryHoldsIt(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'instruments_list', 'title' => 'Instruments free to lend', 'description' => 'Lists every instrument one can lend.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'instrument_lend', 'title' => 'Lend an instrument', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        $view = new SearchQuery('view', 'instrument', 'free to lend');
+        $search = new ToolSearch($tools, learning: $store);
+        $search->learn((string) $search->find($view)->searchId, 'instruments_list');
+        $lend = new SearchQuery('lend', 'instrument', 'cello');
+
+        // Viewing what is free to lend taught the list the pair "instrument
+        // lend", the only pair of a request to lend one: the list must not
+        // take the place of the loan, as the view, asked again, keeps it.
+        self::assertSame('instrument_lend', self::names((new ToolSearch($tools))->search($lend))[0]);
+        self::assertSame('instrument_lend', self::names((new ToolSearch($tools, learning: $store))->search($lend))[0]);
+        self::assertSame('instruments_list', self::names((new ToolSearch($tools, learning: $store))->search($view))[0]);
+    }
+
     public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void
     {
         $tools = ToolSet::of([
