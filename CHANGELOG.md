@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A driving school written in Persian on the search benchmark.** 40
+  tools in English snake_case, with Persian titles and descriptions written
+  with the zero-width non-joiner inside words, most of them neighbours on
+  one object (book, move and cancel a lesson; book, cancel and record a
+  test). Its 100 requests were written before any of them was run, typed
+  with the joiner, with a space in its place, glued, and a few on an Arabic
+  keyboard (`ي`, `ك` for `ی`, `ک`). Nothing was tuned on it: 38 of its 50
+  test requests come first in fields, 33 as one sentence, and learning
+  loses none. The benchmark now holds 3145 requests over twenty-eight
+  servers; its floors move to 1201 and 1406 in fields and 1317 asked again,
+  and the laravel/mcp line to 486 and 736 as one sentence and 870 and 1123
+  with the fields joined.
+
 - **A fire station written in Spanish on the search benchmark.** 40 tools
   named in Spanish snake_case, most of them neighbours on one object (take
   a vehicle out of service and put it back, send a crew and call it back,

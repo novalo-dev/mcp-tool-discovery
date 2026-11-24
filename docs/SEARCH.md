@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1163 times
-out of 1526 in fields, and 867 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1201 times
+out of 1576 in fields, and 900 times as one sentence.
 
 ## How a tool is scored
 
@@ -471,7 +471,7 @@ skipped.
 
 ## The measures
 
-Twenty-seven fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-eight fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -496,18 +496,19 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `flight.change-aircraft`), a fleet of field sensors generated from
 OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
 written in Turkish (40 tools, `ticket_refund`), a kindergarten written
-in Vietnamese (40 tools, `absence_notice_cancel`) and a fire station
-written in Spanish (40 tools, `vehiculo_alta`). 3045 requests, each written as one
+in Vietnamese (40 tools, `absence_notice_cancel`), a fire station
+written in Spanish (40 tools, `vehiculo_alta`) and a driving school
+written in Persian (40 tools, `exam_theory_book`). 3145 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1526 requests | Right tool first | Top 3 |
+| Test half, 1576 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1163 | 1360 |
-| The same request as one sentence | 867 | 1122 |
-| In fields, after every train request was run once | 1166 | 1360 |
-| In fields, after the test requests were run once, then asked again | 1273 | 1419 |
+| The request in fields | 1201 | 1406 |
+| The same request as one sentence | 900 | 1164 |
+| In fields, after every train request was run once | 1204 | 1406 |
+| In fields, after the test requests were run once, then asked again | 1317 | 1466 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -517,10 +518,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 456 | 699 |
-| The fields joined into one sentence | 833 | 1081 |
+| The request as one sentence | 486 | 736 |
+| The fields joined into one sentence | 870 | 1123 |
 
-As one sentence it trails on each of the twenty-seven servers, the English ones
+As one sentence it trails on each of the twenty-eight servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -955,6 +956,33 @@ words the tools do not use ("camion" for "vehículo" and "autobomba",
 "incendios" for "incidentes") and neighbours that share the object
 ("firmar | informe" finds the report of interventions before the signing
 of a report).
+
+The driving school is written in Persian, in the Arabic script, with tool
+names in English snake_case (`exam_theory_book`, `car_ready`), so no word of
+a request meets a name. Its titles and descriptions are written as an
+office writes them, with the zero-width non-joiner inside words
+(`جلسه‌های`) and the hamza of the izafe (`پروندهٔ`); its 100 requests,
+written on 2026-11-24 before any of them was run, are typed as people
+type: with the joiner, with a space in its place, glued, and a few on an
+Arabic keyboard, whose yeh and kaf (`ي`, `ك`) are other letters than the
+Persian ones (`ی`, `ک`). Its tools are neighbours by design (book, move and
+cancel a lesson; book a theory or a road test, cancel it, record its
+result). Nothing was tuned on it: 38 of its 50 test requests find the
+right tool first in fields, 46 in the top 3, 33 as one sentence; learned
+from its train half, 38 again; asked again, 44. Its train half scores 41
+in fields. The joiner cuts a word in two, as a space does, so a request
+written with a space meets it; glued, it is met by its trigrams. Removing
+the joiner instead, so glued words meet, was measured on the train half
+and not kept: 41 first in fields either way and 46 against 45 in the top
+3, but as one sentence 33 against 32 first and 38 against 39 in the top 3,
+a request each way. The Arabic yeh and kaf are left as
+they are: telling them for the Persian letters would take a table of
+letters, which the library does not hold; a host whose clients type them
+gives them as synonyms. Four of the five test requests typed with them
+come first as one sentence, by the words around them and their trigrams.
+What it misses is words the tools do not use ("کنسل" for "لغو", "ماشین"
+for "خودرو") and neighbours of one object (a lesson to book finds the
+theory classes, a car back from the garage the tool that sends it there).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
