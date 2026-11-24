@@ -91,6 +91,14 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **`UnsupportedRevision` no longer repeats the client's string as sent.**
+  The revision comes from the client, and a host that writes the message to
+  its log wrote whatever the client put there, line breaks and terminal
+  sequences included, at any length. The message now names it as unknown
+  tool names are named: cut to 128 characters, anything but letters,
+  digits, `_`, `.` and `-` shown as `?`. A real revision such as
+  `2099-01-01` reads as before.
+
 - **The quick start answers `initialize` with the mode's instructions.**
   It only said which `protocolVersion` to answer, so a host that copied it
   and nothing more sent no `instructions`, and the model read the three
