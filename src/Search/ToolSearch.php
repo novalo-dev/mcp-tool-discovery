@@ -278,7 +278,9 @@ final class ToolSearch
      * as load() has already read them; a key that is not a search, or a
      * search of no lifted tool, is passed over before it is cut.
      *
-     * @param array<string, array<string, int>> $counts
+     * @param array<array-key, array<string, int>> $counts array-key, not
+     *        string: PHP keys a word such as "123" as an integer, whatever
+     *        LearningStore::load() declares
      * @param list<string> $words the terms of the query
      * @param array<string, float> $lift
      *
@@ -289,7 +291,8 @@ final class ToolSearch
         $query = array_flip($words);
         $coverage = [];
         foreach ($counts as $key => $tools) {
-            // Cast back: PHP keys a word such as "123" as an integer.
+            // Cast back before str_starts_with(), which strict types would
+            // refuse an integer key.
             $key = (string) $key;
             if (!str_starts_with($key, self::SEARCH_KEY) || array_intersect_key($tools, $lift) === []) {
                 continue;
