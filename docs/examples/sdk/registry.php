@@ -37,9 +37,12 @@ use Mcp\Server\Exception\ToolCallException;
 use Mcp\Server\Handler\Request\CallToolHandler;
 use Mcp\Server\Server;
 use Mcp\Server\Transport\StdioTransport;
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+
+use function Example\Notes\instructions;
 
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
@@ -50,9 +53,14 @@ $role = getenv('MCP_NOTES_ROLE');
 $notes = new Notes();
 $registry = new Registry();
 $referenceHandler = new ReferenceHandler();
+// One mode for the server: the handshake reads its instructions before any
+// caller has a Discovery, and the handler lists and runs through it.
+$mode = new CompactMode(prefix: 'notes_', batchLimit: 20);
 
 $server = Server::builder()
     ->setServerInfo('notes', '1.0.0')
+    // Read by the model before any tool: the list is not the whole server.
+    ->setInstructions(instructions($mode))
     // The host's registry, so the handler below reads the same tools the SDK
     // registered, and the same handler of references runs them.
     ->setRegistry($registry)
@@ -102,6 +110,7 @@ $server = Server::builder()
         // process serves one caller, so what its runs teach the search lifts
         // only that caller's tools, for as long as the session lasts.
         new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore()),
+        $mode,
     ))
     ->build();
 

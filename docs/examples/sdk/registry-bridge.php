@@ -35,7 +35,7 @@ use Mcp\Server\Session\SessionInterface;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -121,6 +121,7 @@ final class RegistryToolsHandler implements RequestHandlerInterface
         private readonly CallToolHandler $sdk,
         private readonly Closure $visible,
         private readonly SearchSetup $search,
+        private readonly DiscoveryMode $mode,
         private readonly int $pageSize = 50,
     ) {}
 
@@ -136,10 +137,11 @@ final class RegistryToolsHandler implements RequestHandlerInterface
     {
         $revision = revision($request, $session);
         // The gate runs the tool with this request's session, so it is built
-        // per request, and the Discovery with it. The search setup is not:
-        // its cache and what it learned outlive the request.
+        // per request, and the Discovery with it. The search setup and the
+        // mode are not: the cache and what it learned outlive the request,
+        // and the mode is the one the server's instructions were read from.
         $discovery = new Discovery(
-            new CompactMode(prefix: 'notes_', batchLimit: 20),
+            $this->mode,
             new RegistryGate($this->sdk, $request, $session, $this->visible),
             $this->search,
         );

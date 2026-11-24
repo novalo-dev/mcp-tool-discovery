@@ -43,6 +43,10 @@ final class SdkServerTest extends TestCase
 
         self::assertSame('2025-06-18', $replies[1]['result']['protocolVersion']);
         self::assertArrayHasKey('tools', $replies[1]['result']['capabilities']);
+        // The handshake tells the model the list is not the whole server.
+        self::assertStringStartsWith('Notes kept for the team.', $replies[1]['result']['instructions'] ?? '');
+        self::assertStringContainsString('notes_search_tools', $replies[1]['result']['instructions'] ?? '');
+        self::assertStringContainsString('notes_run_write_batch', $replies[1]['result']['instructions'] ?? '');
         self::assertSame(
             ['notes_search_tools', 'notes_run_read_tool', 'notes_run_write_tool', 'notes_run_write_batch'],
             array_column($replies[3]['result']['tools'], 'name'),
@@ -124,6 +128,7 @@ final class SdkServerTest extends TestCase
         ]);
 
         self::assertContains('2026-07-28', $replies[1]['result']['supportedVersions']);
+        self::assertStringContainsString('notes_search_tools', $replies[1]['result']['instructions'] ?? '');
         self::assertSame('complete', $replies[2]['result']['resultType']);
         self::assertSame('notes_search_tools', $replies[2]['result']['tools'][0]['name']);
         self::assertSame('complete', $replies[3]['result']['resultType']);

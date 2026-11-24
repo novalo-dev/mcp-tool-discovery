@@ -22,7 +22,9 @@ becomes the next version's section when it is published.
   for every caller and can go in a discover answer cached as `public`. A
   mode of your own gets them by implementing the new `Mode\Instructions`
   interface, kept apart from `DiscoveryMode` so existing modes are not
-  broken. The stdio and HTTP examples send them.
+  broken. Every example server sends them: those on the official PHP SDK
+  through `setInstructions()`, and the laravel/mcp one from the mode its
+  methods list with, in place of a sentence written by hand.
 
 - **A tool set that leaves out a bad tool instead of failing.**
   `ToolSet::of($tools, $refused)` takes a callback: a definition the

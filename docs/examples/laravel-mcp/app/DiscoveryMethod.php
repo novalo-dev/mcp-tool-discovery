@@ -43,7 +43,16 @@ abstract class DiscoveryMethod implements Method
     {
         [$tools, $gate] = ContextGate::of($context, $request);
 
-        return [new Discovery(new CompactMode(prefix: 'notes_'), $gate, $this->search), $tools];
+        return [new Discovery(self::mode(), $gate, $this->search), $tools];
+    }
+
+    /**
+     * The mode of every request, which NotesServer also reads its
+     * instructions from, so the two never name different tools.
+     */
+    public static function mode(): CompactMode
+    {
+        return new CompactMode(prefix: 'notes_');
     }
 
     protected static function revision(JsonRpcRequest $request, ServerContext $context): Revision

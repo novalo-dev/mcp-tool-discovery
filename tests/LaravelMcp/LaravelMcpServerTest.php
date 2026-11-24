@@ -83,6 +83,19 @@ final class LaravelMcpServerTest extends TestCase
         self::assertSame(['notes_search_tools', 'notes_run_read_tool', 'notes_run_write_tool'], array_column($answer['result']['tools'], 'name'));
     }
 
+    public function testTheHandshakeGivesTheInstructionsOfTheMode(): void
+    {
+        [$status, $answer] = $this->ask('reader-token', 'initialize', ['protocolVersion' => '2025-11-25', 'capabilities' => new \stdClass(), 'clientInfo' => ['name' => 'test', 'version' => '1']]);
+
+        self::assertSame(200, $status);
+        $instructions = $answer['result']['instructions'] ?? '';
+        self::assertIsString($instructions);
+        self::assertStringStartsWith('Notes kept for the team.', $instructions);
+        // The mode lists these three, so the instructions name them.
+        self::assertStringContainsString('notes_search_tools', $instructions);
+        self::assertStringContainsString('notes_run_write_tool', $instructions);
+    }
+
     public function testAToolThatShouldRegisterHidesIsNeverFoundNorRun(): void
     {
         $delete = ['action' => 'delete', 'object' => 'note'];

@@ -261,12 +261,17 @@ final class NotesServer extends Server
 
     protected function boot(): void
     {
+        $this->instructions = instructions(DiscoveryMethod::mode());
         $this->addMethod('tools/list', ListToolsMethod::class);
         $this->addMethod('tools/call', CallToolMethod::class);
     }
 }
 ```
 
+laravel/mcp reads `$instructions` at each message, after `boot()`, so the
+server takes them from the same mode the methods list with
+([Instructions](MODES.md#instructions)), and they cannot name a tool the
+list does not have.
 Both methods extend [DiscoveryMethod](examples/laravel-mcp/app/DiscoveryMethod.php),
 which builds the Discovery of the request from what laravel/mcp's
 `ServerContext::tools()` keeps for it, and
@@ -321,6 +326,7 @@ In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 | The handler | `ToolsHandler`, added with `addRequestHandler()` | it answers `ListToolsRequest` from `listPage()`, with the request's `cursor`, and `CallToolRequest` from `callTool()`; the SDK's registry of tools stays empty |
 | The pages | the handler's `pageSize`, 50 by default | the SDK's own `setPaginationLimit()` default, so pass the number you give it there; a cursor the list did not give gets the SDK's `Error::forInvalidParams()` |
 | The capability | `setCapabilities(new ServerCapabilities(tools: true, ...))` | with an empty registry the SDK would not announce tools by itself |
+| The instructions | `setInstructions()`, with `$discovery->instructions()` after the server's own words | the SDK sends them in `initialize` and `server/discover`, where the model reads that the list is not the whole server ([Instructions](MODES.md#instructions)) |
 | The revision | `RequestContext::getProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
 | The arguments | decoded again as arrays | the SDK keeps nested objects as `stdClass`; without this, every item of a batch is refused as not an object |
 | The answer | `Answer`, a `ResultInterface` holding the array | the SDK encodes an object; in the stateless revision it keeps the `resultType`, `ttlMs` and `cacheScope` the answer carries |
@@ -406,6 +412,7 @@ What changes from the server above:
 | The gate | `RegistryGate`, built per request with its session | `call()` hands a `CallToolRequest` with the client's id and `_meta` to the SDK's `CallToolHandler`, which reads the revision from them; who sees which tool stays the host's rule |
 | The errors | an `Error` from the SDK becomes `CallResult::error()` | arguments the schema refuses are a protocol error for the SDK; through a mode they are the tool's answer, which the assistant reads and corrects |
 | The search | the same `SearchSetup`, built once and given to the handler | the gate and the `Discovery` are built per request, the cache and what was learned outlive it |
+| The mode | built once, given to the handler and read for `setInstructions()` | the builder needs the instructions before any request, so before any `Discovery`; a mode implementing `Mode\Instructions` gives them itself |
 | The capability | detected by the SDK | the registry is not empty, so the SDK announces tools by itself |
 
 The handler answers every `tools/call`, so a tool the gate hides is unknown

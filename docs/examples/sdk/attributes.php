@@ -33,9 +33,12 @@ use Mcp\Server\Capability\Registry\ReferenceHandler;
 use Mcp\Server\Handler\Request\CallToolHandler;
 use Mcp\Server\Server;
 use Mcp\Server\Transport\StdioTransport;
+use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+
+use function Example\Notes\instructions;
 
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
@@ -53,9 +56,14 @@ $registry = new Registry();
 $container = new Container();
 $container->set(Notes::class, $notes);
 $referenceHandler = new ReferenceHandler($container);
+// One mode for the server: the handshake reads its instructions before any
+// caller has a Discovery, and the handler lists and runs through it.
+$mode = new CompactMode(prefix: 'notes_', batchLimit: 20);
 
 $server = Server::builder()
     ->setServerInfo('notes', '1.0.0')
+    // Read by the model before any tool: the list is not the whole server.
+    ->setInstructions(instructions($mode))
     ->setContainer($container)
     ->setRegistry($registry)
     ->setReferenceHandler($referenceHandler)
@@ -67,6 +75,7 @@ $server = Server::builder()
         new CallToolHandler($registry, $referenceHandler),
         (new NotesGate(is_string($role) ? $role : 'reader', $notes))->visible(...),
         new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore()),
+        $mode,
     ))
     ->build();
 

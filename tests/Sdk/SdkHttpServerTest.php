@@ -147,6 +147,7 @@ final class SdkHttpServerTest extends TestCase
         ]], $token, null);
         self::assertSame(200, $status);
         self::assertSame('2025-06-18', $body['result']['protocolVersion'] ?? null);
+        self::assertStringContainsString('notes_search_tools', $body['result']['instructions'] ?? '');
         self::assertIsString($session);
         self::assertSame(202, self::post(['method' => 'notifications/initialized', 'notification' => true], $token, $session)[0]);
 
