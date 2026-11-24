@@ -378,6 +378,45 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(0.25, microtime(true) - $start, 'a word with more letters of marks than plain ones is held against no plain word');
     }
 
+    public function testPlainWordsCostLittleOnALargeIndexOfWordsMostlyOfMarks(): void
+    {
+        // The other way round: a thousand tools whose words are eight
+        // letters, seven of them with marks, and plain words of eight
+        // letters. Every word of the index passes the pattern of each, and
+        // none can spell it, so they are not read at all.
+        $marks = ['ǎ', 'é', 'ü', 'ő', 'ç', 'ñ', 'ά', 'έ', 'ή', 'ί', 'ό', 'ώ'];
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $greek = $word % 2 === 1;
+                $spelled = '';
+                for ($letter = 0; $letter < 7; ++$letter) {
+                    $spelled .= $marks[($greek ? 6 : 0) + hexdec($hash[$letter]) % 6];
+                }
+                $words[] = $spelled . ($greek ? 'α' : 'a');
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $greekLetters = preg_split('//u', 'αβγδεζηθικλμνξοπρστυφχψω', -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $hash = md5((string) $word);
+            for ($letter = 0; $letter < 8; ++$letter) {
+                $field .= $word % 2 === 1 ? $greekLetters[hexdec($hash[$letter]) % 24] : chr(97 + hexdec($hash[$letter]) % 26);
+            }
+            $field .= ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a plain word is held against no word with more letters of marks than half its length');
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

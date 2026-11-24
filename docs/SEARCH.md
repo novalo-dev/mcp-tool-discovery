@@ -129,7 +129,13 @@ kindergarten takes 0.15 ms against 0.22 ms when each word was counted one by
 one, over the bike rental 0.13 ms against 0.18 ms, and over the English
 servers no more than before. Over three thousand tools whose words all have
 eight letters, 32 words with marks that spell none of them cost 0.07 s
-against 0.5 s; every ranking of the benchmark is the same.
+against 0.5 s; every ranking of the benchmark is the same. A tool word whose
+number of letters with marks differs from the request word's by more than
+half their length is not read at all, since the letters taken on trust
+would outnumber those alike: over three thousand tools whose words have
+seven letters with marks out of eight, 32 plain words cost 0.002 s against
+0.5 s in Latin and 2.1 s in Greek, and the cached searches over the
+kindergarten and the museum about 0.02 ms more.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are

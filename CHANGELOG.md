@@ -147,6 +147,14 @@ becomes the next version's section when it is published.
   every key of the store once more: about 0.55 ms against 0.35 ms over 176
   tools.
 
+- **Plain words cost little over an index of words mostly of marks.** A word
+  of a request is no longer held against the tool words whose number of
+  letters with marks differs from its own by more than half their length,
+  which can never spell it. Over an index of words mostly of marks, a plain
+  word cost as much as reading every word of its length; it now costs as
+  little as any other. The ranking of every request of the benchmark is
+  unchanged.
+
 ### Fixed
 
 - **docs/MODES.md gives the bytes of one compact search as measured.**

@@ -120,6 +120,15 @@ final class ToolIndex
     private ?array $marked = null;
 
     /**
+     * The same words of one length, by how many of their letters have
+     * marks, each keyed by its place among the words of that length;
+     * built the first time a query holds an unknown word of that length.
+     *
+     * @var array<int, array<int, array<int, string>>>
+     */
+    private array $markCounts = [];
+
+    /**
      * The same for the indexed words written in the plain letters of one
      * script (PLAIN).
      *
@@ -403,11 +412,17 @@ final class ToolIndex
         if (!$hasMarks && preg_match(self::PLAIN, $word) !== 1) {
             return [];
         }
-        // Against a plain word, every letter with marks is taken on trust
-        // and every other one must match outright, so the plain words can
-        // spell it only when its letters with marks are at most half: past
-        // that, each would pass the pattern below and fail the count.
-        $againstPlain = $hasMarks && 2 * $marks <= count($characters);
+        // A letter with marks matches outright only the same letter, so
+        // each position where one word has marks and the other has not is
+        // taken on trust, and these must be at most half (see spell()): a
+        // word whose number of letters with marks differs from this one's
+        // by more than half its length can never spell it. Such words
+        // passed the pattern below and failed the count, and on an index
+        // of words mostly of marks, or for a request word mostly of marks
+        // against the plain words, that was every word of the length.
+        $length = count($characters);
+        $within = static fn(int $others): bool => 2 * abs($marks - $others) <= $length;
+        $againstPlain = $hasMarks && $within(0);
         // Built from the index at the first word that needs them, each with
         // one pass of PCRE over every word: an index read back from the
         // cache at each request pays for them only when a request holds a
@@ -447,7 +462,26 @@ final class ToolIndex
                 $pattern .= self::stands($character);
             }
         }
-        $candidates = array_merge($againstPlain ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
+        // Counted for one length at a time: counting the marks of every
+        // word of the index at once doubled the cost of a search over the
+        // kindergarten, whose index is read back from the cache at each
+        // request.
+        if (!isset($this->markCounts[$length])) {
+            $this->markCounts[$length] = [];
+            foreach ($this->marked[$length] ?? [] as $place => $indexed) {
+                $this->markCounts[$length][(int) preg_match_all(self::MARKED, $indexed)][$place] = $indexed;
+            }
+        }
+        $withMarks = [];
+        foreach ($this->markCounts[$length] as $others => $words) {
+            if ($within($others)) {
+                $withMarks += $words;
+            }
+        }
+        // Back in index order, so the words kept within MAX_ALIKE are the
+        // same as if every word of the length had been read.
+        ksort($withMarks);
+        $candidates = array_merge($againstPlain ? $this->plain[$length] ?? [] : [], array_values($withMarks));
         $spelled = [];
         // In slices, so the pass stops once MAX_ALIKE are found, as the loop
         // did before it, rather than reading the rest of the index.
