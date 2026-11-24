@@ -33,7 +33,7 @@ not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
 On the benchmark below, the same requests find the right tool first 1109 times
-out of 1464 in fields, and 815 times as one sentence.
+out of 1464 in fields, and 820 times as one sentence.
 
 ## How a tool is scored
 
@@ -111,9 +111,9 @@ outside it, and, wherever one is a Latin letter outside ASCII (`ệ`, `đ`,
 match outright must be at least as many as those taken on trust, so `don`
 is not taken for `đón`, two of whose three letters it would take on trust. It counts as a word
 alike at a Dice coefficient of 1, half the weight of the word itself, as the
-words alike in form above. A letter of another script is never such a place:
-a Greek or Cyrillic word is never spelled by a word of ASCII, and the Greek
-accents (below) are still met by their trigrams only. Measured on the
+words alike in form above. A letter stands only for a letter of its own
+script: a Greek or Cyrillic word is never spelled by a word of ASCII.
+Greek is read the same way (below), and Cyrillic not at all. Measured on the
 train half with the kindergarten in: added on top of the words alike, at a
 weight of 0.5, 0.75, 1 and 1.5, it found 1224, 1222, 1221 and 1220 first
 against 1223, and as a word alike, 1224 and 955 as one sentence against 954:
@@ -498,9 +498,9 @@ and gives the score.
 | Test half, 1464 requests | Right tool first | Top 3 |
 |---|---|---|
 | The request in fields | 1109 | 1303 |
-| The same request as one sentence | 815 | 1065 |
+| The same request as one sentence | 820 | 1069 |
 | In fields, after every train request was run once | 1112 | 1303 |
-| In fields, after the test requests were run once, then asked again | 1217 | 1360 |
+| In fields, after the test requests were run once, then asked again | 1218 | 1360 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -550,9 +550,10 @@ typed as many people type Greek, without the accents (`ακυρωσε` for
 `ακύρωσε`). Nothing was tuned on it: 41 of its 50 test requests find the
 right tool first in fields, 47 in the top 3. The accents are where it loses:
 24 of the 26 test requests written with them come first, 17 of the 24
-written without. A word typed without its accent is another word to the
-index, and only its trigrams away from the accent still meet the tool
-(`εκδηλωση` asked, `εκδήλωση` in the tool).
+written without. A word typed without its accent was another word to the
+index, met only by its trigrams away from the accent (`εκδηλωση` asked,
+`εκδήλωση` in the tool), until it counted as the tool word it spells
+(below).
 
 The newsroom is written as many real servers are, and none of the others
 is: no tool has a title, so its name stands in for one, and each description
@@ -741,6 +742,23 @@ haste: with no accent at all, and so with a plain `σ` where the tools end a
 word with `ς` (`ΚΡΑΤΗΣΕΙΣ` lowers to `κρατησεισ`, never to `κρατήσεις`).
 Half of them went to each half; on the test half, 10 of the 12 come first
 in fields as they stood.
+
+**A Greek word typed without its accents counts as the tool word it
+spells**, as a Latin one does (above): the plain Greek letters are the one
+range α to ω, so a letter of that range stands for any other Greek letter
+(`ή`, `ϊ`, `ῶ`), and the other way round, with no table. A sigma also
+stands for a final sigma: Unicode lowers a capital sigma to `σ` wherever it
+stands, so `ΚΡΑΤΗΣΕΙΣ` reaches `κρατήσεις` only that way. Tried on
+2026-11-24 without the sigma, it lost a test request typed in capitals, and
+was put aside until requests of that kind were on the train half. With
+them, on the train half: 1235 to 1236 first in fields (1352 to 1354 in the
+top 3), 967 to 968 as one sentence, 1303 to 1305 asked again, learning from
+one fold to the other 1236 to 1237. On the test half, read once: 1109 first
+in fields and 1303 in the top 3 as before, as one sentence 815 to 820 (1065
+to 1069 in the top 3), learned from the other half 1112 as before, asked
+again 1217 to 1218; every ranking of the other servers is the same. A
+cached search over the town hall or the museum takes about 0.25 ms against
+0.14 ms, since their words now go through the spelling too.
 
 The bike rental is written in Polish, the first Latin script whose letters
 are typed away as often as its accents: "zglos" for "zgłoś", where no

@@ -727,6 +727,18 @@ final class ToolSearchTest extends TestCase
         ])))->search('tlos')));
     }
 
+    public function testAGreekWordTypedInCapitalsFindsTheToolThatSpellsIt(): void
+    {
+        // Greek in capitals carries no accent, and every capital sigma
+        // lowers to "σ", where the tools end a word with "ς".
+        $town = new ToolSearch(RecordingGate::server('city'));
+        self::assertSame('parking_fine_appeal', self::names($town->search(new SearchQuery('ΕΝΣΤΑΣΗ', 'ΚΛΗΣΗ ΣΤΑΘΜΕΥΣΗΣ', 'ΗΤΑΝ ΣΩΣΤΑ ΠΑΡΚΑΡΙΣΜΕΝΟ')))[0]);
+        $museum = new ToolSearch(RecordingGate::server('museum'));
+        self::assertSame('exhibitions_list', self::names($museum->search('ΠΟΙΕΣ ΕΚΘΕΣΕΙΣ ΕΧΕΙ ΤΟ ΜΟΥΣΕΙΟ'))[0]);
+        // Typed in haste, without accents.
+        self::assertSame('tour_book', self::names($museum->search('θελουν ξεναγηση στα γαλλικα αυριο'))[0]);
+    }
+
     public function testAHostStoreThatHandsBackANumberDoesNotBreakTheSearch(): void
     {
         $tools = ToolSet::of([

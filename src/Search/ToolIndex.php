@@ -74,6 +74,17 @@ final class ToolIndex
     private const SPELL_SLICE = 256;
 
     /**
+     * A word holding a letter with marks: a Latin letter outside ASCII, or
+     * a Greek letter outside α to ω (a tonos, a dialytika, a breathing).
+     * Each script's plain letters are one range of code points, so no
+     * table of letters is needed; see unmarked().
+     */
+    private const MARKED = '/(?![a-z])\p{Latin}|(?![α-ω])\p{Greek}/u';
+
+    /** A word written in the plain letters of one script only. */
+    private const PLAIN = '/^(?:[a-z]+|[α-ω]+)$/u';
+
+    /**
      * How many words of one query no tool uses are looked up in full, the
      * first ones written. Finding the words alike one visits every word of
      * the index sharing a trigram with it, so a field of a thousand unknown
@@ -92,7 +103,7 @@ final class ToolIndex
     private ?array $wordList = null;
 
     /**
-     * The indexed words holding a Latin letter outside ASCII, grouped by
+     * The indexed words holding a letter with marks (MARKED), grouped by
      * how many characters they have, built the first time a query holds a
      * word no document does; see unmarked().
      *
@@ -101,7 +112,8 @@ final class ToolIndex
     private ?array $marked = null;
 
     /**
-     * The same for the indexed words written in ASCII only.
+     * The same for the indexed words written in the plain letters of one
+     * script (PLAIN).
      *
      * @var array<int, list<string>>|null
      */
@@ -343,18 +355,24 @@ final class ToolIndex
 
     /**
      * The indexed words a word spells but for its marks: as long, the same
-     * letter wherever both are in ASCII or both outside it, and wherever
-     * one is a Latin letter outside ASCII ("ệ", "đ", "ü"), any letter of
-     * ASCII in the other. Either side may be the one without its marks.
+     * letter wherever both are plain or both have marks, and wherever one
+     * is a Latin letter outside ASCII ("ệ", "đ", "ü"), any letter of ASCII
+     * in the other, and wherever one is a Greek letter with marks ("ή",
+     * "ϊ"), any Greek letter from α to ω. Either side may be the one
+     * without its marks. A sigma stands for a final sigma and the other way
+     * round: a word typed in capitals lowers to "κρατησεισ", where the
+     * tool writes "κρατήσεις".
      *
      * Vietnamese, and many languages written in Latin letters, are often
      * typed without their marks, on a phone above all. Trigrams do not see
      * it: the marks sit in short words, so most trigrams of "hoc" differ
      * from those of "học". Folding a letter to its base needs a table of
      * letters or the intl extension; reading the place of the marks needs
-     * neither, only the Unicode script of a character, which PCRE knows.
-     * A letter outside the Latin script is never one of these places, so
-     * Greek, Cyrillic or Arabic words never match a word of ASCII.
+     * neither, only the Unicode script of a character, which PCRE knows,
+     * and for Greek the one range α to ω its plain letters fill. A letter
+     * stands only for a letter of its own script, so a Greek word never
+     * matches a word of ASCII, and Cyrillic or Arabic words are never
+     * matched this way.
      *
      * The letters that match outright must be at least as many as those
      * taken on trust, so "đơn" is not spelled by any three letters ending
@@ -368,32 +386,32 @@ final class ToolIndex
         if ($characters === false) {
             return [];
         }
-        // A word in ASCII can only be spelled by a word with marks; a word
+        // A plain word can only be spelled by a word with marks; a word
         // with marks by a word with or without them.
-        $hasMarks = preg_match('/(?![a-z])\p{Latin}/u', $word) === 1;
-        if (!$hasMarks && preg_match('/[^\x00-\x7F]/', $word) === 1) {
+        $hasMarks = preg_match(self::MARKED, $word) === 1;
+        if (!$hasMarks && preg_match(self::PLAIN, $word) !== 1) {
             return [];
         }
         // Built from the index at the first word that needs them, each with
         // one pass of PCRE over every word: an index read back from the
         // cache at each request pays for them only when a request holds a
-        // word no tool uses, and for the words of ASCII only when it holds
-        // one with marks.
+        // word no tool uses, and for the plain words only when it holds one
+        // with marks.
         $this->wordList ??= array_map('strval', array_keys($this->words));
         if ($this->marked === null) {
             $this->marked = [];
             /** @var array<int, string>|false $withMarks */
-            $withMarks = preg_grep('/(?![a-z])\p{Latin}/u', $this->wordList);
+            $withMarks = preg_grep(self::MARKED, $this->wordList);
             foreach ($withMarks === false ? [] : $withMarks as $indexed) {
                 $this->marked[(int) preg_match_all('/./su', $indexed)][] = $indexed;
             }
         }
         if ($hasMarks && $this->plain === null) {
             $this->plain = [];
-            /** @var array<int, string>|false $ascii */
-            $ascii = preg_grep('/^[a-z]+$/', $this->wordList);
-            foreach ($ascii === false ? [] : $ascii as $indexed) {
-                $this->plain[strlen($indexed)][] = $indexed;
+            /** @var array<int, string>|false $plain */
+            $plain = preg_grep(self::PLAIN, $this->wordList);
+            foreach ($plain === false ? [] : $plain as $indexed) {
+                $this->plain[(int) preg_match_all('/./su', $indexed)][] = $indexed;
             }
         }
         // One pass of PCRE over the words of the same length keeps those
@@ -407,6 +425,12 @@ final class ToolIndex
                 $pattern .= '(?:' . $character . '|(?![\x00-\x7F])\p{Latin})';
             } elseif (strlen($character) > 1 && preg_match('/^\p{Latin}$/u', $character) === 1) {
                 $pattern .= '(?:' . preg_quote($character, '/') . '|[a-z])';
+            } elseif ($character === 'σ' || $character === 'ς') {
+                $pattern .= '(?:σ|ς)';
+            } elseif (preg_match('/^[α-ω]$/u', $character) === 1) {
+                $pattern .= '(?:' . $character . '|(?![α-ω])\p{Greek})';
+            } elseif (preg_match('/^\p{Greek}$/u', $character) === 1) {
+                $pattern .= '(?:' . preg_quote($character, '/') . '|[α-ω])';
             } else {
                 $pattern .= preg_quote($character, '/');
             }
@@ -450,7 +474,7 @@ final class ToolIndex
             $trusted = 0;
             foreach ($characters as $position => $character) {
                 $letter = $letters[$position] ?? '';
-                if ($character === $letter) {
+                if ($character === $letter || (self::sigma($character) && self::sigma($letter))) {
                     ++$same;
                 } elseif (self::mark($character, $letter) || self::mark($letter, $character)) {
                     ++$trusted;
@@ -473,11 +497,27 @@ final class ToolIndex
     }
 
     /**
-     * Whether a letter of ASCII may stand for a Latin letter outside it.
+     * Whether a plain letter may stand for a letter with marks of its own
+     * script: a letter of ASCII for a Latin letter outside it, a Greek
+     * letter from α to ω for any other Greek letter.
      */
-    private static function mark(string $ascii, string $marked): bool
+    private static function mark(string $plain, string $marked): bool
     {
-        return strlen($ascii) === 1 && $ascii >= 'a' && $ascii <= 'z' && strlen($marked) > 1 && preg_match('/^\p{Latin}$/u', $marked) === 1;
+        if (strlen($plain) === 1) {
+            return $plain >= 'a' && $plain <= 'z' && strlen($marked) > 1 && preg_match('/^\p{Latin}$/u', $marked) === 1;
+        }
+
+        return preg_match('/^[α-ω]$/u', $plain) === 1 && preg_match('/^(?![α-ω])\p{Greek}$/u', $marked) === 1;
+    }
+
+    /**
+     * Whether a letter is a sigma, final or not. Unicode lowers a capital
+     * sigma to the plain one wherever it stands, so the two are one letter
+     * to a request typed in capitals.
+     */
+    private static function sigma(string $letter): bool
+    {
+        return $letter === 'σ' || $letter === 'ς';
     }
 
     /**

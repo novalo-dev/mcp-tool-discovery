@@ -84,6 +84,16 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A Greek word typed without its accents finds the tool word it
+  spells.** As for a Latin letter outside ASCII, a Greek letter outside α
+  to ω (a tonos, a dialytika, polytonic marks) may be met by any letter of
+  α to ω, and a sigma by a final sigma: a request typed in capitals
+  (`ΚΡΑΤΗΣΕΙΣ`, which lowers to `κρατησεισ`) now reaches `κρατήσεις`. Still
+  no table and no extension. On the test half, 815 to 820 first as one
+  sentence and 1217 to 1218 asked again, the requests in fields as before;
+  the floor asked again moves to 1218. A cached search over a server
+  written in Greek takes about 0.25 ms against 0.14 ms.
+
 - **A word typed without its marks finds the tool word it spells.** A
   request typed as many people type Vietnamese or Polish, on a phone above
   all ("hoc phi" for "học phí", "doladuj" for "doładuj"), met the tool
@@ -92,8 +102,8 @@ becomes the next version's section when it is published.
   the same letters, except where one side has a Latin letter outside ASCII
   and the other any letter of ASCII, as long as the letters that match
   outright are at least as many. No table of letters and no extension: the
-  Unicode script of a character, read by PCRE, is all it takes, so Greek
-  and Cyrillic words are never matched this way. On the test half, 1089 to
+  Unicode script of a character, read by PCRE, is all it takes, so a
+  Greek or Cyrillic word is never matched by a word of ASCII. On the test half, 1089 to
   1099 first in fields, 798 to 807 as one sentence, 1198 to 1206 asked
   again; no server loses a request. The tool words a word may spell are
   first sifted by one pass of PCRE, letter by letter, so a cached search
