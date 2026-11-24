@@ -78,6 +78,57 @@ final class ListCost
     }
 
     /**
+     * The grouped list of the workspace without the tools it leaves as
+     * themselves: how many group tools it shows and their bytes, against the
+     * actions they stand for and the bytes those would take as themselves.
+     * Each side counts its tool definitions only, so the frame of the list,
+     * the same on both, does not narrow the gap.
+     *
+     * @return array{tools: int, bytes: int, actions: int, actionBytes: int}
+     */
+    public static function groups(): array
+    {
+        $revision = Revision::fromString(self::REVISION);
+        $tools = RecordingGate::server(Benchmark::SERVERS['workspace']);
+        $grouped = (new Discovery(Groups::mode(), new RecordingGate()))->listTools($tools, $revision);
+        $own = [];
+        $actions = [];
+        foreach ($tools->all() as $tool) {
+            $own[$tool->name] = true;
+            if (Groups::of($tool) !== '') {
+                $actions[] = $tool;
+            }
+        }
+        $groupTools = [];
+        foreach (is_array($grouped['tools'] ?? null) ? $grouped['tools'] : [] as $definition) {
+            if (is_array($definition) && is_string($definition['name'] ?? null) && !isset($own[$definition['name']])) {
+                $groupTools[] = $definition;
+            }
+        }
+        $listed = Shaper::listResult($actions, $revision)['tools'] ?? [];
+
+        return [
+            'tools' => count($groupTools),
+            'bytes' => self::sum($groupTools),
+            'actions' => count($actions),
+            'actionBytes' => self::sum(is_array($listed) ? $listed : []),
+        ];
+    }
+
+    /**
+     * @param array<mixed> $definitions
+     */
+    private static function sum(array $definitions): int
+    {
+        $bytes = 0;
+        foreach ($definitions as $definition) {
+            $bytes += strlen(json_encode($definition, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+        }
+
+        return $bytes;
+    }
+
+    /**
      * @param array<string, mixed> $result
      */
     private static function bytes(array $result): int

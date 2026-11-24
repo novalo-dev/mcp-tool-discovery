@@ -184,6 +184,12 @@ becomes the next version's section when it is published.
   README sentence on the largest server, with what the benchmark measures,
   and its failure shows the table to paste.
 
+- **docs/MODES.md gives the bytes of the group tools as measured.** Its
+  sentence on the grouped mode (8 tools of 7,154 bytes for 28 actions of
+  9,299 on the workspace) was copied by hand, outside the table the test
+  holds. `ListCostTest` now compares it with what `ListCost::groups()`
+  measures, and `composer benchmark` prints it under the table.
+
 ### Security
 
 - A word of a request counts as at most 32 tool words it spells but for its

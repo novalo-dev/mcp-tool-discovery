@@ -71,7 +71,7 @@ tools stay outside them, listed as themselves.
 - **Grouped** shows the map of the server without a search, for a client that
   searches badly and a server whose tools fall into a few clear groups. It
   leaves the schemas out but names every action, so its list grows with the
-  server. On the workspace its eight tools take 7,154 bytes where the 28
+  server. On the workspace its 8 tools take 7,154 bytes where the 28
   actions they stand for would take 9,299: on short tools it saves almost a
   quarter, more as the schemas grow.
 - **Direct** lists every tool as itself, the first column. It suits a server

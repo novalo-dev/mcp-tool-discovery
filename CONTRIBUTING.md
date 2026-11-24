@@ -113,8 +113,9 @@ The search is measured, not tuned by feel.
   each mode's list costs on them. A change must not lower the scores:
   `tests/Search/BenchmarkTest.php` holds the floors. A change that moves
   the bytes of a list or of a search answer refreshes the table of
-  docs/MODES.md: `tests/Search/ListCostTest.php` fails until it matches,
-  and shows the table as measured.
+  docs/MODES.md and its sentence on the group tools:
+  `tests/Search/ListCostTest.php` fails until they match, and shows them as
+  measured (`composer benchmark` prints both).
 - A change that raises it raises the floors in the same pull request, and
   updates the numbers in docs/SEARCH.md and the README.
 - New fixture queries go in `tests/Fixtures/queries.json`, written **before**
