@@ -10,6 +10,13 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Russian requests typed without `ё` on the search benchmark.** Twelve
+  more on each half of the hotel, written before any of them was run, typed
+  with `е` where the tools write `ё` (`счет` for `счёт`), as Russian is most
+  often typed. The benchmark now holds 2945 requests; its floors move to
+  1120 and 1314 in fields and 1229 asked again, and the laravel/mcp line to
+  436 and 672 as one sentence and 806 and 1043 with the fields joined.
+
 - **Greek requests in capitals and without accents on the search
   benchmark.** Twelve more on the town hall and twelve on the museum, written
   before any of them was run, typed as Greek is typed in capitals or in

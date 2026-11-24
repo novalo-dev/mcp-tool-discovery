@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1109 times
-out of 1464 in fields, and 820 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1120 times
+out of 1476 in fields, and 831 times as one sentence.
 
 ## How a tool is scored
 
@@ -490,17 +490,17 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `flight.change-aircraft`), a fleet of field sensors generated from
 OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
 written in Turkish (40 tools, `ticket_refund`) and a kindergarten written
-in Vietnamese (40 tools, `absence_notice_cancel`). 2921 requests, each written as one
+in Vietnamese (40 tools, `absence_notice_cancel`). 2945 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1464 requests | Right tool first | Top 3 |
+| Test half, 1476 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1109 | 1303 |
-| The same request as one sentence | 820 | 1069 |
-| In fields, after every train request was run once | 1112 | 1303 |
-| In fields, after the test requests were run once, then asked again | 1218 | 1360 |
+| The request in fields | 1120 | 1314 |
+| The same request as one sentence | 831 | 1080 |
+| In fields, after every train request was run once | 1123 | 1314 |
+| In fields, after the test requests were run once, then asked again | 1229 | 1371 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -510,8 +510,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 431 | 663 |
-| The fields joined into one sentence | 800 | 1034 |
+| The request as one sentence | 436 | 672 |
+| The fields joined into one sentence | 806 | 1043 |
 
 As one sentence it trails on each of the twenty-six servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
@@ -666,6 +666,13 @@ other words pair again, and learning loses nothing (37 and 47 both ways).
 What it misses is mostly neighbours of one object (opening a room again after
 repairs finds the tool that closes it) and words the tools do not use
 ("такси" for the transfer).
+
+Twelve requests more on each half were written later, again before any of
+them was run, typed as Russian is most often typed: with "е" where the tools
+write "ё" ("счет" for "счёт", "отчет", "черный список", "платеж"). On the
+test half, 11 of the 12 come first in fields as they stood; the short words
+are the ones the trigrams miss, as most trigrams of "счет" differ from those
+of "счёт".
 
 The clinic is written in Japanese, kanji, hiragana and katakana with no
 spaces, behind snake_case names: a veterinary clinic whose tools are
