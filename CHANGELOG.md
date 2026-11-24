@@ -99,6 +99,16 @@ becomes the next version's section when it is published.
   host's own words, and says where they go in `2026-07-28`; the test that
   runs the quick start checks them.
 
+- **A Russian word typed with `е` for `ё` finds the tool word it
+  spells.** As for Greek, a Cyrillic letter outside а to я (`ё`, and the
+  `і`, `ї`, `є` of Ukrainian) may be met by any letter of а to я and the
+  other way round, so `счет` now reaches `счёт`. Still no table and no
+  extension. On the test half, 1314 to 1315 in the top 3 in fields (the
+  floor moves with it), 1371 to 1372 in the top 3 asked again, and 831 to
+  830 first as one sentence, where two Ukrainian tools now both write the
+  word a request spells. A cached search over a server written in Cyrillic
+  takes about 0.25 ms against 0.15 ms.
+
 - **A Greek word typed without its accents finds the tool word it
   spells.** As for a Latin letter outside ASCII, a Greek letter outside α
   to ω (a tonos, a dialytika, polytonic marks) may be met by any letter of

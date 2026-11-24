@@ -319,7 +319,7 @@ client gives its request **in fields**, and each field is scored on its own:
   prefix or a verb every tool shares weighs almost nothing.
 - **Whole words and trigrams**, so `statuses` meets `status` and `categories`
   meets `category` without a stemmer. A word typed without its marks
-  ("hoc phi") meets the tool word it spells ("học phí"), with no table of
+  ("hoc phi", "счет") meets the tool word it spells ("học phí", "счёт"), with no table of
   letters and no extension. Chinese, Japanese, Thai, Lao and Burmese,
   written without spaces, are cut into pairs of characters, with no dictionary, and
   so is each Korean word, which carries its particles.
@@ -362,10 +362,10 @@ score:
 
 | Test half, 1476 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1120** | **1314** |
-| The same request as one sentence | 831 | 1080 |
-| In fields, after learning from the other half | 1123 | 1314 |
-| In fields, asked a second time | 1229 | 1371 |
+| The request in fields | **1120** | **1315** |
+| The same request as one sentence | 830 | 1080 |
+| In fields, after learning from the other half | 1123 | 1315 |
+| In fields, asked a second time | 1229 | 1372 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

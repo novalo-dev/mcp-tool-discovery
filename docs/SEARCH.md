@@ -33,7 +33,7 @@ not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
 On the benchmark below, the same requests find the right tool first 1120 times
-out of 1476 in fields, and 831 times as one sentence.
+out of 1476 in fields, and 830 times as one sentence.
 
 ## How a tool is scored
 
@@ -113,7 +113,7 @@ is not taken for `đón`, two of whose three letters it would take on trust. It 
 alike at a Dice coefficient of 1, half the weight of the word itself, as the
 words alike in form above. A letter stands only for a letter of its own
 script: a Greek or Cyrillic word is never spelled by a word of ASCII.
-Greek is read the same way (below), and Cyrillic not at all. Measured on the
+Greek and Cyrillic are read the same way (below). Measured on the
 train half with the kindergarten in: added on top of the words alike, at a
 weight of 0.5, 0.75, 1 and 1.5, it found 1224, 1222, 1221 and 1220 first
 against 1223, and as a word alike, 1224 and 955 as one sentence against 954:
@@ -497,10 +497,10 @@ and gives the score.
 
 | Test half, 1476 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1120 | 1314 |
-| The same request as one sentence | 831 | 1080 |
-| In fields, after every train request was run once | 1123 | 1314 |
-| In fields, after the test requests were run once, then asked again | 1229 | 1371 |
+| The request in fields | 1120 | 1315 |
+| The same request as one sentence | 830 | 1080 |
+| In fields, after every train request was run once | 1123 | 1315 |
+| In fields, after the test requests were run once, then asked again | 1229 | 1372 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -766,6 +766,23 @@ to 1069 in the top 3), learned from the other half 1112 as before, asked
 again 1217 to 1218; every ranking of the other servers is the same. A
 cached search over the town hall or the museum takes about 0.25 ms against
 0.14 ms, since their words now go through the spelling too.
+
+**A Cyrillic word typed without its marks counts as the tool word it
+spells** the same way: the plain Cyrillic letters are the one range а to я,
+and `ё` lies outside it, so `счет` reaches `счёт` and `создаёт` reaches
+`создает`. Russian is most often typed with `е` for `ё`. `й` lies within the
+range and is left alone. The letters of Ukrainian and other languages
+outside the range (`і`, `ї`, `є`, `ў`) are taken the same way, since nothing
+but a table could tell a mark from a letter of its own there. Nothing to
+tune; on the train half with the hotel requests typed that way in: 1245 to
+1246 first in fields, 979 to 980 as one sentence, 1316 to 1317 asked again,
+all from the hotel, the theatre as before. On the test half, read once:
+1120 first in fields as before, 1314 to 1315 in the top 3, 1371 to 1372
+asked again in the top 3, and 831 to 830 as one sentence: on the theatre,
+`додай` now also reaches `додає`, which two tools write, and the one that
+adds a show passes the one that adds a discount. A cached search over the
+hotel takes about 0.23 ms against 0.16 ms, over the theatre 0.27 ms
+against 0.12 ms.
 
 The bike rental is written in Polish, the first Latin script whose letters
 are typed away as often as its accents: "zglos" for "zgłoś", where no

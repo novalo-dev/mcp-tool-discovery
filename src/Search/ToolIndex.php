@@ -74,15 +74,23 @@ final class ToolIndex
     private const SPELL_SLICE = 256;
 
     /**
-     * A word holding a letter with marks: a Latin letter outside ASCII, or
-     * a Greek letter outside α to ω (a tonos, a dialytika, a breathing).
-     * Each script's plain letters are one range of code points, so no
-     * table of letters is needed; see unmarked().
+     * A word holding a letter with marks: a Latin letter outside ASCII, a
+     * Greek letter outside α to ω (a tonos, a dialytika, a breathing), or a
+     * Cyrillic letter outside а to я ("ё", "ї", "ў"). Each script's plain
+     * letters are one range of code points, so no table of letters is
+     * needed; see unmarked().
      */
-    private const MARKED = '/(?![a-z])\p{Latin}|(?![α-ω])\p{Greek}/u';
+    private const MARKED = '/(?![a-z])\p{Latin}|(?![α-ω])\p{Greek}|(?![а-я])\p{Cyrillic}/u';
 
     /** A word written in the plain letters of one script only. */
-    private const PLAIN = '/^(?:[a-z]+|[α-ω]+)$/u';
+    private const PLAIN = '/^(?:[a-z]+|[α-ω]+|[а-я]+)$/u';
+
+    /**
+     * The scripts whose plain letters fill one range other than ASCII, and
+     * that range: a letter of the range stands for any other letter of its
+     * script, and the other way round.
+     */
+    private const RANGES = ['Greek' => 'α-ω', 'Cyrillic' => 'а-я'];
 
     /**
      * How many words of one query no tool uses are looked up in full, the
@@ -358,7 +366,9 @@ final class ToolIndex
      * letter wherever both are plain or both have marks, and wherever one
      * is a Latin letter outside ASCII ("ệ", "đ", "ü"), any letter of ASCII
      * in the other, and wherever one is a Greek letter with marks ("ή",
-     * "ϊ"), any Greek letter from α to ω. Either side may be the one
+     * "ϊ"), any Greek letter from α to ω, and the same for a Cyrillic
+     * letter outside а to я ("ё", "ї") and the letters within. Russian is
+     * most often typed with "е" for "ё". Either side may be the one
      * without its marks. A sigma stands for a final sigma and the other way
      * round: a word typed in capitals lowers to "κρατησεισ", where the
      * tool writes "κρατήσεις".
@@ -369,9 +379,9 @@ final class ToolIndex
      * from those of "học". Folding a letter to its base needs a table of
      * letters or the intl extension; reading the place of the marks needs
      * neither, only the Unicode script of a character, which PCRE knows,
-     * and for Greek the one range α to ω its plain letters fill. A letter
-     * stands only for a letter of its own script, so a Greek word never
-     * matches a word of ASCII, and Cyrillic or Arabic words are never
+     * and for Greek and Cyrillic the one range their plain letters fill. A
+     * letter stands only for a letter of its own script, so a Greek word
+     * never matches a word of ASCII, and Arabic or Hebrew words are never
      * matched this way.
      *
      * The letters that match outright must be at least as many as those
@@ -427,12 +437,8 @@ final class ToolIndex
                 $pattern .= '(?:' . preg_quote($character, '/') . '|[a-z])';
             } elseif ($character === 'σ' || $character === 'ς') {
                 $pattern .= '(?:σ|ς)';
-            } elseif (preg_match('/^[α-ω]$/u', $character) === 1) {
-                $pattern .= '(?:' . $character . '|(?![α-ω])\p{Greek})';
-            } elseif (preg_match('/^\p{Greek}$/u', $character) === 1) {
-                $pattern .= '(?:' . preg_quote($character, '/') . '|[α-ω])';
             } else {
-                $pattern .= preg_quote($character, '/');
+                $pattern .= self::stands($character);
             }
         }
         $candidates = array_merge($hasMarks ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
@@ -497,17 +503,42 @@ final class ToolIndex
     }
 
     /**
+     * The pattern of what may stand for a character outside the Latin
+     * script: within one of RANGES, the letter or a letter of its script
+     * outside the range; outside, the letter or a letter of the range.
+     */
+    private static function stands(string $character): string
+    {
+        $quoted = preg_quote($character, '/');
+        foreach (self::RANGES as $script => $range) {
+            if (preg_match('/^[' . $range . ']$/u', $character) === 1) {
+                return '(?:' . $quoted . '|(?![' . $range . '])\\p{' . $script . '})';
+            }
+            if (preg_match('/^\\p{' . $script . '}$/u', $character) === 1) {
+                return '(?:' . $quoted . '|[' . $range . '])';
+            }
+        }
+
+        return $quoted;
+    }
+
+    /**
      * Whether a plain letter may stand for a letter with marks of its own
-     * script: a letter of ASCII for a Latin letter outside it, a Greek
-     * letter from α to ω for any other Greek letter.
+     * script: a letter of ASCII for a Latin letter outside it, a letter of
+     * one of RANGES for any other letter of its script.
      */
     private static function mark(string $plain, string $marked): bool
     {
         if (strlen($plain) === 1) {
             return $plain >= 'a' && $plain <= 'z' && strlen($marked) > 1 && preg_match('/^\p{Latin}$/u', $marked) === 1;
         }
+        foreach (self::RANGES as $script => $range) {
+            if (preg_match('/^[' . $range . ']$/u', $plain) === 1) {
+                return preg_match('/^(?![' . $range . '])\\p{' . $script . '}$/u', $marked) === 1;
+            }
+        }
 
-        return preg_match('/^[α-ω]$/u', $plain) === 1 && preg_match('/^(?![α-ω])\p{Greek}$/u', $marked) === 1;
+        return false;
     }
 
     /**

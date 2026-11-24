@@ -53,11 +53,11 @@ The benchmark says where the search still misses, in
   whose words take their suffixes and are often typed without `ş` or `ı`
   (a ferry line) and a Vietnamese one, typed with and without its tone
   marks (a kindergarten) are in.
-- **Accents.** A word of Latin or Greek letters typed without its marks
-  now meets the tool word it spells, a Greek word typed in capitals
-  included. Cyrillic has the same need where it writes `ё` as `е` or `й`
-  as `и`; a server whose requests do so, written before any of them is
-  run, is welcome.
+- **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
+  marks now meets the tool word it spells, a Greek word typed in capitals
+  and a Russian `е` for `ё` included. `й` typed as `и` lies within the
+  plain Cyrillic range and is not met yet; a server whose requests do so,
+  written before any of them is run, is welcome.
 
 A change to the search comes with the benchmark before and after.
 

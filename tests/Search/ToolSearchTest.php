@@ -739,6 +739,22 @@ final class ToolSearchTest extends TestCase
         self::assertSame('tour_book', self::names($museum->search('θελουν ξεναγηση στα γαλλικα αυριο'))[0]);
     }
 
+    public function testARussianWordTypedWithoutYoFindsTheToolThatSpellsIt(): void
+    {
+        // Russian is most often typed with "е" for "ё", and "счет" shares
+        // too few trigrams with "счёт" to find the bill on them alone.
+        $hotel = new ToolSearch(RecordingGate::server('hotel'));
+        self::assertSame('FOLIO_GET', self::names($hotel->search(new SearchQuery('показать', 'счет')))[0]);
+
+        // Either side may be the one without the mark: on its trigrams
+        // alone, "счёт" finds only the meters, whose "учёт" shares more.
+        $tools = ToolSet::of([
+            ['name' => 'meters_read', 'title' => 'Учёт воды', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'bills_get', 'title' => 'Счет гостя', 'inputSchema' => ['type' => 'object']],
+        ]);
+        self::assertContains('bills_get', self::names((new ToolSearch($tools))->search(new SearchQuery('', 'счёт'))));
+    }
+
     public function testAHostStoreThatHandsBackANumberDoesNotBreakTheSearch(): void
     {
         $tools = ToolSet::of([
