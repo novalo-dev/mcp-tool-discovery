@@ -122,9 +122,14 @@ kept. On the test half, the requests in fields go from 1089 to 1099 first
 the other half from 1092 to 1102, asked again from 1198 to 1206: 9 on the
 kindergarten, 1 on the bike rental, no server loses a request. The
 places of the marks are read from the index at the first request that holds
-a word no tool uses: a cached search over the kindergarten takes 0.30 ms
-against 0.15 ms, over the bike rental 0.20 ms against 0.12 ms, and over the
-English servers no more than before.
+a word no tool uses, and the tool words of the same length are first sifted
+by one pass of PCRE that holds each letter to what may stand for it, so the
+letters are only counted for the few that pass: a cached search over the
+kindergarten takes 0.15 ms against 0.22 ms when each word was counted one by
+one, over the bike rental 0.13 ms against 0.18 ms, and over the English
+servers no more than before. Over three thousand tools whose words all have
+eight letters, 32 words with marks that spell none of them cost 0.07 s
+against 0.5 s; every ranking of the benchmark is the same.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are

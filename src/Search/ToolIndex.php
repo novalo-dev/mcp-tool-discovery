@@ -70,6 +70,9 @@ final class ToolIndex
      */
     private const MAX_ALIKE = 32;
 
+    /** How many words of the index one pass of PCRE reads; see unmarked(). */
+    private const SPELL_SLICE = 256;
+
     /**
      * How many words of one query no tool uses are looked up in full, the
      * first ones written. Finding the words alike one visits every word of
@@ -89,18 +92,18 @@ final class ToolIndex
     private ?array $wordList = null;
 
     /**
-     * The indexed words holding a Latin letter outside ASCII, cut into
-     * characters and grouped by how many they have, built the first time a
-     * query holds a word no document does; see unmarked().
+     * The indexed words holding a Latin letter outside ASCII, grouped by
+     * how many characters they have, built the first time a query holds a
+     * word no document does; see unmarked().
      *
-     * @var array<int, list<array{string, list<string>}>>|null
+     * @var array<int, list<string>>|null
      */
     private ?array $marked = null;
 
     /**
      * The same for the indexed words written in ASCII only.
      *
-     * @var array<int, list<array{string, list<string>}>>|null
+     * @var array<int, list<string>>|null
      */
     private ?array $plain = null;
 
@@ -382,10 +385,7 @@ final class ToolIndex
             /** @var array<int, string>|false $withMarks */
             $withMarks = preg_grep('/(?![a-z])\p{Latin}/u', $this->wordList);
             foreach ($withMarks === false ? [] : $withMarks as $indexed) {
-                $letters = preg_split('//u', $indexed, -1, PREG_SPLIT_NO_EMPTY);
-                if ($letters !== false) {
-                    $this->marked[count($letters)][] = [$indexed, $letters];
-                }
+                $this->marked[(int) preg_match_all('/./su', $indexed)][] = $indexed;
             }
         }
         if ($hasMarks && $this->plain === null) {
@@ -393,19 +393,63 @@ final class ToolIndex
             /** @var array<int, string>|false $ascii */
             $ascii = preg_grep('/^[a-z]+$/', $this->wordList);
             foreach ($ascii === false ? [] : $ascii as $indexed) {
-                $this->plain[strlen($indexed)][] = [$indexed, str_split($indexed)];
+                $this->plain[strlen($indexed)][] = $indexed;
+            }
+        }
+        // One pass of PCRE over the words of the same length keeps those
+        // that could be spelled, letter by letter, so the loop of PHP below
+        // only counts the letters of the few that remain: on a large index
+        // whose words share most of their letters, it was the loop over
+        // every one of them that cost.
+        $pattern = '';
+        foreach ($characters as $character) {
+            if ($character >= 'a' && $character <= 'z' && strlen($character) === 1) {
+                $pattern .= '(?:' . $character . '|(?![\x00-\x7F])\p{Latin})';
+            } elseif (strlen($character) > 1 && preg_match('/^\p{Latin}$/u', $character) === 1) {
+                $pattern .= '(?:' . preg_quote($character, '/') . '|[a-z])';
+            } else {
+                $pattern .= preg_quote($character, '/');
             }
         }
         $candidates = array_merge($hasMarks ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
         $spelled = [];
-        foreach ($candidates as [$indexed, $letters]) {
+        // In slices, so the pass stops once MAX_ALIKE are found, as the loop
+        // did before it, rather than reading the rest of the index.
+        for ($offset = 0; $offset < count($candidates); $offset += self::SPELL_SLICE) {
+            /** @var array<int, string>|false $matching */
+            $matching = preg_grep('/^' . $pattern . '$/u', array_slice($candidates, $offset, self::SPELL_SLICE));
+            if ($this->spell($word, $characters, $matching === false ? [] : $matching, $spelled)) {
+                break;
+            }
+        }
+
+        return $spelled;
+    }
+
+    /**
+     * Adds to $spelled the words that spell the word but for its marks,
+     * with at least as many letters alike as taken on trust.
+     *
+     * @param list<string> $characters the word, cut into characters
+     * @param array<int, string> $matching the words that matched letter by letter
+     * @param list<string> $spelled
+     *
+     * @return bool whether MAX_ALIKE words are found
+     */
+    private function spell(string $word, array $characters, array $matching, array &$spelled): bool
+    {
+        foreach ($matching as $indexed) {
             if ($indexed === $word) {
+                continue;
+            }
+            $letters = preg_split('//u', $indexed, -1, PREG_SPLIT_NO_EMPTY);
+            if ($letters === false) {
                 continue;
             }
             $same = 0;
             $trusted = 0;
             foreach ($characters as $position => $character) {
-                $letter = $letters[$position];
+                $letter = $letters[$position] ?? '';
                 if ($character === $letter) {
                     ++$same;
                 } elseif (self::mark($character, $letter) || self::mark($letter, $character)) {
@@ -420,12 +464,12 @@ final class ToolIndex
             if ($same >= $trusted) {
                 $spelled[] = $indexed;
                 if (count($spelled) >= self::MAX_ALIKE) {
-                    break;
+                    return true;
                 }
             }
         }
 
-        return $spelled;
+        return false;
     }
 
     /**

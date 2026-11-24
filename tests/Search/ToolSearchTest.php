@@ -315,6 +315,37 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(1.0, microtime(true) - $start, 'the words a word spells but for its marks are bounded');
     }
 
+    public function testWordsWithMarksThatSpellNothingCostLittleOnALargeIndex(): void
+    {
+        // Three thousand tools whose words all have eight letters, and words
+        // with marks that spell none of them: each is held against every
+        // word of its length, with no bound to stop at.
+        $definitions = [];
+        for ($tool = 0; $tool < 3000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = 'recx';
+                for ($letter = 0; $letter < 4; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $field .= 'qzx' . chr(97 + $word % 26) . 'ǎǎǎǎ ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'one pass of PCRE keeps the words that could be spelled');
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

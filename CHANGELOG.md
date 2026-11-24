@@ -85,9 +85,10 @@ becomes the next version's section when it is published.
   Unicode script of a character, read by PCRE, is all it takes, so Greek
   and Cyrillic words are never matched this way. On the test half, 1089 to
   1099 first in fields, 798 to 807 as one sentence, 1198 to 1206 asked
-  again; no server loses a request. A cached search over a server written
-  with marks takes about twice as long (0.15 to 0.30 ms over 40 tools); one
-  in English, no longer.
+  again; no server loses a request. The tool words a word may spell are
+  first sifted by one pass of PCRE, letter by letter, so a cached search
+  over a server written with marks takes about as long as before (0.15 ms
+  over 40 tools), and one in English no longer.
 
 - **What was learned for a neighbour lifts it less.** A learned lift is now
   also multiplied by the square of the share of a learned search's words
