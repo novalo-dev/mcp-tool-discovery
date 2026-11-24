@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1071 times
-out of 1402 in fields, and 787 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1089 times
+out of 1452 in fields, and 798 times as one sentence.
 
 ## How a tool is scored
 
@@ -454,18 +454,19 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
 `bike_unlock`), an airline operations centre (150 tools,
 `flight.change-aircraft`), a fleet of field sensors generated from
-OpenAPI (40 tools, `post_devices_device_id_reboot`) and a ferry line
-written in Turkish (40 tools, `ticket_refund`). 2797 requests, each written as one
+OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
+written in Turkish (40 tools, `ticket_refund`) and a kindergarten written
+in Vietnamese (40 tools, `absence_notice_cancel`). 2897 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1402 requests | Right tool first | Top 3 |
+| Test half, 1452 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1071 | 1249 |
-| The same request as one sentence | 787 | 1023 |
-| In fields, after every train request was run once | 1074 | 1249 |
-| In fields, after the test requests were run once, then asked again | 1175 | 1302 |
+| The request in fields | 1089 | 1280 |
+| The same request as one sentence | 798 | 1043 |
+| In fields, after every train request was run once | 1092 | 1280 |
+| In fields, after the test requests were run once, then asked again | 1198 | 1338 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -475,10 +476,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 426 | 649 |
-| The fields joined into one sentence | 791 | 1017 |
+| The request as one sentence | 431 | 662 |
+| The fields joined into one sentence | 800 | 1031 |
 
-As one sentence it trails on each of the twenty-five servers, the English ones
+As one sentence it trails on each of the twenty-six servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -822,6 +823,25 @@ harder one. What it misses is neighbours ("sil", delete, a ticket finds its
 sale; "kaldır", call off, a sailing because the ship broke down finds the
 report of a breakdown) and words the tools do not use ("nöbet", a
 watch, for "vardiya", a shift; "anons" for "duyuru").
+
+The kindergarten is written in Vietnamese, which writes each syllable apart,
+so a word is often two terms ("học phí", fees), and which people very often
+type without its tone marks and without "đ" ("hoc phi"), on a phone above
+all. Its tools are neighbours by design (record and cancel a notice of
+absence, add and remove a person allowed to pick a child up, issue and void
+a receipt, plan and cancel an outing). Its 100 requests were written on
+2026-11-22, before any of them was run, and split as the ferry line's; the
+split is uneven, since the first request of a tool, which goes to train,
+was mostly written with its marks and the second, which goes to test, often
+without. Nothing was tuned on it: 18 of its 50 test requests find the right
+tool first in fields, 31 in the top 3, 11 as one sentence; learned from its
+train half, 18 again; asked again, 23. Its train half scores 42 in fields.
+It was kept out on 2026-11-22 and 2026-11-24 because learning lost it a
+first place, a neighbour sharing the object's pair; since a learned lift is
+scaled by the share of the learned search the request holds (above), it
+loses none. What it misses is the requests typed without marks: a syllable
+without its mark is another word to the index, and its trigrams, all of
+them short, rarely meet the tool's.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

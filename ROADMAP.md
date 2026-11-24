@@ -51,7 +51,8 @@ The benchmark says where the search still misses, in
   and one generated from an OpenAPI description, with a method and a path
   for names and no titles (a fleet of field sensors) and a Turkish one,
   whose words take their suffixes and are often typed without `ş` or `ı`
-  (a ferry line) are in.
+  (a ferry line) and a Vietnamese one, typed with and without its tone
+  marks (a kindergarten) are in.
 - **Accents.** On the Greek servers, a request typed without its accents
   finds the right tool first far less often than one written with them. A
   way to fold them with no table built into the library and no extension

@@ -18,6 +18,19 @@ becomes the next version's section when it is published.
   `Tool` itself and catch the exception one by one. Without the callback,
   the first bad tool still throws, as before.
 
+- **A kindergarten written in Vietnamese on the search benchmark.** 40
+  tools named in snake_case with titles and descriptions in Vietnamese,
+  which writes each syllable apart and is often typed without its tone
+  marks and without `đ`. Most are neighbours on one object (record and
+  cancel a notice of absence, add and remove a person allowed to pick a
+  child up, issue and void a receipt). Its 100 requests were written before
+  any of them was run; learning lost it a first place until a learned lift
+  was scaled by the share of the learned search the request holds, and now
+  loses none. The benchmark now holds 2897 requests over twenty-six
+  servers; its floors move to 1089 and 1280 in fields and 1198 asked again,
+  and the laravel/mcp line to 431 as one sentence and 800 with the fields
+  joined.
+
 - **A ferry line written in Turkish on the search benchmark.** 40 tools
   named in snake_case with titles and descriptions in Turkish, whose words
   take one suffix after another and are often typed without `ş` or `ı`,

@@ -1,0 +1,818 @@
+[
+ {
+  "name": "children_list",
+  "title": "Danh sách trẻ",
+  "description": "Liệt kê các trẻ đang học, theo lớp hoặc theo độ tuổi.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "child_get",
+  "title": "Hồ sơ trẻ",
+  "description": "Xem hồ sơ của một trẻ: ngày sinh, phụ huynh, lớp, ghi chú sức khỏe.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "child_enrol",
+  "title": "Nhập học",
+  "description": "Ghi danh một trẻ mới vào trường và xếp vào một lớp.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Họ tên"
+    },
+    "birth": {
+     "type": "string",
+     "description": "Ngày sinh"
+    },
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "child_update",
+  "title": "Sửa hồ sơ trẻ",
+  "description": "Sửa thông tin trong hồ sơ của trẻ: địa chỉ, số điện thoại phụ huynh, dị ứng.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "fields": {
+     "type": "object",
+     "description": "Các trường"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "child_transfer_class",
+  "title": "Chuyển lớp",
+  "description": "Chuyển một trẻ sang lớp khác trong trường.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "child_withdraw",
+  "title": "Thôi học",
+  "description": "Cho trẻ thôi học và đóng hồ sơ, khi gia đình chuyển đi hoặc xin nghỉ hẳn.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Lý do"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "enrolment_requests_list",
+  "title": "Đơn xin nhập học",
+  "description": "Liệt kê các đơn xin nhập học đang chờ xét.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrolment_request_reject",
+  "title": "Từ chối đơn nhập học",
+  "description": "Từ chối một đơn xin nhập học và báo cho phụ huynh.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Mã đơn"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Lý do"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "attendance_record",
+  "title": "Điểm danh",
+  "description": "Ghi điểm danh buổi sáng của một lớp: có mặt, vắng, đến muộn.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "day": {
+     "type": "string",
+     "description": "Ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "attendance_report",
+  "title": "Báo cáo chuyên cần",
+  "description": "Xem số ngày đi học và vắng của trẻ trong tháng.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "month": {
+     "type": "string",
+     "description": "Tháng"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "absence_notice_record",
+  "title": "Báo nghỉ",
+  "description": "Ghi nhận phụ huynh báo cho trẻ nghỉ học, có lý do và số ngày.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "days": {
+     "type": "number",
+     "description": "Số ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "absence_notice_cancel",
+  "title": "Hủy báo nghỉ",
+  "description": "Hủy một lần báo nghỉ khi trẻ vẫn đi học bình thường.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "notice_id": {
+     "type": "string",
+     "description": "Mã báo nghỉ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "pickup_person_add",
+  "title": "Thêm người đón",
+  "description": "Cho phép thêm một người được đón trẻ, như ông bà hoặc người giúp việc.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "person": {
+     "type": "string",
+     "description": "Người đón"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pickup_person_remove",
+  "title": "Xóa người đón",
+  "description": "Bỏ quyền đón trẻ của một người.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "person": {
+     "type": "string",
+     "description": "Người đón"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "pickup_log",
+  "title": "Sổ đón trả",
+  "description": "Xem ai đã đón trẻ và lúc mấy giờ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "menu_week_set",
+  "title": "Lên thực đơn tuần",
+  "description": "Soạn thực đơn bữa sáng, bữa trưa và bữa xế cho cả tuần.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Tuần"
+    },
+    "meals": {
+     "type": "array",
+     "description": "Các bữa"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "menu_week_get",
+  "title": "Thực đơn tuần",
+  "description": "Xem thực đơn các bữa ăn của tuần.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Tuần"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meal_count_report",
+  "title": "Báo suất ăn",
+  "description": "Báo số suất ăn hôm nay cho nhà bếp, theo số trẻ có mặt.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "allergies_list",
+  "title": "Trẻ dị ứng",
+  "description": "Liệt kê các trẻ bị dị ứng thức ăn và món phải tránh.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_invoice_issue",
+  "title": "Lập phiếu thu học phí",
+  "description": "Lập phiếu thu học phí và tiền ăn tháng cho một trẻ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "month": {
+     "type": "string",
+     "description": "Tháng"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_payment_record",
+  "title": "Ghi nhận đóng tiền",
+  "description": "Ghi nhận phụ huynh đã đóng học phí, tiền mặt hoặc chuyển khoản.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "Số hóa đơn"
+    },
+    "amount": {
+     "type": "number",
+     "description": "Số tiền"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_unpaid_list",
+  "title": "Học phí chưa đóng",
+  "description": "Liệt kê các phiếu thu học phí còn nợ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Tháng"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_discount_grant",
+  "title": "Miễn giảm học phí",
+  "description": "Miễn hoặc giảm học phí cho trẻ thuộc diện ưu tiên, anh chị em cùng học.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "percent": {
+     "type": "number",
+     "description": "Phần trăm"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_invoice_void",
+  "title": "Hủy phiếu thu",
+  "description": "Hủy một phiếu thu lập sai.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "invoice_id": {
+     "type": "string",
+     "description": "Số hóa đơn"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "parent_message_send",
+  "title": "Nhắn phụ huynh",
+  "description": "Gửi tin nhắn cho phụ huynh của một trẻ hoặc cả lớp.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "text": {
+     "type": "string",
+     "description": "Nội dung"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "notice_board_post",
+  "title": "Đăng thông báo",
+  "description": "Đăng thông báo chung của trường lên bảng tin cho mọi phụ huynh.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Tiêu đề"
+    },
+    "text": {
+     "type": "string",
+     "description": "Nội dung"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parent_meeting_schedule",
+  "title": "Hẹn họp phụ huynh",
+  "description": "Đặt lịch họp phụ huynh của một lớp.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "at": {
+     "type": "string",
+     "description": "Thời gian"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "classes_list",
+  "title": "Các lớp",
+  "description": "Liệt kê các lớp: nhà trẻ, mầm, chồi, lá, với sĩ số và giáo viên.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teachers_list",
+  "title": "Giáo viên",
+  "description": "Liệt kê giáo viên và bảo mẫu, với lớp họ phụ trách.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teacher_assign_class",
+  "title": "Phân công giáo viên",
+  "description": "Phân công một giáo viên phụ trách một lớp.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "teacher_id": {
+     "type": "string",
+     "description": "Mã giáo viên"
+    },
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "teacher_leave_record",
+  "title": "Ghi nghỉ phép",
+  "description": "Ghi ngày nghỉ phép hoặc nghỉ ốm của giáo viên.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "teacher_id": {
+     "type": "string",
+     "description": "Mã giáo viên"
+    },
+    "days": {
+     "type": "number",
+     "description": "Số ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "substitute_assign",
+  "title": "Dạy thay",
+  "description": "Cử giáo viên dạy thay cho lớp có cô nghỉ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "teacher_id": {
+     "type": "string",
+     "description": "Mã giáo viên"
+    },
+    "day": {
+     "type": "string",
+     "description": "Ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "health_check_record",
+  "title": "Khám sức khỏe",
+  "description": "Ghi kết quả khám sức khỏe định kỳ: cân nặng, chiều cao.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "weight": {
+     "type": "number",
+     "description": "Cân nặng"
+    },
+    "height": {
+     "type": "number",
+     "description": "Chiều cao"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "growth_chart_get",
+  "title": "Biểu đồ tăng trưởng",
+  "description": "Xem biểu đồ cân nặng và chiều cao của trẻ theo tháng.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vaccinations_list",
+  "title": "Tiêm chủng",
+  "description": "Xem sổ tiêm chủng của trẻ và các mũi còn thiếu.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "medicine_give_record",
+  "title": "Cho uống thuốc",
+  "description": "Ghi lại việc cho trẻ uống thuốc theo dặn của phụ huynh.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "medicine": {
+     "type": "string",
+     "description": "Thuốc"
+    },
+    "at": {
+     "type": "string",
+     "description": "Giờ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "incident_report",
+  "title": "Báo cáo sự cố",
+  "description": "Ghi một sự cố trong ngày: trẻ bị ngã, trầy xước, cắn bạn.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "child_id": {
+     "type": "string",
+     "description": "Mã học sinh"
+    },
+    "text": {
+     "type": "string",
+     "description": "Mô tả"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "photo_album_upload",
+  "title": "Đăng ảnh hoạt động",
+  "description": "Đăng ảnh hoạt động của lớp lên album cho phụ huynh xem.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class_id": {
+     "type": "string",
+     "description": "Mã lớp"
+    },
+    "photos": {
+     "type": "array",
+     "description": "Ảnh"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "field_trip_plan",
+  "title": "Lên kế hoạch dã ngoại",
+  "description": "Lên kế hoạch một buổi dã ngoại: địa điểm, ngày, xe đưa đón.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "place": {
+     "type": "string",
+     "description": "Địa điểm"
+    },
+    "day": {
+     "type": "string",
+     "description": "Ngày"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "field_trip_cancel",
+  "title": "Hủy dã ngoại",
+  "description": "Hủy một buổi dã ngoại đã lên kế hoạch.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "trip_id": {
+     "type": "string",
+     "description": "Mã chuyến"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ }
+]

@@ -47,6 +47,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | post | 40 | 17,780 | 2,871 | 1,839 | - | 1,232 |
 | sensors | 40 | 17,209 | 2,871 | 1,839 | - | 1,578 |
 | ferry | 40 | 12,772 | 2,871 | 1,839 | - | 946 |
+| kinder | 40 | 13,663 | 2,871 | 1,839 | - | 1,438 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
