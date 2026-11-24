@@ -18,6 +18,7 @@ use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\Counts;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+use Novalo\McpToolDiscovery\Search\Learning\LearningStore;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
@@ -637,6 +638,29 @@ final class ToolSearchTest extends TestCase
 
         $search->learn($result->searchId, '42');
         self::assertSame(['42', '123'], self::names($search->search('backup archive')), 'what was learned lifts a numeric name too');
+    }
+
+    public function testAHostStoreThatHandsBackANumberDoesNotBreakTheSearch(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'archive_export', 'title' => 'Export an archive', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'archive_delete', 'title' => 'Delete an archive', 'inputSchema' => ['type' => 'object']],
+        ]);
+        // The library never records a number alone, but a store of the host
+        // may hold one, and PHP keys "2024" as an integer once decoded.
+        $store = new class implements LearningStore {
+            public function load(): array
+            {
+                /** @var array<string, array<string, int>> */
+                return json_decode('{"2024": {"archive_delete": 3}, "archive export": {"archive_export": 2}, "\\tarchive export": {"archive_export": 2}}', true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            public function record(array $words, string $tool): void {}
+        };
+        self::assertContains(2024, array_keys($store->load()));
+
+        $found = (new ToolSearch($tools, learning: $store))->search(new SearchQuery('export', 'archive'));
+        self::assertSame('archive_export', self::names($found)[0]);
     }
 
     public function testFiveHundredToolsAreSearchedFast(): void

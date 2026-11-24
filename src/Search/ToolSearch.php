@@ -279,8 +279,9 @@ final class ToolSearch
      * search of no lifted tool, is passed over before it is cut.
      *
      * @param array<array-key, array<string, int>> $counts array-key, not
-     *        string: PHP keys a word such as "123" as an integer, whatever
-     *        LearningStore::load() declares
+     *        string: the library never learns a number alone, but a store
+     *        written by the host may hand one back, and PHP holds a key
+     *        such as "123" as an integer
      * @param list<string> $words the terms of the query
      * @param array<string, float> $lift
      *
