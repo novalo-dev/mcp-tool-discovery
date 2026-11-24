@@ -53,10 +53,12 @@ The benchmark says where the search still misses, in
   whose words take their suffixes and are often typed without `ş` or `ı`
   (a ferry line) and a Vietnamese one, typed with and without its tone
   marks (a kindergarten) are in.
-- **Accents.** On the Greek servers, a request typed without its accents
-  finds the right tool first far less often than one written with them. A
-  way to fold them with no table built into the library and no extension
-  required is welcome.
+- **Accents.** A word of Latin letters typed without its marks now meets
+  the tool word it spells. On the Greek servers, a request typed without
+  its accents still finds the right tool first far less often than one
+  written with them: Unicode's script tells a Latin letter with a mark from
+  one without, not a Greek one. A way to fold them with no table built into
+  the library and no extension required is welcome.
 
 A change to the search comes with the benchmark before and after.
 

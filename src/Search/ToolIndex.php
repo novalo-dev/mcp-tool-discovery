@@ -89,6 +89,22 @@ final class ToolIndex
     private ?array $wordList = null;
 
     /**
+     * The indexed words holding a Latin letter outside ASCII, cut into
+     * characters and grouped by how many they have, built the first time a
+     * query holds a word no document does; see unmarked().
+     *
+     * @var array<int, list<array{string, list<string>}>>|null
+     */
+    private ?array $marked = null;
+
+    /**
+     * The same for the indexed words written in ASCII only.
+     *
+     * @var array<int, list<array{string, list<string>}>>|null
+     */
+    private ?array $plain = null;
+
+    /**
      * @param list<int|string> $ids the documents, in index order
      * @param array<array-key, array<int|string, float>> $words per word, per document holding it: its
      *        weighted frequency, the fields' weights and lengths already applied
@@ -212,7 +228,13 @@ final class ToolIndex
         // of them: alone they lost the requests a trigram still found.
         $unknown = array_slice(array_values(array_filter($words, fn(string $word): bool => !isset($this->words[$word]))), 0, self::MAX_UNKNOWN);
         foreach ($unknown as $word) {
-            foreach ($this->alike($word) as $alike => $dice) {
+            // A word typed without its marks ("hoc phi" for "học phí") is
+            // taken for the tool word it spells, as alike as can be.
+            $matches = $this->alike($word);
+            foreach ($this->unmarked($word) as $spelled) {
+                $matches[$spelled] = 1.0;
+            }
+            foreach ($matches as $alike => $dice) {
                 foreach ($this->bm25f([(string) $alike], $this->words) as $id => $score) {
                     $wordScores[$id] = ($wordScores[$id] ?? 0.0) + self::ALIKE_WEIGHT * $dice * $score;
                 }
@@ -314,6 +336,98 @@ final class ToolIndex
         }
 
         return $nearest === null ? null : $this->wordList[$nearest] ?? null;
+    }
+
+    /**
+     * The indexed words a word spells but for its marks: as long, the same
+     * letter wherever both are in ASCII or both outside it, and wherever
+     * one is a Latin letter outside ASCII ("ệ", "đ", "ü"), any letter of
+     * ASCII in the other. Either side may be the one without its marks.
+     *
+     * Vietnamese, and many languages written in Latin letters, are often
+     * typed without their marks, on a phone above all. Trigrams do not see
+     * it: the marks sit in short words, so most trigrams of "hoc" differ
+     * from those of "học". Folding a letter to its base needs a table of
+     * letters or the intl extension; reading the place of the marks needs
+     * neither, only the Unicode script of a character, which PCRE knows.
+     * A letter outside the Latin script is never one of these places, so
+     * Greek, Cyrillic or Arabic words never match a word of ASCII.
+     *
+     * The letters that match outright must be at least as many as those
+     * taken on trust, so "đơn" is not spelled by any three letters ending
+     * in "n".
+     *
+     * @return list<string>
+     */
+    private function unmarked(string $word): array
+    {
+        $characters = preg_split('//u', $word, -1, PREG_SPLIT_NO_EMPTY);
+        if ($characters === false) {
+            return [];
+        }
+        // A word in ASCII can only be spelled by a word with marks; a word
+        // with marks by a word with or without them.
+        $hasMarks = preg_match('/(?![a-z])\p{Latin}/u', $word) === 1;
+        if (!$hasMarks && preg_match('/[^\x00-\x7F]/', $word) === 1) {
+            return [];
+        }
+        // Built from the index at the first word that needs them, each with
+        // one pass of PCRE over every word: an index read back from the
+        // cache at each request pays for them only when a request holds a
+        // word no tool uses, and for the words of ASCII only when it holds
+        // one with marks.
+        $this->wordList ??= array_map('strval', array_keys($this->words));
+        if ($this->marked === null) {
+            $this->marked = [];
+            /** @var array<int, string>|false $withMarks */
+            $withMarks = preg_grep('/(?![a-z])\p{Latin}/u', $this->wordList);
+            foreach ($withMarks === false ? [] : $withMarks as $indexed) {
+                $letters = preg_split('//u', $indexed, -1, PREG_SPLIT_NO_EMPTY);
+                if ($letters !== false) {
+                    $this->marked[count($letters)][] = [$indexed, $letters];
+                }
+            }
+        }
+        if ($hasMarks && $this->plain === null) {
+            $this->plain = [];
+            /** @var array<int, string>|false $ascii */
+            $ascii = preg_grep('/^[a-z]+$/', $this->wordList);
+            foreach ($ascii === false ? [] : $ascii as $indexed) {
+                $this->plain[strlen($indexed)][] = [$indexed, str_split($indexed)];
+            }
+        }
+        $candidates = array_merge($hasMarks ? $this->plain[count($characters)] ?? [] : [], $this->marked[count($characters)] ?? []);
+        $spelled = [];
+        foreach ($candidates as [$indexed, $letters]) {
+            if ($indexed === $word) {
+                continue;
+            }
+            $same = 0;
+            $trusted = 0;
+            foreach ($characters as $position => $character) {
+                $letter = $letters[$position];
+                if ($character === $letter) {
+                    ++$same;
+                } elseif (self::mark($character, $letter) || self::mark($letter, $character)) {
+                    ++$trusted;
+                } else {
+                    continue 2;
+                }
+            }
+            if ($same >= $trusted) {
+                $spelled[] = $indexed;
+            }
+        }
+
+        return $spelled;
+    }
+
+    /**
+     * Whether a letter of ASCII may stand for a Latin letter outside it.
+     */
+    private static function mark(string $ascii, string $marked): bool
+    {
+        return strlen($ascii) === 1 && $ascii >= 'a' && $ascii <= 'z' && strlen($marked) > 1 && preg_match('/^\p{Latin}$/u', $marked) === 1;
     }
 
     /**

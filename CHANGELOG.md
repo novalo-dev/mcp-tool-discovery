@@ -60,6 +60,21 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A word typed without its marks finds the tool word it spells.** A
+  request typed as many people type Vietnamese or Polish, on a phone above
+  all ("hoc phi" for "học phí", "doladuj" for "doładuj"), met the tool
+  only by trigrams, which the marks of a short word mostly change. A word
+  no tool uses now also counts as each tool word of its length that has
+  the same letters, except where one side has a Latin letter outside ASCII
+  and the other any letter of ASCII, as long as the letters that match
+  outright are at least as many. No table of letters and no extension: the
+  Unicode script of a character, read by PCRE, is all it takes, so Greek
+  and Cyrillic words are never matched this way. On the test half, 1089 to
+  1099 first in fields, 798 to 807 as one sentence, 1198 to 1206 asked
+  again; no server loses a request. A cached search over a server written
+  with marks takes about twice as long (0.15 to 0.30 ms over 40 tools); one
+  in English, no longer.
+
 - **What was learned for a neighbour lifts it less.** A learned lift is now
   also multiplied by the square of the share of a learned search's words
   that the new request holds, so "view the instruments free to lend", run

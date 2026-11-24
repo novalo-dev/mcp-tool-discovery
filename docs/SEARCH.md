@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1089 times
-out of 1452 in fields, and 798 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1099 times
+out of 1452 in fields, and 807 times as one sentence.
 
 ## How a tool is scored
 
@@ -96,6 +96,35 @@ not and 6 no longer do, where the word alike in form is not the one meant.
 In place of the trigrams of
 those words, rather than on top, it lost 25 first places on train: rejected.
 A cached search over 150 tools takes 0.27 ms against 0.25 ms.
+
+**A word typed without its marks counts as the tool word it spells.**
+Vietnamese, Polish and many languages written in Latin letters are often
+typed without their marks, on a phone above all: "hoc phi" for "học phí",
+"doladuj" for "doładuj". Trigrams do not see it, since the marks sit in short
+words and change most of their trigrams. Folding a letter to its base
+needs a table of letters or the intl extension, neither of which the
+library has; reading where the marks are needs only the Unicode script of a
+character, which PCRE knows. A word no tool uses counts as each tool word of
+the same length that has the same letter wherever both are in ASCII or both
+outside it, and, wherever one is a Latin letter outside ASCII (`ệ`, `đ`,
+`ł`), any letter of ASCII in the other, either way round; the letters that
+match outright must be at least as many as those taken on trust, so `don`
+is not taken for `đón`, two of whose three letters it would take on trust. It counts as a word
+alike at a Dice coefficient of 1, half the weight of the word itself, as the
+words alike in form above. A letter of another script is never such a place:
+a Greek or Cyrillic word is never spelled by a word of ASCII, and the Greek
+accents (below) are still met by their trigrams only. Measured on the
+train half with the kindergarten in: added on top of the words alike, at a
+weight of 0.5, 0.75, 1 and 1.5, it found 1224, 1222, 1221 and 1220 first
+against 1223, and as a word alike, 1224 and 955 as one sentence against 954:
+kept. On the test half, the requests in fields go from 1089 to 1099 first
+(1280 to 1291 in the top 3), as one sentence from 798 to 807, learned from
+the other half from 1092 to 1102, asked again from 1198 to 1206: 9 on the
+kindergarten, 1 on the bike rental, no server loses a request. The
+places of the marks are read from the index at the first request that holds
+a word no tool uses: a cached search over the kindergarten takes 0.30 ms
+against 0.15 ms, over the bike rental 0.20 ms against 0.12 ms, and over the
+English servers no more than before.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are
@@ -463,10 +492,10 @@ and gives the score.
 
 | Test half, 1452 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1089 | 1280 |
-| The same request as one sentence | 798 | 1043 |
-| In fields, after every train request was run once | 1092 | 1280 |
-| In fields, after the test requests were run once, then asked again | 1198 | 1338 |
+| The request in fields | 1099 | 1291 |
+| The same request as one sentence | 807 | 1056 |
+| In fields, after every train request was run once | 1102 | 1291 |
+| In fields, after the test requests were run once, then asked again | 1206 | 1348 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -712,8 +741,10 @@ ASCII). Nothing was tuned on it: 39 of its 50 test requests find the right
 tool first in fields, 46 in the top 3, 31 as one sentence, with 2.24 tools
 returned; learned from its train half, 39 and 46 again. Long Polish words
 keep enough trigrams to meet without their letters ("rowerow" finds
-"rowerów"); what it misses is short ones that do not ("doladuj" against
-"doładuj") and neighbours of one object (closing a lock remotely finds the
+"rowerów"); short ones did not ("doladuj" against "doładuj") until a word
+typed without its marks counted as the tool word it spells (above): 40
+first in fields, 36 as one sentence. What it misses now is mostly
+neighbours of one object (closing a lock remotely finds the
 tool that opens it).
 
 The airline operations centre is the size and shape of a real server: 150
@@ -839,9 +870,13 @@ train half, 18 again; asked again, 23. Its train half scores 42 in fields.
 It was kept out on 2026-11-22 and 2026-11-24 because learning lost it a
 first place, a neighbour sharing the object's pair; since a learned lift is
 scaled by the share of the learned search the request holds (above), it
-loses none. What it misses is the requests typed without marks: a syllable
-without its mark is another word to the index, and its trigrams, all of
-them short, rarely meet the tool's.
+loses none. It missed most of the requests typed without marks: a syllable
+without its mark was another word to the index, and its trigrams, all of
+them short, rarely met the tool's. Since such a word counts as the tool word
+it spells (above), 27 come first in fields, 42 in the top 3, 19 as one
+sentence, 27 learned and 31 asked again. What it misses now is short
+syllables that several tool words spell ("co" for "cô", a teacher, and
+"có", present) and neighbours of one object.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

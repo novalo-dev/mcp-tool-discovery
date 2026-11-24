@@ -640,6 +640,31 @@ final class ToolSearchTest extends TestCase
         self::assertSame(['42', '123'], self::names($search->search('backup archive')), 'what was learned lifts a numeric name too');
     }
 
+    public function testAWordTypedWithoutItsMarksFindsTheToolThatSpellsIt(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'file_upload', 'title' => 'Tải tệp lên', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'file_rename', 'title' => 'Đổi tên tệp', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'file_delete', 'title' => 'Xóa tệp', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $search = new ToolSearch($tools);
+
+        // Vietnamese typed on a phone: no tone marks, "d" for "đ".
+        self::assertSame('file_delete', self::names($search->search(new SearchQuery('xoa', 'tep')))[0]);
+        self::assertSame('file_rename', self::names($search->search(new SearchQuery('doi ten', 'tep')))[0]);
+        // The other way round: the request has the marks the tool lacks.
+        $unmarked = new ToolSearch(ToolSet::of([
+            ['name' => 'folder_create', 'title' => 'Tao thu muc', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'folder_delete', 'title' => 'Xoa thu muc', 'inputSchema' => ['type' => 'object']],
+        ]));
+        self::assertSame('folder_delete', self::names($unmarked->search(new SearchQuery('xóa', 'thư mục')))[0]);
+        // A letter of ASCII stands only for a Latin letter: a word of
+        // another script is never spelled by one.
+        self::assertSame([], self::names((new ToolSearch(ToolSet::of([
+            ['name' => 'a', 'title' => 'Τέλος', 'inputSchema' => ['type' => 'object']],
+        ])))->search('tlos')));
+    }
+
     public function testAHostStoreThatHandsBackANumberDoesNotBreakTheSearch(): void
     {
         $tools = ToolSet::of([
