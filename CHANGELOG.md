@@ -300,6 +300,13 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **A tool name that ends in a newline is refused.** `Tool::fromArray()`
+  took `"get_file\n"` as a valid name, since a bare `$` in PCRE also
+  matches before a final newline, and the mode then listed a name the
+  specification forbids, which a strict client may answer by refusing the
+  whole list. It now throws `InvalidTool`, as for a space, and a `ToolSet`
+  given a `$refused` callback leaves that tool out and says why.
+
 - **docs/MODES.md gives the bytes of one compact search as measured.**
   The changes to the search since the table was written had moved the
   answer on seven servers, the kindergarten from 1,438 to 1,222 bytes, and

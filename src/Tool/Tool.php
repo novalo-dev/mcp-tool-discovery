@@ -29,8 +29,9 @@ final class Tool
      * Names of the 2025-11-25 specification: letters, digits, underscore,
      * hyphen and dot, 1 to 128 characters. Earlier revisions said nothing, and
      * holding every tool to the strictest rule keeps names valid everywhere.
+     * D, since a bare $ also matches before a final newline.
      */
-    private const NAME = '/^[A-Za-z0-9_.-]{1,128}$/';
+    private const NAME = '/^[A-Za-z0-9_.-]{1,128}$/D';
 
     /**
      * @param array<string, mixed> $definition

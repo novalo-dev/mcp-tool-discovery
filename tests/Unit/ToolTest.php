@@ -51,6 +51,7 @@ final class ToolTest extends TestCase
     {
         yield 'no name' => [['inputSchema' => ['type' => 'object']]];
         yield 'a space in the name' => [['name' => 'get file', 'inputSchema' => ['type' => 'object']]];
+        yield 'a newline after the name' => [['name' => "get_file\n", 'inputSchema' => ['type' => 'object']]];
         yield 'a name too long' => [['name' => str_repeat('a', 129), 'inputSchema' => ['type' => 'object']]];
         yield 'no input schema' => [['name' => 'a']];
         yield 'a schema that is not an object' => [['name' => 'a', 'inputSchema' => ['type' => 'string']]];
