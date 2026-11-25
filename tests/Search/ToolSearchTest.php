@@ -663,6 +663,24 @@ final class ToolSearchTest extends TestCase
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
     }
 
+    public function testAToolWordAmongUnknownWordsLiftsNoToolLearnedForMore(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(SearchQuery::text('show ticket'))->searchId, 'acme_get_ticket');
+        }
+        $unknown = new SearchQuery('zqxv', 'ticket', 'vwkj');
+
+        // Only "ticket" is a word of the tools, but the request wrote more
+        // than the object: the search learned for showing a ticket says
+        // nothing of it and must not reorder its tools.
+        self::assertSame(['zqxv', 'vwkj'], (new ToolSearch($tools, learning: $store))->find($unknown)->unmatched);
+        self::assertSame(self::names((new ToolSearch($tools))->search($unknown)), self::names((new ToolSearch($tools, learning: $store))->search($unknown)));
+        self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
+    }
+
     public function testAPairSharedWithANeighbourBarelyMovesIt(): void
     {
         $tools = RecordingGate::server('sensors');

@@ -339,7 +339,7 @@ client gives its request **in fields**, and each field is scored on its own:
   it, under one id, so a host sees what its clients asked and missed. The
   library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-3345 requests over thirty fictional servers, a workspace (snake_case), a
+3545 requests over thirty-two fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -358,16 +358,18 @@ city bike rental written in Polish, an airline operations centre with
 tools were generated from an OpenAPI description, a ferry line
 written in Turkish, a kindergarten written in Vietnamese, a fire
 station written in Spanish, a driving school written in Persian, a
-chess club written in Armenian and a wine cellar written in Georgian.
+chess club written in Armenian, a wine cellar written in Georgian, a
+coffee washing station written in Amharic and a community garden in
+English camelCase.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1676 requests | Right tool first | Right tool in the top 3 |
+| Test half, 1776 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1287** | **1505** |
-| The same request as one sentence | 972 | 1249 |
-| In fields, after learning from the other half | 1290 | 1505 |
-| In fields, asked a second time | 1410 | 1565 |
+| The request in fields | **1361** | **1593** |
+| The same request as one sentence | 1042 | 1329 |
+| In fields, after learning from the other half | 1363 | 1593 |
+| In fields, asked a second time | 1491 | 1658 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -377,8 +379,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 534 | 802 |
-| The fields joined into one sentence | 924 | 1199 |
+| The request as one sentence | 583 | 869 |
+| The fields joined into one sentence | 983 | 1272 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

@@ -134,7 +134,7 @@ final class ToolSearch
         }
 
         $best = max($scores);
-        foreach ($this->learned($groups) as $name => $lift) {
+        foreach ($this->learned($groups, count(array_unique($tokens))) as $name => $lift) {
             // Only tools the text already found: what was learned reorders
             // the answer, it never brings a tool the query does not describe.
             if (isset($scores[$name])) {
@@ -228,11 +228,19 @@ final class ToolSearch
      * that reached the tool at all, so a search that agrees on one pair out
      * of three lifts it a ninth as much as the same search asked again.
      *
+     * A query that holds one word the tools use among words they do not
+     * ("sign | agreement | lot") has no pair either, but it is not a query
+     * of one word: what it asks beyond the thing is only unknown. Its word
+     * alone would lift every tool learned for the thing ("show the history
+     * of a lot"), so it lifts only a tool one of whose learned searches it
+     * holds whole.
+     *
      * @param list<list<string>> $groups the known terms of each token
+     * @param int $tokens how many distinct tokens the query wrote, known or not
      *
      * @return array<string, float>
      */
-    private function learned(array $groups): array
+    private function learned(array $groups, int $tokens): array
     {
         $words = self::flat($groups);
         if ($this->learning === null || $this->options->learningWeight <= 0 || $words === []) {
@@ -240,6 +248,7 @@ final class ToolSearch
         }
         $counts = $this->learning->load();
         $lift = [];
+        $alone = count($words) === 1 && $tokens > 1;
         if (count($words) > 1) {
             $words = self::pairs($groups);
         }
@@ -265,6 +274,9 @@ final class ToolSearch
             // whole, but the view it does not. A tool learned before whole
             // searches were kept has none, and keeps its lift.
             $lift[$tool] *= ($coverage[$tool] ?? 1.0) ** 2;
+            if ($alone && ($coverage[$tool] ?? 1.0) < 1.0) {
+                unset($lift[$tool]);
+            }
         }
 
         return $lift;

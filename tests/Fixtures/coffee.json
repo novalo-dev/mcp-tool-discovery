@@ -1,0 +1,790 @@
+[
+ {
+  "name": "farmers_list",
+  "title": "አባል ገበሬዎች",
+  "description": "የማህበሩ አባል ገበሬዎች ዝርዝር ከቀበሌያቸውና ከማሳቸው ስፋት ጋር።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kebele": {
+     "type": "string",
+     "description": "ቀበሌ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_get",
+  "title": "የገበሬ መረጃ",
+  "description": "የአንድ ገበሬ ስልክ፣ ማሳዎችና በዚህ ወቅት ያስረከበው እሸት።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer": {
+     "type": "string",
+     "description": "ገበሬ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "farmer_register",
+  "title": "አዲስ አባል መመዝገብ",
+  "description": "አዲስ ገበሬን በማህበሩ አባልነት ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "ሙሉ ስም"
+    },
+    "kebele": {
+     "type": "string",
+     "description": "ቀበሌ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cherry_delivery_record",
+  "title": "እሸት መረከብ",
+  "description": "ገበሬው ያመጣውን ቀይ እሸት ቡና በኪሎ ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer": {
+     "type": "string",
+     "description": "ገበሬ"
+    },
+    "weight": {
+     "type": "string",
+     "description": "ክብደት በኪሎ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cherry_deliveries_list",
+  "title": "የተረከብነው እሸት",
+  "description": "በቀን ወይም በወቅቱ የተረከብነው እሸት ቡና በገበሬ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "ቀን"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cherry_delivery_reject",
+  "title": "እሸት መመለስ",
+  "description": "ያልበሰለ ወይም የተበላሸ እሸትን ለገበሬው ይመልሳል፣ ምክንያቱንም ይጽፋል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "delivery": {
+     "type": "string",
+     "description": "ርክክብ"
+    },
+    "reason": {
+     "type": "string",
+     "description": "ምክንያት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "farmer_payment_record",
+  "title": "ለገበሬ ክፍያ",
+  "description": "ለገበሬው ላስረከበው እሸት የተከፈለውን ብር ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer": {
+     "type": "string",
+     "description": "ገበሬ"
+    },
+    "amount": {
+     "type": "string",
+     "description": "ብር"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "advance_record",
+  "title": "ቅድመ ክፍያ ለገበሬ",
+  "description": "ከመከሩ በፊት ለገበሬ የተሰጠውን ብድር ይመዘግባል፣ ከእሸቱ ዋጋ ይቀነሳል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "farmer": {
+     "type": "string",
+     "description": "ገበሬ"
+    },
+    "amount": {
+     "type": "string",
+     "description": "ብር"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "price_set",
+  "title": "የእሸት ዋጋ መወሰን",
+  "description": "ለገበሬዎች የሚከፈለውን የእሸት ዋጋ በኪሎ ይወስናል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "price": {
+     "type": "string",
+     "description": "ዋጋ በኪሎ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pulping_run",
+  "title": "የመፈልፈል ሥራ",
+  "description": "እሸቱን በማፈልፈያ ማሽን ፈልፍሎ ቅርፊቱን ከፍሬው ይለያል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "batch": {
+     "type": "string",
+     "description": "የእሸት ክምር"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fermentation_tanks_list",
+  "title": "የማብላያ ገንዳዎች",
+  "description": "ቡናው የሚብላላባቸው ገንዳዎች፣ የትኛው ሞልቶ የትኛው ባዶ እንደሆነ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "ሁኔታ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fermentation_start",
+  "title": "ማብላላት መጀመር",
+  "description": "የተፈለፈለውን ቡና ገንዳ ውስጥ ያስገባል፣ የጀመረበትን ሰዓት ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tank": {
+     "type": "string",
+     "description": "ገንዳ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "washing_record",
+  "title": "የቡና እጥበት",
+  "description": "የተብላላውን ቡና በንጹህ ውሃ መታጠቡን ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tank": {
+     "type": "string",
+     "description": "ገንዳ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "drying_beds_list",
+  "title": "የማድረቂያ አልጋዎች",
+  "description": "ቡና የሚደርቅባቸው አልጋዎች፣ የትኛው ባዶ እንደሆነና ስንት ቀን እንደቆየ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "ሁኔታ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "drying_bed_assign",
+  "title": "ቡናን አልጋ ላይ ማስጣት",
+  "description": "ታጥቦ የወጣውን ቡና ወደ ማድረቂያ አልጋ ይመድባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "batch": {
+     "type": "string",
+     "description": "ክምር"
+    },
+    "bed": {
+     "type": "string",
+     "description": "አልጋ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "moisture_record",
+  "title": "የእርጥበት መለኪያ",
+  "description": "የሚደርቀውን ቡና እርጥበት በመቶኛ ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bed": {
+     "type": "string",
+     "description": "አልጋ"
+    },
+    "moisture": {
+     "type": "string",
+     "description": "እርጥበት በመቶኛ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rain_alert_send",
+  "title": "የዝናብ ማስጠንቀቂያ",
+  "description": "ዝናብ ሲመጣ አልጋዎቹን እንዲሸፍኑ ለሠራተኞች መልእክት ይልካል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "message": {
+     "type": "string",
+     "description": "መልእክት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lot_create",
+  "title": "አዲስ ሎት",
+  "description": "የደረቀውን ቡና በአንድ ሎት ቁጥር ያደራጃል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "beds": {
+     "type": "string",
+     "description": "አልጋዎች"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lot_trace",
+  "title": "የሎት ታሪክ",
+  "description": "የሎቱን መንገድ ያሳያል፡ ገበሬዎች፣ ገንዳ፣ አልጋና መጋዘን።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "warehouse_stock",
+  "title": "የመጋዘን ክምችት",
+  "description": "በመጋዘን ያለው ደረቅ ቡና በኩንታል፣ በሎትና በደረጃ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "grade": {
+     "type": "string",
+     "description": "ደረጃ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bags_weigh",
+  "title": "ጆንያ መመዘን",
+  "description": "የቡና ጆንያዎችን ይመዝናል፣ ክብደታቸውንም በሎቱ ላይ ይጽፋል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    },
+    "bags": {
+     "type": "string",
+     "description": "የጆንያ ብዛት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cupping_sample_send",
+  "title": "ናሙና ለቅምሻ መላክ",
+  "description": "የሎቱን ናሙና ለጣዕም ምዘና ወደ ላቦራቶሪ ይልካል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cupping_results_get",
+  "title": "የቅምሻ ውጤት",
+  "description": "የጣዕም ምዘናው ውጤት፡ ነጥብ፣ ጉድለቶችና የቀማሹ ማስታወሻ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sample": {
+     "type": "string",
+     "description": "ናሙና"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grade_assign",
+  "title": "ደረጃ መስጠት",
+  "description": "ለሎቱ የጥራት ደረጃ ይሰጣል፣ ከ1 እስከ 5።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    },
+    "grade": {
+     "type": "string",
+     "description": "ደረጃ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transport_schedule",
+  "title": "የጭነት መርሐግብር",
+  "description": "ቡናውን ወደ አዲስ አበባ ለመጫን መኪና፣ ቀንና ሎት ያዘጋጃል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    },
+    "truck": {
+     "type": "string",
+     "description": "መኪና"
+    },
+    "day": {
+     "type": "string",
+     "description": "ቀን"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transport_cancel",
+  "title": "ጭነት መሰረዝ",
+  "description": "የታቀደውን ጭነት ይሰርዛል፣ መኪናውንም ይለቃል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "shipment": {
+     "type": "string",
+     "description": "ጭነት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "trucks_list",
+  "title": "የጭነት መኪናዎች",
+  "description": "መኪናዎቹ፣ ሾፌሮቻቸውና አሁን ያሉበት ሁኔታ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "ሁኔታ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "buyers_list",
+  "title": "ገዢዎች",
+  "description": "ቡናችንን የሚገዙ የውጭና የሀገር ውስጥ ገዢዎች።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "country": {
+     "type": "string",
+     "description": "ሀገር"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sale_contract_create",
+  "title": "የሽያጭ ውል",
+  "description": "ከገዢ ጋር የሽያጭ ውል ይፈጥራል፡ ሎት፣ ዋጋና መድረሻ ሀገር።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "buyer": {
+     "type": "string",
+     "description": "ገዢ"
+    },
+    "lot": {
+     "type": "string",
+     "description": "ሎት"
+    },
+    "price": {
+     "type": "string",
+     "description": "ዋጋ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "workers_list",
+  "title": "ሠራተኞች",
+  "description": "የጣቢያው ቋሚና ጊዜያዊ ሠራተኞች ከስልካቸው ጋር።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "ቋሚ ወይም ጊዜያዊ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "worker_hire",
+  "title": "ጊዜያዊ ሠራተኛ መቅጠር",
+  "description": "ለወቅቱ ጊዜያዊ ሠራተኛ ይቀጥራል፡ ስም፣ ስልክና ቀናት።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "ሙሉ ስም"
+    },
+    "days": {
+     "type": "string",
+     "description": "ቀናት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shift_plan",
+  "title": "የፈረቃ ፕሮግራም",
+  "description": "የሳምንቱ የሠራተኞች ፈረቃ በየክፍሉ።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "ሳምንት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "wages_pay",
+  "title": "የቀን ሠራተኞች ደመወዝ",
+  "description": "ለቀን ሠራተኞች የሳምንቱን ደመወዝ ይከፍላል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "ሳምንት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "training_schedule",
+  "title": "ሥልጠና ማዘጋጀት",
+  "description": "ለገበሬዎች የቡና አያያዝ ሥልጠና ቀንና ቦታ ይወስናል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "topic": {
+     "type": "string",
+     "description": "ርዕስ"
+    },
+    "day": {
+     "type": "string",
+     "description": "ቀን"
+    },
+    "place": {
+     "type": "string",
+     "description": "ቦታ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "machine_repair_request",
+  "title": "የማሽን ጥገና",
+  "description": "የተበላሸ ማፈልፈያ፣ ፓምፕ ወይም ጀነሬተር ለጥገና ያሳውቃል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "machine": {
+     "type": "string",
+     "description": "ማሽን"
+    },
+    "fault": {
+     "type": "string",
+     "description": "ብልሽቱ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "machines_list",
+  "title": "ማሽኖች",
+  "description": "ማፈልፈያዎች፣ ፓምፖችና ጀነሬተሮች ከሁኔታቸው ጋር።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "ዓይነት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "water_usage_record",
+  "title": "የውሃ አጠቃቀም",
+  "description": "በቀን የተጠቀምነውን ውሃ በሊትር ይመዘግባል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "litres": {
+     "type": "string",
+     "description": "ሊትር"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "wastewater_check",
+  "title": "የፍሳሽ ውሃ ምርመራ",
+  "description": "ከጣቢያው የሚወጣው ፍሳሽ ውሃ ወንዙን እንዳይበክል ይፈትሻል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "point": {
+     "type": "string",
+     "description": "የናሙና ቦታ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "certificate_renew",
+  "title": "የምስክር ወረቀት ማደስ",
+  "description": "የኦርጋኒክ ወይም የፍትሐዊ ንግድ ምስክር ወረቀትን ያድሳል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate": {
+     "type": "string",
+     "description": "ምስክር ወረቀት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "season_report",
+  "title": "የዓመቱ ሪፖርት",
+  "description": "የዓመቱን ጠቅላላ እሸት፣ ደረቅ ቡናና ሽያጭ ይቆጥራል።",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "ዓመት"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

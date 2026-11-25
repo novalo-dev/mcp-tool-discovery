@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1287 times
-out of 1676 in fields, and 972 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1361 times
+out of 1776 in fields, and 1042 times as one sentence.
 
 ## How a tool is scored
 
@@ -302,6 +302,26 @@ searches are found by reading every key of the store, as loading it has
 already done: a search that learns over the 176 hosting tools, with every
 request of that server learned, takes about 0.55 ms against 0.35 ms.
 
+A request of one word the tools use among words they do not use ("sign |
+agreement | lot 2417", where only "lot" is a tool word) has no pair either,
+but it is not a request of one word: it asks more than the thing, in words
+the search cannot read. Its single word lifted every tool learned for the
+thing, and on the coffee washing station "show the history of lot 2417",
+learned from the train half, pushed the sales contract out of the top 3 of
+that test request: learning made a new request worse, which the benchmark
+refuses. Such a request now lifts only a tool one of whose learned searches
+it holds whole, so the same lone word asked again keeps its lift. The rule
+was compared on the train half with dropping the lift altogether and with
+dividing it by the number of words of the request: those found 3 more
+first places learned from the other half but lost 1 to 3 asked again, and
+the division, read once on the test half, lost 4 asked again. The rule kept
+changes nothing on the train half. Being chosen after the test half of the
+coffee station was read, it was judged on a server written after that, the
+community garden, with the rule fixed before its requests were run: no
+measure moves there. Over the test half, learned from the other half, 1364
+first and 1592 in the top 3 become 1363 and 1593; asked again, 1491 and
+1658 against 1491 and 1657.
+
 Pairs, not single words, because of servers with many tools about the same
 thing. Word by word, "get the certificate" run once taught "certificate" to
 the tool that shows a certificate, and "delete the unused certificate" then
@@ -475,7 +495,7 @@ skipped.
 
 ## The measures
 
-Thirty fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -503,18 +523,20 @@ written in Turkish (40 tools, `ticket_refund`), a kindergarten written
 in Vietnamese (40 tools, `absence_notice_cancel`), a fire station
 written in Spanish (40 tools, `vehiculo_alta`), a driving school
 written in Persian (40 tools, `exam_theory_book`), a chess club
-written in Armenian (40 tools, `pairing_swap`) and a wine cellar
-written in Georgian (40 tools, `qvevri_seal`). 3345 requests, each written as one
+written in Armenian (40 tools, `pairing_swap`), a wine cellar
+written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
+written in Amharic (40 tools, `drying_bed_assign`) and a community garden
+in English camelCase (40 tools, `swapWateringDuty`). 3545 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1676 requests | Right tool first | Top 3 |
+| Test half, 1776 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1287 | 1505 |
-| The same request as one sentence | 972 | 1249 |
-| In fields, after every train request was run once | 1290 | 1505 |
-| In fields, after the test requests were run once, then asked again | 1410 | 1565 |
+| The request in fields | 1361 | 1593 |
+| The same request as one sentence | 1042 | 1329 |
+| In fields, after every train request was run once | 1363 | 1593 |
+| In fields, after the test requests were run once, then asked again | 1491 | 1658 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -524,10 +546,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 534 | 802 |
-| The fields joined into one sentence | 924 | 1199 |
+| The request as one sentence | 583 | 869 |
+| The fields joined into one sentence | 983 | 1272 |
 
-As one sentence it trails on each of the thirty servers, the English ones
+As one sentence it trails on each of the thirty-two servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1036,6 +1058,34 @@ script with capitals. What it misses is neighbours of one object (bottles
 to count find the bottling that records them, a bottling to plan finds the
 one to cancel) and a verb of another root than the title's (`ჩაწერე`,
 write down, for `მიღება`, reception).
+
+The coffee washing station is written in Amharic, in the Ethiopic script,
+with tool names in English snake_case (`cherry_delivery_record`,
+`drying_bed_assign`, `cupping_results_get`). Its titles keep the letters of
+the old spelling where the dictionary does (`ሠራተኛ`, worker, `ሥልጠና`,
+training, `ዓመት`, year), and 16 of its 100 requests, written on 2026-11-25
+before any of them was run, type the letters of the same sound most people
+use instead (`ሰራተኛ`, `ስልጠና`, `አመት`), which no Unicode mapping joins. Its
+tools are neighbours by design (receive cherries, list them, send them
+back; pay a farmer, advance him money, pay the day workers; plan a
+shipment, cancel it). Nothing was tuned on it: 34 of its 50 test requests
+find the right tool first in fields, 46 in the top 3, 37 as one sentence,
+more than in fields; asked again, 41. Its train half scores 40 in fields.
+Ethiopic has no capitals and its words are spaced, so it needs nothing of
+its own; a word typed with the other letter of its sound meets the tool
+word by its trigrams only, and every syllable is one letter, so a single
+letter changed costs a word up to three of its trigrams. What it misses is
+neighbours of one object (the shipment to plan finds the one to cancel,
+the week's pay finds the farmer's payment) and the verbs of another root
+than the title's (`ፈርም`, sign, for `ውል`, contract).
+
+The community garden is in English, with camelCase names (`assignPlot`,
+`swapWateringDuty`), and its 100 requests, written on 2026-11-25 before any
+of them was run, say what members and the committee say, often not the
+tools' words (allotment for plot, kick out for end a membership, chase for
+remind). Nothing was tuned on it: 40 of its 50 test requests come first in
+fields, 42 in the top 3, 33 as one sentence; asked again, 40 and 44 in the
+top 3. It was written to judge the rule on a lone tool word above.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

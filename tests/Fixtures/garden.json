@@ -1,0 +1,788 @@
+[
+ {
+  "name": "listPlots",
+  "title": "Plots",
+  "description": "Lists the plots of the garden with their size, holder and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "free, let or neglected"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getPlot",
+  "title": "Plot details",
+  "description": "Shows one plot: holder, size, water point, last inspection and notes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assignPlot",
+  "title": "Let a plot",
+  "description": "Lets a free plot to a member, from a start date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    },
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releasePlot",
+  "title": "Give up a plot",
+  "description": "Ends a member's tenancy when they give the plot back.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "transferPlot",
+  "title": "Transfer a plot",
+  "description": "Moves a tenancy from one member to another, such as within a family.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    },
+    "member": {
+     "type": "string",
+     "description": "New holder"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "splitPlot",
+  "title": "Split a plot",
+  "description": "Divides a full plot into two half plots with their own numbers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listMembers",
+  "title": "Members",
+  "description": "Lists the members with their plot, phone and year they joined.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "search": {
+     "type": "string",
+     "description": "Name or phone"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getMember",
+  "title": "Member",
+  "description": "Shows one member: contact details, plots held, fees and warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addMember",
+  "title": "New member",
+  "description": "Registers a new member of the association.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Phone"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "terminateMembership",
+  "title": "End a membership",
+  "description": "Ends a membership for repeated breaches of the rules and frees the plots.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "joinWaitingList",
+  "title": "Add to the waiting list",
+  "description": "Puts a person on the waiting list for a plot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Phone"
+    },
+    "size": {
+     "type": "string",
+     "description": "Full or half plot"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "leaveWaitingList",
+  "title": "Remove from the waiting list",
+  "description": "Takes a person off the waiting list.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "entry": {
+     "type": "string",
+     "description": "Waiting list entry"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listWaitingList",
+  "title": "Waiting list",
+  "description": "Shows the waiting list in order, with how long each person has waited.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "size": {
+     "type": "string",
+     "description": "Full or half plot"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "issueFeeInvoices",
+  "title": "Send the yearly fees",
+  "description": "Sends every member the invoice for the yearly rent of their plot.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "Year"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recordPayment",
+  "title": "Record a payment",
+  "description": "Records a fee paid by a member, in cash or by transfer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "amount": {
+     "type": "string",
+     "description": "Amount"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sendFeeReminder",
+  "title": "Remind of unpaid fees",
+  "description": "Sends a reminder to the members whose fees are still unpaid.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "Year"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listUnpaidFees",
+  "title": "Unpaid fees",
+  "description": "Lists the members who have not paid their fees, with the amount due.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "Year"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "scheduleInspection",
+  "title": "Plan an inspection",
+  "description": "Plans a walk round the plots by the committee to check they are cultivated.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recordInspection",
+  "title": "Inspection result",
+  "description": "Records what the inspection found on a plot: cultivated, untidy or neglected.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot number"
+    },
+    "result": {
+     "type": "string",
+     "description": "Result"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sendWarningLetter",
+  "title": "Warning letter",
+  "description": "Sends a member a letter asking them to tidy a neglected plot within a month.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listShedTools",
+  "title": "Shared tools",
+  "description": "Lists the tools of the shared shed and whether each is in or out.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "in or out"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lendTool",
+  "title": "Lend a tool",
+  "description": "Lends a tool of the shared shed to a member.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tool": {
+     "type": "string",
+     "description": "Tool"
+    },
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "returnTool",
+  "title": "Return a tool",
+  "description": "Records a tool brought back to the shed, and any damage.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tool": {
+     "type": "string",
+     "description": "Tool"
+    },
+    "damage": {
+     "type": "string",
+     "description": "Damage"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reportBrokenTool",
+  "title": "Report a broken tool",
+  "description": "Reports a shed tool that is broken and needs repair or replacing.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tool": {
+     "type": "string",
+     "description": "Tool"
+    },
+    "fault": {
+     "type": "string",
+     "description": "What is wrong"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getWateringRota",
+  "title": "Watering rota",
+  "description": "Shows who waters the shared beds on each day of the week.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Week"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "swapWateringDuty",
+  "title": "Swap a watering day",
+  "description": "Swaps two members' days on the watering rota.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "First member"
+    },
+    "second": {
+     "type": "string",
+     "description": "Second member"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "readWaterMeter",
+  "title": "Water meter reading",
+  "description": "Records the reading of the garden's water meter.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "reading": {
+     "type": "string",
+     "description": "Reading"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shutOffWater",
+  "title": "Turn the water off",
+  "description": "Turns off the water to the troughs for frost or a leak.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "orderManure",
+  "title": "Order manure",
+  "description": "Orders a load of manure or compost to be delivered to the garden.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tonnes": {
+     "type": "string",
+     "description": "Tonnes"
+    },
+    "date": {
+     "type": "string",
+     "description": "Delivery date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listCompostBays",
+  "title": "Compost bays",
+  "description": "Shows the compost bays and how full and how ripe each one is.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "turnCompostBay",
+  "title": "Turn a compost bay",
+  "description": "Records that a compost bay was turned or emptied.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bay": {
+     "type": "string",
+     "description": "Bay"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createWorkParty",
+  "title": "Plan a work day",
+  "description": "Plans a day when members work together on the shared paths and hedges.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "Date"
+    },
+    "tasks": {
+     "type": "string",
+     "description": "Tasks"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listEvents",
+  "title": "Events",
+  "description": "Lists the garden's events: open days, seed swaps and the show.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "Month"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "registerShowEntry",
+  "title": "Enter the show",
+  "description": "Enters a member's produce in a class of the annual show.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "category": {
+     "type": "string",
+     "description": "Class"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "recordShowResults",
+  "title": "Show results",
+  "description": "Records the winners of each class of the annual show.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "category": {
+     "type": "string",
+     "description": "Class"
+    },
+    "winner": {
+     "type": "string",
+     "description": "Winner"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reportTheft",
+  "title": "Report a theft",
+  "description": "Reports produce or tools stolen from a plot or the shed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "plot": {
+     "type": "string",
+     "description": "Plot or shed"
+    },
+    "what": {
+     "type": "string",
+     "description": "What was taken"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listGateCodes",
+  "title": "Gate code",
+  "description": "Shows the current code of the padlock of the gate.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "changeGateCode",
+  "title": "Change the gate code",
+  "description": "Sets a new code on the gate padlock and tells every member.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "code": {
+     "type": "string",
+     "description": "New code"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sendNewsletter",
+  "title": "Newsletter",
+  "description": "Sends a message to every member by e-mail.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "body": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "yearReport",
+  "title": "Yearly report",
+  "description": "Counts plots let, members, fees collected and water used over the year.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "Year"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

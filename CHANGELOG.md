@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A coffee washing station written in Amharic and a community garden in
+  English on the search benchmark.** The station has 40 tools in English
+  snake_case with titles and descriptions in the Ethiopic script, most of
+  them neighbours on one object, and 16 of its 100 requests type the
+  letters of the same sound most people use (`ሰራተኛ` for `ሠራተኛ`, worker).
+  The garden has 40 tools in camelCase, asked in the words of members
+  rather than of the tools. All 200 requests were written before any of
+  them was run, and nothing was tuned on them: on their test halves, 34
+  and 40 come first in fields, 46 and 42 in the top 3. The benchmark now
+  holds 3545 requests over thirty-two servers; its floors move to 1361 and
+  1593 in fields and 1491 asked again, and the laravel/mcp line to 583 and
+  869 as one sentence and 983 and 1272 with the fields joined.
+
 - **The server on logiscape/mcp-sdk-php over HTTP.**
   `docs/examples/logiscape/http-server.php` serves the notes tools through
   the SDK's `HttpServerRunner`, one process per request as PHP-FPM runs it,
@@ -166,6 +179,16 @@ becomes the next version's section when it is published.
   modes are not broken.
 
 ### Changed
+
+- **A request whose only tool word sits among unknown words lifts less of
+  what was learned.** A request of one word the tools use, among words they
+  do not ("sign | agreement | lot"), was lifted like a request of that one
+  word, so every tool learned for the thing moved up, and a new request
+  could lose its right tool from the top 3 to what other people had run.
+  Such a request now lifts only a tool one of whose learned searches it
+  holds whole: the same request asked again keeps its lift. Nothing changes
+  for a request of one word, or of two tool words or more, and the format
+  of the store is the same.
 
 - **`UnsupportedRevision` no longer repeats the client's string as sent.**
   The revision comes from the client, and a host that writes the message to

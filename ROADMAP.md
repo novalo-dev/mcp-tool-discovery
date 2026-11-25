@@ -56,8 +56,9 @@ The benchmark says where the search still misses, in
   with its pronouns joined to the verb (a fire station) and a Persian one,
   typed with and without its joiners and on an Arabic keyboard (a driving
   school), an Armenian one, typed with its marks inside the words (a
-  chess club) and a Georgian one, partly typed in capitals (a wine cellar)
-  are in.
+  chess club), a Georgian one, partly typed in capitals (a wine cellar)
+  and an Amharic one, partly typed with the other letters of the same
+  sound (a coffee washing station) are in.
 - **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
   marks now meets the tool word it spells, a Greek word typed in capitals
   and a Russian `е` for `ё` included. `й` typed as `и` lies within the
