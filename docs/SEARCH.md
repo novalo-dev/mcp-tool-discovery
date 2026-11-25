@@ -52,6 +52,12 @@ own. A rare word weighs more than a common one: "rollback" counts more than
 counts almost nothing. That is why the library needs no list of stop words and
 no rule to strip a prefix. A word repeated earns less each time.
 
+A host changes a weight by naming its field: `new SearchOptions(weights:
+['title' => 3.0])` raises the title and keeps the other three at their
+defaults, as `queryWeights: ['action' => 0.8]` does for a request. A weight
+of 0 leaves the field out. A field the search does not have, a negative
+weight, NAN, or every field at 0 is refused when the options are built.
+
 Then the ranking is **cut** at 60% of the best score, and **limited** to 10
 tools. Equal scores keep the host's order, so a query always gives the same
 answer.
@@ -219,7 +225,10 @@ new SearchOptions(synonyms: ['meeting' => 'calendar event', 'admin' => 'role'], 
 ```
 
 The synonyms are added to each field of the request; the caller's own words
-still count. Better still, put those words in the tool descriptions: every
+still count. Each key is one word of a request, lowered as the request is
+("Événement" meets "événement"): a key of two words ("team meeting",
+"e-mail"), a number, a stop word or an empty value would never be met, and is
+refused when the options are built. Better still, put those words in the tool descriptions: every
 client reads them, even one that never searches.
 
 ---

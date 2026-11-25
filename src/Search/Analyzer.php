@@ -58,7 +58,9 @@ final class Analyzer
      */
     public function __construct(array $stopWords = [])
     {
-        $this->stopWords = array_fill_keys(array_map('strtolower', $stopWords), true);
+        // Lowered as the text is: strtolower() left "Über" or "Και" as given,
+        // and the token "über" never met it.
+        $this->stopWords = array_fill_keys(array_map(self::lower(...), $stopWords), true);
     }
 
     /**
@@ -111,14 +113,8 @@ final class Analyzer
         $split = preg_replace(['/([a-z0-9])([A-Z])/', '/([A-Z]+)([A-Z][a-z])/'], '$1 $2', $text);
         $split = is_string($split) ? $split : $text;
         // Letters and digits of any script: the library holds no alphabet of
-        // its own. mbstring lowers every script when the server has it;
-        // without it, strtolower() lowers ASCII, which covers the English
-        // most tool lists are written in. The simple mapping, one character
-        // for one: the full one turns the Turkish "İ" into "i" and a
-        // combining dot, so "İzin" never met "izin", and from PHP 8.3 it
-        // also picks the Greek final sigma by context, so the same request
-        // found other tools on 8.2 than on 8.3.
-        $lower = function_exists('mb_convert_case') ? mb_convert_case($split, MB_CASE_LOWER_SIMPLE, 'UTF-8') : strtolower($split);
+        // its own.
+        $lower = self::lower($split);
         // Marks belong to the word they sit in. Devanagari, Thai, Tamil and
         // the other Brahmic scripts write most vowels as marks, Arabic and
         // Hebrew their vowel points, and decomposed text (NFD) every accent:
@@ -135,6 +131,20 @@ final class Analyzer
         }
 
         return $words;
+    }
+
+    /**
+     * The text lowered as the index lowers it. mbstring lowers every script
+     * when the server has it; without it, strtolower() lowers ASCII, which
+     * covers the English most tool lists are written in. The simple mapping,
+     * one character for one: the full one turns the Turkish "İ" into "i" and
+     * a combining dot, so "İzin" never met "izin", and from PHP 8.3 it also
+     * picks the Greek final sigma by context, so the same request found
+     * other tools on 8.2 than on 8.3.
+     */
+    private static function lower(string $text): string
+    {
+        return function_exists('mb_convert_case') ? mb_convert_case($text, MB_CASE_LOWER_SIMPLE, 'UTF-8') : strtolower($text);
     }
 
     /**

@@ -25,12 +25,28 @@ namespace Novalo\McpToolDiscovery\Search;
  */
 final class SearchOptions
 {
+    /** How much a match counts in each field of a tool, unless the host says otherwise. */
+    public const WEIGHTS = ['name' => 1.0, 'title' => 2.0, 'description' => 1.0, 'parameters' => 0.5];
+
+    /** How much each field of a query counts, unless the host says otherwise. */
+    public const QUERY_WEIGHTS = ['action' => 0.5, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0];
+
+    /** @var array<string, float> every field of a tool, the defaults under what the host gave */
+    public readonly array $weights;
+
+    /** @var array<string, float> every field of a query, the defaults under what the host gave */
+    public readonly array $queryWeights;
+
+    /** @var array<string, string> each word lowered as the index lowers the request */
+    public readonly array $synonyms;
+
     /**
      * @param array<string, float> $weights how much a match counts in each field of a tool:
-     *        name, title, description, parameters
+     *        name, title, description, parameters; a field left out keeps its default
+     *        and 0 leaves it out of the ranking
      * @param float $trigramWeight how much trigram matches count against whole-word matches
      * @param array<string, float> $queryWeights how much each field of a query counts:
-     *        action, object, description, text
+     *        action, object, description, text; a field left out keeps its default
      * @param float $cut tools below this share of the best score are left out
      * @param int $limit the most tools a search returns
      * @param array<string, string> $synonyms a word of the caller => words of the tools,
@@ -41,25 +57,36 @@ final class SearchOptions
      * @param int $learningCap the successes after which a word lifts a tool no further
      */
     public function __construct(
-        public readonly array $weights = ['name' => 1.0, 'title' => 2.0, 'description' => 1.0, 'parameters' => 0.5],
+        array $weights = self::WEIGHTS,
         public readonly float $trigramWeight = 0.6,
-        public readonly array $queryWeights = ['action' => 0.5, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0],
+        array $queryWeights = self::QUERY_WEIGHTS,
         public readonly float $cut = 0.6,
         public readonly int $limit = 10,
-        public readonly array $synonyms = [],
+        array $synonyms = [],
         public readonly array $stopWords = [],
         public readonly float $learningWeight = 0.75,
         public readonly int $learningCap = 5,
     ) {
-        if ($cut < 0 || $cut > 1) {
+        // NAN passes every comparison below, and would rank every tool NAN.
+        if (!is_finite($cut) || $cut < 0 || $cut > 1) {
             throw new \InvalidArgumentException('The cut is a share of the best score, between 0 and 1.');
         }
         if ($limit < 1) {
             throw new \InvalidArgumentException('The limit must be at least 1.');
         }
-        if ($learningWeight < 0 || $learningCap < 1) {
+        if (!is_finite($learningWeight) || $learningWeight < 0 || $learningCap < 1) {
             throw new \InvalidArgumentException('The learning weight cannot be negative and the cap must be at least 1.');
         }
+        if (!is_finite($trigramWeight) || $trigramWeight < 0) {
+            throw new \InvalidArgumentException('The trigram weight cannot be negative.');
+        }
+        // Merged over the defaults: an array given by name replaces the whole
+        // default, so ['title' => 3.0] used to leave the name, the
+        // description and the parameters out of the index without a word.
+        $this->weights = self::weighed($weights, self::WEIGHTS, 'weights');
+        $this->queryWeights = self::weighed($queryWeights, self::QUERY_WEIGHTS, 'queryWeights');
+        self::strings($stopWords);
+        $this->synonyms = self::words($synonyms, new Analyzer($stopWords));
     }
 
     /**
@@ -68,5 +95,84 @@ final class SearchOptions
     public function indexKey(): string
     {
         return serialize([$this->weights, $this->trigramWeight, $this->stopWords]);
+    }
+
+    /**
+     * The host's weights over the defaults, refused when one could never be
+     * read: a field the search does not have ("names", "query") was never
+     * looked at, and a ranking that would not move was all the host saw.
+     *
+     * @param array<string, float> $defaults
+     *
+     * @return array<string, float>
+     */
+    private static function weighed(mixed $given, array $defaults, string $option): array
+    {
+        if (!is_array($given)) {
+            throw new \InvalidArgumentException(sprintf('The %s are a map of field => weight.', $option));
+        }
+        foreach (array_diff_key($given, $defaults) as $field => $weight) {
+            throw new \InvalidArgumentException(sprintf('The %s have no field "%s"; the fields are %s.', $option, $field, implode(', ', array_keys($defaults))));
+        }
+        $weights = $defaults;
+        foreach ($defaults as $field => $default) {
+            if (!array_key_exists($field, $given)) {
+                continue;
+            }
+            $weight = $given[$field];
+            if ((!is_float($weight) && !is_int($weight)) || !is_finite((float) $weight) || $weight < 0) {
+                throw new \InvalidArgumentException(sprintf('The weight of "%s" in the %s must be a number of 0 or more.', $field, $option));
+            }
+            $weights[$field] = (float) $weight;
+        }
+        if (array_filter($weights, static fn(float $weight): bool => $weight > 0) === []) {
+            throw new \InvalidArgumentException(sprintf('At least one of the %s must be above 0, or no tool is ever found.', $option));
+        }
+
+        return $weights;
+    }
+
+    /**
+     * The stop words, refused when one is not a string: its shape is in a
+     * docblock only, and an array among them stopped the first search.
+     */
+    private static function strings(mixed $words): void
+    {
+        foreach (is_array($words) ? $words : [] as $word) {
+            if (!is_string($word)) {
+                throw new \InvalidArgumentException('A stop word must be a string.');
+            }
+        }
+    }
+
+    /**
+     * The synonyms keyed by the one token each stands for. A key the request
+     * can never hold as a token was never met: two words ("team meeting",
+     * "e-mail"), a number, a stop word, or a capital strtolower() leaves as
+     * it is ("Événement" was never "événement").
+     *
+     * @return array<string, string>
+     */
+    private static function words(mixed $synonyms, Analyzer $analyzer): array
+    {
+        if (!is_array($synonyms)) {
+            throw new \InvalidArgumentException('The synonyms are a map of word => words of the tools.');
+        }
+        $words = [];
+        foreach ($synonyms as $word => $meaning) {
+            $tokens = $analyzer->tokens((string) $word);
+            if (count($tokens) !== 1) {
+                throw new \InvalidArgumentException(sprintf('The synonym "%s" is not one word of a request: a key is a single word, not a number or a stop word.', $word));
+            }
+            if (!is_string($meaning) || trim($meaning) === '') {
+                throw new \InvalidArgumentException(sprintf('The synonym "%s" must give the words of the tools as a string.', $word));
+            }
+            if (isset($words[$tokens[0]])) {
+                throw new \InvalidArgumentException(sprintf('The synonyms give "%s" twice.', $tokens[0]));
+            }
+            $words[$tokens[0]] = $meaning;
+        }
+
+        return $words;
     }
 }

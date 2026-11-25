@@ -210,6 +210,14 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A weight given alone keeps the other fields at their defaults.**
+  `new SearchOptions(weights: ['title' => 3.0])` replaced the whole map, so
+  the name, the description and the parameters were no longer indexed and
+  a tool was found by its title only. The weights given are now laid over
+  `SearchOptions::WEIGHTS`, and `queryWeights` over
+  `SearchOptions::QUERY_WEIGHTS`; a field is left out with a weight of 0. A
+  host that passed the four fields sees no change.
+
 - **What the cut at 60% costs and saves is in docs/SEARCH.md.** Measured
   again on the train half: lowering it finds up to 19 more requests in the
   top 3 out of 1769, but each search then returns more tools than the
@@ -299,6 +307,18 @@ becomes the next version's section when it is published.
   unchanged.
 
 ### Fixed
+
+- **Search settings that would never be read are refused when built.**
+  `SearchOptions` throws `InvalidArgumentException`, naming the setting, for
+  a field the search does not have (`weights: ['names' => 2.0]` indexed
+  nothing, `queryWeights: ['query' => 2.0]` was ignored), a negative or NAN
+  weight, every field at 0, a NAN cut, a negative trigram weight, a stop word
+  that is not a string, and a synonym key that is not one word of a request
+  (`'team meeting'`, `'e-mail'`, a number, a stop word) or whose value is
+  empty. A synonym key and a stop word with a capital outside ASCII
+  (`'Événement'`, `'Über'`) are now lowered as the request is: they were
+  lowered by `strtolower()`, which leaves such letters as they are, and were
+  never met.
 
 - **Titles and groups the mode would never read are refused when it is
   built.** `new CompactMode(titles: ['run_read_tool' => '...'])` used to be

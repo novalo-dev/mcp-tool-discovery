@@ -448,7 +448,8 @@ final class ToolSearch
         if ($this->options->synonyms === []) {
             return $text;
         }
-        $synonyms = array_change_key_case($this->options->synonyms, CASE_LOWER);
+        // Keyed by the token each stands for (see SearchOptions).
+        $synonyms = $this->options->synonyms;
         $extra = [];
         // The pairs too: in a sentence without spaces the host's word is
         // never a token of its own, only a pair inside one.
