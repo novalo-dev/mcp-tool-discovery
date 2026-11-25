@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A server on logiscape/mcp-sdk-php in the host examples.**
+  `docs/examples/logiscape/` serves the notes tools on the other MCP SDK for
+  PHP many servers run on, pinned at 2.0.2, over stdio. The library answers
+  the `tools/list` and `tools/call` handlers of the SDK's `Server`; the
+  example leaves out its `McpServer` wrapper, which would announce prompts
+  and resources the server does not have, and adds the instructions to
+  `initialize` and `server/discover` through a subclass of the SDK's
+  session, since the SDK has no setting for them. A CI job installs the SDK
+  and runs the `logiscape` test suite, as part of **CI passed**: the SDK is
+  past 1.0 and pinned. docs/HOSTS.md says what each part does and why.
+
 - **A chess club written in Armenian on the search benchmark.** 40 tools
   in English snake_case, with Armenian titles and descriptions, most of
   them neighbours on one object (pair a round, swap two pairings, publish

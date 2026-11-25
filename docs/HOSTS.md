@@ -6,7 +6,8 @@ the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
 on ReactPHP, in a Symfony application, in a Laravel application, in a server
-written with laravel/mcp, and in four on the official PHP SDK. All ten serve
+written with laravel/mcp, in one on logiscape/mcp-sdk-php, and in four on
+the official PHP SDK. All eleven serve
 the same notes tools, kept with their gate in
 [examples/notes.php](examples/notes.php) (the laravel/mcp server writes them
 as its own tool classes): only the transport differs.
@@ -299,6 +300,38 @@ php -S 127.0.0.1:8080 docs/examples/laravel-mcp/public/app.php
 
 laravel/mcp also ships a `ToolSearch` of its own; the README compares the two
 searches on the same benchmark.
+
+---
+
+## A server on logiscape/mcp-sdk-php
+
+[examples/logiscape/server.php](examples/logiscape/server.php) serves the
+same tools on [`logiscape/mcp-sdk-php`](https://github.com/logiscape/mcp-sdk-php),
+the other MCP SDK for PHP many servers run on, over its stdio transport. The
+SDK keeps the transport, the handshake, the stateless revision and JSON-RPC
+errors; the library answers `tools/list` and `tools/call`, the two handlers
+registered on the SDK's `Server`, which keys its handlers by method. What the
+example needs around them is in
+[examples/logiscape/bridge.php](examples/logiscape/bridge.php). The SDK runs on
+PHP 8.1; the example pins its version in
+[examples/logiscape/composer.json](examples/logiscape/composer.json), and a CI
+job installs it there and runs
+[tests/Logiscape/LogiscapeServerTest.php](../tests/Logiscape/LogiscapeServerTest.php).
+
+```
+cd docs/examples/logiscape && composer install && cd -
+php docs/examples/logiscape/server.php
+```
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The server | the SDK's `Server`, not its `McpServer` wrapper | `McpServer` adds handlers for prompts and resources, and `initialize` would announce both to the client |
+| The handlers | `registerHandler('tools/list', ...)` from `listPage()`, with the params' `cursor`, and `registerHandler('tools/call', ...)` from `callTool()` | the capability follows: a `Server` announces tools because it has a `tools/list` handler |
+| The instructions | `InstructedSession`, the SDK's `ServerSession` with `instructions` set in `initialize` and `server/discover` | the SDK has no setting for them, and they are where the model reads that the list is not the whole server ([Instructions](MODES.md#instructions)); the example runs the session as the SDK's `ServerRunner` does |
+| The revision | the session's `getNegotiatedProtocolVersion()`, read into `Revision::fromString()` | the SDK has already agreed on it, by handshake or by the request's `_meta` |
+| The answer | `Result::fromResponseData()` on the library's array | the SDK encodes a `Result`; it removes `resultType` for an older revision and keeps it for the stateless one |
+| A cursor the list did not give | `McpError` with code -32602 | any other exception from a handler reaches the client as an internal error |
+| The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore`, given to the `Discovery` | as over stdio by hand: the index is kept for the process, and its one caller's runs teach the search for the session |
 
 ---
 
