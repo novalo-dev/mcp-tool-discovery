@@ -323,6 +323,14 @@ cd docs/examples/logiscape && composer install && cd -
 php docs/examples/logiscape/server.php
 ```
 
+As the server over stdio written by hand, it takes the mode by name, on the
+same four tools: `MCP_NOTES_MODE=grouped php docs/examples/logiscape/server.php`,
+or `gateway`, `direct`, or nothing for compact. The SDK turns each answer
+into its own `Result` and back, and the test suite runs every mode through
+it: the annotations of each tool, the `action` enum of a group, and an empty
+`arguments` object sent to the gateway's `run` all reach the client and the
+library as the library wrote them.
+
 | Part | On the SDK | Why |
 |---|---|---|
 | The server | the SDK's `Server`, not its `McpServer` wrapper | `McpServer` adds handlers for prompts and resources, and `initialize` would announce both to the client |

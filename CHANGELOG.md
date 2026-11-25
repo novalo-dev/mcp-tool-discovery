@@ -10,6 +10,15 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Every mode on logiscape/mcp-sdk-php.** Both servers of
+  `docs/examples/logiscape/` take the mode by `MCP_NOTES_MODE`, as the
+  server written by hand does, and the `logiscape` test suite runs the
+  grouped, gateway and direct modes through the SDK: until now only the
+  compact mode was proved on a third-party SDK. The annotations of each
+  tool, the `action` enum of a group, a change sent to the wrong tool of
+  its group and an empty `arguments` object sent to the gateway's `run`
+  all come through the SDK's `Result` as the library wrote them.
+
 - **A coffee washing station written in Amharic and a community garden in
   English on the search benchmark.** The station has 40 tools in English
   snake_case with titles and descriptions in the Ethiopic script, most of

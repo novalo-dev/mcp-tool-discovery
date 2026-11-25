@@ -21,6 +21,8 @@ declare(strict_types=1);
  * Install: composer install, in this directory.
  * Run it:   php -S 127.0.0.1:8080 docs/examples/logiscape/http-server.php
  * Call it:  POST http://127.0.0.1:8080/, with Authorization: Bearer reader-token
+ * In another mode (direct, grouped or gateway):
+ *           MCP_NOTES_MODE=gateway php -S 127.0.0.1:8080 docs/examples/logiscape/http-server.php
  */
 
 namespace Example\Notes\Logiscape;
@@ -33,7 +35,6 @@ use Mcp\Server\Server;
 use Mcp\Server\Transport\Http\FileSessionStore;
 use Mcp\Server\Transport\Http\HttpMessage;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -41,6 +42,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
 use function Example\Notes\instructions;
+use function Example\Notes\mode;
 use function Example\Notes\roleOf;
 
 require __DIR__ . '/vendor/autoload.php';
@@ -77,7 +79,8 @@ $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 // No learning store: it would be shared by every caller, which is a choice
 // for the host to make, as docs/HOSTS.md says.
 $discovery = new Discovery(
-    new CompactMode(prefix: 'notes_', batchLimit: 20),
+    // Compact unless MCP_NOTES_MODE names direct, grouped or gateway.
+    mode(getenv('MCP_NOTES_MODE')),
     new NotesGate($role, new Notes($data . '/notes.json')),
     new SearchSetup(cache: new FileIndexCache($data . '/index')),
 );

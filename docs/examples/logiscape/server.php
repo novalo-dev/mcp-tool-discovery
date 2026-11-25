@@ -23,6 +23,8 @@ declare(strict_types=1);
  * Install: composer install, in this directory.
  * Run it:   php docs/examples/logiscape/server.php
  * As admin: MCP_NOTES_ROLE=admin php docs/examples/logiscape/server.php
+ * The same tools in another mode (direct, grouped or gateway):
+ *           MCP_NOTES_MODE=grouped php docs/examples/logiscape/server.php
  */
 
 namespace Example\Notes\Logiscape;
@@ -33,7 +35,6 @@ use Mcp\Server\NotificationOptions;
 use Mcp\Server\Server;
 use Mcp\Server\Transport\StdioServerTransport;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -42,6 +43,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
 use function Example\Notes\instructions;
+use function Example\Notes\mode;
 
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
@@ -52,7 +54,8 @@ $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 // One Discovery per caller. Over stdio the caller is the process for its whole
 // life; over HTTP, http-server.php builds it per request, with that request's gate.
 $discovery = new Discovery(
-    new CompactMode(prefix: 'notes_', batchLimit: 20),
+    // Compact unless MCP_NOTES_MODE names direct, grouped or gateway.
+    mode(getenv('MCP_NOTES_MODE')),
     new NotesGate(is_string($role) ? $role : 'reader', new Notes()),
     new SearchSetup(cache: new MemoryIndexCache(), learning: new MemoryLearningStore()),
 );
