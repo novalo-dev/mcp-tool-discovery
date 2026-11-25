@@ -189,6 +189,12 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **What the cut at 60% costs and saves is in docs/SEARCH.md.** Measured
+  again on the train half: lowering it finds up to 19 more requests in the
+  top 3 out of 1769, but each search then returns more tools than the
+  searches it saves would cost. The default does not change; a host whose
+  caller cannot search again can lower `SearchOptions::cut`.
+
 - **A request whose only tool word sits among unknown words lifts less of
   what was learned.** A request of one word the tools use, among words they
   do not ("sign | agreement | lot"), was lifted like a request of that one

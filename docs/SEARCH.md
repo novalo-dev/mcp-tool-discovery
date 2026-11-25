@@ -56,6 +56,20 @@ Then the ranking is **cut** at 60% of the best score, and **limited** to 10
 tools. Equal scores keep the host's order, so a query always gives the same
 answer.
 
+The cut trades a few requests for fewer tools to read, and it was measured
+again on 2026-11-25 on the train half (1769 requests): with no cut, 19 more
+requests in fields would have their tool in the top 3 (1663 against 1644)
+and 37 more as one sentence, but already at 30% a search returns 4.89 tools
+instead of 2.18. Cutting at 50% gives 11 more in fields for 2.84 tools;
+keeping the first three tools down to 45% of the best gives 14 more for
+2.60. A compact search answer of the benchmark weighs about 1100 bytes for
+its two tools or so: the extra tools add some 200 bytes to every search,
+while the 14 requests they save would each have cost one more search, some
+9 bytes a search on average. The cut stays at 60%. A host whose caller
+cannot search again can lower it (`SearchOptions::cut`). A cut that also
+keeps a tool close to the one before it (90% or 80% of its score) found no
+request more in the top 3.
+
 ## Words and trigrams
 
 The Analyzer splits snake_case, kebab-case, dots and camelCase, lowercases
