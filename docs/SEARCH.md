@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1361 times
-out of 1776 in fields, and 1042 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1423 times
+out of 1851 in fields, and 1086 times as one sentence.
 
 ## How a tool is scored
 
@@ -539,18 +539,19 @@ written in Spanish (40 tools, `vehiculo_alta`), a driving school
 written in Persian (40 tools, `exam_theory_book`), a chess club
 written in Armenian (40 tools, `pairing_swap`), a wine cellar
 written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
-written in Amharic (40 tools, `drying_bed_assign`) and a community garden
-in English camelCase (40 tools, `swapWateringDuty`). 3545 requests, each written as one
+written in Amharic (40 tools, `drying_bed_assign`), a community garden
+in English camelCase (40 tools, `swapWateringDuty`) and an IT service
+desk (150 tools, `link-incident-problem`). 3695 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1776 requests | Right tool first | Top 3 |
+| Test half, 1851 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1361 | 1593 |
-| The same request as one sentence | 1042 | 1329 |
-| In fields, after every train request was run once | 1363 | 1593 |
-| In fields, after the test requests were run once, then asked again | 1491 | 1658 |
+| The request in fields | 1423 | 1664 |
+| The same request as one sentence | 1086 | 1384 |
+| In fields, after every train request was run once | 1425 | 1664 |
+| In fields, after the test requests were run once, then asked again | 1559 | 1731 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -560,10 +561,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 583 | 869 |
-| The fields joined into one sentence | 983 | 1272 |
+| The request as one sentence | 614 | 910 |
+| The fields joined into one sentence | 1038 | 1340 |
 
-As one sentence it trails on each of the thirty-two servers, the English ones
+As one sentence it trails on each of the thirty-three servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1100,6 +1101,22 @@ tools' words (allotment for plot, kick out for end a membership, chase for
 remind). Nothing was tuned on it: 40 of its 50 test requests come first in
 fields, 42 in the top 3, 33 as one sentence; asked again, 40 and 44 in the
 top 3. It was written to judge the rule on a lone tool word above.
+
+The IT service desk is the third large server in English: 150 tools in
+kebab-case, verb first (`assign-incident`, `assign-problem`,
+`assign-task`, `assign-asset`), most of them sharing a verb or an object
+with several others (approve a change or a request, retire an asset, an
+article or a catalogue item, publish an article or a workaround). Its 150
+requests, one per tool, were written on 2026-11-25 before any of them was
+run, in the words of agents rather than of the tools (ticket for incident,
+laptop for asset, locked out, banner). Nothing was tuned on it, and the
+cut at 60% holds: 62 of its 75 test requests come first in fields, 71 in
+the top 3, with 3.28 tools in an answer (3.49 on the hosting panel); 44 as
+one sentence; asked again, 68. Its train half scores 65 and 74. What it
+misses is a verb found in another tool's description ("give | laptop"
+meets "which give its priority" before "Gives an asset to a user"), a
+neighbour of the same object (decline a request finds the one to cancel)
+and words the tools do not use ("old tickets" for the age of the backlog).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

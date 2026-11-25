@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **An IT service desk with 150 tools on the search benchmark.** The third
+  large server in English, after the hosting panel and the airline
+  operations centre: kebab-case names, verb first (`assign-incident`,
+  `assign-problem`, `assign-task`), most of them sharing a verb or an
+  object with several others, as on a host that exposes its whole back
+  office. Its 150 requests, one per tool, were written before any of them
+  was run, in the words of agents (ticket, laptop, locked out), and nothing
+  was tuned on them: on its test half, 62 of 75 come first in fields and
+  71 in the top 3, with the cut at 60% unchanged. The benchmark now holds
+  3695 requests over thirty-three servers; its floors move to 1423 and
+  1664 in fields and 1559 asked again, and the laravel/mcp line to 614 and
+  910 as one sentence and 1038 and 1340 with the fields joined.
+
 - **Every mode on the official PHP SDK over stdio.** `docs/examples/sdk/server.php`
   takes the mode by `MCP_NOTES_MODE`, as its HTTP server and the logiscape
   servers do, and the `sdk` test suite runs the grouped, gateway and direct
