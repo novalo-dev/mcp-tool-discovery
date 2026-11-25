@@ -19,3 +19,4 @@
 /docs/examples/laravel-mcp/storage/
 /docs/examples/logiscape/vendor/
 /docs/examples/logiscape/composer.lock
+/.phpunit.result.cache
