@@ -9,8 +9,10 @@ parameters:
     phpVersion: 80100
     paths:
         - bridge.php
+        - http-server.php
         - server.php
     scanFiles:
+        - ../http.php
         - ../notes.php
     bootstrapFiles:
         - vendor/autoload.php

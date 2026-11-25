@@ -153,7 +153,7 @@ complete servers that the tests run as a client would: two written by hand,
 one over stdio and one over HTTP with a gate built for each request, the same
 HTTP server kept up in one ReactPHP process, the same as a Symfony application
 and as a Laravel one, a server written with laravel/mcp whose `tools/list`
-and `tools/call` the library answers, one on logiscape/mcp-sdk-php, and four on the official PHP SDK: over stdio and over
+and `tools/call` the library answers, two on logiscape/mcp-sdk-php, over stdio and over its HTTP runner, and four on the official PHP SDK: over stdio and over
 its HTTP transport, and two with their tools left in the SDK's registry,
 added by hand or found by their attribute.
 

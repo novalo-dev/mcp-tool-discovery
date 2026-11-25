@@ -6,8 +6,8 @@ the negotiated revision, and the two methods `tools/list` and `tools/call`
 handed over. This page shows that wiring in two servers written by hand, one
 over stdio and one over HTTP, in the same HTTP server kept up in one process
 on ReactPHP, in a Symfony application, in a Laravel application, in a server
-written with laravel/mcp, in one on logiscape/mcp-sdk-php, and in four on
-the official PHP SDK. All eleven serve
+written with laravel/mcp, in two on logiscape/mcp-sdk-php, and in four on
+the official PHP SDK. All twelve serve
 the same notes tools, kept with their gate in
 [examples/notes.php](examples/notes.php) (the laravel/mcp server writes them
 as its own tool classes): only the transport differs.
@@ -332,6 +332,38 @@ php docs/examples/logiscape/server.php
 | The answer | `Result::fromResponseData()` on the library's array | the SDK encodes a `Result`; it removes `resultType` for an older revision and keeps it for the stateless one |
 | A cursor the list did not give | `McpError` with code -32602 | any other exception from a handler reaches the client as an internal error |
 | The search | one `SearchSetup`, with a `MemoryIndexCache` and a `MemoryLearningStore`, given to the `Discovery` | as over stdio by hand: the index is kept for the process, and its one caller's runs teach the search for the session |
+
+
+### Over the SDK's HTTP runner
+
+[examples/logiscape/http-server.php](examples/logiscape/http-server.php)
+serves the same handlers over the SDK's `HttpServerRunner`, one process per
+request as PHP-FPM runs it. The caller is no longer the process, so the gate
+and the `Discovery` are built for the caller each request names, as in the
+HTTP example written by hand.
+[tests/Logiscape/LogiscapeHttpServerTest.php](../tests/Logiscape/LogiscapeHttpServerTest.php)
+calls it over HTTP in the same CI job.
+
+```
+php -S 127.0.0.1:8080 docs/examples/logiscape/http-server.php
+```
+
+What changes from the server over stdio:
+
+| Part | On the SDK | Why |
+|---|---|---|
+| The caller | read from the bearer token with `roleOf()` of `http.php`, before the SDK; no caller is answered 401 | the gate answers for one caller, and the SDK has no notion of who may see a tool |
+| The handlers | `serve()`, the same two as over stdio | they read the revision from the session the runner sets on the `Server` for the request |
+| The session | `sessionStore: new FileSessionStore(...)` | without a store the runner keeps sessions in memory, which a process per request loses before the client's next request; in files, the revision a client agreed on reaches its next requests |
+| The instructions | `instruct()` on the runner's answer, between `handleRequest()` and `sendResponse()` | the runner builds its session itself, so `InstructedSession` cannot take its place; the JSON is decoded as objects, so that an empty object of the answer stays `{}` |
+| The answer | `enable_sse` left off | the runner then answers in JSON, the body `instruct()` reads |
+| The origin | `allowed_origins` set to the local host | the runner checks `Origin` only when told which hosts may send one, and the SDK's `McpServer` sets them for the built-in server alone |
+| Who a session serves | anyone who sends its `Mcp-Session-Id`, unless the SDK's OAuth is on | harmless here: a session holds the revision, never a right, and the gate is built from the token of each request |
+| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | as on the official SDK over HTTP: nothing in memory outlives the request, and a learning store would be shared by every caller |
+
+The stateless revision `2026-07-28` needs no session: the runner reads its
+revision from `_meta`, answers `server/discover` with the instructions, and
+the handlers answer as they do for the others.
 
 ---
 

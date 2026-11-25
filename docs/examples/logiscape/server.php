@@ -32,11 +32,7 @@ use Example\Notes\NotesGate;
 use Mcp\Server\NotificationOptions;
 use Mcp\Server\Server;
 use Mcp\Server\Transport\StdioServerTransport;
-use Mcp\Shared\ErrorData;
-use Mcp\Shared\McpError;
-use Mcp\Types\Result;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Exception\InvalidCursor;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
@@ -54,7 +50,7 @@ require __DIR__ . '/bridge.php';
 $role = getenv('MCP_NOTES_ROLE');
 $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 // One Discovery per caller. Over stdio the caller is the process for its whole
-// life; over HTTP, build it per request, with that request's gate.
+// life; over HTTP, http-server.php builds it per request, with that request's gate.
 $discovery = new Discovery(
     new CompactMode(prefix: 'notes_', batchLimit: 20),
     new NotesGate(is_string($role) ? $role : 'reader', new Notes()),
@@ -63,22 +59,7 @@ $discovery = new Discovery(
 
 $server = new Server('notes');
 
-$server->registerHandler('tools/list', static function (mixed $params) use ($discovery, $tools, $server): Result {
-    $cursor = is_object($params) && isset($params->cursor) && is_string($params->cursor) ? $params->cursor : null;
-    try {
-        return answer($discovery->listPage($tools, revision($server), $cursor, 50));
-    } catch (InvalidCursor $error) {
-        // The client's mistake, so the invalid params error the specification
-        // asks for instead of the internal error the SDK would send.
-        throw new McpError(new ErrorData(-32602, $error->getMessage()));
-    }
-});
-
-$server->registerHandler('tools/call', static function (mixed $params) use ($discovery, $tools, $server): Result {
-    $name = is_object($params) && isset($params->name) && is_string($params->name) ? $params->name : '';
-
-    return answer($discovery->callTool($name, arguments($params), $tools, revision($server)));
-});
+serve($server, $discovery, $tools);
 
 // What the SDK's ServerRunner does over stdio, with the session that sends
 // the instructions. The tools the mode lists do not change, so list_changed

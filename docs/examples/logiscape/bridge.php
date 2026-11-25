@@ -12,10 +12,11 @@
 declare(strict_types=1);
 
 /*
- * What a server on logiscape/mcp-sdk-php needs around the library: the
- * session that sends the instructions, the revision the SDK agreed on, the
- * arguments of a call, and the library's answer handed back as a Result.
- * docs/examples/logiscape/server.php wires them.
+ * What a server on logiscape/mcp-sdk-php needs around the library: the two
+ * handlers, the instructions sent with the SDK's handshake, the revision the
+ * SDK agreed on, the arguments of a call, and the library's answer handed
+ * back as a Result. docs/examples/logiscape/server.php wires them over stdio,
+ * docs/examples/logiscape/http-server.php over HTTP.
  */
 
 namespace Example\Notes\Logiscape;
@@ -23,13 +24,44 @@ namespace Example\Notes\Logiscape;
 use Mcp\Server\InitializationOptions;
 use Mcp\Server\Server;
 use Mcp\Server\ServerSession;
+use Mcp\Server\Transport\Http\HttpMessage;
 use Mcp\Server\Transport\Transport;
+use Mcp\Shared\ErrorData;
+use Mcp\Shared\McpError;
 use Mcp\Types\DiscoverResult;
 use Mcp\Types\InitializeResult;
 use Mcp\Types\RequestWrapperInterface;
 use Mcp\Types\Result;
+use Novalo\McpToolDiscovery\Discovery;
+use Novalo\McpToolDiscovery\Exception\InvalidCursor;
 use Novalo\McpToolDiscovery\Exception\UnsupportedRevision;
 use Novalo\McpToolDiscovery\Protocol\Revision;
+use Novalo\McpToolDiscovery\Tool\ToolSet;
+
+/**
+ * tools/list and tools/call, answered by the library. The SDK's Server keys
+ * its handlers by method and announces tools because it has a tools/list
+ * handler.
+ */
+function serve(Server $server, Discovery $discovery, ToolSet $tools): void
+{
+    $server->registerHandler('tools/list', static function (mixed $params) use ($discovery, $tools, $server): Result {
+        $cursor = is_object($params) && isset($params->cursor) && is_string($params->cursor) ? $params->cursor : null;
+        try {
+            return answer($discovery->listPage($tools, revision($server), $cursor, 50));
+        } catch (InvalidCursor $error) {
+            // The client's mistake, so the invalid params error the specification
+            // asks for instead of the internal error the SDK would send.
+            throw new McpError(new ErrorData(-32602, $error->getMessage()));
+        }
+    });
+
+    $server->registerHandler('tools/call', static function (mixed $params) use ($discovery, $tools, $server): Result {
+        $name = is_object($params) && isset($params->name) && is_string($params->name) ? $params->name : '';
+
+        return answer($discovery->callTool($name, arguments($params), $tools, revision($server)));
+    });
+}
 
 /**
  * The SDK's session, with the instructions in initialize and server/discover.
@@ -61,6 +93,40 @@ final class InstructedSession extends ServerSession
             }
             $respond($result);
         };
+    }
+}
+
+/**
+ * The instructions, set on the answers to initialize and server/discover in
+ * the JSON body the SDK's HTTP runner built. Over HTTP the runner makes its
+ * session itself, so InstructedSession cannot take its place; the answer is
+ * the one place left. The runner answers in JSON unless enable_sse is set,
+ * which http-server.php leaves off.
+ */
+function instruct(HttpMessage $request, HttpMessage $response, string $instructions): void
+{
+    $asked = json_decode((string) $request->getBody());
+    // The ids of the requests that open a session or discover the server,
+    // so an answer of another method is left as it is.
+    $ids = [];
+    foreach (is_array($asked) ? $asked : [$asked] as $message) {
+        if ($message instanceof \stdClass && in_array($message->method ?? null, ['initialize', 'server/discover'], true) && isset($message->id)) {
+            $ids[] = $message->id;
+        }
+    }
+    // Decoded as objects, so that an empty object of the answer, such as a
+    // capability with no option, is encoded again as {} and not [].
+    $answered = $ids === [] ? null : json_decode((string) $response->getBody());
+    $changed = false;
+    foreach (is_array($answered) ? $answered : [$answered] as $message) {
+        if ($message instanceof \stdClass && isset($message->id, $message->result) && $message->result instanceof \stdClass && in_array($message->id, $ids, true)) {
+            $message->result->instructions = $instructions;
+            $changed = true;
+        }
+    }
+    if ($changed) {
+        $response->setBody(json_encode($answered, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
+        $response->removeHeader('Content-Length');
     }
 }
 

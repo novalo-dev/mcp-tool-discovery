@@ -70,7 +70,7 @@ A change to the search comes with the benchmark before and after.
 
 - Examples on other hosts, beside the servers written by hand over stdio and
   HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications,
-  the server written with laravel/mcp, the one on logiscape/mcp-sdk-php and
+  the server written with laravel/mcp, the two on logiscape/mcp-sdk-php and
   the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,

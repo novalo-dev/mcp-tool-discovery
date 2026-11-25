@@ -10,6 +10,21 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **The server on logiscape/mcp-sdk-php over HTTP.**
+  `docs/examples/logiscape/http-server.php` serves the notes tools through
+  the SDK's `HttpServerRunner`, one process per request as PHP-FPM runs it,
+  with the gate and the `Discovery` built for the caller of each request.
+  Three traps of the SDK are covered: the runner keeps its sessions in
+  memory unless given a store, so the example gives it a
+  `FileSessionStore`; it builds its session itself, so the instructions are
+  set on the JSON answers to `initialize` and `server/discover` by
+  `instruct()`, decoded as objects so that the empty objects of the answer
+  stay `{}`; and it binds a session to no caller without its OAuth, which
+  is harmless here because the gate is built from each request's token,
+  never from the session. The handlers both servers register now live once
+  in `serve()`. The `logiscape` test suite calls it over HTTP, the
+  stateless revision included.
+
 - **A wine cellar written in Georgian on the search benchmark.** 40 tools
   in English snake_case, with Georgian titles and descriptions, most of
   them neighbours on one object (fill a qvevri, seal it, open it, wash it;
