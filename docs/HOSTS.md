@@ -392,6 +392,14 @@ cd docs/examples/sdk && composer install && cd -
 php docs/examples/sdk/server.php
 ```
 
+As the server over stdio written by hand, it takes the mode by name, on the
+same four tools: `MCP_NOTES_MODE=grouped php docs/examples/sdk/server.php`,
+or `gateway`, `direct`, or nothing for compact. The `sdk` test suite runs
+every mode through it: the annotations of each tool, the `action` enum of a
+group, a change sent to the wrong tool of its group, and an empty
+`arguments` object sent to the gateway's `run` all reach the client and the
+library as the library wrote them.
+
 In your own project, `composer require mcp/sdk novalo/mcp-tool-discovery`, then:
 
 | Part | On the SDK | Why |

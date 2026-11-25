@@ -10,6 +10,14 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **Every mode on the official PHP SDK over stdio.** `docs/examples/sdk/server.php`
+  takes the mode by `MCP_NOTES_MODE`, as its HTTP server and the logiscape
+  servers do, and the `sdk` test suite runs the grouped, gateway and direct
+  modes through `mcp/sdk`: its stdio server had only ever been run in
+  compact mode. The instructions of `initialize` follow the mode, and the
+  arguments nested in a call to a group or to the gateway, an empty
+  `arguments` object included, reach the library as the client sent them.
+
 - **Every mode on logiscape/mcp-sdk-php.** Both servers of
   `docs/examples/logiscape/` take the mode by `MCP_NOTES_MODE`, as the
   server written by hand does, and the `logiscape` test suite runs the
