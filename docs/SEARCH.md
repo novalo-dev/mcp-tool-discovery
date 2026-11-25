@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1201 times
-out of 1576 in fields, and 900 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1245 times
+out of 1626 in fields, and 939 times as one sentence.
 
 ## How a tool is scored
 
@@ -471,7 +471,7 @@ skipped.
 
 ## The measures
 
-Twenty-eight fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Twenty-nine fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -497,18 +497,19 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
 written in Turkish (40 tools, `ticket_refund`), a kindergarten written
 in Vietnamese (40 tools, `absence_notice_cancel`), a fire station
-written in Spanish (40 tools, `vehiculo_alta`) and a driving school
-written in Persian (40 tools, `exam_theory_book`). 3145 requests, each written as one
+written in Spanish (40 tools, `vehiculo_alta`), a driving school
+written in Persian (40 tools, `exam_theory_book`) and a chess club
+written in Armenian (40 tools, `pairing_swap`). 3245 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1576 requests | Right tool first | Top 3 |
+| Test half, 1626 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1201 | 1406 |
-| The same request as one sentence | 900 | 1164 |
-| In fields, after every train request was run once | 1204 | 1406 |
-| In fields, after the test requests were run once, then asked again | 1317 | 1466 |
+| The request in fields | 1245 | 1456 |
+| The same request as one sentence | 939 | 1208 |
+| In fields, after every train request was run once | 1248 | 1456 |
+| In fields, after the test requests were run once, then asked again | 1364 | 1516 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -518,10 +519,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 486 | 736 |
-| The fields joined into one sentence | 870 | 1123 |
+| The request as one sentence | 517 | 774 |
+| The fields joined into one sentence | 904 | 1166 |
 
-As one sentence it trails on each of the twenty-eight servers, the English ones
+As one sentence it trails on each of the twenty-nine servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -983,6 +984,32 @@ come first as one sentence, by the words around them and their trigrams.
 What it misses is words the tools do not use ("کنسل" for "لغو", "ماشین"
 for "خودرو") and neighbours of one object (a lesson to book finds the
 theory classes, a car back from the garage the tool that sends it there).
+
+The chess club is written in Armenian, a script of its own with capitals,
+with tool names in English snake_case (`round_pair`, `pairing_swap`). Its
+titles and descriptions write the ligature `և` inside words (`Երևան`,
+`այլևս`); its 100 requests, written on 2026-11-25 before any of them was
+run, are typed as people type Armenian: with the question mark `՞` and the
+emphasis mark `՛` set on a vowel inside the word, as the language does
+(`փոխե՞լ`, `գրանցի՛ր`), with `եվ` for `և` on a keyboard without it, and
+some starting with a capital. Its tools are neighbours by design (pair a
+round, swap two pairings, publish them; record a result, correct it,
+record a forfeit). Nothing was tuned on it: 44 of its 50 test requests find
+the right tool first in fields, all 50 in the top 3, 39 as one sentence;
+learned from its train half, 44 again; asked again, 47. Its train half
+scores 43 in fields. A mark inside a word cuts it in two, as a space does,
+and the trigrams of the first part still meet the tool word. Joining the
+word across such a mark was measured on the train half and not kept: the
+mark of a script (not a shared one) dropped between two letters gave 41
+first as one sentence, as before; keeping both halves and adding the
+joined word gave 42, one request in 1619 over all servers. Ethiopic and
+Tibetan write their word and syllable separators glued between letters,
+with the same Unicode category and a script of their own, so the first
+way would glue their words together. `և` and `եվ` are left as they are:
+no Unicode mapping joins them (NFKC gives `եւ`). What it misses is the
+endings of a verb that the tools write in another form (`չեղարկիր`, cancel,
+against `չեղարկում`) and neighbours of one object (the next pairing to
+publish finds the pairing itself).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

@@ -1,0 +1,818 @@
+[
+ {
+  "name": "members_list",
+  "title": "Անդամներ",
+  "description": "Ակումբի անդամները՝ վարկանիշով և անդամավճարի վիճակով։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "status": {
+     "type": "string",
+     "description": "անդամավճարի վիճակ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_get",
+  "title": "Անդամի քարտ",
+  "description": "Մեկ անդամի տվյալները՝ անուն, ծննդյան տարի, վարկանիշ, խաղացած մրցաշարեր։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_join",
+  "title": "Նոր անդամի գրանցում",
+  "description": "Նոր խաղացողին գրանցում է ակումբում՝ որպես մեծահասակ կամ պատանի։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "անուն ազգանուն"
+    },
+    "category": {
+     "type": "string",
+     "description": "կարգ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "member_leave",
+  "title": "Անդամության դադարեցում",
+  "description": "Փակում է ակումբից հեռացած անդամի քարտը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "dues_record",
+  "title": "Անդամավճարի վճարում",
+  "description": "Գրանցում է անդամի ամսական կամ տարեկան անդամավճարը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    },
+    "amount": {
+     "type": "string",
+     "description": "գումար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "dues_overdue",
+  "title": "Չվճարված անդամավճարներ",
+  "description": "Ցույց է տալիս այն անդամներին, որոնց անդամավճարը ուշացել է։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ամիս"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tournament_create",
+  "title": "Մրցաշարի ստեղծում",
+  "description": "Ստեղծում է նոր մրցաշար՝ շվեյցարական կամ շրջանաձև համակարգով և ժամանակի հսկողությամբ։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "մրցաշարի անուն"
+    },
+    "system": {
+     "type": "string",
+     "description": "համակարգ"
+    },
+    "control": {
+     "type": "string",
+     "description": "ժամանակի հսկողություն"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tournaments_list",
+  "title": "Մրցաշարեր",
+  "description": "Ընթացիկ և առաջիկա մրցաշարերը Երևանում և մարզերում՝ ամսաթվով և մասնակիցների թվով։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "վիճակ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tournament_register",
+  "title": "Մասնակցի գրանցում մրցաշարին",
+  "description": "Անդամին կամ հյուր խաղացողին գրանցում է մրցաշարի մասնակից։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    },
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tournament_withdraw",
+  "title": "Մասնակցի դուրսբերում",
+  "description": "Մասնակցին հանում է մրցաշարից, և մնացած տուրերում նրան այլևս զույգ չի տրվում։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    },
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "round_pair",
+  "title": "Տուրի զույգավորում",
+  "description": "Կազմում է հաջորդ տուրի զույգերը և բաշխում սպիտակ ու սև գույները։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    },
+    "round": {
+     "type": "string",
+     "description": "տուր"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pairing_swap",
+  "title": "Զույգերի փոփոխություն",
+  "description": "Ձեռքով փոխում է երկու տախտակի մրցակիցներին կամ գույները՝ նախքան տուրի սկիզբը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "round": {
+     "type": "string",
+     "description": "տուր"
+    },
+    "boards": {
+     "type": "string",
+     "description": "տախտակներ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pairings_publish",
+  "title": "Զույգերի հրապարակում",
+  "description": "Հրապարակում է տուրի զույգերը ակումբի կայքում և պատին։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "round": {
+     "type": "string",
+     "description": "տուր"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "round_postpone",
+  "title": "Տուրի հետաձգում",
+  "description": "Տուրը տեղափոխում է այլ օր կամ ժամ։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "round": {
+     "type": "string",
+     "description": "տուր"
+    },
+    "time": {
+     "type": "string",
+     "description": "նոր օր և ժամ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "result_record",
+  "title": "Խաղի արդյունքի գրանցում",
+  "description": "Գրանցում է պարտիայի արդյունքը՝ 1-0, 0-1 կամ ոչ-ոքի։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "board": {
+     "type": "string",
+     "description": "տախտակ"
+    },
+    "result": {
+     "type": "string",
+     "description": "արդյունք"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "result_correct",
+  "title": "Արդյունքի ուղղում",
+  "description": "Ուղղում է սխալ գրանցված արդյունքը և վերահաշվում աղյուսակը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "board": {
+     "type": "string",
+     "description": "տախտակ"
+    },
+    "result": {
+     "type": "string",
+     "description": "ճիշտ արդյունք"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "game_forfeit",
+  "title": "Պարտություն չներկայանալու համար",
+  "description": "Գրանցում է, որ խաղացողը չի ներկայացել, և հաղթանակը տալիս է մրցակցին։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "board": {
+     "type": "string",
+     "description": "տախտակ"
+    },
+    "absent": {
+     "type": "string",
+     "description": "չներկայացած խաղացող"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "standings_show",
+  "title": "Մրցաշարային աղյուսակ",
+  "description": "Ցույց է տալիս մրցաշարի աղյուսակը՝ միավորներով և լրացուցիչ ցուցանիշներով (Բուխհոլց)։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ratings_update",
+  "title": "Վարկանիշների թարմացում",
+  "description": "Վերահաշվում է մասնակիցների Էլոյի վարկանիշը մրցաշարի ավարտից հետո։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rating_history",
+  "title": "Վարկանիշի պատմություն",
+  "description": "Ցույց է տալիս անդամի վարկանիշի փոփոխությունը ըստ ամիսների։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "game_upload_pgn",
+  "title": "Պարտիայի վերբեռնում",
+  "description": "Ավելացնում է պարտիայի նոտագրությունը PGN ֆայլով՝ արխիվի համար։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "board": {
+     "type": "string",
+     "description": "տախտակ"
+    },
+    "file": {
+     "type": "string",
+     "description": "PGN ֆայլ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "games_search",
+  "title": "Պարտիաների որոնում",
+  "description": "Գտնում է արխիվի պարտիաները ըստ խաղացողի, դեբյուտի կամ տարեթվի։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "player": {
+     "type": "string",
+     "description": "խաղացող"
+    },
+    "opening": {
+     "type": "string",
+     "description": "դեբյուտ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_schedule",
+  "title": "Դասի նշանակում",
+  "description": "Մարզչի հետ դաս է նշանակում խմբի կամ անհատական աշակերտի համար։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "coach": {
+     "type": "string",
+     "description": "մարզիչ"
+    },
+    "time": {
+     "type": "string",
+     "description": "օր և ժամ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_cancel",
+  "title": "Դասի չեղարկում",
+  "description": "Չեղարկում է նշանակված դասը և ազատում մարզչի ժամը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "դաս"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lessons_week",
+  "title": "Շաբաթվա դասերը",
+  "description": "Այս շաբաթվա դասերի ժամանակացույցը՝ մարզիչներով և դահլիճներով։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "coach": {
+     "type": "string",
+     "description": "մարզիչ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "coaches_list",
+  "title": "Մարզիչներ",
+  "description": "Ակումբի մարզիչները՝ կոչումով և ազատ ժամերով։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "կոչում"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_enroll",
+  "title": "Աշակերտի ընդգրկում խմբում",
+  "description": "Երեխային կամ մեծահասակին ընդգրկում է սկսնակների կամ առաջադեմների խմբում։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    },
+    "group": {
+     "type": "string",
+     "description": "խումբ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "attendance_mark",
+  "title": "Հաճախումների նշում",
+  "description": "Նշում է, թե ով է եկել դասին և ով է բացակայել։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "դաս"
+    },
+    "absent": {
+     "type": "string",
+     "description": "բացականեր"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hall_book",
+  "title": "Դահլիճի ամրագրում",
+  "description": "Ամրագրում է խաղադահլիճը կամ դասասենյակը մրցաշարի կամ դասի համար։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "սենյակ"
+    },
+    "time": {
+     "type": "string",
+     "description": "օր և ժամ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_list",
+  "title": "Գույքի ցանկ",
+  "description": "Ակումբի տախտակները, խաղաքարերը և ժամացույցները՝ քանակով և վիճակով։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "տեսակ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "clock_report_broken",
+  "title": "Անսարք ժամացույց",
+  "description": "Նշում է անսարք շախմատային ժամացույցը, որպեսզի այն չտրվի տուրին։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "clock": {
+     "type": "string",
+     "description": "ժամացույցի համար"
+    },
+    "fault": {
+     "type": "string",
+     "description": "անսարքություն"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_lend",
+  "title": "Գույքի տրամադրում",
+  "description": "Տախտակ կամ ժամացույց է տալիս անդամին՝ տուն տանելու համար։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    },
+    "item": {
+     "type": "string",
+     "description": "իր"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "arbiter_assign",
+  "title": "Մրցավարի նշանակում",
+  "description": "Մրցաշարի գլխավոր կամ օգնական մրցավար է նշանակում։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    },
+    "arbiter": {
+     "type": "string",
+     "description": "մրցավար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "appeal_record",
+  "title": "Բողոքի գրանցում",
+  "description": "Գրանցում է խաղացողի բողոքը մրցավարի որոշման դեմ։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "board": {
+     "type": "string",
+     "description": "տախտակ"
+    },
+    "text": {
+     "type": "string",
+     "description": "բողոքի տեքստ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fide_report_export",
+  "title": "Զեկույց ՖԻԴԵ-ին",
+  "description": "Պատրաստում է մրցաշարի արդյունքների ֆայլը ՖԻԴԵ-ի վարկանիշի համար։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "newsletter_send",
+  "title": "Տեղեկագրի ուղարկում",
+  "description": "Նամակ է ուղարկում բոլոր անդամներին՝ մրցաշարերի և նորությունների մասին։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "նամակի տեքստ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reminder_send",
+  "title": "Հիշեցում",
+  "description": "Հիշեցում է ուղարկում անդամին վաղվա տուրի կամ դասի մասին։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "անդամի համար"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "prize_award",
+  "title": "Մրցանակների գրանցում",
+  "description": "Գրանցում է մրցաշարի մրցանակները ըստ զբաղեցրած տեղի։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tournament": {
+     "type": "string",
+     "description": "մրցաշար"
+    },
+    "place": {
+     "type": "string",
+     "description": "տեղ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "simul_schedule",
+  "title": "Միաժամանակյա խաղաշարք",
+  "description": "Նշանակում է գրոսմայստերի միաժամանակյա խաղաշարք (սեանս) և տախտակների թիվը։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "master": {
+     "type": "string",
+     "description": "գրոսմայստեր"
+    },
+    "boards": {
+     "type": "string",
+     "description": "տախտակների թիվ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_attendance_month",
+  "title": "Ամսական հաճախումներ",
+  "description": "Հաշվում է դասերի հաճախումները ըստ խմբի և ամսի։",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ամիս"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

@@ -10,6 +10,19 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A chess club written in Armenian on the search benchmark.** 40 tools
+  in English snake_case, with Armenian titles and descriptions, most of
+  them neighbours on one object (pair a round, swap two pairings, publish
+  them; record a result, correct it, record a forfeit). Its 100 requests
+  were written before any of them was run, typed with the question and
+  emphasis marks set inside the word (`փոխե՞լ`), with `եվ` for `և`, and
+  some starting with a capital. Nothing was tuned on it: 44 of its 50 test
+  requests come first in fields, all 50 in the top 3, 39 as one sentence,
+  and learning loses none. The benchmark now holds 3245 requests over
+  twenty-nine servers; its floors move to 1245 and 1456 in fields and 1364
+  asked again, and the laravel/mcp line to 517 and 774 as one sentence and
+  904 and 1166 with the fields joined.
+
 - **A driving school written in Persian on the search benchmark.** 40
   tools in English snake_case, with Persian titles and descriptions written
   with the zero-width non-joiner inside words, most of them neighbours on
