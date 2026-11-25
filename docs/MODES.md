@@ -55,6 +55,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | coffee | 40 | 14,401 | 2,871 | 1,839 | - | 1,042 |
 | garden | 40 | 12,309 | 2,871 | 1,839 | - | 810 |
 | desk | 150 | 49,454 | 2,871 | 1,839 | - | 1,231 |
+| leisure | 40 | 13,467 | 2,871 | 1,839 | - | 1,135 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a

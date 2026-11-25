@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1423 times
-out of 1851 in fields, and 1086 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1456 times
+out of 1901 in fields, and 1111 times as one sentence.
 
 ## How a tool is scored
 
@@ -550,17 +550,18 @@ written in Armenian (40 tools, `pairing_swap`), a wine cellar
 written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
 written in Amharic (40 tools, `drying_bed_assign`), a community garden
 in English camelCase (40 tools, `swapWateringDuty`) and an IT service
-desk (150 tools, `link-incident-problem`). 3695 requests, each written as one
+desk (150 tools, `link-incident-problem`) and a leisure centre in English
+PascalCase (40 tools, `FreezeMembership`). 3795 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1851 requests | Right tool first | Top 3 |
+| Test half, 1901 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1423 | 1664 |
-| The same request as one sentence | 1086 | 1384 |
-| In fields, after every train request was run once | 1425 | 1664 |
-| In fields, after the test requests were run once, then asked again | 1559 | 1731 |
+| The request in fields | 1456 | 1703 |
+| The same request as one sentence | 1111 | 1418 |
+| In fields, after every train request was run once | 1458 | 1703 |
+| In fields, after the test requests were run once, then asked again | 1594 | 1771 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -570,10 +571,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 614 | 910 |
-| The fields joined into one sentence | 1038 | 1340 |
+| The request as one sentence | 631 | 932 |
+| The fields joined into one sentence | 1066 | 1376 |
 
-As one sentence it trails on each of the thirty-three servers, the English ones
+As one sentence it trails on each of the thirty-four servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1126,6 +1127,21 @@ misses is a verb found in another tool's description ("give | laptop"
 meets "which give its priority" before "Gives an asset to a user"), a
 neighbour of the same object (decline a request finds the one to cancel)
 and words the tools do not use ("old tickets" for the age of the backlog).
+
+The leisure centre is a smaller server where neighbours are the rule: 40
+tools in PascalCase, five or more on each of a booking (`CreateBooking`,
+`MoveBooking`, `CancelBooking`), a membership (start, renew, freeze,
+unfreeze, change, cancel) and a class (add, cancel, book, leave, wait).
+Its 100 requests were written on 2026-11-25 before any of them was run, in
+the words of the front desk, whose verbs the tools often do not use (pause
+for freeze, bump for move, top up for credit), and twenty of them name the
+same object as another request and differ only by the verb. Nothing was
+tuned on it: 33 of its 50 test requests come first in fields, 39 in the top
+3, with 2.92 tools in an answer; 25 as one sentence; asked again, 35. Its
+train half scores 32 and 38. What it misses is a verb no tool uses
+("resume", "quit", "pay back", "bump"), which leaves only the object, shared
+by five tools, and two neighbours the request does not tell apart (taking
+a member off a class finds the tool that cancels the class).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

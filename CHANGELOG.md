@@ -10,6 +10,17 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A leisure centre on the search benchmark.** 40 tools in English
+  PascalCase, with five or more on each of a booking, a membership and a
+  class (`FreezeMembership`, `UnfreezeMembership`, `CancelMembership`), and
+  100 requests written before any of them was run, in the words of the
+  front desk, whose verbs the tools often do not use (pause, bump, top
+  up). Nothing was tuned on it: on its test half, 33 of 50 come first in
+  fields and 39 in the top 3. The benchmark now holds 3795 requests over
+  thirty-four servers; its floors move to 1456 and 1703 in fields and 1594
+  asked again, and the laravel/mcp line to 631 and 932 as one sentence and
+  1066 and 1376 with the fields joined.
+
 - **An IT service desk with 150 tools on the search benchmark.** The third
   large server in English, after the hosting panel and the airline
   operations centre: kebab-case names, verb first (`assign-incident`,

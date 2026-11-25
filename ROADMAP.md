@@ -59,7 +59,9 @@ The benchmark says where the search still misses, in
   chess club), a Georgian one, partly typed in capitals (a wine cellar)
   an Amharic one, partly typed with the other letters of the same
   sound (a coffee washing station) and a third large English one, 150
-  tools in kebab-case, verb first (an IT service desk) are in.
+  tools in kebab-case, verb first (an IT service desk) and an English one
+  where most tools share an object with four others, in PascalCase (a
+  leisure centre) are in.
 - **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
   marks now meets the tool word it spells, a Greek word typed in capitals
   and a Russian `е` for `ё` included. `й` typed as `и` lies within the
