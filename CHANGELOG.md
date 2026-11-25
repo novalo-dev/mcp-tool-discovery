@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.8.0 - 2026-11-25
+
 ### Added
 
 - **A leisure centre on the search benchmark.** 40 tools in English
