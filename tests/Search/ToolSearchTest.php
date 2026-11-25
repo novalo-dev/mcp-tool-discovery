@@ -417,6 +417,54 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(0.25, microtime(true) - $start, 'a plain word is held against no word with more letters of marks than half its length');
     }
 
+    public function testWordsWithMarksElsewhereCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words are eight letters, the last four with
+        // marks, and words of eight letters with marks on the first four
+        // only: every word of the index passes the pattern of each, and none
+        // can spell it, since no letter is the same in both.
+        $marks = ['ǎ', 'é', 'ü', 'ő', 'ç', 'ñ'];
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = '';
+                for ($letter = 0; $letter < 8; ++$letter) {
+                    $spelled .= $letter < 4 ? chr(97 + hexdec($hash[$letter]) % 26) : $marks[hexdec($hash[$letter]) % 6];
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $hash = md5((string) $word);
+            for ($letter = 0; $letter < 8; ++$letter) {
+                $field .= $letter < 4 ? $marks[hexdec($hash[$letter]) % 6] : chr(97 + hexdec($hash[$letter]) % 26);
+            }
+            $field .= ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a word is held only against the words whose letters with marks sit mostly in its own places');
+    }
+
+    public function testAWordIsSpelledByTheWordWithItsMarksInOtherPlaces(): void
+    {
+        // Two letters of four taken on trust, one each way, are still half.
+        $search = new ToolSearch(ToolSet::of([
+            ['name' => 'first', 'description' => 'čaje', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'second', 'description' => 'other words', 'inputSchema' => ['type' => 'object']],
+        ]));
+
+        self::assertSame(['first'], array_map(static fn($tool) => $tool->name, $search->find(SearchQuery::text('cajé'))->tools));
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());

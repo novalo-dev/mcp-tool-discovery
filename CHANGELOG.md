@@ -266,6 +266,12 @@ becomes the next version's section when it is published.
   spell it, so its search costs as little as any other on a large index.
   The ranking of every request of the benchmark is unchanged.
 
+- A word of a request is held only against the tool words whose letters
+  with marks sit in the same places as its own at half of them or more,
+  the only ones that can spell it, so its search costs as little as any
+  other on a large index whatever the places of the marks. The ranking of
+  every request of the benchmark is unchanged.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

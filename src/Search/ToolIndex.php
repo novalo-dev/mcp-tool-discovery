@@ -120,13 +120,14 @@ final class ToolIndex
     private ?array $marked = null;
 
     /**
-     * The same words of one length, by how many of their letters have
-     * marks, each keyed by its place among the words of that length;
-     * built the first time a query holds an unknown word of that length.
+     * The same words of one length, by the places of their letters with
+     * marks (see places()), each keyed by its place among the words of
+     * that length; built the first time a query holds an unknown word of
+     * that length.
      *
-     * @var array<int, array<int, array<int, string>>>
+     * @var array<int, array<string, array<int, string>>>
      */
-    private array $markCounts = [];
+    private array $markPlaces = [];
 
     /**
      * The same for the indexed words written in the plain letters of one
@@ -413,16 +414,18 @@ final class ToolIndex
             return [];
         }
         // A letter with marks matches outright only the same letter, so
-        // each position where one word has marks and the other has not is
-        // taken on trust, and these must be at most half (see spell()): a
-        // word whose number of letters with marks differs from this one's
-        // by more than half its length can never spell it. Such words
-        // passed the pattern below and failed the count, and on an index
-        // of words mostly of marks, or for a request word mostly of marks
-        // against the plain words, that was every word of the length.
+        // the positions taken on trust are exactly those where one word has
+        // marks and the other has not, and these must be at most half (see
+        // spell()). A word whose letters with marks sit elsewhere than this
+        // one's at more than half its positions can never spell it: such
+        // words passed the pattern below and failed the count, and on an
+        // index of words with marks in the same places that was every word
+        // of the length. Read by places, every word that passes the pattern
+        // spells the word, so the bound MAX_ALIKE stops the pass.
         $length = count($characters);
-        $within = static fn(int $others): bool => 2 * abs($marks - $others) <= $length;
-        $againstPlain = $hasMarks && $within(0);
+        $places = self::places($word);
+        $within = static fn(string $others): bool => 2 * substr_count($places ^ $others, "\x01") <= $length;
+        $againstPlain = $hasMarks && 2 * $marks <= $length;
         // Built from the index at the first word that needs them, each with
         // one pass of PCRE over every word: an index read back from the
         // cache at each request pays for them only when a request holds a
@@ -462,18 +465,18 @@ final class ToolIndex
                 $pattern .= self::stands($character);
             }
         }
-        // Counted for one length at a time: counting the marks of every
-        // word of the index at once doubled the cost of a search over the
+        // Read for one length at a time: reading the marks of every word of
+        // the index at once doubled the cost of a search over the
         // kindergarten, whose index is read back from the cache at each
         // request.
-        if (!isset($this->markCounts[$length])) {
-            $this->markCounts[$length] = [];
+        if (!isset($this->markPlaces[$length])) {
+            $this->markPlaces[$length] = [];
             foreach ($this->marked[$length] ?? [] as $place => $indexed) {
-                $this->markCounts[$length][(int) preg_match_all(self::MARKED, $indexed)][$place] = $indexed;
+                $this->markPlaces[$length][self::places($indexed)][$place] = $indexed;
             }
         }
         $withMarks = [];
-        foreach ($this->markCounts[$length] as $others => $words) {
+        foreach ($this->markPlaces[$length] as $others => $words) {
             if ($within($others)) {
                 $withMarks += $words;
             }
@@ -540,6 +543,18 @@ final class ToolIndex
         }
 
         return false;
+    }
+
+    /**
+     * One byte per character of the word: 1 where the letter has marks
+     * (MARKED), 0 elsewhere, so two words of one length are compared place
+     * by place with one XOR.
+     */
+    private static function places(string $word): string
+    {
+        $places = preg_replace(['/[\x00\x01]/', self::MARKED, '/[^\x01]/su'], ["\x00", "\x01", "\x00"], $word);
+
+        return is_string($places) ? $places : '';
     }
 
     /**
