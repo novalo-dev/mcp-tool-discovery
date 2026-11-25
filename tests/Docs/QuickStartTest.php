@@ -76,7 +76,7 @@ final class QuickStartTest extends TestCase
             . self::HOST . "\n"
             . implode("\n", \array_slice($blocks, 0, 3)) . "\n"
             . '$answers = [$revision->value, array_column($discovery->listTools($tools, $revision)[\'tools\'], \'name\'), $result, '
-            . '$discovery->callTool(\'files_delete\', [], $tools, $revision)];' . "\n"
+            . '$discovery->callTool(\'files_delete\', [], $tools, $revision), $initialize];' . "\n"
             . implode("\n", \array_slice($blocks, 3)) . "\n"
             . 'echo json_encode($answers, JSON_THROW_ON_ERROR);' . "\n";
 
@@ -86,7 +86,7 @@ final class QuickStartTest extends TestCase
         self::assertSame('', $err);
         $answers = json_decode($out, true, 512, JSON_THROW_ON_ERROR);
         self::assertIsArray($answers);
-        [$revision, $listed, $called, $hidden] = $answers;
+        [$revision, $listed, $called, $hidden, $initialize] = $answers;
 
         self::assertSame('2025-11-25', $revision);
         // The compact mode's tools, never the host's own.
@@ -97,5 +97,17 @@ final class QuickStartTest extends TestCase
         self::assertIsArray($hidden);
         self::assertTrue($hidden['isError'] ?? false);
         self::assertStringNotContainsString('ran files_delete', json_encode($hidden, JSON_THROW_ON_ERROR));
+
+        // The handshake a host copies answers in the negotiated revision and
+        // carries the mode's instructions after the host's words: without
+        // them the model reads three tools as the whole server.
+        self::assertIsArray($initialize);
+        self::assertSame('2025-11-25', $initialize['protocolVersion'] ?? null);
+        self::assertSame([], $initialize['capabilities']['tools'] ?? null);
+        $instructions = $initialize['instructions'] ?? null;
+        self::assertIsString($instructions);
+        self::assertStringStartsWith('Files and tickets of the team. ', $instructions);
+        self::assertStringContainsString('search_tools', $instructions);
+        self::assertStringNotContainsString('files_read', $instructions);
     }
 }

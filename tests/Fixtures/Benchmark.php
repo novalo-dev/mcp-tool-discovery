@@ -22,30 +22,17 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 /**
- * The search benchmark: 2697 requests over twenty-four servers named in six
- * styles, one of them in French, one in German, two in Greek, one in Chinese,
- * one in Hindi, one in Thai, one in Korean, one in Arabic, one in Russian, one in Ukrainian, one in Hebrew, one
- * in Japanese, one in Khmer, one in Lao, one in Burmese, one in Polish, one with 176 tools,
- * one with 150 tools that are mostly neighbours,
- * one whose tools have no title and long descriptions
- * and one generated from an OpenAPI description.
+ * The search benchmark: every request of queries.json, asked of the servers
+ * of SERVERS, named in several styles and written in many languages and
+ * scripts. docs/SEARCH.md describes each server and when it came in.
  *
  * Each request is written twice, as one sentence (query) and in fields
  * (action, object, description), with the tool a person would expect. Half
  * of them (train) were used to choose the settings; the other half (test)
- * was kept aside and is the score that counts. The library, school, hosting,
- * city, newsroom, estate, depot, arena, academy, garage, hotel, clinic, water, mill, museum, bikes, ops, theatre, marina, post and sensors servers came
- * after the settings were chosen, so none of their halves shaped them; the train half
- * of estate only chose how a sentence without spaces is cut into terms, that
- * of depot whether a mark is kept in its word or dropped, that of arena how
- * Thai is cut into pairs, that of academy whether a Korean word keeps
- * itself beside its pairs, and that of garage whether Arabic is cut into
- * pairs (it is not). The train half of every server but hotel, clinic, water and mill chose how close
- * a word the tools do not use must be to one they do to be learned as it,
- * that of clinic which terms of a request learning pairs, that of water
- * whether Khmer is cut into pairs as Thai is (it is not), that of mill
- * whether Burmese is (it is, its run kept beside them as for Thai), and that
- * of post whether Lao is (it is, as Burmese).
+ * was kept aside and is the score that counts. Most servers came after the
+ * settings were chosen, and the train half of a few of them chose one rule
+ * each (how a script is cut, how close a word must be to be learned as a
+ * tool word); docs/SEARCH.md says which.
  *
  * Shared by the test that guards the floors and by bin/benchmark.php, which
  * prints the score and writes its badge, so both measure the same thing.
@@ -53,7 +40,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors', 'ferry' => 'ferry', 'kinder' => 'kinder', 'fire' => 'fire', 'drive' => 'drive', 'chess' => 'chess', 'cellar' => 'cellar', 'coffee' => 'coffee', 'garden' => 'garden', 'desk' => 'desk', 'leisure' => 'leisure'];
 
     /**
      * Four measures on the test half:

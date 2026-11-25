@@ -51,6 +51,7 @@ final class ToolTest extends TestCase
     {
         yield 'no name' => [['inputSchema' => ['type' => 'object']]];
         yield 'a space in the name' => [['name' => 'get file', 'inputSchema' => ['type' => 'object']]];
+        yield 'a newline after the name' => [['name' => "get_file\n", 'inputSchema' => ['type' => 'object']]];
         yield 'a name too long' => [['name' => str_repeat('a', 129), 'inputSchema' => ['type' => 'object']]];
         yield 'no input schema' => [['name' => 'a']];
         yield 'a schema that is not an object' => [['name' => 'a', 'inputSchema' => ['type' => 'string']]];
@@ -75,6 +76,36 @@ final class ToolTest extends TestCase
             ['name' => 'a', 'inputSchema' => ['type' => 'object']],
             ['name' => 'a', 'inputSchema' => ['type' => 'object']],
         ]);
+    }
+
+    public function testASetHandsARefusedToolToTheHostAndKeepsTheOthers(): void
+    {
+        $badName = ['name' => 'get file', 'inputSchema' => ['type' => 'object']];
+        $later = ['name' => 'a', 'description' => 'Second', 'inputSchema' => ['type' => 'object']];
+        $twice = Tool::fromArray(['name' => 'b', 'description' => 'Second', 'inputSchema' => ['type' => 'object']]);
+        $refused = [];
+
+        $set = ToolSet::of([
+            ['name' => 'a', 'description' => 'First', 'inputSchema' => ['type' => 'object']],
+            $badName,
+            ['name' => 'b', 'description' => 'First', 'inputSchema' => ['type' => 'object']],
+            $later,
+            $twice,
+            ['name' => 'c', 'inputSchema' => ['type' => 'string']],
+        ], static function (InvalidTool $error, Tool|array $definition) use (&$refused): void {
+            $refused[] = [$error->getMessage(), $definition];
+        });
+
+        self::assertSame(['a', 'b'], $set->names());
+        self::assertSame('First', $set->get('a')?->description(), 'the first tool under a name is kept');
+        self::assertSame('First', $set->get('b')?->description());
+        self::assertCount(4, $refused);
+        self::assertSame($badName, $refused[0][1], 'the host gets back what it gave');
+        self::assertStringContainsString('the name must be', $refused[0][0]);
+        self::assertSame($later, $refused[1][1]);
+        self::assertSame('Tool "a": the name is used twice', $refused[1][0]);
+        self::assertSame($twice, $refused[2][1]);
+        self::assertStringContainsString('Tool "c": inputSchema', $refused[3][0]);
     }
 
     public function testASetKeepsTheHostOrder(): void
@@ -106,5 +137,15 @@ final class ToolTest extends TestCase
         self::assertSame(['123', 'a'], $keys);
         self::assertSame('123', $set->get('123')?->name);
         self::assertSame(['123'], $set->filter(static fn(Tool $tool): bool => $tool->name === '123')->names());
+    }
+
+    public function testValidNameHoldsTheRuleOfTheSpecification(): void
+    {
+        self::assertTrue(Tool::validName('acme.files-2_x'));
+        self::assertTrue(Tool::validName(str_repeat('a', 128)));
+        self::assertFalse(Tool::validName(''));
+        self::assertFalse(Tool::validName('acme files'));
+        self::assertFalse(Tool::validName(str_repeat('a', 129)));
+        self::assertFalse(Tool::validName("acme\n"));
     }
 }

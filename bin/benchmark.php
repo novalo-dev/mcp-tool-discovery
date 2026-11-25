@@ -49,6 +49,8 @@ printf("  %-10s %5s %8s %8s %8s %8s %8s\n", 'server', 'tools', 'all', 'compact',
 foreach (ListCost::run() as $server => $row) {
     printf("  %-10s %5d %8d %8d %8d %8s %8d\n", $server, $row['tools'], $row['all'], $row['compact'], $row['gateway'], $row['grouped'] ?? '-', $row['search']);
 }
+$groups = ListCost::groups();
+printf("  workspace groups: %d group tools take %d bytes, the %d actions they stand for %d\n", $groups['tools'], $groups['bytes'], $groups['actions'], $groups['actionBytes']);
 $score = $scores['fields'];
 $dir = dirname(__DIR__) . '/build/badges';
 if (!is_dir($dir) && !mkdir($dir, 0o777, true) && !is_dir($dir)) {

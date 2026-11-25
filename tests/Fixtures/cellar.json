@@ -1,0 +1,834 @@
+[
+ {
+  "name": "growers_list",
+  "title": "მევენახეები",
+  "description": "მევენახეების სია, ვენახის ფართობით და ყურძნის ჯიშებით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "village": {
+     "type": "string",
+     "description": "სოფელი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grower_get",
+  "title": "მევენახის ბარათი",
+  "description": "ერთი მევენახის მონაცემები: ტელეფონი, ვენახები და ჩაბარებული ყურძენი.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "grower": {
+     "type": "string",
+     "description": "მევენახე"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grower_add",
+  "title": "ახალი მევენახე",
+  "description": "ამატებს ახალ მევენახეს, რომელიც მარანს ყურძენს ჩააბარებს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "სახელი და გვარი"
+    },
+    "village": {
+     "type": "string",
+     "description": "სოფელი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grape_delivery_record",
+  "title": "ყურძნის მიღება",
+  "description": "აღრიცხავს ჩამოტანილ ყურძენს: ჯიში, წონა და შაქრიანობა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "grower": {
+     "type": "string",
+     "description": "მევენახე"
+    },
+    "variety": {
+     "type": "string",
+     "description": "ჯიში"
+    },
+    "weight": {
+     "type": "string",
+     "description": "წონა კილოგრამებში"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grape_deliveries_list",
+  "title": "მიღებული ყურძენი",
+  "description": "დღის ან სეზონის ჩაბარებები მევენახეების და ჯიშების მიხედვით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "დღე"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "grape_delivery_reject",
+  "title": "ყურძნის დაწუნება",
+  "description": "აბრუნებს დაზიანებულ ან დამპალ ყურძენს და წერს მიზეზს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "delivery": {
+     "type": "string",
+     "description": "ჩაბარება"
+    },
+    "reason": {
+     "type": "string",
+     "description": "მიზეზი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "grower_payment_record",
+  "title": "მევენახისთვის გადახდა",
+  "description": "აღრიცხავს თანხას, რომელიც მევენახეს ჩაბარებული ყურძნისთვის გადაეხადა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "grower": {
+     "type": "string",
+     "description": "მევენახე"
+    },
+    "amount": {
+     "type": "string",
+     "description": "თანხა ლარებში"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "qvevri_list",
+  "title": "ქვევრები",
+  "description": "მარნის ქვევრები: მოცულობა, რა ღვინოა შიგნით და რა მდგომარეობაშია.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "მდგომარეობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "qvevri_fill",
+  "title": "ქვევრის ავსება",
+  "description": "ქვევრში ასხამს დაწურულ ყურძენს, ჭაჭით ან უჭაჭოდ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "qvevri": {
+     "type": "string",
+     "description": "ქვევრის ნომერი"
+    },
+    "variety": {
+     "type": "string",
+     "description": "ჯიში"
+    },
+    "pomace": {
+     "type": "string",
+     "description": "ჭაჭით თუ უჭაჭოდ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "qvevri_seal",
+  "title": "ქვევრის დახურვა",
+  "description": "ქვევრს ხურავს ქვის სარქველით და თიხით დუღილის დასრულების შემდეგ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "qvevri": {
+     "type": "string",
+     "description": "ქვევრის ნომერი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "qvevri_open",
+  "title": "ქვევრის მოხდა",
+  "description": "ხსნის დახურულ ქვევრს ღვინის გადასაღებად ან დასაგემოვნებლად.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "qvevri": {
+     "type": "string",
+     "description": "ქვევრის ნომერი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "qvevri_clean",
+  "title": "ქვევრის რეცხვა",
+  "description": "აღრიცხავს ქვევრის რეცხვას ალვის ქერქით და ცაცხვის ცვილით დამუშავებას.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "qvevri": {
+     "type": "string",
+     "description": "ქვევრის ნომერი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "wine_transfer",
+  "title": "ღვინის გადაღება",
+  "description": "ღვინოს ერთი ქვევრიდან ან ავზიდან მეორეში გადაიტანს და ლექს ტოვებს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "source": {
+     "type": "string",
+     "description": "საიდან"
+    },
+    "target": {
+     "type": "string",
+     "description": "სად"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tanks_list",
+  "title": "ავზები",
+  "description": "უჟანგავი ფოლადის ავზები: მოცულობა, ღვინო და ტემპერატურა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "მდგომარეობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fermentation_log",
+  "title": "დუღილის ჩანაწერი",
+  "description": "წერს ტემპერატურას და შაქრიანობას დუღილის დროს, დღეში ერთხელ ან მეტჯერ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vessel": {
+     "type": "string",
+     "description": "ქვევრი ან ავზი"
+    },
+    "temperature": {
+     "type": "string",
+     "description": "ტემპერატურა"
+    },
+    "sugar": {
+     "type": "string",
+     "description": "შაქრიანობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fermentation_chart",
+  "title": "დუღილის მიმდინარეობა",
+  "description": "აჩვენებს, როგორ იცვლება ტემპერატურა და შაქარი დღეების მიხედვით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vessel": {
+     "type": "string",
+     "description": "ქვევრი ან ავზი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lab_sample_send",
+  "title": "ნიმუშის გაგზავნა ლაბორატორიაში",
+  "description": "ღვინის ნიმუშს აგზავნის ანალიზზე: სიმჟავე, ალკოჰოლი, გოგირდი.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vessel": {
+     "type": "string",
+     "description": "ქვევრი ან ავზი"
+    },
+    "tests": {
+     "type": "string",
+     "description": "ანალიზები"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lab_results_get",
+  "title": "ანალიზის შედეგები",
+  "description": "ლაბორატორიის პასუხი ნიმუშზე: ალკოჰოლი, სიმჟავე, თავისუფალი გოგირდი.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sample": {
+     "type": "string",
+     "description": "ნიმუში"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bottling_schedule",
+  "title": "ჩამოსხმის დაგეგმვა",
+  "description": "გეგმავს ღვინის ჩამოსხმას ბოთლებში: დღე, ღვინო და ბოთლების რაოდენობა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "wine": {
+     "type": "string",
+     "description": "ღვინო"
+    },
+    "day": {
+     "type": "string",
+     "description": "დღე"
+    },
+    "bottles": {
+     "type": "string",
+     "description": "ბოთლების რაოდენობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bottling_cancel",
+  "title": "ჩამოსხმის გაუქმება",
+  "description": "აუქმებს დაგეგმილ ჩამოსხმას და ათავისუფლებს ჩამოსასხმელ ხაზს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bottling": {
+     "type": "string",
+     "description": "ჩამოსხმა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "bottling_record",
+  "title": "ჩამოსხმის აღრიცხვა",
+  "description": "წერს, რამდენი ბოთლი ჩამოისხა სინამდვილეში და რომელი პარტიის ნომრით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bottling": {
+     "type": "string",
+     "description": "ჩამოსხმა"
+    },
+    "bottles": {
+     "type": "string",
+     "description": "ბოთლები"
+    },
+    "lot": {
+     "type": "string",
+     "description": "პარტია"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "label_print",
+  "title": "ეტიკეტების ბეჭდვა",
+  "description": "ბეჭდავს ეტიკეტებს მოსავლის წლით, ჯიშით და პარტიის ნომრით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "პარტია"
+    },
+    "count": {
+     "type": "string",
+     "description": "რაოდენობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bottles_count",
+  "title": "ბოთლების აღრიცხვა",
+  "description": "რამდენი ბოთლი ინახება მარანში, ღვინის და მოსავლის წლის მიხედვით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "wine": {
+     "type": "string",
+     "description": "ღვინო"
+    },
+    "vintage": {
+     "type": "string",
+     "description": "მოსავლის წელი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tasting_book",
+  "title": "დეგუსტაციის დაჯავშნა",
+  "description": "ჯავშნის დეგუსტაციას სტუმრებისთვის: დღე, საათი, სტუმრების რაოდენობა და ენა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "დღე და საათი"
+    },
+    "guests": {
+     "type": "string",
+     "description": "სტუმრები"
+    },
+    "language": {
+     "type": "string",
+     "description": "ენა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tasting_move",
+  "title": "დეგუსტაციის გადატანა",
+  "description": "დეგუსტაციის ჯავშანს სხვა დღეზე ან საათზე გადაიტანს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "ჯავშანი"
+    },
+    "day": {
+     "type": "string",
+     "description": "ახალი დღე და საათი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tasting_cancel",
+  "title": "დეგუსტაციის გაუქმება",
+  "description": "აუქმებს დეგუსტაციის ჯავშანს და ათავისუფლებს დარბაზს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "ჯავშანი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "tastings_day",
+  "title": "დღის დეგუსტაციები",
+  "description": "დღის ჯავშნები: სტუმრები, ენა და გიდი.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "დღე"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "guide_assign",
+  "title": "გიდის დანიშვნა",
+  "description": "ნიშნავს გიდს ექსკურსიაზე ან დეგუსტაციაზე, ენის მიხედვით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "ჯავშანი"
+    },
+    "guide": {
+     "type": "string",
+     "description": "გიდი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tour_feedback_list",
+  "title": "სტუმრების შეფასებები",
+  "description": "რას წერენ სტუმრები ექსკურსიის და დეგუსტაციის შემდეგ.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "თვე"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shift_plan",
+  "title": "ცვლების განრიგი",
+  "description": "თანამშრომლების ცვლები მარანში და რთველზე, კვირის მიხედვით.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "კვირა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "worker_hire_seasonal",
+  "title": "სეზონური მუშის აყვანა",
+  "description": "აფორმებს რთველის სეზონურ მუშას: სახელი, ტელეფონი და დღეები.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "სახელი და გვარი"
+    },
+    "days": {
+     "type": "string",
+     "description": "დღეები"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "harvest_plan",
+  "title": "რთველის დაგეგმვა",
+  "description": "გეგმავს, რომელ ვენახში რომელ დღეს დაიწყოს ყურძნის კრეფა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vineyard": {
+     "type": "string",
+     "description": "ვენახი"
+    },
+    "day": {
+     "type": "string",
+     "description": "დღე"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vineyard_spray_log",
+  "title": "ვენახის შეწამვლა",
+  "description": "აღრიცხავს ვენახის შეწამვლას: პრეპარატი, დოზა და თარიღი.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vineyard": {
+     "type": "string",
+     "description": "ვენახი"
+    },
+    "product": {
+     "type": "string",
+     "description": "პრეპარატი"
+    },
+    "dose": {
+     "type": "string",
+     "description": "დოზა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vineyards_list",
+  "title": "ვენახები",
+  "description": "მარნის საკუთარი ვენახები: ადგილი, ფართობი და ჯიში.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "variety": {
+     "type": "string",
+     "description": "ჯიში"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_repair_request",
+  "title": "დანადგარის შეკეთება",
+  "description": "აცხადებს გაფუჭებულ ტუმბოს, საწნახელს ან ხაზს შესაკეთებლად.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "machine": {
+     "type": "string",
+     "description": "დანადგარი"
+    },
+    "fault": {
+     "type": "string",
+     "description": "რა გაფუჭდა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "equipment_list",
+  "title": "დანადგარები",
+  "description": "ტუმბოები, საწნახელები, ფილტრები და მათი მდგომარეობა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "kind": {
+     "type": "string",
+     "description": "სახეობა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "export_certificate_request",
+  "title": "საექსპორტო სერტიფიკატი",
+  "description": "ითხოვს სერტიფიკატს ღვინის პარტიის საზღვარგარეთ გასაგზავნად.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "პარტია"
+    },
+    "country": {
+     "type": "string",
+     "description": "ქვეყანა"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "batch_trace",
+  "title": "პარტიის ისტორია",
+  "description": "აჩვენებს ბოთლების პარტიის გზას: ყურძენი, ქვევრი, ანალიზი და ჩამოსხმა.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lot": {
+     "type": "string",
+     "description": "პარტია"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "temperature_alert_set",
+  "title": "ტემპერატურის შეტყობინება",
+  "description": "აყენებს შეტყობინებას, როცა ავზის ან მარნის ტემპერატურა ზღვარს გადააჭარბებს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vessel": {
+     "type": "string",
+     "description": "ავზი ან მარანი"
+    },
+    "limit": {
+     "type": "string",
+     "description": "ზღვარი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "season_report",
+  "title": "სეზონის ანგარიში",
+  "description": "ითვლის სეზონის მთლიან ყურძენს, ღვინოს ლიტრებში და ჩამოსხმულ ბოთლებს.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "year": {
+     "type": "string",
+     "description": "წელი"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

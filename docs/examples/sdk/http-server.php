@@ -50,6 +50,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
 use function Example\Notes\grantedRole;
+use function Example\Notes\instructions;
 use function Example\Notes\mode;
 use function Example\Notes\roleOf;
 
@@ -104,6 +105,9 @@ $stateless = $request->getHeaderLine('MCP-Protocol-Version') === Revision::V2026
 
 $server = Server::builder()
     ->setServerInfo('notes', '1.0.0')
+    // Read by the model before any tool: the list is not the whole server.
+    // The same for every caller, so the discover answer stays public.
+    ->setInstructions(instructions($discovery))
     // The registry is empty, so the SDK would not announce tools by itself.
     ->setCapabilities(new ServerCapabilities(tools: true, toolsListChanged: $stateless, resources: false, prompts: false))
     ->addRequestHandler(new ToolsHandler($discovery, $tools))

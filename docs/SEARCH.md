@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1037 times
-out of 1352 in fields, and 756 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1456 times
+out of 1901 in fields, and 1111 times as one sentence.
 
 ## How a tool is scored
 
@@ -52,9 +52,29 @@ own. A rare word weighs more than a common one: "rollback" counts more than
 counts almost nothing. That is why the library needs no list of stop words and
 no rule to strip a prefix. A word repeated earns less each time.
 
+A host changes a weight by naming its field: `new SearchOptions(weights:
+['title' => 3.0])` raises the title and keeps the other three at their
+defaults, as `queryWeights: ['action' => 0.8]` does for a request. A weight
+of 0 leaves the field out. A field the search does not have, a negative
+weight, NAN, or every field at 0 is refused when the options are built.
+
 Then the ranking is **cut** at 60% of the best score, and **limited** to 10
 tools. Equal scores keep the host's order, so a query always gives the same
 answer.
+
+The cut trades a few requests for fewer tools to read, and it was measured
+again on 2026-11-25 on the train half (1769 requests): with no cut, 19 more
+requests in fields would have their tool in the top 3 (1663 against 1644)
+and 37 more as one sentence, but already at 30% a search returns 4.89 tools
+instead of 2.18. Cutting at 50% gives 11 more in fields for 2.84 tools;
+keeping the first three tools down to 45% of the best gives 14 more for
+2.60. A compact search answer of the benchmark weighs about 1100 bytes for
+its two tools or so: the extra tools add some 200 bytes to every search,
+while the 14 requests they save would each have cost one more search, some
+9 bytes a search on average. The cut stays at 60%. A host whose caller
+cannot search again can lower it (`SearchOptions::cut`). A cut that also
+keeps a tool close to the one before it (90% or 80% of its score) found no
+request more in the top 3.
 
 ## Words and trigrams
 
@@ -96,6 +116,50 @@ not and 6 no longer do, where the word alike in form is not the one meant.
 In place of the trigrams of
 those words, rather than on top, it lost 25 first places on train: rejected.
 A cached search over 150 tools takes 0.27 ms against 0.25 ms.
+
+**A word typed without its marks counts as the tool word it spells.**
+Vietnamese, Polish and many languages written in Latin letters are often
+typed without their marks, on a phone above all: "hoc phi" for "học phí",
+"doladuj" for "doładuj". Trigrams do not see it, since the marks sit in short
+words and change most of their trigrams. Folding a letter to its base
+needs a table of letters or the intl extension, neither of which the
+library has; reading where the marks are needs only the Unicode script of a
+character, which PCRE knows. A word no tool uses counts as each tool word of
+the same length that has the same letter wherever both are in ASCII or both
+outside it, and, wherever one is a Latin letter outside ASCII (`ệ`, `đ`,
+`ł`), any letter of ASCII in the other, either way round; the letters that
+match outright must be at least as many as those taken on trust, so `don`
+is not taken for `đón`, two of whose three letters it would take on trust. It counts as a word
+alike at a Dice coefficient of 1, half the weight of the word itself, as the
+words alike in form above. A letter stands only for a letter of its own
+script: a Greek or Cyrillic word is never spelled by a word of ASCII.
+Greek and Cyrillic are read the same way (below). Measured on the
+train half with the kindergarten in: added on top of the words alike, at a
+weight of 0.5, 0.75, 1 and 1.5, it found 1224, 1222, 1221 and 1220 first
+against 1223, and as a word alike, 1224 and 955 as one sentence against 954:
+kept. On the test half, the requests in fields go from 1089 to 1099 first
+(1280 to 1291 in the top 3), as one sentence from 798 to 807, learned from
+the other half from 1092 to 1102, asked again from 1198 to 1206: 9 on the
+kindergarten, 1 on the bike rental, no server loses a request. The
+places of the marks are read from the index at the first request that holds
+a word no tool uses, and the tool words of the same length are first sifted
+by one pass of PCRE that holds each letter to what may stand for it, so the
+letters are only counted for the few that pass: a cached search over the
+kindergarten takes 0.15 ms against 0.22 ms when each word was counted one by
+one, over the bike rental 0.13 ms against 0.18 ms, and over the English
+servers no more than before. Over three thousand tools whose words all have
+eight letters, 32 words with marks that spell none of them cost 0.07 s
+against 0.5 s; every ranking of the benchmark is the same. A tool word whose
+letters with marks sit elsewhere than the request word's at more than half
+their places is not read at all, since the letters taken on trust would
+outnumber those alike; the words of each length are grouped by the places
+of their marks, so every word that passes the pattern spells the request
+word and the bound of 32 stops the pass. Over three thousand tools whose
+words have seven letters with marks out of eight, 32 plain words cost
+0.002 s against 0.5 s in Latin and 2.1 s in Greek; over a thousand tools
+whose words have marks on their last four letters, 32 words with marks on
+their first four cost 0.01 s against 4.7 s. The cached searches over the
+kindergarten and the museum cost about 0.02 ms more than with no grouping.
 
 **Chinese and Japanese are cut into pairs.** They are written without
 spaces, so a whole sentence would be one word, and most of their words are
@@ -161,7 +225,10 @@ new SearchOptions(synonyms: ['meeting' => 'calendar event', 'admin' => 'role'], 
 ```
 
 The synonyms are added to each field of the request; the caller's own words
-still count. Better still, put those words in the tool descriptions: every
+still count. Each key is one word of a request, lowered as the request is
+("Événement" meets "événement"): a key of two words ("team meeting",
+"e-mail"), a number, a stop word or an empty value would never be met, and is
+refused when the options are built. Better still, put those words in the tool descriptions: every
 client reads them, even one that never searches.
 
 ---
@@ -235,6 +302,48 @@ asked again, which keeps every pair. Neighbours share pairs without the
 verb: "add a site address", run once, lifted the tool that creates a site
 before the one that changes an address for "change a site address", with
 the plain mean of the pairs.
+
+Last, the lift is multiplied by the square of the largest share of the
+words of one search learned for that tool that the request holds. Each run
+also keeps its whole search, its words in alphabetical order, under a key
+that starts with a tab, which no word or pair can hold. The share of pairs
+reads the request, not the search learned: "view the instruments free to
+lend", run once for the list, taught it the pair "instrument lend", which is
+the only pair of "lend an instrument, a cello", so the list took the place
+of the loan. The request holds two of the three words of that search, so the
+list keeps four ninths of its lift, and the loan comes first again; the same
+search asked again holds all its words and keeps its whole lift. A tool
+learned before whole searches were kept has none, and keeps its lift as
+before. Chosen on the train half, in two folds: learning from one fold to
+the other found 1178 first against 1181 without learning, and 1182 with the
+square of the share (1180 with the share, 1181 with its cube, 1178 to 1181
+with a Dice coefficient of the two searches instead); asked again, 1239 to
+1245. On the test half, read once: learned from the other half, 1072 to
+1074, so learning no longer costs the airline operations centre its first
+place, and asked again, 1171 to 1175; no server loses a request. The whole
+searches are found by reading every key of the store, as loading it has
+already done: a search that learns over the 176 hosting tools, with every
+request of that server learned, takes about 0.55 ms against 0.35 ms.
+
+A request of one word the tools use among words they do not use ("sign |
+agreement | lot 2417", where only "lot" is a tool word) has no pair either,
+but it is not a request of one word: it asks more than the thing, in words
+the search cannot read. Its single word lifted every tool learned for the
+thing, and on the coffee washing station "show the history of lot 2417",
+learned from the train half, pushed the sales contract out of the top 3 of
+that test request: learning made a new request worse, which the benchmark
+refuses. Such a request now lifts only a tool one of whose learned searches
+it holds whole, so the same lone word asked again keeps its lift. The rule
+was compared on the train half with dropping the lift altogether and with
+dividing it by the number of words of the request: those found 3 more
+first places learned from the other half but lost 1 to 3 asked again, and
+the division, read once on the test half, lost 4 asked again. The rule kept
+changes nothing on the train half. Being chosen after the test half of the
+coffee station was read, it was judged on a server written after that, the
+community garden, with the rule fixed before its requests were run: no
+measure moves there. Over the test half, learned from the other half, 1364
+first and 1592 in the top 3 become 1363 and 1593; asked again, 1491 and
+1658 against 1491 and 1657.
 
 Pairs, not single words, because of servers with many tools about the same
 thing. Word by word, "get the certificate" run once taught "certificate" to
@@ -409,7 +518,7 @@ skipped.
 
 ## The measures
 
-Twenty-four fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -431,18 +540,28 @@ tools, `outage_schedule`), a post office written in Lao (40 tools,
 `paddy_receive`), an archaeological museum written in Greek (40 tools,
 `loan_approve`), a city bike rental written in Polish (40 tools,
 `bike_unlock`), an airline operations centre (150 tools,
-`flight.change-aircraft`) and a fleet of field sensors generated from
-OpenAPI (40 tools, `post_devices_device_id_reboot`). 2697 requests, each written as one
+`flight.change-aircraft`), a fleet of field sensors generated from
+OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
+written in Turkish (40 tools, `ticket_refund`), a kindergarten written
+in Vietnamese (40 tools, `absence_notice_cancel`), a fire station
+written in Spanish (40 tools, `vehiculo_alta`), a driving school
+written in Persian (40 tools, `exam_theory_book`), a chess club
+written in Armenian (40 tools, `pairing_swap`), a wine cellar
+written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
+written in Amharic (40 tools, `drying_bed_assign`), a community garden
+in English camelCase (40 tools, `swapWateringDuty`) and an IT service
+desk (150 tools, `link-incident-problem`) and a leisure centre in English
+PascalCase (40 tools, `FreezeMembership`). 3795 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1352 requests | Right tool first | Top 3 |
+| Test half, 1901 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1037 | 1207 |
-| The same request as one sentence | 756 | 985 |
-| In fields, after every train request was run once | 1038 | 1207 |
-| In fields, after the test requests were run once, then asked again | 1134 | 1253 |
+| The request in fields | 1456 | 1703 |
+| The same request as one sentence | 1111 | 1418 |
+| In fields, after every train request was run once | 1458 | 1703 |
+| In fields, after the test requests were run once, then asked again | 1594 | 1771 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -452,10 +571,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 408 | 622 |
-| The fields joined into one sentence | 764 | 979 |
+| The request as one sentence | 631 | 932 |
+| The fields joined into one sentence | 1066 | 1376 |
 
-As one sentence it trails on each of the twenty-four servers, the English ones
+As one sentence it trails on each of the thirty-four servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -492,9 +611,10 @@ typed as many people type Greek, without the accents (`ακυρωσε` for
 `ακύρωσε`). Nothing was tuned on it: 41 of its 50 test requests find the
 right tool first in fields, 47 in the top 3. The accents are where it loses:
 24 of the 26 test requests written with them come first, 17 of the 24
-written without. A word typed without its accent is another word to the
-index, and only its trigrams away from the accent still meet the tool
-(`εκδηλωση` asked, `εκδήλωση` in the tool).
+written without. A word typed without its accent was another word to the
+index, met only by its trigrams away from the accent (`εκδηλωση` asked,
+`εκδήλωση` in the tool), until it counted as the tool word it spells
+(below).
 
 The newsroom is written as many real servers are, and none of the others
 is: no tool has a title, so its name stands in for one, and each description
@@ -608,6 +728,13 @@ What it misses is mostly neighbours of one object (opening a room again after
 repairs finds the tool that closes it) and words the tools do not use
 ("такси" for the transfer).
 
+Twelve requests more on each half were written later, again before any of
+them was run, typed as Russian is most often typed: with "е" where the tools
+write "ё" ("счет" for "счёт", "отчет", "черный список", "платеж"). On the
+test half, 11 of the 12 come first in fields as they stood; the short words
+are the ones the trigrams miss, as most trigrams of "счет" differ from those
+of "счёт".
+
 The clinic is written in Japanese, kanji, hiragana and katakana with no
 spaces, behind snake_case names: a veterinary clinic whose tools are
 neighbours by design (book, move, cancel an appointment; prescribe, refill,
@@ -677,6 +804,47 @@ on every version, against 17 on 8.3 and 16 on 8.2 before. What it misses is
 mostly accents again (`συντηρησεις` asked, `συντήρηση` in the tool) and
 neighbours of one object (asking for a loan finds the list of loans).
 
+Twelve requests more on each of the two Greek servers were written later,
+again before any of them was run, typed as Greek is typed in capitals or in
+haste: with no accent at all, and so with a plain `σ` where the tools end a
+word with `ς` (`ΚΡΑΤΗΣΕΙΣ` lowers to `κρατησεισ`, never to `κρατήσεις`).
+Half of them went to each half; on the test half, 10 of the 12 come first
+in fields as they stood.
+
+**A Greek word typed without its accents counts as the tool word it
+spells**, as a Latin one does (above): the plain Greek letters are the one
+range α to ω, so a letter of that range stands for any other Greek letter
+(`ή`, `ϊ`, `ῶ`), and the other way round, with no table. A sigma also
+stands for a final sigma: Unicode lowers a capital sigma to `σ` wherever it
+stands, so `ΚΡΑΤΗΣΕΙΣ` reaches `κρατήσεις` only that way. Tried on
+2026-11-24 without the sigma, it lost a test request typed in capitals, and
+was put aside until requests of that kind were on the train half. With
+them, on the train half: 1235 to 1236 first in fields (1352 to 1354 in the
+top 3), 967 to 968 as one sentence, 1303 to 1305 asked again, learning from
+one fold to the other 1236 to 1237. On the test half, read once: 1109 first
+in fields and 1303 in the top 3 as before, as one sentence 815 to 820 (1065
+to 1069 in the top 3), learned from the other half 1112 as before, asked
+again 1217 to 1218; every ranking of the other servers is the same. A
+cached search over the town hall or the museum takes about 0.25 ms against
+0.14 ms, since their words now go through the spelling too.
+
+**A Cyrillic word typed without its marks counts as the tool word it
+spells** the same way: the plain Cyrillic letters are the one range а to я,
+and `ё` lies outside it, so `счет` reaches `счёт` and `создаёт` reaches
+`создает`. Russian is most often typed with `е` for `ё`. `й` lies within the
+range and is left alone. The letters of Ukrainian and other languages
+outside the range (`і`, `ї`, `є`, `ў`) are taken the same way, since nothing
+but a table could tell a mark from a letter of its own there. Nothing to
+tune; on the train half with the hotel requests typed that way in: 1245 to
+1246 first in fields, 979 to 980 as one sentence, 1316 to 1317 asked again,
+all from the hotel, the theatre as before. On the test half, read once:
+1120 first in fields as before, 1314 to 1315 in the top 3, 1371 to 1372
+asked again in the top 3, and 831 to 830 as one sentence: on the theatre,
+`додай` now also reaches `додає`, which two tools write, and the one that
+adds a show passes the one that adds a discount. A cached search over the
+hotel takes about 0.23 ms against 0.16 ms, over the theatre 0.27 ms
+against 0.12 ms.
+
 The bike rental is written in Polish, the first Latin script whose letters
 are typed away as often as its accents: "zglos" for "zgłoś", where no
 decomposition gives "ł" a base. Its tools are neighbours by design (lock and
@@ -688,8 +856,10 @@ ASCII). Nothing was tuned on it: 39 of its 50 test requests find the right
 tool first in fields, 46 in the top 3, 31 as one sentence, with 2.24 tools
 returned; learned from its train half, 39 and 46 again. Long Polish words
 keep enough trigrams to meet without their letters ("rowerow" finds
-"rowerów"); what it misses is short ones that do not ("doladuj" against
-"doładuj") and neighbours of one object (closing a lock remotely finds the
+"rowerów"); short ones did not ("doladuj" against "doładuj") until a word
+typed without its marks counted as the tool word it spells (above): 40
+first in fields, 36 as one sentence. What it misses now is mostly
+neighbours of one object (closing a lock remotely finds the
 tool that opens it).
 
 The airline operations centre is the size and shape of a real server: 150
@@ -780,6 +950,198 @@ sentence: it was not kept. Learning from its train half, with the plain
 mean of the pairs, lost 3 first places, all neighbours ("change a site
 address" found the creation of a site, learned from "add a site address");
 scaled by the share of pairs that reached the tool (above), it loses none.
+
+The ferry line is written in Turkish, whose words take one suffix after
+another ("biletini", "seferlerin") and which people often type without its
+letters ("sikayet" for "şikâyet"). Its titles start with a capital `İ` where
+a request writes `i` ("İzin kaydet", "İskeleler"), the case that each letter
+lowered on its own (above) settles. Most of its 40 tools are neighbours on
+one object (sell, cancel, refund and move a ticket; add, cancel and delay a
+sailing; block and unblock a card). Its 100 requests were written before any
+of them was run and split as the servers before the airline's: the first
+and third request of a tool in train, the second in test. Nothing was tuned
+on it: 34 of its 50 test requests find the right tool first in fields, 42 in
+the top 3, 31 as one sentence, with 2.14 tools returned; learned from its
+train half, 34 and 42 again; asked again, 37. When it was first measured,
+before learning was scaled by the share of pairs (above), learning lost it
+one first place. Its train half scores 43 in fields, so its test half is the
+harder one. What it misses is neighbours ("sil", delete, a ticket finds its
+sale; "kaldır", call off, a sailing because the ship broke down finds the
+report of a breakdown) and words the tools do not use ("nöbet", a
+watch, for "vardiya", a shift; "anons" for "duyuru").
+
+The kindergarten is written in Vietnamese, which writes each syllable apart,
+so a word is often two terms ("học phí", fees), and which people very often
+type without its tone marks and without "đ" ("hoc phi"), on a phone above
+all. Its tools are neighbours by design (record and cancel a notice of
+absence, add and remove a person allowed to pick a child up, issue and void
+a receipt, plan and cancel an outing). Its 100 requests were written on
+2026-11-22, before any of them was run, and split as the ferry line's; the
+split is uneven, since the first request of a tool, which goes to train,
+was mostly written with its marks and the second, which goes to test, often
+without. Nothing was tuned on it: 18 of its 50 test requests find the right
+tool first in fields, 31 in the top 3, 11 as one sentence; learned from its
+train half, 18 again; asked again, 23. Its train half scores 42 in fields.
+It was kept out on 2026-11-22 and 2026-11-24 because learning lost it a
+first place, a neighbour sharing the object's pair; since a learned lift is
+scaled by the share of the learned search the request holds (above), it
+loses none. It missed most of the requests typed without marks: a syllable
+without its mark was another word to the index, and its trigrams, all of
+them short, rarely met the tool's. Since such a word counts as the tool word
+it spells (above), 27 come first in fields, 42 in the top 3, 19 as one
+sentence, 27 learned and 31 asked again. What it misses now is short
+syllables that several tool words spell ("co" for "cô", a teacher, and
+"có", present) and neighbours of one object.
+
+The fire station is written in Spanish, the second Romance language after
+the libraries' French, with tool names in Spanish snake_case
+(`vehiculo_baja`, `hidrante_reparado`). Its tools are neighbours by
+design (take a vehicle out of service and put it back, send a crew and
+call it back, schedule and cancel an inspection or a drill). Its 100
+requests were written on 2026-11-24, before any of them was run, half in
+train and half in test, most of them as Spanish is typed in a hurry:
+without accents ("camion", "inspeccion"), and with the pronoun joined
+to the verb ("quitala", "dalo de alta", "apuntalo"). Nothing was tuned
+on it: 43 of its 50 test requests find the right tool first in fields, 45
+in the top 3, 37 as one sentence; learned from its train half, 43 again;
+asked again, 44. Its train half scores 48 in fields. What it misses is
+words the tools do not use ("camion" for "vehículo" and "autobomba",
+"incendios" for "incidentes") and neighbours that share the object
+("firmar | informe" finds the report of interventions before the signing
+of a report).
+
+The driving school is written in Persian, in the Arabic script, with tool
+names in English snake_case (`exam_theory_book`, `car_ready`), so no word of
+a request meets a name. Its titles and descriptions are written as an
+office writes them, with the zero-width non-joiner inside words
+(`جلسه‌های`) and the hamza of the izafe (`پروندهٔ`); its 100 requests,
+written on 2026-11-24 before any of them was run, are typed as people
+type: with the joiner, with a space in its place, glued, and a few on an
+Arabic keyboard, whose yeh and kaf (`ي`, `ك`) are other letters than the
+Persian ones (`ی`, `ک`). Its tools are neighbours by design (book, move and
+cancel a lesson; book a theory or a road test, cancel it, record its
+result). Nothing was tuned on it: 38 of its 50 test requests find the
+right tool first in fields, 46 in the top 3, 33 as one sentence; learned
+from its train half, 38 again; asked again, 44. Its train half scores 41
+in fields. The joiner cuts a word in two, as a space does, so a request
+written with a space meets it; glued, it is met by its trigrams. Removing
+the joiner instead, so glued words meet, was measured on the train half
+and not kept: 41 first in fields either way and 46 against 45 in the top
+3, but as one sentence 33 against 32 first and 38 against 39 in the top 3,
+a request each way. The Arabic yeh and kaf are left as
+they are: telling them for the Persian letters would take a table of
+letters, which the library does not hold; a host whose clients type them
+gives them as synonyms. Four of the five test requests typed with them
+come first as one sentence, by the words around them and their trigrams.
+What it misses is words the tools do not use ("کنسل" for "لغو", "ماشین"
+for "خودرو") and neighbours of one object (a lesson to book finds the
+theory classes, a car back from the garage the tool that sends it there).
+
+The chess club is written in Armenian, a script of its own with capitals,
+with tool names in English snake_case (`round_pair`, `pairing_swap`). Its
+titles and descriptions write the ligature `և` inside words (`Երևան`,
+`այլևս`); its 100 requests, written on 2026-11-25 before any of them was
+run, are typed as people type Armenian: with the question mark `՞` and the
+emphasis mark `՛` set on a vowel inside the word, as the language does
+(`փոխե՞լ`, `գրանցի՛ր`), with `եվ` for `և` on a keyboard without it, and
+some starting with a capital. Its tools are neighbours by design (pair a
+round, swap two pairings, publish them; record a result, correct it,
+record a forfeit). Nothing was tuned on it: 44 of its 50 test requests find
+the right tool first in fields, all 50 in the top 3, 39 as one sentence;
+learned from its train half, 44 again; asked again, 47. Its train half
+scores 43 in fields. A mark inside a word cuts it in two, as a space does,
+and the trigrams of the first part still meet the tool word. Joining the
+word across such a mark was measured on the train half and not kept: the
+mark of a script (not a shared one) dropped between two letters gave 41
+first as one sentence, as before; keeping both halves and adding the
+joined word gave 42, one request in 1619 over all servers. Ethiopic and
+Tibetan write their word and syllable separators glued between letters,
+with the same Unicode category and a script of their own, so the first
+way would glue their words together. `և` and `եվ` are left as they are:
+no Unicode mapping joins them (NFKC gives `եւ`). What it misses is the
+endings of a verb that the tools write in another form (`չեղարկիր`, cancel,
+against `չեղարկում`) and neighbours of one object (the next pairing to
+publish finds the pairing itself).
+
+The wine cellar is written in Georgian, in Mkhedruli, with tool names in
+English snake_case (`qvevri_fill`, `qvevri_seal`, `wine_transfer`). Its 100
+requests, written on 2026-11-25 before any of them was run, use the verbs
+as people type them, imperatives with their prefixes (`გააუქმე`, cancel)
+against the verbal nouns of the titles (`გაუქმება`), and 13 of them are
+typed in Mtavruli, the capitals Unicode 11 added (`ᲓᲐᲮᲣᲠᲔ`), as a phone
+set to capitals or a heading writes them. Its tools are neighbours by
+design (fill a qvevri, seal it, open it, wash it; plan a bottling, cancel
+it, record it; book a tasting, move it, cancel it). Nothing was tuned on it:
+42 of its 50 test requests find the right tool first in fields, 49 in the
+top 3, 33 as one sentence; learned from its train half, 42 again; asked
+again, 46. Its train half scores 40 in fields. The capitals need nothing of
+their own: the simple lowercase of mbstring maps Mtavruli to Mkhedruli, and
+the 13 requests typed that way find their tool in the top 3 in fields, 9
+of them first. A host without
+mbstring lowers ASCII only and would miss them, as it misses every other
+script with capitals. What it misses is neighbours of one object (bottles
+to count find the bottling that records them, a bottling to plan finds the
+one to cancel) and a verb of another root than the title's (`ჩაწერე`,
+write down, for `მიღება`, reception).
+
+The coffee washing station is written in Amharic, in the Ethiopic script,
+with tool names in English snake_case (`cherry_delivery_record`,
+`drying_bed_assign`, `cupping_results_get`). Its titles keep the letters of
+the old spelling where the dictionary does (`ሠራተኛ`, worker, `ሥልጠና`,
+training, `ዓመት`, year), and 16 of its 100 requests, written on 2026-11-25
+before any of them was run, type the letters of the same sound most people
+use instead (`ሰራተኛ`, `ስልጠና`, `አመት`), which no Unicode mapping joins. Its
+tools are neighbours by design (receive cherries, list them, send them
+back; pay a farmer, advance him money, pay the day workers; plan a
+shipment, cancel it). Nothing was tuned on it: 34 of its 50 test requests
+find the right tool first in fields, 46 in the top 3, 37 as one sentence,
+more than in fields; asked again, 41. Its train half scores 40 in fields.
+Ethiopic has no capitals and its words are spaced, so it needs nothing of
+its own; a word typed with the other letter of its sound meets the tool
+word by its trigrams only, and every syllable is one letter, so a single
+letter changed costs a word up to three of its trigrams. What it misses is
+neighbours of one object (the shipment to plan finds the one to cancel,
+the week's pay finds the farmer's payment) and the verbs of another root
+than the title's (`ፈርም`, sign, for `ውል`, contract).
+
+The community garden is in English, with camelCase names (`assignPlot`,
+`swapWateringDuty`), and its 100 requests, written on 2026-11-25 before any
+of them was run, say what members and the committee say, often not the
+tools' words (allotment for plot, kick out for end a membership, chase for
+remind). Nothing was tuned on it: 40 of its 50 test requests come first in
+fields, 42 in the top 3, 33 as one sentence; asked again, 40 and 44 in the
+top 3. It was written to judge the rule on a lone tool word above.
+
+The IT service desk is the third large server in English: 150 tools in
+kebab-case, verb first (`assign-incident`, `assign-problem`,
+`assign-task`, `assign-asset`), most of them sharing a verb or an object
+with several others (approve a change or a request, retire an asset, an
+article or a catalogue item, publish an article or a workaround). Its 150
+requests, one per tool, were written on 2026-11-25 before any of them was
+run, in the words of agents rather than of the tools (ticket for incident,
+laptop for asset, locked out, banner). Nothing was tuned on it, and the
+cut at 60% holds: 62 of its 75 test requests come first in fields, 71 in
+the top 3, with 3.28 tools in an answer (3.49 on the hosting panel); 44 as
+one sentence; asked again, 68. Its train half scores 65 and 74. What it
+misses is a verb found in another tool's description ("give | laptop"
+meets "which give its priority" before "Gives an asset to a user"), a
+neighbour of the same object (decline a request finds the one to cancel)
+and words the tools do not use ("old tickets" for the age of the backlog).
+
+The leisure centre is a smaller server where neighbours are the rule: 40
+tools in PascalCase, five or more on each of a booking (`CreateBooking`,
+`MoveBooking`, `CancelBooking`), a membership (start, renew, freeze,
+unfreeze, change, cancel) and a class (add, cancel, book, leave, wait).
+Its 100 requests were written on 2026-11-25 before any of them was run, in
+the words of the front desk, whose verbs the tools often do not use (pause
+for freeze, bump for move, top up for credit), and twenty of them name the
+same object as another request and differ only by the verb. Nothing was
+tuned on it: 33 of its 50 test requests come first in fields, 39 in the top
+3, with 2.92 tools in an answer; 25 as one sentence; asked again, 35. Its
+train half scores 32 and 38. What it misses is a verb no tool uses
+("resume", "quit", "pay back", "bump"), which leaves only the object, shared
+by five tools, and two neighbours the request does not tell apart (taking
+a member off a class finds the tool that cancels the class).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

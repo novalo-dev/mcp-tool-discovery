@@ -16,6 +16,8 @@ namespace Novalo\McpToolDiscovery\Mode\Grouped;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Protocol\Json;
 use Novalo\McpToolDiscovery\Tool\Tool;
@@ -38,7 +40,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * whose group is not declared is listed as itself, so it is never out of
  * the assistant's reach.
  */
-final class GroupedMode implements DiscoveryMode
+final class GroupedMode implements DiscoveryMode, GuideHeader, Instructions
 {
     public const CHANGE_SUFFIX = '_change';
 
@@ -71,12 +73,13 @@ final class GroupedMode implements DiscoveryMode
         if ($maxDescribed < 1) {
             throw new \InvalidArgumentException('A call must be able to describe at least one action.');
         }
+        self::checkTitles($groups, $changeTitles);
         foreach (array_keys($groups) as $group) {
             $read = $prefix . $group;
             $change = $read . self::CHANGE_SUFFIX;
             // Checked here rather than when the list is built, so a group
             // the host misnamed fails at boot instead of on one client.
-            if (preg_match('/^[A-Za-z0-9_.-]{1,128}$/', $change) !== 1) {
+            if (!Tool::validName($change)) {
                 throw new \InvalidArgumentException(sprintf('The group "%s" does not make a valid tool name: letters, digits, "_", "-" or ".", 128 characters in all.', $group));
             }
             if (isset($this->readNames[$change]) || isset($this->changeNames[$read])) {
@@ -84,6 +87,35 @@ final class GroupedMode implements DiscoveryMode
             }
             $this->readNames[$read] = $group;
             $this->changeNames[$change] = $group;
+        }
+    }
+
+    /**
+     * Checked here: both maps are typed in a docblock only, and each wrong
+     * shape would show late and quietly. A plain list of names keys its
+     * groups 0, 1, 2, so no tool falls in one and every tool is listed as
+     * itself; a change title under a misspelled group keeps the default.
+     *
+     * @param array<mixed> $groups
+     * @param array<mixed> $changeTitles
+     */
+    private static function checkTitles(array $groups, array $changeTitles): void
+    {
+        if ($groups !== [] && array_is_list($groups)) {
+            throw new \InvalidArgumentException('groups maps each group\'s name to its title, e.g. [\'files\' => \'Files\'], not a list of names.');
+        }
+        foreach ($groups as $group => $title) {
+            if (!is_string($title)) {
+                throw new \InvalidArgumentException(sprintf('The title of the group "%s" must be a string, %s given.', $group, get_debug_type($title)));
+            }
+        }
+        foreach ($changeTitles as $group => $title) {
+            if (!isset($groups[$group])) {
+                throw new \InvalidArgumentException(sprintf('changeTitles names the group "%s", which is not in groups.', $group));
+            }
+            if (!is_string($title)) {
+                throw new \InvalidArgumentException(sprintf('The change title of the group "%s" must be a string, %s given.', $group, get_debug_type($title)));
+            }
         }
     }
 
@@ -131,6 +163,60 @@ final class GroupedMode implements DiscoveryMode
         }
 
         return $this->run($group, false, $arguments, $runner);
+    }
+
+    /**
+     * The sentences for the server's instructions: a group's tools are the
+     * actions of its tool, not tools of the list. No group is named, since
+     * a group whose tools the gate hides from a caller is not in that
+     * caller's list.
+     */
+    public function instructions(): string
+    {
+        return sprintf('This server lists its tools by group: each tool of a group is an action of the group\'s tool, not a tool of your list. Read an action\'s parameters with describe on the group\'s tool, run a read with action and arguments on that tool, and a change on the tool of the same name ending in %s. Any other tool in your list is called directly.', self::CHANGE_SUFFIX);
+    }
+
+    /**
+     * The block a host puts at the top of a guide that names tools: a tool
+     * of a declared group is an action of its group's tool, not a tool of
+     * the list, and without it the assistant looks for a tool it cannot see.
+     * A tool outside every group is in the list as itself and gets a line
+     * of its own, so the assistant does not look for it in a group.
+     */
+    public function guideHeader(iterable $names, ToolSet $visible): string
+    {
+        $through = [];
+        $direct = [];
+        foreach ($names as $name) {
+            $tool = $visible->get($name);
+            if ($tool === null || $this->owns($name)) {
+                continue;
+            }
+            $runner = $this->runnerFor($tool);
+            if ($runner === $tool->name) {
+                $direct[] = $name;
+            } else {
+                $through[$runner][] = $name;
+            }
+        }
+        if ($through === []) {
+            return '';
+        }
+        $lines = [
+            '## How to call the tools of this guide',
+            '',
+            'This server lists its tools by group: the tools this guide names are not in your tool list'
+                . ($direct === [] ? '. ' : ', except the ones it says to call directly. ')
+                . sprintf('Each is an action of the tool of its group. Read the parameters of the ones you need with describe on that tool (the one without %s), then run them with action and arguments:', self::CHANGE_SUFFIX),
+        ];
+        foreach ($through as $runner => $actions) {
+            $lines[] = sprintf('- through %s: %s', $runner, implode(', ', $actions));
+        }
+        if ($direct !== []) {
+            $lines[] = '- directly, as they are in your list: ' . implode(', ', $direct);
+        }
+
+        return implode("\n", $lines) . "\n\n";
     }
 
     /**

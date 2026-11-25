@@ -48,6 +48,13 @@ final class ToolSearch
      */
     private const MAX_PAIRED_WORDS = 16;
 
+    /**
+     * Starts the key of a whole learned search, its words in alphabetical
+     * order after it. The Analyzer never keeps a tab or a space inside a
+     * word, so such a key is never taken for a word or a pair.
+     */
+    private const SEARCH_KEY = "\t";
+
     private readonly ToolIndex $index;
     private readonly Analyzer $analyzer;
 
@@ -127,7 +134,7 @@ final class ToolSearch
         }
 
         $best = max($scores);
-        foreach ($this->learned($groups) as $name => $lift) {
+        foreach ($this->learned($groups, count(array_unique($tokens))) as $name => $lift) {
             // Only tools the text already found: what was learned reorders
             // the answer, it never brings a tool the query does not describe.
             if (isset($scores[$name])) {
@@ -178,7 +185,7 @@ final class ToolSearch
             }
         }
         if ($groups !== []) {
-            $this->learning->record([...self::flat($groups), ...self::pairs($groups)], $tool);
+            $this->learning->record([...self::flat($groups), ...self::pairs($groups), self::searchKey($groups)], $tool);
         }
     }
 
@@ -221,11 +228,19 @@ final class ToolSearch
      * that reached the tool at all, so a search that agrees on one pair out
      * of three lifts it a ninth as much as the same search asked again.
      *
+     * A query that holds one word the tools use among words they do not
+     * ("sign | agreement | lot") has no pair either, but it is not a query
+     * of one word: what it asks beyond the thing is only unknown. Its word
+     * alone would lift every tool learned for the thing ("show the history
+     * of a lot"), so it lifts only a tool one of whose learned searches it
+     * holds whole.
+     *
      * @param list<list<string>> $groups the known terms of each token
+     * @param int $tokens how many distinct tokens the query wrote, known or not
      *
      * @return array<string, float>
      */
-    private function learned(array $groups): array
+    private function learned(array $groups, int $tokens): array
     {
         $words = self::flat($groups);
         if ($this->learning === null || $this->options->learningWeight <= 0 || $words === []) {
@@ -233,6 +248,7 @@ final class ToolSearch
         }
         $counts = $this->learning->load();
         $lift = [];
+        $alone = count($words) === 1 && $tokens > 1;
         if (count($words) > 1) {
             $words = self::pairs($groups);
         }
@@ -244,6 +260,7 @@ final class ToolSearch
             }
         }
         $total = count($words);
+        $coverage = $lift === [] ? [] : self::coverage($counts, self::flat($groups), $lift);
         foreach ($lift as $tool => $sum) {
             // Scaled again by the share of the pairs that hit the tool: a
             // search learned for a neighbour ("add a site address") shares
@@ -251,9 +268,70 @@ final class ToolSearch
             // barely move it, while the same request asked again hits every
             // pair and keeps its whole lift.
             $lift[$tool] = $sum / $total * ($hits[$tool] / $total);
+            // And by the square of the share of a learned search's words the
+            // query holds: "view the instruments to lend" taught the list
+            // the pair "instrument lend", which "lend an instrument" holds
+            // whole, but the view it does not. A tool learned before whole
+            // searches were kept has none, and keeps its lift.
+            $lift[$tool] *= ($coverage[$tool] ?? 1.0) ** 2;
+            if ($alone && ($coverage[$tool] ?? 1.0) < 1.0) {
+                unset($lift[$tool]);
+            }
         }
 
         return $lift;
+    }
+
+    /**
+     * For each tool lifted, the largest share of the words of one search
+     * learned for it that the query holds.
+     *
+     * The whole searches are only found by reading every key of the store,
+     * as load() has already read them; a key that is not a search, or a
+     * search of no lifted tool, is passed over before it is cut.
+     *
+     * @param array<array-key, array<string, int>> $counts array-key, not
+     *        string: the library never learns a number alone, but a store
+     *        written by the host may hand one back, and PHP holds a key
+     *        such as "123" as an integer
+     * @param list<string> $words the terms of the query
+     * @param array<string, float> $lift
+     *
+     * @return array<string, float>
+     */
+    private static function coverage(array $counts, array $words, array $lift): array
+    {
+        $query = array_flip($words);
+        $coverage = [];
+        foreach ($counts as $key => $tools) {
+            // Cast back before str_starts_with(), which strict types would
+            // refuse an integer key.
+            $key = (string) $key;
+            if (!str_starts_with($key, self::SEARCH_KEY) || array_intersect_key($tools, $lift) === []) {
+                continue;
+            }
+            $learned = explode(' ', substr($key, strlen(self::SEARCH_KEY)));
+            $held = count(array_intersect_key(array_flip($learned), $query)) / count($learned);
+            foreach (array_keys(array_intersect_key($tools, $lift)) as $tool) {
+                $coverage[$tool] = max($coverage[$tool] ?? 0.0, $held);
+            }
+        }
+
+        return $coverage;
+    }
+
+    /**
+     * The key under which a whole search is learned: its words, cut as for
+     * pairs, in alphabetical order.
+     *
+     * @param list<list<string>> $groups
+     */
+    private static function searchKey(array $groups): string
+    {
+        $words = array_values(array_unique(self::flat($groups)));
+        sort($words);
+
+        return self::SEARCH_KEY . implode(' ', array_slice($words, 0, self::MAX_PAIRED_WORDS));
     }
 
     /**
@@ -327,6 +405,13 @@ final class ToolSearch
         $key = hash('xxh128', serialize($documents) . $options->indexKey());
         $saved = $cache->get($key);
         $index = $saved === null ? null : ToolIndex::fromArray($saved, $analyzer);
+        // The key is a hash of the tools, not the tools: an index saved for
+        // others, through a collision or a host cache that mixes its keys,
+        // would hold the words of tools this caller does not see. Only an
+        // index of exactly the tools searched is used.
+        if ($index !== null && $index->ids() !== array_keys($documents)) {
+            $index = null;
+        }
         if ($index === null) {
             // With what alike() reads: any search meeting a word the tools lack
             // needs it, and working it out again at each request cost more
@@ -363,7 +448,8 @@ final class ToolSearch
         if ($this->options->synonyms === []) {
             return $text;
         }
-        $synonyms = array_change_key_case($this->options->synonyms, CASE_LOWER);
+        // Keyed by the token each stands for (see SearchOptions).
+        $synonyms = $this->options->synonyms;
         $extra = [];
         // The pairs too: in a sentence without spaces the host's word is
         // never a token of its own, only a pair inside one.

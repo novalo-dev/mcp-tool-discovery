@@ -16,6 +16,7 @@ namespace Novalo\McpToolDiscovery\Tests\Unit;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Exception\InvalidTool;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
+use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Protocol\Revision;
 use Novalo\McpToolDiscovery\Tests\Fixtures\RecordingGate;
@@ -103,5 +104,29 @@ final class DiscoveryTest extends TestCase
             self::assertIsArray($tool);
             self::assertSame(['name', 'description', 'inputSchema'], array_keys($tool));
         }
+    }
+
+    public function testTheGuideHeaderNamesOnlyToolsTheCallerMaySee(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $names = ['acme_get_file', 'acme_list_users'];
+        $header = (new Discovery(new CompactMode(), new RecordingGate(['acme_list_users'])))->guideHeader($names, $tools);
+
+        self::assertStringContainsString('acme_get_file', $header);
+        // Passed the whole list, the header still leaves out what the gate hides.
+        self::assertStringNotContainsString('acme_list_users', $header);
+    }
+
+    public function testAModeThatListsEveryToolAsItselfHasNoGuideHeader(): void
+    {
+        self::assertSame('', (new Discovery(new DirectMode(), new RecordingGate()))->guideHeader(['acme_get_file'], RecordingGate::fixtureTools()));
+    }
+
+    public function testTheInstructionsAreTheModesAndEmptyWhenItListsEveryTool(): void
+    {
+        $mode = new CompactMode(prefix: 'acme_');
+
+        self::assertSame($mode->instructions(), (new Discovery($mode, new RecordingGate()))->instructions());
+        self::assertSame('', (new Discovery(new DirectMode(), new RecordingGate()))->instructions());
     }
 }

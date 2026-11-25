@@ -25,27 +25,37 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | workspace | 50 | 16,147 | 2,871 | 1,839 | 13,982 | 1,161 |
 | platform | 40 | 12,829 | 2,871 | 1,839 | - | 851 |
 | people | 40 | 12,814 | 2,871 | 1,839 | - | 854 |
-| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,073 |
+| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,082 |
 | school | 40 | 15,096 | 2,871 | 1,839 | - | 1,086 |
 | hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,342 |
-| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,444 |
+| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,416 |
 | newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,682 |
 | estate | 40 | 12,284 | 2,871 | 1,839 | - | 813 |
 | depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,353 |
 | arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,390 |
 | academy | 40 | 12,433 | 2,871 | 1,839 | - | 765 |
 | garage | 40 | 15,281 | 2,871 | 1,839 | - | 1,315 |
-| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,707 |
+| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,619 |
 | clinic | 40 | 13,592 | 2,871 | 1,839 | - | 1,293 |
 | water | 40 | 17,857 | 2,871 | 1,839 | - | 2,997 |
 | mill | 40 | 19,842 | 2,871 | 1,839 | - | 1,635 |
-| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,414 |
-| bikes | 40 | 12,966 | 2,871 | 1,839 | - | 994 |
+| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,386 |
+| bikes | 40 | 12,966 | 2,871 | 1,839 | - | 955 |
 | ops | 150 | 50,720 | 2,871 | 1,839 | - | 1,015 |
-| theatre | 40 | 15,392 | 2,871 | 1,839 | - | 1,253 |
+| theatre | 40 | 15,392 | 2,871 | 1,839 | - | 1,247 |
 | marina | 40 | 13,812 | 2,871 | 1,839 | - | 1,001 |
 | post | 40 | 17,780 | 2,871 | 1,839 | - | 1,232 |
 | sensors | 40 | 17,209 | 2,871 | 1,839 | - | 1,578 |
+| ferry | 40 | 12,772 | 2,871 | 1,839 | - | 946 |
+| kinder | 40 | 13,663 | 2,871 | 1,839 | - | 1,222 |
+| fire | 40 | 13,864 | 2,871 | 1,839 | - | 881 |
+| drive | 40 | 15,424 | 2,871 | 1,839 | - | 1,175 |
+| chess | 40 | 16,197 | 2,871 | 1,839 | - | 1,267 |
+| cellar | 40 | 19,520 | 2,871 | 1,839 | - | 1,984 |
+| coffee | 40 | 14,401 | 2,871 | 1,839 | - | 1,042 |
+| garden | 40 | 12,309 | 2,871 | 1,839 | - | 810 |
+| desk | 150 | 49,454 | 2,871 | 1,839 | - | 1,231 |
+| leisure | 40 | 13,467 | 2,871 | 1,839 | - | 1,135 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a
@@ -68,7 +78,7 @@ tools stay outside them, listed as themselves.
 - **Grouped** shows the map of the server without a search, for a client that
   searches badly and a server whose tools fall into a few clear groups. It
   leaves the schemas out but names every action, so its list grows with the
-  server. On the workspace its eight tools take 7,154 bytes where the 28
+  server. On the workspace its 8 tools take 7,154 bytes where the 28
   actions they stand for would take 9,299: on short tools it saves almost a
   quarter, more as the schemas grow.
 - **Direct** lists every tool as itself, the first column. It suits a server
@@ -116,6 +126,12 @@ interface DiscoveryMode
 - Build your tool definitions with `Tool::fromArray()`, so they are validated,
   and let `Shaper` adapt them to each revision.
 
+A mode that does not list every tool as itself can also implement
+`Mode\GuideHeader`, apart from the contract so a mode written elsewhere keeps
+working without it: `guideHeader(iterable $names, ToolSet $visible)` returns
+the block to put at the top of a prompt that names tools, or `""`. See
+[Guides](#guides).
+
 The rules a mode must keep are in
 [ModeContractTestCase](../tests/Contract/ModeContractTestCase.php). Read it
 before writing a line: it is the review your mode will get.
@@ -154,11 +170,18 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   is marked `destructiveHint`, and its description asks the client to show
   the whole list before the one confirmation. The search learns once per
   batch, from the first item that succeeds.
-- `pinned` tools are listed as themselves, next to the three.
-- `guideHeader()` gives the block to put at the top of a prompt that names
-  tools, saying which runner each one goes through, and which of them are
-  pinned and called directly. It is empty when the prompt names only tools
-  of the list.
+- `pinned` tools are listed as themselves, next to the three; a name given
+  twice is listed once.
+- A `prefix` that makes no valid tool name (a space, or more than 128
+  characters with the name) is refused in the constructor, as the grouped
+  mode refuses a group: the host learns of it at boot, not on the first
+  `tools/list`. `run_write_batch` is only checked when it is on.
+- `titles` takes the keys `search`, `read`, `write` and `batch`. Any other
+  key, `run_read_tool` say, is refused in the constructor: it would leave
+  the English title on every screen without a word.
+- The guide header (see [Guides](#guides)) says which runner each tool a
+  prompt names goes through, and which of them are pinned and called
+  directly.
 
 ## Grouped
 
@@ -206,7 +229,9 @@ its names without the list. A tool whose `groupOf` is not a declared group
 (an empty string, say) is listed as itself and called by its own name, which
 is also how a host pins a ping. A group whose names would not make a valid
 tool name, or that clashes with another group's change tool, is refused in
-the constructor. Pick a `prefix` if a host tool could carry a group's name:
+the constructor, and so are `groups` given as a plain list of names (its
+keys would be 0, 1, 2, so no tool would fall in a group) and a
+`changeTitles` key that is not a group. Pick a `prefix` if a host tool could carry a group's name:
 `Discovery` throws `InvalidTool` on the first request that meets such a host
 tool, since it could never be called.
 
@@ -253,6 +278,9 @@ carry nothing, so a server that only reads pays nothing for it; with
 `changesApart`, `run_with` already names each change, and the mark is left
 out.
 
+A `prefix` that makes no valid tool name is refused in the constructor, as
+in the other modes.
+
 Search and describe share their code with the compact search
 (`src/Mode/ToolFinder.php`), so a host that switches between the two modes
 gets the same tools for the same request.
@@ -279,6 +307,57 @@ settings, and its cache and learning store wait, unused, for the day it
 switches back. The mode does not search, so it hands out no `search_id`.
 
 ---
+
+## Guides
+
+An MCP prompt that names tools reads wrong in any mode but Direct: the tools
+it names are not in the client's list as themselves, and the client looks for
+tools it cannot see. `$discovery->guideHeader($toolNames, $tools)` returns
+the block to put at the top of the prompt text, written for the current mode:
+
+| Mode | What the header says |
+|---|---|
+| Compact | read the parameters with `search_tools` (names), run each through `run_read_tool` or `run_write_tool`; pinned tools are called directly |
+| Grouped | each tool is an action of its group: read it with `describe` on the group's tool, run it through `<group>` or `<group>_change`; tools outside every group are called directly |
+| Gateway | read with `operation` `describe`, run with `operation` `run`, all through `use_tools`; with `changesApart`, the changes are called directly |
+| Direct | nothing: `""` |
+
+```php
+$text = $discovery->guideHeader(['acme_get_file', 'acme_set_ticket_status'], $tools) . $myPromptText;
+```
+
+It is `""` when every tool the prompt names is in the list as itself, so a
+host can call it for every prompt. Pass the host's whole `ToolSet`, as for
+`listTools()`: `Discovery` keeps only the tools the caller may see, and a
+hidden tool the prompt names is left out of the header. A mode of your own
+gets a header by implementing `Mode\GuideHeader`; one that does not gets
+`""`.
+
+## Instructions
+
+Clients put the `instructions` of the `initialize` answer (of
+`server/discover` from `2026-07-28`) in the model's system prompt, read
+before any tool. In every mode but Direct the list is not the whole server,
+and a model shown three tools for three hundred concludes the one it needs
+is missing. `$discovery->instructions()` returns one or two sentences that
+say how the current mode reaches the others, to put after the host's own:
+
+| Mode | What the instructions say |
+|---|---|
+| Compact | most tools are not in the list: find them with `search_tools`, run each with `run_read_tool` or `run_write_tool` (and `run_write_batch` when it is on); a tool in the list is called directly |
+| Grouped | each tool of a group is an action of the group's tool: read it with `describe`, run a read with `action` and `arguments`, a change on `<group>_change`; any other tool is called directly |
+| Gateway | every tool goes through `use_tools`, with `operation` `search`, `describe` and `run`; with `changesApart`, only the reads, and the changes are called directly |
+| Direct | nothing: `""` |
+
+```php
+$result['instructions'] = trim('Files and tickets of the team. ' . $discovery->instructions());
+```
+
+They are the same for every caller: they name the mode's own tools, never
+one of the host's, not even a pinned one, since the gate may hide it from
+some. So they can go in a `server/discover` answer cached with
+`cacheScope` `public`. A mode of your own gets them by implementing
+`Mode\Instructions`; one that does not gets `""`.
 
 ## What a mode never does
 

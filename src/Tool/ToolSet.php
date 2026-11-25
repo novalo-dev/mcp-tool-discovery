@@ -33,18 +33,34 @@ final class ToolSet implements \IteratorAggregate, \Countable
     private function __construct(private readonly array $tools) {}
 
     /**
-     * @param iterable<Tool|array<string, mixed>> $tools Tool objects or MCP definitions
+     * @param iterable<Tool|array<string, mixed>>                       $tools   Tool objects or MCP definitions
+     * @param (callable(InvalidTool, Tool|array<string, mixed>): void)|null $refused when given, a definition
+     *        the library cannot work with, or a later tool under a name already taken, is left out and
+     *        handed here with the reason; without it, the first one fails the whole set
      *
-     * @throws InvalidTool on a malformed definition or a name given twice
+     * @throws InvalidTool on a malformed definition or a name given twice, when no $refused is given
      */
-    public static function of(iterable $tools): self
+    public static function of(iterable $tools, ?callable $refused = null): self
     {
         $byName = [];
-        foreach ($tools as $tool) {
-            $tool = $tool instanceof Tool ? $tool : Tool::fromArray($tool);
-            if (isset($byName[$tool->name])) {
-                // Two tools under one name would make every call ambiguous.
-                throw InvalidTool::because($tool->name, 'the name is used twice');
+        foreach ($tools as $definition) {
+            try {
+                $tool = $definition instanceof Tool ? $definition : Tool::fromArray($definition);
+                if (isset($byName[$tool->name])) {
+                    // Two tools under one name would make every call ambiguous.
+                    throw InvalidTool::because($tool->name, 'the name is used twice');
+                }
+            } catch (InvalidTool $error) {
+                if ($refused === null) {
+                    throw $error;
+                }
+                // A host that gathers tools from parts it does not write (plugins,
+                // other packages) would otherwise lose every tool to one bad
+                // definition. The first tool under a name is the one kept, as a
+                // registry that refuses a name already taken keeps it.
+                $refused($error, $definition);
+
+                continue;
             }
             $byName[$tool->name] = $tool;
         }

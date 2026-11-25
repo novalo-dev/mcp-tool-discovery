@@ -46,6 +46,10 @@
         <testsuite name="laravel-mcp">
             <directory>tests/LaravelMcp</directory>
         </testsuite>
+        <!-- Needs composer install in docs/examples/logiscape; CI runs it in its own job. -->
+        <testsuite name="logiscape">
+            <directory>tests/Logiscape</directory>
+        </testsuite>
     </testsuites>
     <source>
         <include>

@@ -91,4 +91,25 @@ final class ShaperTest extends TestCase
         $this->expectException(UnsupportedRevision::class);
         Revision::fromString('2099-01-01');
     }
+
+    public function testAnUnknownRevisionIsNamedInTheMessage(): void
+    {
+        try {
+            Revision::fromString('2099-01-01');
+            self::fail('An unknown revision was accepted.');
+        } catch (UnsupportedRevision $e) {
+            self::assertSame('Unsupported MCP protocol revision "2099-01-01".', $e->getMessage());
+        }
+    }
+
+    public function testTheMessageHoldsNothingTheClientCouldWriteToALog(): void
+    {
+        try {
+            Revision::fromString("2025-06-18\r\nforged line \x1b]52;c;x\x07" . str_repeat('a', 500));
+            self::fail('An unknown revision was accepted.');
+        } catch (UnsupportedRevision $e) {
+            self::assertMatchesRegularExpression('/^Unsupported MCP protocol revision "[A-Za-z0-9_.?-]{1,128}"\.$/', $e->getMessage());
+            self::assertStringStartsWith('Unsupported MCP protocol revision "2025-06-18??forged?line', $e->getMessage());
+        }
+    }
 }

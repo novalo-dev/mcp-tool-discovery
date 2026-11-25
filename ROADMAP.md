@@ -49,11 +49,24 @@ The benchmark says where the search still misses, in
   theatre) and a Hebrew one, whose particles start its words (a marina)
   and a Lao one, cut into pairs of clusters as Thai is (a post office)
   and one generated from an OpenAPI description, with a method and a path
-  for names and no titles (a fleet of field sensors) are in.
-- **Accents.** On the Greek servers, a request typed without its accents
-  finds the right tool first far less often than one written with them. A
-  way to fold them with no table built into the library and no extension
-  required is welcome.
+  for names and no titles (a fleet of field sensors) and a Turkish one,
+  whose words take their suffixes and are often typed without `ş` or `ı`
+  (a ferry line) and a Vietnamese one, typed with and without its tone
+  marks (a kindergarten) and a Spanish one, typed without its accents and
+  with its pronouns joined to the verb (a fire station) and a Persian one,
+  typed with and without its joiners and on an Arabic keyboard (a driving
+  school), an Armenian one, typed with its marks inside the words (a
+  chess club), a Georgian one, partly typed in capitals (a wine cellar)
+  an Amharic one, partly typed with the other letters of the same
+  sound (a coffee washing station) and a third large English one, 150
+  tools in kebab-case, verb first (an IT service desk) and an English one
+  where most tools share an object with four others, in PascalCase (a
+  leisure centre) are in.
+- **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
+  marks now meets the tool word it spells, a Greek word typed in capitals
+  and a Russian `е` for `ё` included. `й` typed as `и` lies within the
+  plain Cyrillic range and is not met yet; a server whose requests do so,
+  written before any of them is run, is welcome.
 
 A change to the search comes with the benchmark before and after.
 
@@ -61,7 +74,8 @@ A change to the search comes with the benchmark before and after.
 
 - Examples on other hosts, beside the servers written by hand over stdio and
   HTTP, the one kept up on ReactPHP, the Symfony and Laravel applications,
-  the server written with laravel/mcp and the four on the official PHP SDK in
+  the server written with laravel/mcp, the two on logiscape/mcp-sdk-php and
+  the four on the official PHP SDK in
   [docs/HOSTS.md](docs/HOSTS.md): a framework bundle.
 - Reports from servers that use the library: what their clients searched,
   what was missed, as a `SearchLog` keeps it

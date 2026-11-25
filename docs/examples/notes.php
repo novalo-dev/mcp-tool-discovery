@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace Example\Notes;
 
+use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolGate;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
@@ -29,6 +30,7 @@ use Novalo\McpToolDiscovery\Mode\Direct\DirectMode;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Search\SearchLog;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
 use Novalo\McpToolDiscovery\Search\SearchResult;
@@ -97,6 +99,20 @@ function mode(string|false $name): DiscoveryMode
         'gateway' => new GatewayMode(prefix: 'notes_'),
         default => new CompactMode(prefix: 'notes_', batchLimit: 20),
     };
+}
+
+/**
+ * The instructions of the initialize or server/discover answer: what the
+ * server is, then how its mode reaches the tools it does not list. A client
+ * puts them in the model's system prompt, read before any tool, so a model
+ * shown three tools knows the server has more. The same for every caller,
+ * so the discover answer stays public. A server whose handshake is built
+ * before any caller, as the SDK's builder is, has no Discovery yet and gives
+ * the mode itself.
+ */
+function instructions(Discovery|Instructions $from): string
+{
+    return trim('Notes kept for the team. ' . $from->instructions());
 }
 
 /**

@@ -73,6 +73,7 @@ function answer(array $message, Discovery $discovery, ToolSet $tools, ?Revision 
                 // longer right, so the client need not ask again to find out.
                 'capabilities' => ['tools' => ['listChanged' => true]],
                 'serverInfo' => ['name' => 'notes', 'version' => '1.0.0'],
+                'instructions' => instructions($discovery),
             ]];
         case 'ping':
             return ['jsonrpc' => '2.0', 'id' => $id, 'result' => new \stdClass()];

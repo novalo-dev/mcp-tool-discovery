@@ -1,0 +1,794 @@
+[
+ {
+  "name": "incidente_abrir",
+  "title": "Abrir un incidente",
+  "description": "Registra una nueva emergencia recibida en la central: tipo, dirección y prioridad.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tipo": {
+     "type": "string",
+     "description": "Incendio, rescate, fuga de gas u otro"
+    },
+    "direccion": {
+     "type": "string",
+     "description": "Dirección o punto kilométrico"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "incidente_cerrar",
+  "title": "Cerrar un incidente",
+  "description": "Da por terminada una emergencia cuando la última dotación vuelve al parque.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incidente": {
+     "type": "string",
+     "description": "Número de incidente"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "incidentes_listar",
+  "title": "Incidentes en curso",
+  "description": "Lista las emergencias abiertas con su prioridad y las dotaciones enviadas.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "prioridad": {
+     "type": "string",
+     "description": "Alta, media o baja"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "incidente_ver",
+  "title": "Ficha del incidente",
+  "description": "Muestra un incidente: hora de aviso, dirección, dotaciones, víctimas y notas.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incidente": {
+     "type": "string",
+     "description": "Número de incidente"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "incidente_reasignar",
+  "title": "Reasignar un incidente",
+  "description": "Cambia el parque que lleva una emergencia, por ejemplo cuando otro está más cerca.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incidente": {
+     "type": "string",
+     "description": "Número de incidente"
+    },
+    "parque": {
+     "type": "string",
+     "description": "Parque de destino"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "dotacion_enviar",
+  "title": "Enviar una dotación",
+  "description": "Moviliza un vehículo y su tripulación hacia un incidente abierto.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incidente": {
+     "type": "string",
+     "description": "Número de incidente"
+    },
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "dotacion_retirar",
+  "title": "Retirar una dotación",
+  "description": "Hace volver al parque un vehículo enviado a un incidente que ya no lo necesita.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehiculos_listar",
+  "title": "Vehículos del parque",
+  "description": "Lista autobombas, escalas y furgones con su estado: disponible, en salida o en taller.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parque": {
+     "type": "string",
+     "description": "Parque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehiculo_baja",
+  "title": "Dejar un vehículo fuera de servicio",
+  "description": "Retira un vehículo de la disponibilidad por avería o revisión, con el motivo.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    },
+    "motivo": {
+     "type": "string",
+     "description": "Motivo"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehiculo_alta",
+  "title": "Volver a poner en servicio",
+  "description": "Devuelve a la disponibilidad un vehículo reparado o revisado.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehiculo_repostar",
+  "title": "Registrar un repostaje",
+  "description": "Anota los litros de gasóleo cargados en un vehículo y su kilometraje.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    },
+    "litros": {
+     "type": "string",
+     "description": "Litros"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "vehiculo_revision_programar",
+  "title": "Programar la ITV o una revisión",
+  "description": "Reserva una fecha de taller para la inspección técnica o el mantenimiento de un vehículo.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vehiculo": {
+     "type": "string",
+     "description": "Indicativo del vehículo"
+    },
+    "fecha": {
+     "type": "string",
+     "description": "Fecha"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bomberos_listar",
+  "title": "Plantilla",
+  "description": "Lista los bomberos del parque con su categoría y su turno.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parque": {
+     "type": "string",
+     "description": "Parque"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bombero_ver",
+  "title": "Ficha de un bombero",
+  "description": "Muestra un bombero: categoría, turno, permisos de conducir y formación al día.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bombero_alta",
+  "title": "Dar de alta a un bombero",
+  "description": "Incorpora a la plantilla a un bombero recién llegado al parque.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "nombre": {
+     "type": "string",
+     "description": "Nombre y apellidos"
+    },
+    "categoria": {
+     "type": "string",
+     "description": "Categoría"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bombero_baja",
+  "title": "Dar de baja a un bombero",
+  "description": "Borra de la plantilla a un bombero que se jubila o se traslada.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "turno_ver",
+  "title": "Cuadrante de guardias",
+  "description": "Muestra quién está de guardia cada día del mes y en qué vehículo.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "mes": {
+     "type": "string",
+     "description": "Mes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "turno_cambiar",
+  "title": "Cambiar una guardia",
+  "description": "Intercambia la guardia de dos bomberos en una fecha, con el visto bueno del jefe.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    },
+    "con": {
+     "type": "string",
+     "description": "Compañero"
+    },
+    "fecha": {
+     "type": "string",
+     "description": "Fecha"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ausencia_registrar",
+  "title": "Registrar una ausencia",
+  "description": "Anota una baja médica, unas vacaciones o un permiso de un bombero.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    },
+    "tipo": {
+     "type": "string",
+     "description": "Baja, vacaciones o permiso"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hidrantes_listar",
+  "title": "Hidrantes de una zona",
+  "description": "Lista los hidrantes de un barrio con su caudal y su último control.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "zona": {
+     "type": "string",
+     "description": "Barrio o zona"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hidrante_averia",
+  "title": "Marcar un hidrante averiado",
+  "description": "Señala que un hidrante no da agua o está dañado, para que no se cuente con él.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hidrante": {
+     "type": "string",
+     "description": "Código del hidrante"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hidrante_reparado",
+  "title": "Marcar un hidrante reparado",
+  "description": "Vuelve a contar con un hidrante después de su reparación.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "hidrante": {
+     "type": "string",
+     "description": "Código del hidrante"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inspeccion_programar",
+  "title": "Programar una inspección",
+  "description": "Fija la visita de prevención a un local, un colegio o una nave industrial.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "edificio": {
+     "type": "string",
+     "description": "Dirección del edificio"
+    },
+    "fecha": {
+     "type": "string",
+     "description": "Fecha"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inspeccion_cancelar",
+  "title": "Anular una inspección",
+  "description": "Anula una visita de prevención ya programada.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "inspeccion": {
+     "type": "string",
+     "description": "Número de inspección"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "inspeccion_resultado",
+  "title": "Registrar el resultado de una inspección",
+  "description": "Anota lo que se encontró: extintores caducados, salidas bloqueadas, plazo para corregirlo.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "inspeccion": {
+     "type": "string",
+     "description": "Número de inspección"
+    },
+    "resultado": {
+     "type": "string",
+     "description": "Favorable o con deficiencias"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inspecciones_pendientes",
+  "title": "Inspecciones pendientes",
+  "description": "Lista las visitas de prevención por hacer y las deficiencias sin corregir.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "zona": {
+     "type": "string",
+     "description": "Barrio o zona"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aviso_poblacion_enviar",
+  "title": "Enviar un aviso a la población",
+  "description": "Manda una alerta por SMS y redes a los vecinos de una zona: humo, corte de calle, desalojo.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "zona": {
+     "type": "string",
+     "description": "Zona"
+    },
+    "mensaje": {
+     "type": "string",
+     "description": "Texto del aviso"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "aviso_poblacion_retirar",
+  "title": "Retirar un aviso",
+  "description": "Da por terminada una alerta a la población que ya no está vigente.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "aviso": {
+     "type": "string",
+     "description": "Número de aviso"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parte_redactar",
+  "title": "Redactar el parte de intervención",
+  "description": "Escribe el informe de una salida: qué se encontró, qué se hizo, medios empleados.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incidente": {
+     "type": "string",
+     "description": "Número de incidente"
+    },
+    "texto": {
+     "type": "string",
+     "description": "Texto del parte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "parte_firmar",
+  "title": "Firmar un parte",
+  "description": "Valida con la firma del jefe de turno el parte de una intervención.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parte": {
+     "type": "string",
+     "description": "Número de parte"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "epi_asignar",
+  "title": "Entregar un EPI",
+  "description": "Asigna a un bombero un equipo de protección: traje, casco, botas o equipo de respiración.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    },
+    "equipo": {
+     "type": "string",
+     "description": "Equipo"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "epi_retirar",
+  "title": "Retirar un EPI",
+  "description": "Da de baja un equipo de protección dañado o caducado.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "equipo": {
+     "type": "string",
+     "description": "Número de serie"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "epis_caducidad",
+  "title": "Caducidad de los EPI",
+  "description": "Lista los equipos de protección y las botellas de aire que caducan pronto.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "dias": {
+     "type": "string",
+     "description": "Días"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "simulacro_programar",
+  "title": "Programar un simulacro",
+  "description": "Organiza un ejercicio de evacuación o de rescate con un centro o una empresa.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lugar": {
+     "type": "string",
+     "description": "Lugar"
+    },
+    "fecha": {
+     "type": "string",
+     "description": "Fecha"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "simulacro_cancelar",
+  "title": "Cancelar un simulacro",
+  "description": "Suspende un ejercicio programado.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "simulacro": {
+     "type": "string",
+     "description": "Número de simulacro"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "formacion_registrar",
+  "title": "Registrar una formación",
+  "description": "Anota un curso hecho por un bombero: rescate en altura, materias peligrosas, conducción.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "bombero": {
+     "type": "string",
+     "description": "Número de placa"
+    },
+    "curso": {
+     "type": "string",
+     "description": "Curso"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "informe_intervenciones",
+  "title": "Informe de intervenciones",
+  "description": "Cuenta las salidas del mes por tipo de emergencia y por barrio.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "mes": {
+     "type": "string",
+     "description": "Mes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "informe_tiempos",
+  "title": "Tiempos de respuesta",
+  "description": "Calcula el tiempo medio entre el aviso y la llegada de la primera dotación.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "desde": {
+     "type": "string",
+     "description": "Desde"
+    },
+    "hasta": {
+     "type": "string",
+     "description": "Hasta"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "zona_riesgo_ver",
+  "title": "Mapa de riesgos",
+  "description": "Muestra en una zona las naves con productos peligrosos, gasolineras y edificios altos.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "zona": {
+     "type": "string",
+     "description": "Zona"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "meteo_riesgo_incendio",
+  "title": "Riesgo de incendio forestal",
+  "description": "Da el índice de riesgo de incendio forestal de hoy según el viento y la humedad.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "comarca": {
+     "type": "string",
+     "description": "Comarca"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

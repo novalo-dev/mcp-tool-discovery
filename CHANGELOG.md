@@ -8,6 +8,395 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.8.0 - 2026-11-25
+
+### Added
+
+- **A leisure centre on the search benchmark.** 40 tools in English
+  PascalCase, with five or more on each of a booking, a membership and a
+  class (`FreezeMembership`, `UnfreezeMembership`, `CancelMembership`), and
+  100 requests written before any of them was run, in the words of the
+  front desk, whose verbs the tools often do not use (pause, bump, top
+  up). Nothing was tuned on it: on its test half, 33 of 50 come first in
+  fields and 39 in the top 3. The benchmark now holds 3795 requests over
+  thirty-four servers; its floors move to 1456 and 1703 in fields and 1594
+  asked again, and the laravel/mcp line to 631 and 932 as one sentence and
+  1066 and 1376 with the fields joined.
+
+- **An IT service desk with 150 tools on the search benchmark.** The third
+  large server in English, after the hosting panel and the airline
+  operations centre: kebab-case names, verb first (`assign-incident`,
+  `assign-problem`, `assign-task`), most of them sharing a verb or an
+  object with several others, as on a host that exposes its whole back
+  office. Its 150 requests, one per tool, were written before any of them
+  was run, in the words of agents (ticket, laptop, locked out), and nothing
+  was tuned on them: on its test half, 62 of 75 come first in fields and
+  71 in the top 3, with the cut at 60% unchanged. The benchmark now holds
+  3695 requests over thirty-three servers; its floors move to 1423 and
+  1664 in fields and 1559 asked again, and the laravel/mcp line to 614 and
+  910 as one sentence and 1038 and 1340 with the fields joined.
+
+- **Every mode on the official PHP SDK over stdio.** `docs/examples/sdk/server.php`
+  takes the mode by `MCP_NOTES_MODE`, as its HTTP server and the logiscape
+  servers do, and the `sdk` test suite runs the grouped, gateway and direct
+  modes through `mcp/sdk`: its stdio server had only ever been run in
+  compact mode. The instructions of `initialize` follow the mode, and the
+  arguments nested in a call to a group or to the gateway, an empty
+  `arguments` object included, reach the library as the client sent them.
+
+- **Every mode on logiscape/mcp-sdk-php.** Both servers of
+  `docs/examples/logiscape/` take the mode by `MCP_NOTES_MODE`, as the
+  server written by hand does, and the `logiscape` test suite runs the
+  grouped, gateway and direct modes through the SDK: until now only the
+  compact mode was proved on a third-party SDK. The annotations of each
+  tool, the `action` enum of a group, a change sent to the wrong tool of
+  its group and an empty `arguments` object sent to the gateway's `run`
+  all come through the SDK's `Result` as the library wrote them.
+
+- **A coffee washing station written in Amharic and a community garden in
+  English on the search benchmark.** The station has 40 tools in English
+  snake_case with titles and descriptions in the Ethiopic script, most of
+  them neighbours on one object, and 16 of its 100 requests type the
+  letters of the same sound most people use (`ሰራተኛ` for `ሠራተኛ`, worker).
+  The garden has 40 tools in camelCase, asked in the words of members
+  rather than of the tools. All 200 requests were written before any of
+  them was run, and nothing was tuned on them: on their test halves, 34
+  and 40 come first in fields, 46 and 42 in the top 3. The benchmark now
+  holds 3545 requests over thirty-two servers; its floors move to 1361 and
+  1593 in fields and 1491 asked again, and the laravel/mcp line to 583 and
+  869 as one sentence and 983 and 1272 with the fields joined.
+
+- **The server on logiscape/mcp-sdk-php over HTTP.**
+  `docs/examples/logiscape/http-server.php` serves the notes tools through
+  the SDK's `HttpServerRunner`, one process per request as PHP-FPM runs it,
+  with the gate and the `Discovery` built for the caller of each request.
+  Three traps of the SDK are covered: the runner keeps its sessions in
+  memory unless given a store, so the example gives it a
+  `FileSessionStore`; it builds its session itself, so the instructions are
+  set on the JSON answers to `initialize` and `server/discover` by
+  `instruct()`, decoded as objects so that the empty objects of the answer
+  stay `{}`; and it binds a session to no caller without its OAuth, which
+  is harmless here because the gate is built from each request's token,
+  never from the session. The handlers both servers register now live once
+  in `serve()`. The `logiscape` test suite calls it over HTTP, the
+  stateless revision included.
+
+- **A wine cellar written in Georgian on the search benchmark.** 40 tools
+  in English snake_case, with Georgian titles and descriptions, most of
+  them neighbours on one object (fill a qvevri, seal it, open it, wash it;
+  plan a bottling, cancel it, record it). Its 100 requests were written
+  before any of them was run, with the verbs as people type them and 13 of
+  them in Mtavruli, the Georgian capitals. Nothing was tuned on it: 42 of
+  its 50 test requests come first in fields, 49 in the top 3, 33 as one
+  sentence, and learning loses none. The benchmark now holds 3345 requests
+  over thirty servers; its floors move to 1287 and 1505 in fields and 1410
+  asked again, and the laravel/mcp line to 534 and 802 as one sentence and
+  924 and 1199 with the fields joined.
+
+- **A server on logiscape/mcp-sdk-php in the host examples.**
+  `docs/examples/logiscape/` serves the notes tools on the other MCP SDK for
+  PHP many servers run on, pinned at 2.0.2, over stdio. The library answers
+  the `tools/list` and `tools/call` handlers of the SDK's `Server`; the
+  example leaves out its `McpServer` wrapper, which would announce prompts
+  and resources the server does not have, and adds the instructions to
+  `initialize` and `server/discover` through a subclass of the SDK's
+  session, since the SDK has no setting for them. A CI job installs the SDK
+  and runs the `logiscape` test suite, as part of **CI passed**: the SDK is
+  past 1.0 and pinned. docs/HOSTS.md says what each part does and why.
+
+- **A chess club written in Armenian on the search benchmark.** 40 tools
+  in English snake_case, with Armenian titles and descriptions, most of
+  them neighbours on one object (pair a round, swap two pairings, publish
+  them; record a result, correct it, record a forfeit). Its 100 requests
+  were written before any of them was run, typed with the question and
+  emphasis marks set inside the word (`փոխե՞լ`), with `եվ` for `և`, and
+  some starting with a capital. Nothing was tuned on it: 44 of its 50 test
+  requests come first in fields, all 50 in the top 3, 39 as one sentence,
+  and learning loses none. The benchmark now holds 3245 requests over
+  twenty-nine servers; its floors move to 1245 and 1456 in fields and 1364
+  asked again, and the laravel/mcp line to 517 and 774 as one sentence and
+  904 and 1166 with the fields joined.
+
+- **A driving school written in Persian on the search benchmark.** 40
+  tools in English snake_case, with Persian titles and descriptions written
+  with the zero-width non-joiner inside words, most of them neighbours on
+  one object (book, move and cancel a lesson; book, cancel and record a
+  test). Its 100 requests were written before any of them was run, typed
+  with the joiner, with a space in its place, glued, and a few on an Arabic
+  keyboard (`ي`, `ك` for `ی`, `ک`). Nothing was tuned on it: 38 of its 50
+  test requests come first in fields, 33 as one sentence, and learning
+  loses none. The benchmark now holds 3145 requests over twenty-eight
+  servers; its floors move to 1201 and 1406 in fields and 1317 asked again,
+  and the laravel/mcp line to 486 and 736 as one sentence and 870 and 1123
+  with the fields joined.
+
+- **A fire station written in Spanish on the search benchmark.** 40 tools
+  named in Spanish snake_case, most of them neighbours on one object (take
+  a vehicle out of service and put it back, send a crew and call it back,
+  schedule and cancel an inspection). Its 100 requests were written before
+  any of them was run, most typed as Spanish is in a hurry: without
+  accents, and with the pronoun joined to the verb (`quitala`). Nothing was
+  tuned on it: 43 of its 50 test requests come first in fields, 37 as one
+  sentence. The benchmark now holds 3045 requests over twenty-seven
+  servers; its floors move to 1163 and 1360 in fields and 1273 asked
+  again, and the laravel/mcp line to 456 and 699 as one sentence and 833
+  and 1081 with the fields joined.
+
+- **Russian requests typed without `ё` on the search benchmark.** Twelve
+  more on each half of the hotel, written before any of them was run, typed
+  with `е` where the tools write `ё` (`счет` for `счёт`), as Russian is most
+  often typed. The benchmark now holds 2945 requests; its floors move to
+  1120 and 1314 in fields and 1229 asked again, and the laravel/mcp line to
+  436 and 672 as one sentence and 806 and 1043 with the fields joined.
+
+- **Greek requests in capitals and without accents on the search
+  benchmark.** Twelve more on the town hall and twelve on the museum, written
+  before any of them was run, typed as Greek is typed in capitals or in
+  haste: no accent, and a plain `σ` where the tools end a word with `ς`.
+  The benchmark now holds 2921 requests; its floors move to 1109 and 1303
+  in fields and 1217 asked again, and the laravel/mcp line to 431 and 663
+  as one sentence and 800 and 1034 with the fields joined.
+
+- **Server instructions from the mode, with `Discovery::instructions()`.**
+  Clients put the `instructions` of the `initialize` answer (of
+  `server/discover` from 2026-07-28) in the model's system prompt, before
+  any tool. In Compact, Grouped and Gateway the list is not the whole
+  server, and a model that is not told so concludes the tool it needs is
+  missing; every host had to write that sentence itself and keep it in step
+  with its prefix and its options. It now gets one or two sentences for the
+  current mode, to put after its own words, and `""` in Direct. They name
+  the mode's own tools only, never one of the host's, so they are the same
+  for every caller and can go in a discover answer cached as `public`. A
+  mode of your own gets them by implementing the new `Mode\Instructions`
+  interface, kept apart from `DiscoveryMode` so existing modes are not
+  broken. Every example server sends them: those on the official PHP SDK
+  through `setInstructions()`, and the laravel/mcp one from the mode its
+  methods list with, in place of a sentence written by hand.
+
+- **A tool set that leaves out a bad tool instead of failing.**
+  `ToolSet::of($tools, $refused)` takes a callback: a definition the
+  library cannot work with, or a later tool under a name already taken, is
+  left out and handed to it with its `InvalidTool`, and every other tool is
+  kept. A host that gathers tools from plugins no longer has to build each
+  `Tool` itself and catch the exception one by one. Without the callback,
+  the first bad tool still throws, as before.
+
+- **A kindergarten written in Vietnamese on the search benchmark.** 40
+  tools named in snake_case with titles and descriptions in Vietnamese,
+  which writes each syllable apart and is often typed without its tone
+  marks and without `đ`. Most are neighbours on one object (record and
+  cancel a notice of absence, add and remove a person allowed to pick a
+  child up, issue and void a receipt). Its 100 requests were written before
+  any of them was run; learning lost it a first place until a learned lift
+  was scaled by the share of the learned search the request holds, and now
+  loses none. The benchmark now holds 2897 requests over twenty-six
+  servers; its floors move to 1089 and 1280 in fields and 1198 asked again,
+  and the laravel/mcp line to 431 as one sentence and 800 with the fields
+  joined.
+
+- **A ferry line written in Turkish on the search benchmark.** 40 tools
+  named in snake_case with titles and descriptions in Turkish, whose words
+  take one suffix after another and are often typed without `ş` or `ı`,
+  and whose titles start with the capital `İ` that each letter lowered on
+  its own now meets. Most are neighbours on one object (sell, cancel,
+  refund and move a ticket; block and unblock a card). Its 100 requests
+  were written before any of them was run; learning lost it a first place
+  until a learned lift was scaled by the share of pairs that reached the
+  tool, and now loses none. The benchmark now holds 2797 requests over
+  twenty-five servers; its floors move to 1071 and 1249 in fields and 1171
+  asked again, and the laravel/mcp line to 426 as one sentence and 791
+  with the fields joined.
+
+- **A guide header in every mode, from `Discovery::guideHeader()`.** A
+  prompt that names tools now gets its header in Grouped and Gateway too:
+  in Grouped, each tool is named with the group tool that runs it and read
+  with `describe`; in Gateway, it is read with `operation` `describe` and
+  run with `operation` `run`, and with `changesApart` the changes are
+  called directly. Before, only `CompactMode::guideHeader()` existed, and a
+  host that switched a client to another mode lost the header of its
+  guides. Call it on `Discovery` with the host's whole `ToolSet`: it keeps
+  only the tools the caller may see, so a hidden tool a prompt names is
+  never written in its header, and it gives `""` in Direct or in a mode
+  without a header. A mode of your own gets one by implementing the new
+  `Mode\GuideHeader` interface, kept apart from `DiscoveryMode` so existing
+  modes are not broken.
+
+### Changed
+
+- **A weight given alone keeps the other fields at their defaults.**
+  `new SearchOptions(weights: ['title' => 3.0])` replaced the whole map, so
+  the name, the description and the parameters were no longer indexed and
+  a tool was found by its title only. The weights given are now laid over
+  `SearchOptions::WEIGHTS`, and `queryWeights` over
+  `SearchOptions::QUERY_WEIGHTS`; a field is left out with a weight of 0. A
+  host that passed the four fields sees no change.
+
+- **What the cut at 60% costs and saves is in docs/SEARCH.md.** Measured
+  again on the train half: lowering it finds up to 19 more requests in the
+  top 3 out of 1769, but each search then returns more tools than the
+  searches it saves would cost. The default does not change; a host whose
+  caller cannot search again can lower `SearchOptions::cut`.
+
+- **A request whose only tool word sits among unknown words lifts less of
+  what was learned.** A request of one word the tools use, among words they
+  do not ("sign | agreement | lot"), was lifted like a request of that one
+  word, so every tool learned for the thing moved up, and a new request
+  could lose its right tool from the top 3 to what other people had run.
+  Such a request now lifts only a tool one of whose learned searches it
+  holds whole: the same request asked again keeps its lift. Nothing changes
+  for a request of one word, or of two tool words or more, and the format
+  of the store is the same.
+
+- **`UnsupportedRevision` no longer repeats the client's string as sent.**
+  The revision comes from the client, and a host that writes the message to
+  its log wrote whatever the client put there, line breaks and terminal
+  sequences included, at any length. The message now names it as unknown
+  tool names are named: cut to 128 characters, anything but letters,
+  digits, `_`, `.` and `-` shown as `?`. A real revision such as
+  `2099-01-01` reads as before.
+
+- **The quick start answers `initialize` with the mode's instructions.**
+  It only said which `protocolVersion` to answer, so a host that copied it
+  and nothing more sent no `instructions`, and the model read the three
+  tools of Compact as the whole server. Its third block now builds the
+  whole `initialize` result, with `$discovery->instructions()` after the
+  host's own words, and says where they go in `2026-07-28`; the test that
+  runs the quick start checks them.
+
+- **A Russian word typed with `е` for `ё` finds the tool word it
+  spells.** As for Greek, a Cyrillic letter outside а to я (`ё`, and the
+  `і`, `ї`, `є` of Ukrainian) may be met by any letter of а to я and the
+  other way round, so `счет` now reaches `счёт`. Still no table and no
+  extension. On the test half, 1314 to 1315 in the top 3 in fields (the
+  floor moves with it), 1371 to 1372 in the top 3 asked again, and 831 to
+  830 first as one sentence, where two Ukrainian tools now both write the
+  word a request spells. A cached search over a server written in Cyrillic
+  takes about 0.25 ms against 0.15 ms.
+
+- **A Greek word typed without its accents finds the tool word it
+  spells.** As for a Latin letter outside ASCII, a Greek letter outside α
+  to ω (a tonos, a dialytika, polytonic marks) may be met by any letter of
+  α to ω, and a sigma by a final sigma: a request typed in capitals
+  (`ΚΡΑΤΗΣΕΙΣ`, which lowers to `κρατησεισ`) now reaches `κρατήσεις`. Still
+  no table and no extension. On the test half, 815 to 820 first as one
+  sentence and 1217 to 1218 asked again, the requests in fields as before;
+  the floor asked again moves to 1218. A cached search over a server
+  written in Greek takes about 0.25 ms against 0.14 ms.
+
+- **A word typed without its marks finds the tool word it spells.** A
+  request typed as many people type Vietnamese or Polish, on a phone above
+  all ("hoc phi" for "học phí", "doladuj" for "doładuj"), met the tool
+  only by trigrams, which the marks of a short word mostly change. A word
+  no tool uses now also counts as each tool word of its length that has
+  the same letters, except where one side has a Latin letter outside ASCII
+  and the other any letter of ASCII, as long as the letters that match
+  outright are at least as many. No table of letters and no extension: the
+  Unicode script of a character, read by PCRE, is all it takes, so a
+  Greek or Cyrillic word is never matched by a word of ASCII. On the test half, 1089 to
+  1099 first in fields, 798 to 807 as one sentence, 1198 to 1206 asked
+  again; no server loses a request. The tool words a word may spell are
+  first sifted by one pass of PCRE, letter by letter, so a cached search
+  over a server written with marks takes about as long as before (0.15 ms
+  over 40 tools), and one in English no longer.
+
+- **What was learned for a neighbour lifts it less.** A learned lift is now
+  also multiplied by the square of the share of a learned search's words
+  that the new request holds, so "view the instruments free to lend", run
+  for the list, no longer puts the list before the loan for "lend an
+  instrument". Each run keeps its whole search in the store, under a key
+  that starts with a tab; a store written before keeps working, its tools
+  lifted as before until new runs come. On the benchmark, learned from the
+  other half 1072 to 1074 first, asked again 1171 to 1175 (floor moved),
+  and no server loses a request to learning. A search that learns reads
+  every key of the store once more: about 0.55 ms against 0.35 ms over 176
+  tools.
+
+- **Plain words cost little over an index of words mostly of marks.** A word
+  of a request is no longer held against the tool words whose number of
+  letters with marks differs from its own by more than half their length,
+  which can never spell it. Over an index of words mostly of marks, a plain
+  word cost as much as reading every word of its length; it now costs as
+  little as any other. The ranking of every request of the benchmark is
+  unchanged.
+
+### Fixed
+
+- **Search settings that would never be read are refused when built.**
+  `SearchOptions` throws `InvalidArgumentException`, naming the setting, for
+  a field the search does not have (`weights: ['names' => 2.0]` indexed
+  nothing, `queryWeights: ['query' => 2.0]` was ignored), a negative or NAN
+  weight, every field at 0, a NAN cut, a negative trigram weight, a stop word
+  that is not a string, and a synonym key that is not one word of a request
+  (`'team meeting'`, `'e-mail'`, a number, a stop word) or whose value is
+  empty. A synonym key and a stop word with a capital outside ASCII
+  (`'Événement'`, `'Über'`) are now lowered as the request is: they were
+  lowered by `strtolower()`, which leaves such letters as they are, and were
+  never met.
+
+- **Titles and groups the mode would never read are refused when it is
+  built.** `new CompactMode(titles: ['run_read_tool' => '...'])` used to be
+  accepted, and the runner kept its English title on every screen;
+  `new GroupedMode($groupOf, ['files', 'tickets'])` keyed its groups 0 and
+  1, so no tool fell in one and every tool was listed as itself; a
+  `changeTitles` key that names no group was dropped. Each now throws
+  `InvalidArgumentException` naming the key, and so does a title that is
+  not a string. A tool named twice in `pinned` is listed once: it used to
+  appear twice in `tools/list`, which a strict client may refuse.
+
+- **A bad prefix is refused when the compact or gateway mode is built.**
+  `new CompactMode(prefix: 'acme tools ')` used to be accepted, then
+  `tools/list` threw `InvalidTool` on every request, naming
+  `acme tools search_tools` as if the host had written that tool, while
+  `tools/call` still answered. Both constructors now throw
+  `InvalidArgumentException` with the prefix and the name it makes, as
+  `GroupedMode` already did for a group; `run_write_batch` is only checked
+  when `batchLimit` turns it on. The rule of a tool name is
+  `Tool::validName()`, now public, so a mode of your own can check the
+  names it makes the same way.
+
+- **A tool name that ends in a newline is refused.** `Tool::fromArray()`
+  took `"get_file\n"` as a valid name, since a bare `$` in PCRE also
+  matches before a final newline, and the mode then listed a name the
+  specification forbids, which a strict client may answer by refusing the
+  whole list. It now throws `InvalidTool`, as for a space, and a `ToolSet`
+  given a `$refused` callback leaves that tool out and says why.
+
+- **docs/MODES.md gives the bytes of one compact search as measured.**
+  The changes to the search since the table was written had moved the
+  answer on seven servers, the kindergarten from 1,438 to 1,222 bytes, and
+  nothing checked it. `ListCostTest` now compares the whole table, and the
+  README sentence on the largest server, with what the benchmark measures,
+  and its failure shows the table to paste.
+
+- **docs/MODES.md gives the bytes of the group tools as measured.** Its
+  sentence on the grouped mode (8 tools of 7,154 bytes for 28 actions of
+  9,299 on the workspace) was copied by hand, outside the table the test
+  holds. `ListCostTest` now compares it with what `ListCost::groups()`
+  measures, and `composer benchmark` prints it under the table.
+
+### Security
+
+- A word of a request counts as at most 32 tool words it spells but for its
+  marks, as for the words alike it, so the cost of a search stays small
+  however many words of a large index share most of their letters. The
+  ranking of every request of the benchmark is unchanged.
+
+- A word of a request whose letters with marks outnumber its plain letters
+  is no longer held against the plain words of the index, which can never
+  spell it, so its search costs as little as any other on a large index.
+  The ranking of every request of the benchmark is unchanged.
+
+- A word of a request is held only against the tool words whose letters
+  with marks sit in the same places as its own at half of them or more,
+  the only ones that can spell it, so its search costs as little as any
+  other on a large index whatever the places of the marks. The ranking of
+  every request of the benchmark is unchanged.
+
+- An index read from the cache is used only when it was built over exactly
+  the tools being searched, whatever the cache hands back for a key;
+  otherwise it is built again, so a search never knows the words of a tool
+  the caller does not see.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

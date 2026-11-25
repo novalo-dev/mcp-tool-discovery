@@ -70,6 +70,28 @@ final class ToolIndex
      */
     private const MAX_ALIKE = 32;
 
+    /** How many words of the index one pass of PCRE reads; see unmarked(). */
+    private const SPELL_SLICE = 256;
+
+    /**
+     * A word holding a letter with marks: a Latin letter outside ASCII, a
+     * Greek letter outside α to ω (a tonos, a dialytika, a breathing), or a
+     * Cyrillic letter outside а to я ("ё", "ї", "ў"). Each script's plain
+     * letters are one range of code points, so no table of letters is
+     * needed; see unmarked().
+     */
+    private const MARKED = '/(?![a-z])\p{Latin}|(?![α-ω])\p{Greek}|(?![а-я])\p{Cyrillic}/u';
+
+    /** A word written in the plain letters of one script only. */
+    private const PLAIN = '/^(?:[a-z]+|[α-ω]+|[а-я]+)$/u';
+
+    /**
+     * The scripts whose plain letters fill one range other than ASCII, and
+     * that range: a letter of the range stands for any other letter of its
+     * script, and the other way round.
+     */
+    private const RANGES = ['Greek' => 'α-ω', 'Cyrillic' => 'а-я'];
+
     /**
      * How many words of one query no tool uses are looked up in full, the
      * first ones written. Finding the words alike one visits every word of
@@ -87,6 +109,33 @@ final class ToolIndex
      * @var list<string>|null
      */
     private ?array $wordList = null;
+
+    /**
+     * The indexed words holding a letter with marks (MARKED), grouped by
+     * how many characters they have, built the first time a query holds a
+     * word no document does; see unmarked().
+     *
+     * @var array<int, list<string>>|null
+     */
+    private ?array $marked = null;
+
+    /**
+     * The same words of one length, by the places of their letters with
+     * marks (see places()), each keyed by its place among the words of
+     * that length; built the first time a query holds an unknown word of
+     * that length.
+     *
+     * @var array<int, array<string, array<int, string>>>
+     */
+    private array $markPlaces = [];
+
+    /**
+     * The same for the indexed words written in the plain letters of one
+     * script (PLAIN).
+     *
+     * @var array<int, list<string>>|null
+     */
+    private ?array $plain = null;
 
     /**
      * @param list<int|string> $ids the documents, in index order
@@ -212,7 +261,13 @@ final class ToolIndex
         // of them: alone they lost the requests a trigram still found.
         $unknown = array_slice(array_values(array_filter($words, fn(string $word): bool => !isset($this->words[$word]))), 0, self::MAX_UNKNOWN);
         foreach ($unknown as $word) {
-            foreach ($this->alike($word) as $alike => $dice) {
+            // A word typed without its marks ("hoc phi" for "học phí") is
+            // taken for the tool word it spells, as alike as can be.
+            $matches = $this->alike($word);
+            foreach ($this->unmarked($word) as $spelled) {
+                $matches[$spelled] = 1.0;
+            }
+            foreach ($matches as $alike => $dice) {
                 foreach ($this->bm25f([(string) $alike], $this->words) as $id => $score) {
                     $wordScores[$id] = ($wordScores[$id] ?? 0.0) + self::ALIKE_WEIGHT * $dice * $score;
                 }
@@ -314,6 +369,241 @@ final class ToolIndex
         }
 
         return $nearest === null ? null : $this->wordList[$nearest] ?? null;
+    }
+
+    /**
+     * The indexed words a word spells but for its marks: as long, the same
+     * letter wherever both are plain or both have marks, and wherever one
+     * is a Latin letter outside ASCII ("ệ", "đ", "ü"), any letter of ASCII
+     * in the other, and wherever one is a Greek letter with marks ("ή",
+     * "ϊ"), any Greek letter from α to ω, and the same for a Cyrillic
+     * letter outside а to я ("ё", "ї") and the letters within. Russian is
+     * most often typed with "е" for "ё". Either side may be the one
+     * without its marks. A sigma stands for a final sigma and the other way
+     * round: a word typed in capitals lowers to "κρατησεισ", where the
+     * tool writes "κρατήσεις".
+     *
+     * Vietnamese, and many languages written in Latin letters, are often
+     * typed without their marks, on a phone above all. Trigrams do not see
+     * it: the marks sit in short words, so most trigrams of "hoc" differ
+     * from those of "học". Folding a letter to its base needs a table of
+     * letters or the intl extension; reading the place of the marks needs
+     * neither, only the Unicode script of a character, which PCRE knows,
+     * and for Greek and Cyrillic the one range their plain letters fill. A
+     * letter stands only for a letter of its own script, so a Greek word
+     * never matches a word of ASCII, and Arabic or Hebrew words are never
+     * matched this way.
+     *
+     * The letters that match outright must be at least as many as those
+     * taken on trust, so "đơn" is not spelled by any three letters ending
+     * in "n". At most MAX_ALIKE words, the first in index order.
+     *
+     * @return list<string>
+     */
+    private function unmarked(string $word): array
+    {
+        $characters = preg_split('//u', $word, -1, PREG_SPLIT_NO_EMPTY);
+        if ($characters === false) {
+            return [];
+        }
+        // A plain word can only be spelled by a word with marks; a word
+        // with marks by a word with or without them.
+        $marks = (int) preg_match_all(self::MARKED, $word);
+        $hasMarks = $marks > 0;
+        if (!$hasMarks && preg_match(self::PLAIN, $word) !== 1) {
+            return [];
+        }
+        // A letter with marks matches outright only the same letter, so
+        // the positions taken on trust are exactly those where one word has
+        // marks and the other has not, and these must be at most half (see
+        // spell()). A word whose letters with marks sit elsewhere than this
+        // one's at more than half its positions can never spell it: such
+        // words passed the pattern below and failed the count, and on an
+        // index of words with marks in the same places that was every word
+        // of the length. Read by places, every word that passes the pattern
+        // spells the word, so the bound MAX_ALIKE stops the pass.
+        $length = count($characters);
+        $places = self::places($word);
+        $within = static fn(string $others): bool => 2 * substr_count($places ^ $others, "\x01") <= $length;
+        $againstPlain = $hasMarks && 2 * $marks <= $length;
+        // Built from the index at the first word that needs them, each with
+        // one pass of PCRE over every word: an index read back from the
+        // cache at each request pays for them only when a request holds a
+        // word no tool uses, and for the plain words only when it holds one
+        // with marks.
+        $this->wordList ??= array_map('strval', array_keys($this->words));
+        if ($this->marked === null) {
+            $this->marked = [];
+            /** @var array<int, string>|false $withMarks */
+            $withMarks = preg_grep(self::MARKED, $this->wordList);
+            foreach ($withMarks === false ? [] : $withMarks as $indexed) {
+                $this->marked[(int) preg_match_all('/./su', $indexed)][] = $indexed;
+            }
+        }
+        if ($againstPlain && $this->plain === null) {
+            $this->plain = [];
+            /** @var array<int, string>|false $plain */
+            $plain = preg_grep(self::PLAIN, $this->wordList);
+            foreach ($plain === false ? [] : $plain as $indexed) {
+                $this->plain[(int) preg_match_all('/./su', $indexed)][] = $indexed;
+            }
+        }
+        // One pass of PCRE over the words of the same length keeps those
+        // that could be spelled, letter by letter, so the loop of PHP below
+        // only counts the letters of the few that remain: on a large index
+        // whose words share most of their letters, it was the loop over
+        // every one of them that cost.
+        $pattern = '';
+        foreach ($characters as $character) {
+            if ($character >= 'a' && $character <= 'z' && strlen($character) === 1) {
+                $pattern .= '(?:' . $character . '|(?![\x00-\x7F])\p{Latin})';
+            } elseif (strlen($character) > 1 && preg_match('/^\p{Latin}$/u', $character) === 1) {
+                $pattern .= '(?:' . preg_quote($character, '/') . '|[a-z])';
+            } elseif ($character === 'σ' || $character === 'ς') {
+                $pattern .= '(?:σ|ς)';
+            } else {
+                $pattern .= self::stands($character);
+            }
+        }
+        // Read for one length at a time: reading the marks of every word of
+        // the index at once doubled the cost of a search over the
+        // kindergarten, whose index is read back from the cache at each
+        // request.
+        if (!isset($this->markPlaces[$length])) {
+            $this->markPlaces[$length] = [];
+            foreach ($this->marked[$length] ?? [] as $place => $indexed) {
+                $this->markPlaces[$length][self::places($indexed)][$place] = $indexed;
+            }
+        }
+        $withMarks = [];
+        foreach ($this->markPlaces[$length] as $others => $words) {
+            if ($within($others)) {
+                $withMarks += $words;
+            }
+        }
+        // Back in index order, so the words kept within MAX_ALIKE are the
+        // same as if every word of the length had been read.
+        ksort($withMarks);
+        $candidates = array_merge($againstPlain ? $this->plain[$length] ?? [] : [], array_values($withMarks));
+        $spelled = [];
+        // In slices, so the pass stops once MAX_ALIKE are found, as the loop
+        // did before it, rather than reading the rest of the index.
+        for ($offset = 0; $offset < count($candidates); $offset += self::SPELL_SLICE) {
+            /** @var array<int, string>|false $matching */
+            $matching = preg_grep('/^' . $pattern . '$/u', array_slice($candidates, $offset, self::SPELL_SLICE));
+            if ($this->spell($word, $characters, $matching === false ? [] : $matching, $spelled)) {
+                break;
+            }
+        }
+
+        return $spelled;
+    }
+
+    /**
+     * Adds to $spelled the words that spell the word but for its marks,
+     * with at least as many letters alike as taken on trust.
+     *
+     * @param list<string> $characters the word, cut into characters
+     * @param array<int, string> $matching the words that matched letter by letter
+     * @param list<string> $spelled
+     *
+     * @return bool whether MAX_ALIKE words are found
+     */
+    private function spell(string $word, array $characters, array $matching, array &$spelled): bool
+    {
+        foreach ($matching as $indexed) {
+            if ($indexed === $word) {
+                continue;
+            }
+            $letters = preg_split('//u', $indexed, -1, PREG_SPLIT_NO_EMPTY);
+            if ($letters === false) {
+                continue;
+            }
+            $same = 0;
+            $trusted = 0;
+            foreach ($characters as $position => $character) {
+                $letter = $letters[$position] ?? '';
+                if ($character === $letter || (self::sigma($character) && self::sigma($letter))) {
+                    ++$same;
+                } elseif (self::mark($character, $letter) || self::mark($letter, $character)) {
+                    ++$trusted;
+                } else {
+                    continue 2;
+                }
+            }
+            // Bounded as the words alike are: each is scored on its own, and
+            // a word whose letters are half marks is spelled by every word
+            // of the index sharing the other half.
+            if ($same >= $trusted) {
+                $spelled[] = $indexed;
+                if (count($spelled) >= self::MAX_ALIKE) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * One byte per character of the word: 1 where the letter has marks
+     * (MARKED), 0 elsewhere, so two words of one length are compared place
+     * by place with one XOR.
+     */
+    private static function places(string $word): string
+    {
+        $places = preg_replace(['/[\x00\x01]/', self::MARKED, '/[^\x01]/su'], ["\x00", "\x01", "\x00"], $word);
+
+        return is_string($places) ? $places : '';
+    }
+
+    /**
+     * The pattern of what may stand for a character outside the Latin
+     * script: within one of RANGES, the letter or a letter of its script
+     * outside the range; outside, the letter or a letter of the range.
+     */
+    private static function stands(string $character): string
+    {
+        $quoted = preg_quote($character, '/');
+        foreach (self::RANGES as $script => $range) {
+            if (preg_match('/^[' . $range . ']$/u', $character) === 1) {
+                return '(?:' . $quoted . '|(?![' . $range . '])\\p{' . $script . '})';
+            }
+            if (preg_match('/^\\p{' . $script . '}$/u', $character) === 1) {
+                return '(?:' . $quoted . '|[' . $range . '])';
+            }
+        }
+
+        return $quoted;
+    }
+
+    /**
+     * Whether a plain letter may stand for a letter with marks of its own
+     * script: a letter of ASCII for a Latin letter outside it, a letter of
+     * one of RANGES for any other letter of its script.
+     */
+    private static function mark(string $plain, string $marked): bool
+    {
+        if (strlen($plain) === 1) {
+            return $plain >= 'a' && $plain <= 'z' && strlen($marked) > 1 && preg_match('/^\p{Latin}$/u', $marked) === 1;
+        }
+        foreach (self::RANGES as $script => $range) {
+            if (preg_match('/^[' . $range . ']$/u', $plain) === 1) {
+                return preg_match('/^(?![' . $range . '])\\p{' . $script . '}$/u', $marked) === 1;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Whether a letter is a sigma, final or not. Unicode lowers a capital
+     * sigma to the plain one wherever it stands, so the two are one letter
+     * to a request typed in capitals.
+     */
+    private static function sigma(string $letter): bool
+    {
+        return $letter === 'σ' || $letter === 'ς';
     }
 
     /**

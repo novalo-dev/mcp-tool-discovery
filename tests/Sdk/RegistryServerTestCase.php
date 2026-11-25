@@ -45,6 +45,9 @@ abstract class RegistryServerTestCase extends TestCase
     {
         $replies = self::session([self::INITIALIZE, self::INITIALIZED, ['method' => 'tools/list']]);
 
+        // The instructions come from the mode the handler lists with.
+        self::assertStringStartsWith('Notes kept for the team.', $replies[1]['result']['instructions'] ?? '');
+        self::assertStringContainsString('notes_run_write_batch', $replies[1]['result']['instructions'] ?? '');
         self::assertSame(
             ['notes_search_tools', 'notes_run_read_tool', 'notes_run_write_tool', 'notes_run_write_batch'],
             array_column($replies[3]['result']['tools'], 'name'),

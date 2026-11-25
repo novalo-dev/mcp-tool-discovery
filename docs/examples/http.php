@@ -135,6 +135,7 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
             return [200, ['jsonrpc' => '2.0', 'id' => $id, 'result' => [
                 'supportedVersions' => supported(),
                 'capabilities' => ['tools' => new \stdClass()],
+                'instructions' => instructions($discovery),
                 'ttlMs' => 3_600_000,
                 'cacheScope' => 'public',
                 'resultType' => 'complete',
@@ -147,6 +148,7 @@ function answerHttp(string $method, callable $header, string $body, \Closure $di
                 'protocolVersion' => Revision::negotiate($params['protocolVersion'] ?? null)->value,
                 'capabilities' => ['tools' => new \stdClass()],
                 'serverInfo' => ['name' => 'notes', 'version' => '1.0.0'],
+                'instructions' => instructions($discovery),
             ]], []];
         }
 

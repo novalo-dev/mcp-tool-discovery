@@ -29,8 +29,9 @@ final class Tool
      * Names of the 2025-11-25 specification: letters, digits, underscore,
      * hyphen and dot, 1 to 128 characters. Earlier revisions said nothing, and
      * holding every tool to the strictest rule keeps names valid everywhere.
+     * D, since a bare $ also matches before a final newline.
      */
-    private const NAME = '/^[A-Za-z0-9_.-]{1,128}$/';
+    private const NAME = '/^[A-Za-z0-9_.-]{1,128}$/D';
 
     /**
      * @param array<string, mixed> $definition
@@ -41,6 +42,16 @@ final class Tool
     ) {}
 
     /**
+     * Whether a name follows the rule every listed tool is held to. Public so
+     * a mode can check the names it makes from the host's settings when it is
+     * built, rather than on the first list a client asks for.
+     */
+    public static function validName(string $name): bool
+    {
+        return preg_match(self::NAME, $name) === 1;
+    }
+
+    /**
      * @param array<string, mixed> $definition a Tool object of the MCP specification
      *
      * @throws InvalidTool
@@ -48,7 +59,7 @@ final class Tool
     public static function fromArray(array $definition): self
     {
         $name = $definition['name'] ?? null;
-        if (!is_string($name) || preg_match(self::NAME, $name) !== 1) {
+        if (!is_string($name) || !self::validName($name)) {
             throw InvalidTool::because(is_string($name) ? $name : '?', 'the name must be 1 to 128 letters, digits, "_", "-" or "."');
         }
         $schema = $definition['inputSchema'] ?? null;

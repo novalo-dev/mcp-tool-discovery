@@ -1,0 +1,3063 @@
+[
+ {
+  "name": "list-incidents",
+  "title": "Incidents",
+  "description": "Lists the incidents of a queue with their priority, state and assignee.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    },
+    "state": {
+     "type": "string",
+     "description": "new, assigned, on hold, resolved or closed"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-incident",
+  "title": "Incident",
+  "description": "Returns an incident with its caller, notes, attachments and history.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "open-incident",
+  "title": "Open an incident",
+  "description": "Opens an incident for a caller with a short description and a category.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "caller": {
+     "type": "string",
+     "description": "User who reports it"
+    },
+    "summary": {
+     "type": "string",
+     "description": "Short description"
+    },
+    "category": {
+     "type": "string",
+     "description": "Category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assign-incident",
+  "title": "Assign an incident",
+  "description": "Assigns an incident to an agent or a support group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "assignee": {
+     "type": "string",
+     "description": "Agent or group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "escalate-incident",
+  "title": "Escalate an incident",
+  "description": "Escalates an incident to the next support level and notifies its manager.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "set-incident-priority",
+  "title": "Incident priority",
+  "description": "Sets the impact and urgency of an incident, which give its priority.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "impact": {
+     "type": "string",
+     "description": "1 to 4"
+    },
+    "urgency": {
+     "type": "string",
+     "description": "1 to 4"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hold-incident",
+  "title": "Put an incident on hold",
+  "description": "Puts an incident on hold while waiting for the caller or a vendor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "waiting_for": {
+     "type": "string",
+     "description": "caller or vendor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "resolve-incident",
+  "title": "Resolve an incident",
+  "description": "Marks an incident resolved with a resolution code and notes for the caller.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "code": {
+     "type": "string",
+     "description": "Resolution code"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Resolution notes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "close-incident",
+  "title": "Close an incident",
+  "description": "Closes a resolved incident once the caller confirmed the fix.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reopen-incident",
+  "title": "Reopen an incident",
+  "description": "Reopens a resolved or closed incident when the issue comes back.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "merge-incidents",
+  "title": "Merge incidents",
+  "description": "Merges duplicate incidents into one, keeping the notes of each.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_ids": {
+     "type": "string",
+     "description": "Incident numbers"
+    },
+    "into": {
+     "type": "string",
+     "description": "Incident to keep"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "add-incident-note",
+  "title": "Note on an incident",
+  "description": "Adds a work note or a comment visible to the caller on an incident.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "text": {
+     "type": "string",
+     "description": "Note"
+    },
+    "visible": {
+     "type": "string",
+     "description": "true for a comment the caller sees"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "link-incident-problem",
+  "title": "Link to a problem",
+  "description": "Links an incident to the problem record that causes it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    },
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-major-incidents",
+  "title": "Major incidents",
+  "description": "Lists the major incidents in progress with their bridge call and communications.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "declare-major-incident",
+  "title": "Declare a major incident",
+  "description": "Declares an incident major, opens a bridge call and pages the incident manager.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "incident_id": {
+     "type": "string",
+     "description": "Incident number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-problems",
+  "title": "Problems",
+  "description": "Lists the problem records with their state, known error flag and linked incidents.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "State"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-problem",
+  "title": "Problem",
+  "description": "Returns a problem record with its root cause, workaround and linked incidents.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "open-problem",
+  "title": "Open a problem",
+  "description": "Opens a problem record to investigate the cause of repeated incidents.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "summary": {
+     "type": "string",
+     "description": "Short description"
+    },
+    "incident_ids": {
+     "type": "string",
+     "description": "Incidents it explains"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assign-problem",
+  "title": "Assign a problem",
+  "description": "Assigns a problem record to an analyst for investigation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    },
+    "assignee": {
+     "type": "string",
+     "description": "Analyst"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "record-root-cause",
+  "title": "Root cause",
+  "description": "Records the root cause found for a problem.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    },
+    "cause": {
+     "type": "string",
+     "description": "Root cause"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publish-workaround",
+  "title": "Publish a workaround",
+  "description": "Publishes a workaround for a known error so agents can apply it to incidents.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    },
+    "workaround": {
+     "type": "string",
+     "description": "Workaround"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "close-problem",
+  "title": "Close a problem",
+  "description": "Closes a problem record once the permanent fix is in place.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "problem_id": {
+     "type": "string",
+     "description": "Problem number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-known-errors",
+  "title": "Known errors",
+  "description": "Lists the known errors with their workaround, for agents answering calls.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Words to find"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-changes",
+  "title": "Changes",
+  "description": "Lists the change requests with their type, risk, state and planned window.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "State"
+    },
+    "from": {
+     "type": "string",
+     "description": "From date"
+    },
+    "to": {
+     "type": "string",
+     "description": "To date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-change",
+  "title": "Change",
+  "description": "Returns a change request with its plan, risk assessment, approvals and tasks.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "request-change",
+  "title": "Request a change",
+  "description": "Creates a change request with its plan, backout plan and planned window.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "summary": {
+     "type": "string",
+     "description": "Short description"
+    },
+    "type": {
+     "type": "string",
+     "description": "standard, normal or emergency"
+    },
+    "start": {
+     "type": "string",
+     "description": "Planned start"
+    },
+    "end": {
+     "type": "string",
+     "description": "Planned end"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assess-change-risk",
+  "title": "Change risk",
+  "description": "Computes the risk of a change from its answers to the risk questions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "submit-change",
+  "title": "Submit a change",
+  "description": "Submits a change request for approval by the change advisory board.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "approve-change",
+  "title": "Approve a change",
+  "description": "Records the approval of a change request by an approver.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    },
+    "comment": {
+     "type": "string",
+     "description": "Comment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reject-change",
+  "title": "Reject a change",
+  "description": "Rejects a change request and sends it back to its owner with a reason.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "schedule-change",
+  "title": "Schedule a change",
+  "description": "Sets the planned window of an approved change.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "end": {
+     "type": "string",
+     "description": "End"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "start-change",
+  "title": "Start a change",
+  "description": "Marks a change as being implemented at the start of its window.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complete-change",
+  "title": "Complete a change",
+  "description": "Closes a change as successful, partly successful or failed after its implementation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    },
+    "outcome": {
+     "type": "string",
+     "description": "successful, partial or failed"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "roll-back-change",
+  "title": "Roll back a change",
+  "description": "Records that a change was backed out and opens a review.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancel-change",
+  "title": "Cancel a change",
+  "description": "Cancels a change request that will not be implemented.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "list-change-conflicts",
+  "title": "Change conflicts",
+  "description": "Lists the changes whose windows overlap on the same configuration items.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "change_id": {
+     "type": "string",
+     "description": "Change number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-change-calendar",
+  "title": "Change calendar",
+  "description": "Returns the calendar of planned changes and freeze windows for a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "add-freeze-window",
+  "title": "Freeze window",
+  "description": "Adds a period during which no change may be implemented.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "end": {
+     "type": "string",
+     "description": "End"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-cab-meetings",
+  "title": "CAB meetings",
+  "description": "Lists the change advisory board meetings with their agenda.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-service-requests",
+  "title": "Service requests",
+  "description": "Lists the service requests with their catalogue item, requester and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "State"
+    },
+    "requester": {
+     "type": "string",
+     "description": "Requester"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-service-request",
+  "title": "Service request",
+  "description": "Returns a service request with its items, approvals and fulfilment tasks.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "raise-service-request",
+  "title": "Raise a service request",
+  "description": "Raises a request for a catalogue item on behalf of a user.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item": {
+     "type": "string",
+     "description": "Catalogue item"
+    },
+    "for_user": {
+     "type": "string",
+     "description": "User"
+    },
+    "answers": {
+     "type": "string",
+     "description": "Answers to the item form"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "approve-service-request",
+  "title": "Approve a service request",
+  "description": "Approves a service request waiting for the manager of the requester.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reject-service-request",
+  "title": "Reject a service request",
+  "description": "Rejects a service request with a reason for the requester.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request number"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fulfil-service-request",
+  "title": "Fulfil a service request",
+  "description": "Marks a service request fulfilled and tells the requester.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request number"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Notes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancel-service-request",
+  "title": "Cancel a service request",
+  "description": "Cancels a service request the requester no longer needs.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "request_id": {
+     "type": "string",
+     "description": "Request number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "list-catalogue-items",
+  "title": "Catalogue items",
+  "description": "Lists the items of the service catalogue with their category and approval rule.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "category": {
+     "type": "string",
+     "description": "Category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-catalogue-item",
+  "title": "Catalogue item",
+  "description": "Returns a catalogue item with its form, approvals and delivery time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string",
+     "description": "Item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-catalogue-item",
+  "title": "Create a catalogue item",
+  "description": "Adds an item to the service catalogue with its form and fulfilment group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "category": {
+     "type": "string",
+     "description": "Category"
+    },
+    "group": {
+     "type": "string",
+     "description": "Fulfilment group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "update-catalogue-form",
+  "title": "Catalogue item form",
+  "description": "Changes the questions of the form a user fills in to request a catalogue item.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string",
+     "description": "Item"
+    },
+    "questions": {
+     "type": "string",
+     "description": "Questions"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "retire-catalogue-item",
+  "title": "Retire a catalogue item",
+  "description": "Removes an item from the catalogue so it can no longer be requested.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "item_id": {
+     "type": "string",
+     "description": "Item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "list-tasks",
+  "title": "Tasks",
+  "description": "Lists the tasks of incidents, changes and requests assigned to an agent or group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignee": {
+     "type": "string",
+     "description": "Agent or group"
+    },
+    "state": {
+     "type": "string",
+     "description": "State"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-task",
+  "title": "Task",
+  "description": "Returns a task with its parent record, assignee and work notes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "task_id": {
+     "type": "string",
+     "description": "Task number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-task",
+  "title": "Create a task",
+  "description": "Adds a task to an incident, a change or a request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parent": {
+     "type": "string",
+     "description": "Parent record"
+    },
+    "summary": {
+     "type": "string",
+     "description": "What to do"
+    },
+    "assignee": {
+     "type": "string",
+     "description": "Agent or group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assign-task",
+  "title": "Assign a task",
+  "description": "Assigns a task to an agent or a group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "task_id": {
+     "type": "string",
+     "description": "Task number"
+    },
+    "assignee": {
+     "type": "string",
+     "description": "Agent or group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complete-task",
+  "title": "Complete a task",
+  "description": "Marks a task done with its work notes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "task_id": {
+     "type": "string",
+     "description": "Task number"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Work notes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-assets",
+  "title": "Assets",
+  "description": "Lists the hardware assets with their model, serial number, owner and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "in stock, in use, in repair or retired"
+    },
+    "model": {
+     "type": "string",
+     "description": "Model"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-asset",
+  "title": "Asset",
+  "description": "Returns an asset with its owner, location, warranty and history.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "register-asset",
+  "title": "Register an asset",
+  "description": "Registers a new hardware asset with its model, serial number and purchase date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "model": {
+     "type": "string",
+     "description": "Model"
+    },
+    "serial": {
+     "type": "string",
+     "description": "Serial number"
+    },
+    "purchased": {
+     "type": "string",
+     "description": "Purchase date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assign-asset",
+  "title": "Assign an asset",
+  "description": "Gives an asset to a user and records the handover.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    },
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "return-asset",
+  "title": "Return an asset",
+  "description": "Records that a user gave an asset back to stock.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    },
+    "condition": {
+     "type": "string",
+     "description": "Condition"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "send-asset-to-repair",
+  "title": "Send an asset to repair",
+  "description": "Sends an asset to repair with the vendor under its warranty.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    },
+    "fault": {
+     "type": "string",
+     "description": "Fault"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "retire-asset",
+  "title": "Retire an asset",
+  "description": "Retires an asset, with the reason and how it was disposed of.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    },
+    "disposal": {
+     "type": "string",
+     "description": "recycled, sold or destroyed"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "transfer-asset",
+  "title": "Transfer an asset",
+  "description": "Moves an asset to another location or cost centre.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "asset_tag": {
+     "type": "string",
+     "description": "Asset tag"
+    },
+    "location": {
+     "type": "string",
+     "description": "Location"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-expiring-warranties",
+  "title": "Expiring warranties",
+  "description": "Lists the assets whose warranty ends within a number of days.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "days": {
+     "type": "string",
+     "description": "Days ahead"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "start-asset-audit",
+  "title": "Asset audit",
+  "description": "Starts a stock count of the assets of a location against what is recorded.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "location": {
+     "type": "string",
+     "description": "Location"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-software-licences",
+  "title": "Software licences",
+  "description": "Lists the software licences with their seats, seats in use and renewal date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "publisher": {
+     "type": "string",
+     "description": "Publisher"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-software-licence",
+  "title": "Software licence",
+  "description": "Returns a licence with its agreement, seats and the users holding them.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "licence_id": {
+     "type": "string",
+     "description": "Licence"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "allocate-licence-seat",
+  "title": "Allocate a licence seat",
+  "description": "Gives a seat of a software licence to a user.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "licence_id": {
+     "type": "string",
+     "description": "Licence"
+    },
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reclaim-licence-seat",
+  "title": "Reclaim a licence seat",
+  "description": "Takes back a seat from a user who no longer uses the software.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "licence_id": {
+     "type": "string",
+     "description": "Licence"
+    },
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "renew-software-licence",
+  "title": "Renew a licence",
+  "description": "Records the renewal of a software licence with its new end date and seats.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "licence_id": {
+     "type": "string",
+     "description": "Licence"
+    },
+    "end": {
+     "type": "string",
+     "description": "New end date"
+    },
+    "seats": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-unused-licence-seats",
+  "title": "Unused seats",
+  "description": "Lists the seats held by users who did not open the software for a number of days.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "days": {
+     "type": "string",
+     "description": "Days"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-config-items",
+  "title": "Configuration items",
+  "description": "Lists the configuration items of the CMDB with their class and status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "class": {
+     "type": "string",
+     "description": "Class, for example server or application"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-config-item",
+  "title": "Configuration item",
+  "description": "Returns a configuration item with its attributes and relationships.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ci_id": {
+     "type": "string",
+     "description": "Configuration item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "add-config-item",
+  "title": "Add a configuration item",
+  "description": "Adds a configuration item to the CMDB.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "class": {
+     "type": "string",
+     "description": "Class"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "relate-config-items",
+  "title": "Relate configuration items",
+  "description": "Records that one configuration item depends on or runs on another.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Configuration item"
+    },
+    "to": {
+     "type": "string",
+     "description": "Configuration item"
+    },
+    "type": {
+     "type": "string",
+     "description": "depends on or runs on"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unrelate-config-items",
+  "title": "Remove a relationship",
+  "description": "Removes a relationship between two configuration items.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Configuration item"
+    },
+    "to": {
+     "type": "string",
+     "description": "Configuration item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get-impact-analysis",
+  "title": "Impact analysis",
+  "description": "Lists the services and users affected if a configuration item goes down.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "ci_id": {
+     "type": "string",
+     "description": "Configuration item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-services",
+  "title": "Business services",
+  "description": "Lists the business services with their owner, hours and current health.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-service-health",
+  "title": "Service health",
+  "description": "Returns the health of a business service from its open incidents and monitoring.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "service": {
+     "type": "string",
+     "description": "Service"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-knowledge-articles",
+  "title": "Knowledge articles",
+  "description": "Lists the articles of the knowledge base with their state, views and rating.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "draft, review or published"
+    },
+    "category": {
+     "type": "string",
+     "description": "Category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "search-knowledge",
+  "title": "Search the knowledge base",
+  "description": "Finds published articles whose words match a question.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Question"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-knowledge-article",
+  "title": "Knowledge article",
+  "description": "Returns an article with its body, versions and feedback.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "draft-knowledge-article",
+  "title": "Draft an article",
+  "description": "Writes a new knowledge article as a draft, optionally from a resolved incident.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "body": {
+     "type": "string",
+     "description": "Body"
+    },
+    "incident_id": {
+     "type": "string",
+     "description": "Incident it comes from"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "submit-article-review",
+  "title": "Send an article for review",
+  "description": "Sends a draft article to its knowledge manager for review.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publish-knowledge-article",
+  "title": "Publish an article",
+  "description": "Publishes a reviewed article so users and agents can read it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "retire-knowledge-article",
+  "title": "Retire an article",
+  "description": "Takes an article out of the knowledge base when it is out of date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "translate-knowledge-article",
+  "title": "Translate an article",
+  "description": "Adds a version of an article in another language.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    },
+    "language": {
+     "type": "string",
+     "description": "Language"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-article-feedback",
+  "title": "Article feedback",
+  "description": "Lists the ratings and comments users left on articles.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "article_id": {
+     "type": "string",
+     "description": "Article"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-slas",
+  "title": "SLAs",
+  "description": "Lists the service level agreements with their targets for response and resolution.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-sla",
+  "title": "SLA",
+  "description": "Returns an SLA with its targets, schedule and the records it applies to.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sla_id": {
+     "type": "string",
+     "description": "SLA"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-sla",
+  "title": "Create an SLA",
+  "description": "Defines a service level agreement with its targets and business hours.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "response": {
+     "type": "string",
+     "description": "Response target"
+    },
+    "resolution": {
+     "type": "string",
+     "description": "Resolution target"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "pause-sla-clock",
+  "title": "Pause the SLA clock",
+  "description": "Pauses the SLA timer of a record while waiting for the caller.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "record": {
+     "type": "string",
+     "description": "Record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-sla-breaches",
+  "title": "SLA breaches",
+  "description": "Lists the records that breached or are about to breach their SLA.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "within_hours": {
+     "type": "string",
+     "description": "Hours ahead"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-queues",
+  "title": "Queues",
+  "description": "Lists the support queues with their open records and members.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-queue",
+  "title": "Create a queue",
+  "description": "Creates a support queue with its working hours.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "hours": {
+     "type": "string",
+     "description": "Working hours"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "add-queue-member",
+  "title": "Add to a queue",
+  "description": "Adds an agent to a support queue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    },
+    "agent": {
+     "type": "string",
+     "description": "Agent"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "remove-queue-member",
+  "title": "Remove from a queue",
+  "description": "Removes an agent from a support queue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    },
+    "agent": {
+     "type": "string",
+     "description": "Agent"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "set-routing-rule",
+  "title": "Routing rule",
+  "description": "Sets the rule that sends new records of a category to a queue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "category": {
+     "type": "string",
+     "description": "Category"
+    },
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-users",
+  "title": "Users",
+  "description": "Lists the users of the directory with their department, manager and status.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "department": {
+     "type": "string",
+     "description": "Department"
+    },
+    "text": {
+     "type": "string",
+     "description": "Name or e-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-user",
+  "title": "User",
+  "description": "Returns a user with their devices, open records and groups.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-user",
+  "title": "Create a user",
+  "description": "Creates a user account for a new starter.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    },
+    "department": {
+     "type": "string",
+     "description": "Department"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "deactivate-user",
+  "title": "Deactivate a user",
+  "description": "Disables the account of a user who leaves and lists what they still hold.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User"
+    },
+    "last_day": {
+     "type": "string",
+     "description": "Last day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "reset-user-password",
+  "title": "Reset a password",
+  "description": "Resets the password of a user and sends a temporary one.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unlock-user-account",
+  "title": "Unlock an account",
+  "description": "Unlocks an account locked after too many failed sign-ins.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "set-out-of-office",
+  "title": "Out of office",
+  "description": "Marks an agent away so no record is routed to them.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "agent": {
+     "type": "string",
+     "description": "Agent"
+    },
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-groups",
+  "title": "Groups",
+  "description": "Lists the support groups with their manager and members.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-group",
+  "title": "Create a group",
+  "description": "Creates a support group with its manager.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "manager": {
+     "type": "string",
+     "description": "Manager"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "add-group-member",
+  "title": "Add to a group",
+  "description": "Adds a user to a support group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    },
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "remove-group-member",
+  "title": "Remove from a group",
+  "description": "Removes a user from a support group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    },
+    "user": {
+     "type": "string",
+     "description": "User"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "get-on-call-rota",
+  "title": "On-call rota",
+  "description": "Returns who is on call for a group, today or on a date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    },
+    "date": {
+     "type": "string",
+     "description": "Date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "swap-on-call-shift",
+  "title": "Swap on-call shifts",
+  "description": "Swaps two on-call shifts between agents of a group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    },
+    "shift_a": {
+     "type": "string",
+     "description": "Shift"
+    },
+    "shift_b": {
+     "type": "string",
+     "description": "Shift"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "page-on-call",
+  "title": "Page on call",
+  "description": "Pages the agent on call for a group by phone and text message.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "post-announcement",
+  "title": "Post an announcement",
+  "description": "Posts a banner on the portal about an outage or planned work.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "text": {
+     "type": "string",
+     "description": "Text"
+    },
+    "until": {
+     "type": "string",
+     "description": "Until"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-announcements",
+  "title": "Announcements",
+  "description": "Lists the banners shown on the portal.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "withdraw-announcement",
+  "title": "Withdraw an announcement",
+  "description": "Takes a banner off the portal.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "announcement_id": {
+     "type": "string",
+     "description": "Announcement"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "send-satisfaction-survey",
+  "title": "Send a survey",
+  "description": "Sends the satisfaction survey of a resolved record to its caller.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "record": {
+     "type": "string",
+     "description": "Record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-survey-results",
+  "title": "Survey results",
+  "description": "Returns the satisfaction scores and comments for a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    },
+    "group": {
+     "type": "string",
+     "description": "Group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report-incident-volume",
+  "title": "Incident volume",
+  "description": "Counts the incidents opened per day, category and priority over a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report-sla-compliance",
+  "title": "SLA compliance",
+  "description": "Returns the share of records that met their SLA, per group and priority.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report-agent-workload",
+  "title": "Agent workload",
+  "description": "Returns the open records and the time logged of each agent.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "Group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report-backlog-age",
+  "title": "Backlog age",
+  "description": "Counts the open records by how long they have been open.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report-first-call-resolution",
+  "title": "First call resolution",
+  "description": "Returns the share of incidents resolved on first contact.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-canned-responses",
+  "title": "Canned responses",
+  "description": "Lists the saved replies agents can insert in a comment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-canned-response",
+  "title": "Create a canned response",
+  "description": "Saves a reply agents can insert in a comment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "text": {
+     "type": "string",
+     "description": "Text"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "apply-canned-response",
+  "title": "Use a canned response",
+  "description": "Adds a saved reply as a comment on a record, filled with its fields.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "record": {
+     "type": "string",
+     "description": "Record"
+    },
+    "response": {
+     "type": "string",
+     "description": "Canned response"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-automation-rules",
+  "title": "Automation rules",
+  "description": "Lists the rules that act on records when they are created or change.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "create-automation-rule",
+  "title": "Create an automation rule",
+  "description": "Creates a rule that acts on records that meet its conditions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "when": {
+     "type": "string",
+     "description": "Condition"
+    },
+    "then": {
+     "type": "string",
+     "description": "Action"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enable-automation-rule",
+  "title": "Enable a rule",
+  "description": "Turns an automation rule on.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rule_id": {
+     "type": "string",
+     "description": "Rule"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disable-automation-rule",
+  "title": "Disable a rule",
+  "description": "Turns an automation rule off without deleting it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rule_id": {
+     "type": "string",
+     "description": "Rule"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delete-automation-rule",
+  "title": "Delete a rule",
+  "description": "Deletes an automation rule.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "rule_id": {
+     "type": "string",
+     "description": "Rule"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "list-mailboxes",
+  "title": "Mailboxes",
+  "description": "Lists the e-mail inboxes that turn messages into records.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "connect-mailbox",
+  "title": "Connect a mailbox",
+  "description": "Connects an e-mail inbox so its messages open records.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "address": {
+     "type": "string",
+     "description": "E-mail address"
+    },
+    "queue": {
+     "type": "string",
+     "description": "Queue"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "disconnect-mailbox",
+  "title": "Disconnect a mailbox",
+  "description": "Stops turning the messages of an inbox into records.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "address": {
+     "type": "string",
+     "description": "E-mail address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "log-time",
+  "title": "Log time",
+  "description": "Logs time spent by an agent on a record.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "record": {
+     "type": "string",
+     "description": "Record"
+    },
+    "minutes": {
+     "type": "string",
+     "description": "Minutes"
+    },
+    "notes": {
+     "type": "string",
+     "description": "Notes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-time-entries",
+  "title": "Time entries",
+  "description": "Lists the time logged on records by agent and day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "agent": {
+     "type": "string",
+     "description": "Agent"
+    },
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-departments",
+  "title": "Departments",
+  "description": "Lists the departments with their head and cost centre.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-locations",
+  "title": "Locations",
+  "description": "Lists the offices and sites with their address and local support group.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-vendors",
+  "title": "Vendors",
+  "description": "Lists the vendors with their contracts and support contacts.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-vendor",
+  "title": "Vendor",
+  "description": "Returns a vendor with its contracts, contacts and open vendor tickets.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vendor": {
+     "type": "string",
+     "description": "Vendor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "raise-vendor-ticket",
+  "title": "Raise a vendor ticket",
+  "description": "Opens a ticket with a vendor for an incident or an asset under contract.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "vendor": {
+     "type": "string",
+     "description": "Vendor"
+    },
+    "record": {
+     "type": "string",
+     "description": "Record"
+    },
+    "summary": {
+     "type": "string",
+     "description": "Summary"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-releases",
+  "title": "Releases",
+  "description": "Lists the releases with the changes they bundle and their deployment date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "plan-release",
+  "title": "Plan a release",
+  "description": "Creates a release that bundles changes for one deployment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "change_ids": {
+     "type": "string",
+     "description": "Changes"
+    },
+    "date": {
+     "type": "string",
+     "description": "Deployment date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "deploy-release",
+  "title": "Deploy a release",
+  "description": "Records that a release was deployed to an environment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "release_id": {
+     "type": "string",
+     "description": "Release"
+    },
+    "environment": {
+     "type": "string",
+     "description": "Environment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-maintenance-windows",
+  "title": "Maintenance windows",
+  "description": "Lists the agreed windows when a service may be taken down for work.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "service": {
+     "type": "string",
+     "description": "Service"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "get-record-history",
+  "title": "Record history",
+  "description": "Returns who changed what on any record, field by field.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "record": {
+     "type": "string",
+     "description": "Record"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-approvals",
+  "title": "Approvals",
+  "description": "Lists the changes and requests waiting for the approval of a user.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "approver": {
+     "type": "string",
+     "description": "Approver"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "delegate-approvals",
+  "title": "Delegate approvals",
+  "description": "Lets another user approve in the name of an approver for a period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "approver": {
+     "type": "string",
+     "description": "Approver"
+    },
+    "delegate": {
+     "type": "string",
+     "description": "Delegate"
+    },
+    "until": {
+     "type": "string",
+     "description": "Until"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "list-incident-categories",
+  "title": "Incident categories",
+  "description": "Lists the categories and subcategories an incident can be filed under.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "export-records",
+  "title": "Export records",
+  "description": "Exports the records of a list to a CSV file.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "table": {
+     "type": "string",
+     "description": "incident, problem, change or request"
+    },
+    "filter": {
+     "type": "string",
+     "description": "Filter"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

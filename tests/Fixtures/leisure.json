@@ -1,0 +1,872 @@
+[
+ {
+  "name": "ListMembers",
+  "title": "Members",
+  "description": "Lists the members of the centre with their membership type and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "search": {
+     "type": "string",
+     "description": "Name, card or phone"
+    },
+    "state": {
+     "type": "string",
+     "description": "active, frozen or ended"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GetMember",
+  "title": "Member",
+  "description": "Shows one member: contact details, membership, card, credit and visits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RegisterMember",
+  "title": "New member",
+  "description": "Registers a new member and prints their entry card.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Full name"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Phone"
+    },
+    "birth": {
+     "type": "string",
+     "description": "Date of birth"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "UpdateMemberContact",
+  "title": "Change contact details",
+  "description": "Changes the phone, e-mail or postal address of a member.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Phone"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "StartMembership",
+  "title": "Start a membership",
+  "description": "Starts a monthly or yearly membership for a member from a date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "plan": {
+     "type": "string",
+     "description": "Plan"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RenewMembership",
+  "title": "Renew a membership",
+  "description": "Renews a membership that has ended or is about to end, for one more period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "FreezeMembership",
+  "title": "Freeze a membership",
+  "description": "Suspends a membership for a while, such as for an injury or a long trip, and moves its end date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "until": {
+     "type": "string",
+     "description": "Until"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "UnfreezeMembership",
+  "title": "Unfreeze a membership",
+  "description": "Starts a frozen membership again before its planned date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ChangeMembershipPlan",
+  "title": "Change plan",
+  "description": "Moves a member to another plan, such as from off-peak to full, from the next period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "plan": {
+     "type": "string",
+     "description": "New plan"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CancelMembership",
+  "title": "Cancel a membership",
+  "description": "Ends a membership at the end of its notice period.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "ListMembershipPlans",
+  "title": "Plans and prices",
+  "description": "Lists the membership plans with their price, hours and what they include.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ReplaceCard",
+  "title": "Replace a card",
+  "description": "Prints a new entry card for a member and blocks the old one.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "lost, stolen or broken"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "AddCredit",
+  "title": "Add credit",
+  "description": "Adds money to a member's account, to pay for bookings and the cafe.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "amount": {
+     "type": "string",
+     "description": "Amount"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RefundCredit",
+  "title": "Refund credit",
+  "description": "Pays a member back the credit left on their account.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "amount": {
+     "type": "string",
+     "description": "Amount"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "ListBookings",
+  "title": "Bookings",
+  "description": "Lists the bookings of courts, lanes and rooms for a day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Day"
+    },
+    "facility": {
+     "type": "string",
+     "description": "Facility"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GetBooking",
+  "title": "Booking",
+  "description": "Shows one booking: who, what, when, price and whether it is paid.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CreateBooking",
+  "title": "Book",
+  "description": "Books a court, a lane or a room for a member at a time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "facility": {
+     "type": "string",
+     "description": "Facility"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "length": {
+     "type": "string",
+     "description": "Length"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "MoveBooking",
+  "title": "Move a booking",
+  "description": "Moves a booking to another time or another court of the same kind.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking number"
+    },
+    "start": {
+     "type": "string",
+     "description": "New start"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CancelBooking",
+  "title": "Cancel a booking",
+  "description": "Cancels a booking and puts any charge back as credit.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "CheckAvailability",
+  "title": "Free slots",
+  "description": "Shows the free slots of a court, a lane or a room over a day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "facility": {
+     "type": "string",
+     "description": "Facility"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "BlockFacility",
+  "title": "Close a facility",
+  "description": "Closes a court, a lane or a room for a time, for repairs or an event, and warns the bookings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "facility": {
+     "type": "string",
+     "description": "Facility"
+    },
+    "start": {
+     "type": "string",
+     "description": "From"
+    },
+    "end": {
+     "type": "string",
+     "description": "To"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ListClasses",
+  "title": "Classes",
+  "description": "Lists the group classes of the week with their instructor and places left.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "Week"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "GetClass",
+  "title": "Class",
+  "description": "Shows one class: time, room, instructor, who is booked and who waits.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ScheduleClass",
+  "title": "Add a class",
+  "description": "Adds a group class to the timetable, once or every week.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Class"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "room": {
+     "type": "string",
+     "description": "Room"
+    },
+    "instructor": {
+     "type": "string",
+     "description": "Instructor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "CancelClass",
+  "title": "Cancel a class",
+  "description": "Cancels a class and tells everyone booked on it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "EnrolInClass",
+  "title": "Book a class",
+  "description": "Books a member a place in a class.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    },
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "WithdrawFromClass",
+  "title": "Leave a class",
+  "description": "Takes a member off a class and gives the place to the first one waiting.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    },
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "JoinClassWaitlist",
+  "title": "Wait for a class",
+  "description": "Puts a member on the waiting list of a full class.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    },
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "AssignInstructor",
+  "title": "Change instructor",
+  "description": "Gives a class to another instructor, such as to cover an illness.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Class id"
+    },
+    "instructor": {
+     "type": "string",
+     "description": "Instructor"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ListInstructors",
+  "title": "Instructors",
+  "description": "Lists the instructors with what they teach and their hours this week.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {}
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RecordVisit",
+  "title": "Check in",
+  "description": "Records a member coming in at the front desk.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "card": {
+     "type": "string",
+     "description": "Card number"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ListVisits",
+  "title": "Visits",
+  "description": "Lists the visits of a member, or of the centre for a day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "IssueGuestPass",
+  "title": "Guest pass",
+  "description": "Gives a member's guest a pass for one day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "guest": {
+     "type": "string",
+     "description": "Guest name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "AssignLocker",
+  "title": "Rent a locker",
+  "description": "Lets a locker of the changing rooms to a member for a month.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "member": {
+     "type": "string",
+     "description": "Member id"
+    },
+    "locker": {
+     "type": "string",
+     "description": "Locker"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "ReleaseLocker",
+  "title": "Free a locker",
+  "description": "Ends the rent of a locker and opens it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "locker": {
+     "type": "string",
+     "description": "Locker"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "ReportFault",
+  "title": "Report a fault",
+  "description": "Reports something broken in the building: a machine, a shower, the sauna.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "where": {
+     "type": "string",
+     "description": "Where"
+    },
+    "fault": {
+     "type": "string",
+     "description": "What is wrong"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RecordPoolReading",
+  "title": "Pool water test",
+  "description": "Records the chlorine, pH and temperature of the pool water.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pool": {
+     "type": "string",
+     "description": "Pool"
+    },
+    "chlorine": {
+     "type": "string",
+     "description": "Chlorine"
+    },
+    "ph": {
+     "type": "string",
+     "description": "pH"
+    },
+    "temperature": {
+     "type": "string",
+     "description": "Temperature"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "RecordIncident",
+  "title": "Accident report",
+  "description": "Records an accident or first aid given on site.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "where": {
+     "type": "string",
+     "description": "Where"
+    },
+    "what": {
+     "type": "string",
+     "description": "What happened"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "SendMemberMessage",
+  "title": "Message members",
+  "description": "Sends an e-mail or a text to members, all of them or those of a plan or a class.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "to": {
+     "type": "string",
+     "description": "Who"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "body": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "DailyReport",
+  "title": "Day report",
+  "description": "Counts visits, bookings, classes and takings for a day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ }
+]

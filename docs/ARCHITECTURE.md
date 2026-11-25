@@ -16,6 +16,7 @@ src/
   Protocol/              Revision, Shaper, Json: the exact shape of each revision
   Mode/
     DiscoveryMode.php    the contract of a mode
+    GuideHeader.php      what a mode writes at the top of a guide that names tools
     ToolFinder.php       the search answer the searching modes share
     Compact/             the compact pack
     Grouped/             the grouped pack

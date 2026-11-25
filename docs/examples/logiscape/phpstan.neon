@@ -1,0 +1,18 @@
+includes:
+    - ../../../vendor/phpstan/phpstan-strict-rules/rules.neon
+
+parameters:
+    # The logiscape/mcp-sdk-php example, held to the level of the other
+    # examples. It is read with the SDK installed in this directory, which
+    # the main analysis does not have.
+    level: max
+    phpVersion: 80100
+    paths:
+        - bridge.php
+        - http-server.php
+        - server.php
+    scanFiles:
+        - ../http.php
+        - ../notes.php
+    bootstrapFiles:
+        - vendor/autoload.php

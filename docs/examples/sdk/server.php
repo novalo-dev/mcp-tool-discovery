@@ -21,6 +21,8 @@ declare(strict_types=1);
  * Install: composer install, in this directory.
  * Run it:   php docs/examples/sdk/server.php
  * As admin: MCP_NOTES_ROLE=admin php docs/examples/sdk/server.php
+ * The same tools in another mode (direct, grouped or gateway):
+ *           MCP_NOTES_MODE=grouped php docs/examples/sdk/server.php
  */
 
 namespace Example\Notes\Sdk;
@@ -31,7 +33,6 @@ use Mcp\Schema\ServerCapabilities;
 use Mcp\Server\Server;
 use Mcp\Server\Transport\StdioTransport;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
@@ -39,6 +40,8 @@ use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
+use function Example\Notes\instructions;
+use function Example\Notes\mode;
 
 require __DIR__ . '/vendor/autoload.php';
 require dirname(__DIR__) . '/notes.php';
@@ -49,7 +52,8 @@ $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 // One Discovery per caller. Over stdio the caller is the process for its whole
 // life; over HTTP, build it per request, with that request's gate.
 $discovery = new Discovery(
-    new CompactMode(prefix: 'notes_', batchLimit: 20),
+    // Compact unless MCP_NOTES_MODE names direct, grouped or gateway.
+    mode(getenv('MCP_NOTES_MODE')),
     new NotesGate(is_string($role) ? $role : 'reader', new Notes()),
     // The index is built at the first search instead of at every one. The
     // process serves one caller, so what its runs teach the search lifts
@@ -59,6 +63,8 @@ $discovery = new Discovery(
 
 $server = Server::builder()
     ->setServerInfo('notes', '1.0.0')
+    // Read by the model before any tool: the list is not the whole server.
+    ->setInstructions(instructions($discovery))
     // The registry is empty, so the SDK would not announce tools by itself.
     ->setCapabilities(new ServerCapabilities(tools: true, resources: false, prompts: false))
     ->addRequestHandler(new ToolsHandler($discovery, $tools))

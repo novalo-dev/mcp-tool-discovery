@@ -19,6 +19,8 @@ use Example\Notes\LaravelMcp\Tools\GetNote;
 use Example\Notes\LaravelMcp\Tools\ListNotes;
 use Laravel\Mcp\Server;
 
+use function Example\Notes\instructions;
+
 /**
  * A laravel/mcp server as its documentation writes one, with two lines
  * more: tools/list and tools/call are answered by the library. The tools,
@@ -30,8 +32,6 @@ final class NotesServer extends Server
 
     protected string $version = '1.0.0';
 
-    protected string $instructions = 'Notes kept for the team. Search the tools with notes_search_tools, then run the one found.';
-
     protected array $tools = [
         ListNotes::class,
         GetNote::class,
@@ -41,6 +41,9 @@ final class NotesServer extends Server
 
     protected function boot(): void
     {
+        // laravel/mcp reads the property at each message, after boot(); set
+        // here, from the mode the methods list with, they cannot drift apart.
+        $this->instructions = instructions(DiscoveryMethod::mode());
         $this->addMethod('tools/list', ListToolsMethod::class);
         $this->addMethod('tools/call', CallToolMethod::class);
     }

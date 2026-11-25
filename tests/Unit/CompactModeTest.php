@@ -278,4 +278,59 @@ final class CompactModeTest extends TestCase
         // Without a pinned tool named, the header reads as before.
         self::assertStringNotContainsString('directly', (new CompactMode())->guideHeader(['acme_set_ticket_status'], RecordingGate::fixtureTools()));
     }
+
+    public function testTheInstructionsNameTheSearchAndTheRunners(): void
+    {
+        $instructions = (new CompactMode(prefix: 'acme_', pinned: ['acme_get_file']))->instructions();
+
+        self::assertStringContainsString('acme_search_tools', $instructions);
+        self::assertStringContainsString('acme_run_read_tool if it only reads', $instructions);
+        self::assertStringContainsString('acme_run_write_tool if it changes something', $instructions);
+        self::assertStringContainsString('called directly', $instructions);
+        // A pinned tool may be hidden from some callers, who share these.
+        self::assertStringNotContainsString('acme_get_file', $instructions);
+    }
+
+    public function testAPrefixThatMakesNoValidNameIsRefusedAtBoot(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('acme tools search_tools');
+        new CompactMode(prefix: 'acme tools ');
+    }
+
+    public function testATitleUnderAKeyTheModeDoesNotReadIsRefusedAtBoot(): void
+    {
+        /** @var array<string, string> $titles the run_read_tool name instead of the "read" key */
+        $titles = ['search' => 'Chercher', 'run_read_tool' => 'Lire'];
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('"run_read_tool"');
+        new CompactMode(titles: $titles);
+    }
+
+    public function testATitleThatIsNotAStringIsRefusedAtBoot(): void
+    {
+        /** @var array<string, mixed> $titles */
+        $titles = ['read' => null];
+
+        $this->expectException(\InvalidArgumentException::class);
+        new CompactMode(titles: $titles);
+    }
+
+    public function testAPinnedToolNamedTwiceIsListedOnce(): void
+    {
+        $mode = new CompactMode(pinned: ['acme_get_settings', 'acme_get_settings']);
+        $names = array_map(static fn(Tool $tool): string => $tool->name, $mode->listTools(RecordingGate::fixtureTools()));
+
+        self::assertSame(['acme_get_settings', 'search_tools', 'run_read_tool', 'run_write_tool'], $names);
+    }
+
+    public function testAPinnedEntryThatIsNotANameIsRefusedAtBoot(): void
+    {
+        /** @var list<mixed> $pinned */
+        $pinned = [['acme_get_settings']];
+
+        $this->expectException(\InvalidArgumentException::class);
+        new CompactMode(pinned: $pinned);
+    }
 }

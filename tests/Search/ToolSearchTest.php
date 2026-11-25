@@ -15,9 +15,11 @@ namespace Novalo\McpToolDiscovery\Tests\Search;
 
 use Novalo\McpToolDiscovery\Search\Analyzer;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Cache\IndexCache;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\Counts;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+use Novalo\McpToolDiscovery\Search\Learning\LearningStore;
 use Novalo\McpToolDiscovery\Search\Learning\MemoryLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
@@ -283,6 +285,187 @@ final class ToolSearchTest extends TestCase
         self::assertLessThan(1.0, microtime(true) - $start, 'the words alike each unknown word are bounded');
     }
 
+    public function testWordsWithMarksCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words all share their first half, so a word
+        // whose second half is marks is spelled by every word of the index.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = 'recx';
+                for ($letter = 0; $letter < 4; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        foreach (['ǎ', 'ä', 'á', 'à', 'â', 'ã', 'å', 'ā', 'ă', 'ą', 'ȁ', 'ȃ', 'ạ', 'ả', 'ấ', 'ầ', 'ẩ', 'ẫ', 'ậ', 'ắ', 'ằ', 'ẳ', 'ẵ', 'ặ', 'ǻ', 'ǟ', 'ǡ', 'ḁ', 'ẚ', 'ⱥ', 'ɐ', 'ɑ'] as $mark) {
+            $field .= 'recx' . str_repeat($mark, 4) . ' ';
+        }
+
+        $start = microtime(true);
+        $result = $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertNotSame([], $result->tools);
+        self::assertLessThan(1.0, microtime(true) - $start, 'the words a word spells but for its marks are bounded');
+    }
+
+    public function testWordsWithMarksThatSpellNothingCostLittleOnALargeIndex(): void
+    {
+        // Three thousand tools whose words all have eight letters, and words
+        // with marks that spell none of them: each is held against every
+        // word of its length, with no bound to stop at.
+        $definitions = [];
+        for ($tool = 0; $tool < 3000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = 'recx';
+                for ($letter = 0; $letter < 4; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $field .= 'qzx' . chr(97 + $word % 26) . 'ǎǎǎǎ ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'one pass of PCRE keeps the words that could be spelled');
+    }
+
+    public function testWordsMostlyOfMarksCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words are plain and eight letters long, and
+        // words of eight letters with marks only: every plain word of the
+        // index has their letters but for the marks, and none spells them,
+        // so the plain words are not read at all.
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = '';
+                for ($letter = 0; $letter < 8; ++$letter) {
+                    $spelled .= chr(97 + hexdec(substr($hash, 2 * $letter, 2)) % 26);
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        foreach (['ǎ', 'ä', 'á', 'à', 'â', 'ã', 'å', 'ā', 'ă', 'ą', 'ȁ', 'ȃ', 'ạ', 'ả', 'ấ', 'ầ', 'ά', 'έ', 'ή', 'ί', 'ό', 'ύ', 'ώ', 'ϊ', 'ё', 'ї', 'ў', 'є', 'і', 'ђ', 'ћ', 'џ'] as $mark) {
+            $field .= str_repeat($mark, 8) . ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a word with more letters of marks than plain ones is held against no plain word');
+    }
+
+    public function testPlainWordsCostLittleOnALargeIndexOfWordsMostlyOfMarks(): void
+    {
+        // The other way round: a thousand tools whose words are eight
+        // letters, seven of them with marks, and plain words of eight
+        // letters. Every word of the index passes the pattern of each, and
+        // none can spell it, so they are not read at all.
+        $marks = ['ǎ', 'é', 'ü', 'ő', 'ç', 'ñ', 'ά', 'έ', 'ή', 'ί', 'ό', 'ώ'];
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $greek = $word % 2 === 1;
+                $spelled = '';
+                for ($letter = 0; $letter < 7; ++$letter) {
+                    $spelled .= $marks[($greek ? 6 : 0) + hexdec($hash[$letter]) % 6];
+                }
+                $words[] = $spelled . ($greek ? 'α' : 'a');
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $greekLetters = preg_split('//u', 'αβγδεζηθικλμνξοπρστυφχψω', -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $hash = md5((string) $word);
+            for ($letter = 0; $letter < 8; ++$letter) {
+                $field .= $word % 2 === 1 ? $greekLetters[hexdec($hash[$letter]) % 24] : chr(97 + hexdec($hash[$letter]) % 26);
+            }
+            $field .= ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a plain word is held against no word with more letters of marks than half its length');
+    }
+
+    public function testWordsWithMarksElsewhereCostLittleOnALargeIndex(): void
+    {
+        // A thousand tools whose words are eight letters, the last four with
+        // marks, and words of eight letters with marks on the first four
+        // only: every word of the index passes the pattern of each, and none
+        // can spell it, since no letter is the same in both.
+        $marks = ['ǎ', 'é', 'ü', 'ő', 'ç', 'ñ'];
+        $definitions = [];
+        for ($tool = 0; $tool < 1000; ++$tool) {
+            $words = [];
+            for ($word = 0; $word < 8; ++$word) {
+                $hash = md5($tool . '-' . $word);
+                $spelled = '';
+                for ($letter = 0; $letter < 8; ++$letter) {
+                    $spelled .= $letter < 4 ? chr(97 + hexdec($hash[$letter]) % 26) : $marks[hexdec($hash[$letter]) % 6];
+                }
+                $words[] = $spelled;
+            }
+            $definitions[] = ['name' => 'tool_' . $tool, 'description' => implode(' ', $words), 'inputSchema' => ['type' => 'object']];
+        }
+        $search = new ToolSearch(ToolSet::of($definitions));
+        $search->find(SearchQuery::text('recxǎ'));
+        $field = '';
+        for ($word = 0; $word < 32; ++$word) {
+            $hash = md5((string) $word);
+            for ($letter = 0; $letter < 8; ++$letter) {
+                $field .= $letter < 4 ? $marks[hexdec($hash[$letter]) % 6] : chr(97 + hexdec($hash[$letter]) % 26);
+            }
+            $field .= ' ';
+        }
+
+        $start = microtime(true);
+        $search->find(new SearchQuery($field, $field, $field, $field));
+
+        self::assertLessThan(0.25, microtime(true) - $start, 'a word is held only against the words whose letters with marks sit mostly in its own places');
+    }
+
+    public function testAWordIsSpelledByTheWordWithItsMarksInOtherPlaces(): void
+    {
+        // Two letters of four taken on trust, one each way, are still half.
+        $search = new ToolSearch(ToolSet::of([
+            ['name' => 'first', 'description' => 'čaje', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'second', 'description' => 'other words', 'inputSchema' => ['type' => 'object']],
+        ]));
+
+        self::assertSame(['first'], array_map(static fn($tool) => $tool->name, $search->find(SearchQuery::text('cajé'))->tools));
+    }
+
     public function testAHugeRequestCostsLittleMemory(): void
     {
         $search = new ToolSearch(RecordingGate::fixtureTools());
@@ -357,6 +540,38 @@ final class ToolSearchTest extends TestCase
         // Built over the tools this caller may see, never read from an index
         // that holds a tool hidden from them.
         self::assertNotContains('acme_set_ticket_status', self::names((new ToolSearch($fewer, cache: $cache))->search(new SearchQuery('change', 'ticket status'))));
+    }
+
+    public function testAnIndexSavedForOtherToolsIsBuiltAgain(): void
+    {
+        // A cache that hands back the first index it kept whatever the key,
+        // as a host cache that mixes its keys would.
+        $cache = new class implements IndexCache {
+            /** @var array<array-key, mixed>|null */
+            private ?array $index = null;
+
+            public function get(string $key): ?array
+            {
+                return $this->index;
+            }
+
+            public function set(string $key, array $index): void
+            {
+                $this->index ??= $index;
+            }
+        };
+        $all = RecordingGate::fixtureTools();
+        $fewer = $all->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_share_file');
+        $query = SearchQuery::text('share a file so a person can access and edit it');
+        new ToolSearch($all, cache: $cache);
+
+        $fresh = (new ToolSearch($fewer))->find($query);
+        $cached = (new ToolSearch($fewer, cache: $cache))->find($query);
+
+        // The words only the hidden tool uses stay unknown to this caller.
+        self::assertSame($fresh->unmatched, $cached->unmatched);
+        self::assertSame($fresh->searchId, $cached->searchId);
+        self::assertSame(self::names($fresh->tools), self::names($cached->tools));
     }
 
     public function testABrokenCacheEntryIsBuiltAgain(): void
@@ -481,6 +696,24 @@ final class ToolSearchTest extends TestCase
         self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
     }
 
+    public function testAToolWordAmongUnknownWordsLiftsNoToolLearnedForMore(): void
+    {
+        $tools = RecordingGate::fixtureTools();
+        $store = new MemoryLearningStore();
+        for ($run = 0; $run < 5; ++$run) {
+            $search = new ToolSearch($tools, learning: $store);
+            $search->learn((string) $search->find(SearchQuery::text('show ticket'))->searchId, 'acme_get_ticket');
+        }
+        $unknown = new SearchQuery('zqxv', 'ticket', 'vwkj');
+
+        // Only "ticket" is a word of the tools, but the request wrote more
+        // than the object: the search learned for showing a ticket says
+        // nothing of it and must not reorder its tools.
+        self::assertSame(['zqxv', 'vwkj'], (new ToolSearch($tools, learning: $store))->find($unknown)->unmatched);
+        self::assertSame(self::names((new ToolSearch($tools))->search($unknown)), self::names((new ToolSearch($tools, learning: $store))->search($unknown)));
+        self::assertSame('acme_get_ticket', self::names((new ToolSearch($tools, learning: $store))->search(SearchQuery::text('show ticket')))[0]);
+    }
+
     public function testAPairSharedWithANeighbourBarelyMovesIt(): void
     {
         $tools = RecordingGate::server('sensors');
@@ -495,6 +728,26 @@ final class ToolSearchTest extends TestCase
         self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools))->search($change))[0]);
         self::assertSame('patch_sites_site_id', self::names((new ToolSearch($tools, learning: $store))->search($change))[0]);
         self::assertSame('post_sites', self::names((new ToolSearch($tools, learning: $store))->search(new SearchQuery('add', 'site', 'address')))[0]);
+    }
+
+    public function testASearchLearnedForANeighbourLiftsItOnlyAsFarAsTheQueryHoldsIt(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'instruments_list', 'title' => 'Instruments free to lend', 'description' => 'Lists every instrument one can lend.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'instrument_lend', 'title' => 'Lend an instrument', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $store = new MemoryLearningStore();
+        $view = new SearchQuery('view', 'instrument', 'free to lend');
+        $search = new ToolSearch($tools, learning: $store);
+        $search->learn((string) $search->find($view)->searchId, 'instruments_list');
+        $lend = new SearchQuery('lend', 'instrument', 'cello');
+
+        // Viewing what is free to lend taught the list the pair "instrument
+        // lend", the only pair of a request to lend one: the list must not
+        // take the place of the loan, as the view, asked again, keeps it.
+        self::assertSame('instrument_lend', self::names((new ToolSearch($tools))->search($lend))[0]);
+        self::assertSame('instrument_lend', self::names((new ToolSearch($tools, learning: $store))->search($lend))[0]);
+        self::assertSame('instruments_list', self::names((new ToolSearch($tools, learning: $store))->search($view))[0]);
     }
 
     public function testAVerbTheToolsWriteAnotherWayIsLearnedWithItsObject(): void
@@ -617,6 +870,82 @@ final class ToolSearchTest extends TestCase
 
         $search->learn($result->searchId, '42');
         self::assertSame(['42', '123'], self::names($search->search('backup archive')), 'what was learned lifts a numeric name too');
+    }
+
+    public function testAWordTypedWithoutItsMarksFindsTheToolThatSpellsIt(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'file_upload', 'title' => 'Tải tệp lên', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'file_rename', 'title' => 'Đổi tên tệp', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'file_delete', 'title' => 'Xóa tệp', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $search = new ToolSearch($tools);
+
+        // Vietnamese typed on a phone: no tone marks, "d" for "đ".
+        self::assertSame('file_delete', self::names($search->search(new SearchQuery('xoa', 'tep')))[0]);
+        self::assertSame('file_rename', self::names($search->search(new SearchQuery('doi ten', 'tep')))[0]);
+        // The other way round: the request has the marks the tool lacks.
+        $unmarked = new ToolSearch(ToolSet::of([
+            ['name' => 'folder_create', 'title' => 'Tao thu muc', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'folder_delete', 'title' => 'Xoa thu muc', 'inputSchema' => ['type' => 'object']],
+        ]));
+        self::assertSame('folder_delete', self::names($unmarked->search(new SearchQuery('xóa', 'thư mục')))[0]);
+        // A letter of ASCII stands only for a Latin letter: a word of
+        // another script is never spelled by one.
+        self::assertSame([], self::names((new ToolSearch(ToolSet::of([
+            ['name' => 'a', 'title' => 'Τέλος', 'inputSchema' => ['type' => 'object']],
+        ])))->search('tlos')));
+    }
+
+    public function testAGreekWordTypedInCapitalsFindsTheToolThatSpellsIt(): void
+    {
+        // Greek in capitals carries no accent, and every capital sigma
+        // lowers to "σ", where the tools end a word with "ς".
+        $town = new ToolSearch(RecordingGate::server('city'));
+        self::assertSame('parking_fine_appeal', self::names($town->search(new SearchQuery('ΕΝΣΤΑΣΗ', 'ΚΛΗΣΗ ΣΤΑΘΜΕΥΣΗΣ', 'ΗΤΑΝ ΣΩΣΤΑ ΠΑΡΚΑΡΙΣΜΕΝΟ')))[0]);
+        $museum = new ToolSearch(RecordingGate::server('museum'));
+        self::assertSame('exhibitions_list', self::names($museum->search('ΠΟΙΕΣ ΕΚΘΕΣΕΙΣ ΕΧΕΙ ΤΟ ΜΟΥΣΕΙΟ'))[0]);
+        // Typed in haste, without accents.
+        self::assertSame('tour_book', self::names($museum->search('θελουν ξεναγηση στα γαλλικα αυριο'))[0]);
+    }
+
+    public function testARussianWordTypedWithoutYoFindsTheToolThatSpellsIt(): void
+    {
+        // Russian is most often typed with "е" for "ё", and "счет" shares
+        // too few trigrams with "счёт" to find the bill on them alone.
+        $hotel = new ToolSearch(RecordingGate::server('hotel'));
+        self::assertSame('FOLIO_GET', self::names($hotel->search(new SearchQuery('показать', 'счет')))[0]);
+
+        // Either side may be the one without the mark: on its trigrams
+        // alone, "счёт" finds only the meters, whose "учёт" shares more.
+        $tools = ToolSet::of([
+            ['name' => 'meters_read', 'title' => 'Учёт воды', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'bills_get', 'title' => 'Счет гостя', 'inputSchema' => ['type' => 'object']],
+        ]);
+        self::assertContains('bills_get', self::names((new ToolSearch($tools))->search(new SearchQuery('', 'счёт'))));
+    }
+
+    public function testAHostStoreThatHandsBackANumberDoesNotBreakTheSearch(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'archive_export', 'title' => 'Export an archive', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'archive_delete', 'title' => 'Delete an archive', 'inputSchema' => ['type' => 'object']],
+        ]);
+        // The library never records a number alone, but a store of the host
+        // may hold one, and PHP keys "2024" as an integer once decoded.
+        $store = new class implements LearningStore {
+            public function load(): array
+            {
+                /** @var array<string, array<string, int>> */
+                return json_decode('{"2024": {"archive_delete": 3}, "archive export": {"archive_export": 2}, "\\tarchive export": {"archive_export": 2}}', true, 512, JSON_THROW_ON_ERROR);
+            }
+
+            public function record(array $words, string $tool): void {}
+        };
+        self::assertContains(2024, array_keys($store->load()));
+
+        $found = (new ToolSearch($tools, learning: $store))->search(new SearchQuery('export', 'archive'));
+        self::assertSame('archive_export', self::names($found)[0]);
     }
 
     public function testFiveHundredToolsAreSearchedFast(): void

@@ -16,6 +16,8 @@ namespace Novalo\McpToolDiscovery\Mode\Gateway;
 use Novalo\McpToolDiscovery\Gate\CallResult;
 use Novalo\McpToolDiscovery\Gate\ToolRunner;
 use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
+use Novalo\McpToolDiscovery\Mode\GuideHeader;
+use Novalo\McpToolDiscovery\Mode\Instructions;
 use Novalo\McpToolDiscovery\Mode\ToolFinder;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
@@ -32,7 +34,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
  * search, sets $changesApart: the changes are then listed as themselves, with
  * their own annotations, and the gateway only reads.
  */
-final class GatewayMode implements DiscoveryMode
+final class GatewayMode implements DiscoveryMode, GuideHeader, Instructions
 {
     public const NAME = 'use_tools';
 
@@ -61,6 +63,11 @@ final class GatewayMode implements DiscoveryMode
         private readonly bool $schemaOnError = true,
     ) {
         $this->toolName = $prefix . self::NAME;
+        // At boot, as the other modes do: a bad prefix would otherwise fail
+        // on every tools/list while tools/call still answers.
+        if (!Tool::validName($this->toolName)) {
+            throw new \InvalidArgumentException(sprintf('The prefix "%s" does not make a valid tool name: %s must be 1 to 128 letters, digits, "_", "-" or ".".', $prefix, $this->toolName));
+        }
         $this->finder = new ToolFinder(
             $this->runWith(...),
             $maxDescribed,
@@ -105,6 +112,59 @@ final class GatewayMode implements DiscoveryMode
             self::RUN => $this->run($arguments, $runner),
             default => CallResult::error(sprintf('operation is required: %s, %s or %s.', self::SEARCH, self::DESCRIBE, self::RUN)),
         };
+    }
+
+    /**
+     * The sentences for the server's instructions: one tool stands for the
+     * whole server, and with the changes apart, the changes are called as
+     * themselves and refused by the gateway.
+     */
+    public function instructions(): string
+    {
+        if ($this->changesApart) {
+            return sprintf('The tools of this server that only read go through %s: find the ones you need with operation %s, read their parameters with operation %s, and run each with operation %s. A tool that changes something is in your tool list: call it directly.', $this->toolName, self::SEARCH, self::DESCRIBE, self::RUN);
+        }
+
+        return sprintf('Every tool of this server goes through %s: find the ones you need with operation %s, read their parameters with operation %s, and run each with operation %s.', $this->toolName, self::SEARCH, self::DESCRIBE, self::RUN);
+    }
+
+    /**
+     * The block a host puts at the top of a guide that names tools: through
+     * the gateway, none of them is in the assistant's list. With the changes
+     * apart, the changes the guide names are, and get a line of their own,
+     * so the assistant does not send them to the gateway, which refuses them.
+     */
+    public function guideHeader(iterable $names, ToolSet $visible): string
+    {
+        $through = [];
+        $direct = [];
+        foreach ($names as $name) {
+            $tool = $visible->get($name);
+            if ($tool === null || $this->owns($name)) {
+                continue;
+            }
+            if ($this->runWith($tool) === $tool->name) {
+                $direct[] = $name;
+            } else {
+                $through[] = $name;
+            }
+        }
+        if ($through === []) {
+            return '';
+        }
+        $lines = [
+            '## How to call the tools of this guide',
+            '',
+            sprintf('Every tool of this server goes through %s: the tools this guide names are not in your tool list', $this->toolName)
+                . ($direct === [] ? '. ' : ', except the ones it says to call directly. ')
+                . sprintf('Read the parameters of the ones you need with operation %s (names), then run each with operation %s (name and arguments):', self::DESCRIBE, self::RUN),
+            sprintf('- through %s: %s', $this->toolName, implode(', ', $through)),
+        ];
+        if ($direct !== []) {
+            $lines[] = '- directly, as they are in your list: ' . implode(', ', $direct);
+        }
+
+        return implode("\n", $lines) . "\n\n";
     }
 
     private function gateway(bool $runsChanges): Tool

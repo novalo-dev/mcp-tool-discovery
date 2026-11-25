@@ -250,4 +250,22 @@ final class CompactBatchTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         new CompactMode(batchLimit: -1);
     }
+
+    public function testAPrefixTooLongForTheBatchRunnerIsRefusedOnlyWhenItIsOn(): void
+    {
+        // run_write_batch is the longest of the four names: this prefix fits
+        // the three others, so it is refused only with the batch runner on.
+        $prefix = str_repeat('a', 128 - strlen(CompactMode::RUN_WRITE_BATCH) + 1);
+        self::assertFalse((new CompactMode(prefix: $prefix))->owns($prefix . CompactMode::RUN_WRITE_BATCH));
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage(CompactMode::RUN_WRITE_BATCH);
+        new CompactMode(prefix: $prefix, batchLimit: 5);
+    }
+
+    public function testTheInstructionsNameTheBatchRunnerOnlyWhenItIsOn(): void
+    {
+        self::assertStringContainsString(CompactMode::RUN_WRITE_BATCH, (new CompactMode(batchLimit: 5))->instructions());
+        self::assertStringNotContainsString(CompactMode::RUN_WRITE_BATCH, (new CompactMode())->instructions());
+    }
 }

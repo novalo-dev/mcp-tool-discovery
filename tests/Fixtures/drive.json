@@ -1,0 +1,790 @@
+[
+ {
+  "name": "students_list",
+  "title": "هنرجویان",
+  "description": "هنرجویان آموزشگاه را با شمارهٔ پرونده و مرحلهٔ آموزش نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "stage": {
+     "type": "string",
+     "description": "مرحلهٔ آموزش"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_get",
+  "title": "پروندهٔ هنرجو",
+  "description": "مشخصات یک هنرجو: نام، کد ملی، نوع گواهینامه، جلسه‌های گذرانده و آزمون‌ها.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_register",
+  "title": "ثبت‌نام هنرجو",
+  "description": "هنرجوی تازه را برای گواهینامهٔ پایه سه، پایه دو یا موتورسیکلت ثبت‌نام می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "نام و نام خانوادگی"
+    },
+    "licence": {
+     "type": "string",
+     "description": "نوع گواهینامه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "student_withdraw",
+  "title": "انصراف هنرجو",
+  "description": "پروندهٔ هنرجویی را که از ادامهٔ دوره منصرف شده می‌بندد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lesson_book",
+  "title": "رزرو جلسهٔ عملی",
+  "description": "یک جلسهٔ رانندگی با مربی و خودرو برای هنرجو رزرو می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "time": {
+     "type": "string",
+     "description": "روز و ساعت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_move",
+  "title": "جابه‌جایی جلسه",
+  "description": "زمان یک جلسهٔ رزروشده را به روز یا ساعت دیگری می‌برد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "شمارهٔ جلسه"
+    },
+    "time": {
+     "type": "string",
+     "description": "روز و ساعت تازه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_cancel",
+  "title": "لغو جلسه",
+  "description": "جلسهٔ رزروشده را لغو می‌کند و ساعت مربی را آزاد می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "شمارهٔ جلسه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "lessons_today",
+  "title": "جلسه‌های امروز",
+  "description": "برنامهٔ جلسه‌های عملی امروز را با مربی، خودرو و هنرجو نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "instructor": {
+     "type": "string",
+     "description": "مربی"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_absent",
+  "title": "ثبت غیبت در جلسه",
+  "description": "ثبت می‌کند که هنرجو سر جلسه نیامده است.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "شمارهٔ جلسه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lesson_feedback",
+  "title": "نظر مربی دربارهٔ جلسه",
+  "description": "یادداشت مربی پس از جلسه: پارک دوبل، دنده‌عقب، رانندگی در شهر.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lesson": {
+     "type": "string",
+     "description": "شمارهٔ جلسه"
+    },
+    "note": {
+     "type": "string",
+     "description": "یادداشت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "theory_classes",
+  "title": "برنامهٔ کلاس‌های آیین‌نامه",
+  "description": "کلاس‌های تئوری آیین‌نامه و فنی را با ساعت و ظرفیت نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "week": {
+     "type": "string",
+     "description": "هفته"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "theory_class_enroll",
+  "title": "ثبت در کلاس آیین‌نامه",
+  "description": "هنرجو را در یک کلاس تئوری آیین‌نامه یا فنی می‌نشاند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "klass": {
+     "type": "string",
+     "description": "کلاس"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instructors_list",
+  "title": "مربیان",
+  "description": "مربیان آموزشگاه را با نوع گواهینامه‌ای که آموزش می‌دهند نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "licence": {
+     "type": "string",
+     "description": "نوع گواهینامه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instructor_get",
+  "title": "پروندهٔ مربی",
+  "description": "مشخصات یک مربی: کارت مربیگری، ساعت‌های آزاد و هنرجویانش.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "instructor": {
+     "type": "string",
+     "description": "مربی"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instructor_assign",
+  "title": "تعیین مربی",
+  "description": "مربی یک هنرجو را تعیین یا عوض می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "instructor": {
+     "type": "string",
+     "description": "مربی"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "instructor_leave",
+  "title": "ثبت مرخصی مربی",
+  "description": "روزهایی را که مربی نیست ثبت می‌کند تا جلسه‌ای برایش رزرو نشود.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "instructor": {
+     "type": "string",
+     "description": "مربی"
+    },
+    "days": {
+     "type": "string",
+     "description": "روزها"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cars_list",
+  "title": "خودروهای آموزشی",
+  "description": "خودروهای دوپدال آموزشگاه را با پلاک و وضعیت نشان می‌دهد: آماده یا در تعمیرگاه.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "وضعیت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "car_service",
+  "title": "فرستادن خودرو به تعمیرگاه",
+  "description": "خودرو را برای سرویس یا تعمیر از برنامه بیرون می‌گذارد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "car": {
+     "type": "string",
+     "description": "پلاک"
+    },
+    "reason": {
+     "type": "string",
+     "description": "علت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "car_ready",
+  "title": "آماده‌شدن خودرو",
+  "description": "خودرویی را که از تعمیرگاه برگشته دوباره در برنامه می‌گذارد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "car": {
+     "type": "string",
+     "description": "پلاک"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "car_fuel",
+  "title": "ثبت سوخت‌گیری",
+  "description": "لیتر بنزین زده‌شده و کیلومتر خودرو را ثبت می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "car": {
+     "type": "string",
+     "description": "پلاک"
+    },
+    "litres": {
+     "type": "string",
+     "description": "لیتر"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "car_insurance",
+  "title": "بیمهٔ خودروها",
+  "description": "تاریخ پایان بیمهٔ بدنه و شخص ثالث هر خودرو را نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "car": {
+     "type": "string",
+     "description": "پلاک"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exam_theory_book",
+  "title": "نوبت آزمون آیین‌نامه",
+  "description": "برای هنرجو نوبت آزمون کتبی آیین‌نامه در مرکز آزمون می‌گیرد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "date": {
+     "type": "string",
+     "description": "تاریخ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exam_practical_book",
+  "title": "نوبت آزمون شهر",
+  "description": "برای هنرجو نوبت آزمون عملی شهر با افسر راهنمایی و رانندگی می‌گیرد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "date": {
+     "type": "string",
+     "description": "تاریخ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exam_cancel",
+  "title": "لغو نوبت آزمون",
+  "description": "نوبت آزمون آیین‌نامه یا شهر را پس می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exam": {
+     "type": "string",
+     "description": "شمارهٔ نوبت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "exam_result",
+  "title": "ثبت نتیجهٔ آزمون",
+  "description": "قبول یا ردشدن هنرجو در آزمون آیین‌نامه یا شهر را ثبت می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "exam": {
+     "type": "string",
+     "description": "شمارهٔ نوبت"
+    },
+    "result": {
+     "type": "string",
+     "description": "قبول یا رد"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exams_upcoming",
+  "title": "آزمون‌های پیش رو",
+  "description": "نوبت‌های آزمون هفته‌های آینده را با نام هنرجو نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "weeks": {
+     "type": "string",
+     "description": "چند هفته"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fee_invoice",
+  "title": "صدور صورتحساب شهریه",
+  "description": "صورتحساب شهریهٔ دوره یا جلسه‌های اضافه را برای هنرجو صادر می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fee_payment_record",
+  "title": "ثبت پرداخت شهریه",
+  "description": "قسط یا پرداخت شهریهٔ هنرجو را ثبت می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "amount": {
+     "type": "string",
+     "description": "مبلغ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fees_unpaid",
+  "title": "شهریه‌های پرداخت‌نشده",
+  "description": "هنرجویانی را که شهریه یا قسطشان عقب افتاده نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ماه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "fee_refund",
+  "title": "بازپرداخت شهریه",
+  "description": "شهریهٔ جلسه‌های برگزارنشده را به هنرجوی منصرف‌شده برمی‌گرداند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "documents_check",
+  "title": "بررسی مدارک",
+  "description": "مدارک پروندهٔ هنرجو را بررسی می‌کند: عکس، کارت ملی، گواهی پزشکی.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "document_upload",
+  "title": "افزودن مدرک",
+  "description": "یک مدرک اسکن‌شده را به پروندهٔ هنرجو اضافه می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "file": {
+     "type": "string",
+     "description": "فایل"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "medical_record",
+  "title": "ثبت گواهی پزشکی",
+  "description": "گواهی معاینهٔ چشم و پزشکی هنرجو را با تاریخ اعتبار ثبت می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "until": {
+     "type": "string",
+     "description": "تاریخ اعتبار"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sms_reminder",
+  "title": "پیامک یادآوری",
+  "description": "یادآوری جلسه یا آزمون فردا را برای هنرجو پیامک می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sms_bulk",
+  "title": "پیامک گروهی",
+  "description": "یک پیام را برای همهٔ هنرجویان یک کلاس یا دوره می‌فرستد، مثلاً تعطیلی.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "group": {
+     "type": "string",
+     "description": "کلاس یا دوره"
+    },
+    "text": {
+     "type": "string",
+     "description": "متن پیام"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "certificate_issue",
+  "title": "صدور گواهی پایان دوره",
+  "description": "گواهی پایان دورهٔ آموزشی را برای هنرجویی که همهٔ جلسه‌ها را گذرانده صادر می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_pass_rate",
+  "title": "درصد قبولی",
+  "description": "درصد قبولی هنرجویان در آزمون‌ها را به تفکیک مربی و ماه حساب می‌کند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ماه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_instructor_hours",
+  "title": "ساعت کار مربیان",
+  "description": "ساعت‌های جلسهٔ هر مربی در ماه را برای حقوق جمع می‌زند.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "month": {
+     "type": "string",
+     "description": "ماه"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "complaint_record",
+  "title": "ثبت شکایت",
+  "description": "شکایت هنرجو از مربی یا خودرو را ثبت می‌کند تا پیگیری شود.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "student": {
+     "type": "string",
+     "description": "شمارهٔ پرونده"
+    },
+    "text": {
+     "type": "string",
+     "description": "متن شکایت"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "holiday_set",
+  "title": "تعطیلی آموزشگاه",
+  "description": "روزی را که آموزشگاه بسته است ثبت می‌کند و جلسه‌های آن روز را نشان می‌دهد.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "date": {
+     "type": "string",
+     "description": "تاریخ"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]
