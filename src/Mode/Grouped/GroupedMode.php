@@ -78,7 +78,7 @@ final class GroupedMode implements DiscoveryMode, GuideHeader, Instructions
             $change = $read . self::CHANGE_SUFFIX;
             // Checked here rather than when the list is built, so a group
             // the host misnamed fails at boot instead of on one client.
-            if (preg_match('/^[A-Za-z0-9_.-]{1,128}$/', $change) !== 1) {
+            if (!Tool::validName($change)) {
                 throw new \InvalidArgumentException(sprintf('The group "%s" does not make a valid tool name: letters, digits, "_", "-" or ".", 128 characters in all.', $group));
             }
             if (isset($this->readNames[$change]) || isset($this->changeNames[$read])) {

@@ -81,6 +81,15 @@ final class CompactMode implements DiscoveryMode, GuideHeader, Instructions
         if ($batchLimit < 0) {
             throw new \InvalidArgumentException('The batch limit is a number of items, 0 to leave the batch runner out.');
         }
+        // Checked here, as the grouped mode checks its groups: a prefix that
+        // makes no valid name would otherwise fail on every tools/list while
+        // tools/call still answers, and blamed on a tool the host never wrote.
+        // The batch runner is only checked when it is listed.
+        foreach ($batchLimit > 0 ? [$this->searchName, $this->readName, $this->writeName, $this->batchName] : [$this->searchName, $this->readName, $this->writeName] as $own) {
+            if (!Tool::validName($own)) {
+                throw new \InvalidArgumentException(sprintf('The prefix "%s" does not make a valid tool name: %s must be 1 to 128 letters, digits, "_", "-" or ".".', $prefix, $own));
+            }
+        }
     }
 
     public function name(): string

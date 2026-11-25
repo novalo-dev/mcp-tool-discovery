@@ -138,4 +138,14 @@ final class ToolTest extends TestCase
         self::assertSame('123', $set->get('123')?->name);
         self::assertSame(['123'], $set->filter(static fn(Tool $tool): bool => $tool->name === '123')->names());
     }
+
+    public function testValidNameHoldsTheRuleOfTheSpecification(): void
+    {
+        self::assertTrue(Tool::validName('acme.files-2_x'));
+        self::assertTrue(Tool::validName(str_repeat('a', 128)));
+        self::assertFalse(Tool::validName(''));
+        self::assertFalse(Tool::validName('acme files'));
+        self::assertFalse(Tool::validName(str_repeat('a', 129)));
+        self::assertFalse(Tool::validName("acme\n"));
+    }
 }

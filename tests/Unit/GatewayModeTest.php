@@ -233,6 +233,18 @@ final class GatewayModeTest extends TestCase
         new GatewayMode(maxDescribed: 0);
     }
 
+    public function testAPrefixThatMakesNoValidNameIsRefusedAtBoot(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('acme tools use_tools');
+        new GatewayMode(prefix: 'acme tools ');
+    }
+
+    public function testAPrefixUpToTheLongestNameIsTaken(): void
+    {
+        self::assertTrue((new GatewayMode(prefix: str_repeat('a', 128 - strlen(GatewayMode::NAME))))->owns(str_repeat('a', 128 - strlen(GatewayMode::NAME)) . GatewayMode::NAME));
+    }
+
     public function testTheGuideHeaderSendsEveryToolThroughTheGateway(): void
     {
         $header = (new GatewayMode(prefix: 'acme_'))->guideHeader(['acme_get_file', 'acme_set_ticket_status', 'acme_list_users', 'acme_use_tools'], RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));

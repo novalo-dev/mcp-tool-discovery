@@ -170,6 +170,10 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   the whole list before the one confirmation. The search learns once per
   batch, from the first item that succeeds.
 - `pinned` tools are listed as themselves, next to the three.
+- A `prefix` that makes no valid tool name (a space, or more than 128
+  characters with the name) is refused in the constructor, as the grouped
+  mode refuses a group: the host learns of it at boot, not on the first
+  `tools/list`. `run_write_batch` is only checked when it is on.
 - The guide header (see [Guides](#guides)) says which runner each tool a
   prompt names goes through, and which of them are pinned and called
   directly.
@@ -266,6 +270,9 @@ description asks of it. So each tool that changes something comes with
 carry nothing, so a server that only reads pays nothing for it; with
 `changesApart`, `run_with` already names each change, and the mark is left
 out.
+
+A `prefix` that makes no valid tool name is refused in the constructor, as
+in the other modes.
 
 Search and describe share their code with the compact search
 (`src/Mode/ToolFinder.php`), so a host that switches between the two modes

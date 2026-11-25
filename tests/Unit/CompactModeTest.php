@@ -290,4 +290,11 @@ final class CompactModeTest extends TestCase
         // A pinned tool may be hidden from some callers, who share these.
         self::assertStringNotContainsString('acme_get_file', $instructions);
     }
+
+    public function testAPrefixThatMakesNoValidNameIsRefusedAtBoot(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('acme tools search_tools');
+        new CompactMode(prefix: 'acme tools ');
+    }
 }

@@ -63,6 +63,11 @@ final class GatewayMode implements DiscoveryMode, GuideHeader, Instructions
         private readonly bool $schemaOnError = true,
     ) {
         $this->toolName = $prefix . self::NAME;
+        // At boot, as the other modes do: a bad prefix would otherwise fail
+        // on every tools/list while tools/call still answers.
+        if (!Tool::validName($this->toolName)) {
+            throw new \InvalidArgumentException(sprintf('The prefix "%s" does not make a valid tool name: %s must be 1 to 128 letters, digits, "_", "-" or ".".', $prefix, $this->toolName));
+        }
         $this->finder = new ToolFinder(
             $this->runWith(...),
             $maxDescribed,

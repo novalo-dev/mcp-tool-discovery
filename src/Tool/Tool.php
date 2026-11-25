@@ -42,6 +42,16 @@ final class Tool
     ) {}
 
     /**
+     * Whether a name follows the rule every listed tool is held to. Public so
+     * a mode can check the names it makes from the host's settings when it is
+     * built, rather than on the first list a client asks for.
+     */
+    public static function validName(string $name): bool
+    {
+        return preg_match(self::NAME, $name) === 1;
+    }
+
+    /**
      * @param array<string, mixed> $definition a Tool object of the MCP specification
      *
      * @throws InvalidTool
@@ -49,7 +59,7 @@ final class Tool
     public static function fromArray(array $definition): self
     {
         $name = $definition['name'] ?? null;
-        if (!is_string($name) || preg_match(self::NAME, $name) !== 1) {
+        if (!is_string($name) || !self::validName($name)) {
             throw InvalidTool::because(is_string($name) ? $name : '?', 'the name must be 1 to 128 letters, digits, "_", "-" or "."');
         }
         $schema = $definition['inputSchema'] ?? null;

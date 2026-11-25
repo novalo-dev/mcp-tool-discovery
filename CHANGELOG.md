@@ -300,6 +300,17 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **A bad prefix is refused when the compact or gateway mode is built.**
+  `new CompactMode(prefix: 'acme tools ')` used to be accepted, then
+  `tools/list` threw `InvalidTool` on every request, naming
+  `acme tools search_tools` as if the host had written that tool, while
+  `tools/call` still answered. Both constructors now throw
+  `InvalidArgumentException` with the prefix and the name it makes, as
+  `GroupedMode` already did for a group; `run_write_batch` is only checked
+  when `batchLimit` turns it on. The rule of a tool name is
+  `Tool::validName()`, now public, so a mode of your own can check the
+  names it makes the same way.
+
 - **A tool name that ends in a newline is refused.** `Tool::fromArray()`
   took `"get_file\n"` as a valid name, since a bare `$` in PCRE also
   matches before a final newline, and the mode then listed a name the
