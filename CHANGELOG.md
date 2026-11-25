@@ -8,6 +8,25 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+### Added
+
+- **The file cache and the file learning store say why they failed.**
+  `FileIndexCache` and `FileLearningStore` take a second, optional
+  argument, a callable given the reason each time an index could not be
+  kept, or the learning file could not be read or written or held no JSON
+  object. A failure still never stops a request, as before; a directory
+  left unwritable now shows in the host's log instead of a server that
+  quietly builds its index on every request and learns nothing.
+
+### Fixed
+
+- **A path that can never work is refused when the store is built.** An
+  empty path, or one with a null byte, given to `FileIndexCache` or
+  `FileLearningStore` now throws `InvalidArgumentException` at once. Before,
+  an empty path silently kept nothing, and a null byte in the learning file
+  made `fopen()` throw `ValueError` out of the call after the tool had
+  run, so the host lost the answer of a run that had succeeded.
+
 ## 0.8.0 - 2026-11-25
 
 ### Added

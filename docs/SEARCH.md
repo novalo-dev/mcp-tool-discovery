@@ -256,6 +256,23 @@ writes to. The files of tools that have since changed stay there; emptying the
 directory when the server is deployed is safe
 ([When the tools change](HOSTS.md#when-the-tools-change)).
 
+A cache that cannot write never stops a request: the search only builds its
+index again next time. So that a directory left unwritable does not go
+unseen, `FileIndexCache` takes a second argument, told why each time an index
+could not be kept; `FileLearningStore` takes the same for a file it cannot
+read or write, or one that holds no JSON object. An empty path, or one with a
+null byte, is refused when either is built.
+
+```php
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+
+$log = static fn(string $reason) => error_log($reason);
+
+new FileIndexCache($cacheDir, $log);
+new FileLearningStore($learningFile, $log);
+```
+
 | Tools | No cache | Memory | Files, with OPcache |
 |---|---|---|---|
 | 50 | 1.5 ms | 0.1 ms | 0.1 ms |

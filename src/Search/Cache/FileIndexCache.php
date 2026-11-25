@@ -22,10 +22,30 @@ namespace Novalo\McpToolDiscovery\Search\Cache;
  * hash of what was indexed, so a file is written once and never goes stale.
  *
  * The directory must be one only the server writes to: the files are run.
+ *
+ * A cache that cannot write only makes the next search slower, so a failure
+ * never stops a request; it is handed to the host's callback, if it gave one,
+ * so a directory left unwritable shows in its log rather than as a server
+ * that quietly builds its index on every request.
  */
 final class FileIndexCache implements IndexCache
 {
-    public function __construct(private readonly string $directory) {}
+    /** @var (\Closure(string): void)|null */
+    private readonly ?\Closure $failed;
+
+    /**
+     * @param string $directory where the indexes are kept, created if it is missing
+     * @param (callable(string): void)|null $failed told why an index could not be kept
+     */
+    public function __construct(private readonly string $directory, ?callable $failed = null)
+    {
+        // Refused here rather than at the first search: an empty path would
+        // never keep anything, and a null byte makes PHP throw in mid-request.
+        if ($directory === '' || str_contains($directory, "\0")) {
+            throw new \InvalidArgumentException('The directory of the index cache must be a path without null bytes.');
+        }
+        $this->failed = $failed === null ? null : \Closure::fromCallable($failed);
+    }
 
     public function get(string $key): ?array
     {
@@ -41,16 +61,30 @@ final class FileIndexCache implements IndexCache
     public function set(string $key, array $index): void
     {
         if (!is_dir($this->directory) && !@mkdir($this->directory, 0o775, true) && !is_dir($this->directory)) {
-            // A cache that cannot write only makes the next search slower.
+            $this->fail('cannot create the directory ' . $this->directory);
+
             return;
         }
-        $temporary = @tempnam($this->directory, 'index');
+        // tempnam() falls back to the system's temporary directory when this
+        // one is not writable; the rename below would then cross into it.
+        $temporary = is_writable($this->directory) ? @tempnam($this->directory, 'index') : false;
         if ($temporary === false) {
+            $this->fail('cannot write in the directory ' . $this->directory);
+
             return;
         }
+        $file = $this->file($key);
         // Written aside then renamed, so a request never includes half a file.
-        if (@file_put_contents($temporary, '<?php return ' . var_export($index, true) . ";\n") === false || !@rename($temporary, $this->file($key))) {
+        if (@file_put_contents($temporary, '<?php return ' . var_export($index, true) . ";\n") === false || !@rename($temporary, $file)) {
             @unlink($temporary);
+            $this->fail('cannot write ' . $file);
+        }
+    }
+
+    private function fail(string $reason): void
+    {
+        if ($this->failed !== null) {
+            ($this->failed)('The index cache ' . $reason . '.');
         }
     }
 
