@@ -53,6 +53,9 @@ final class CompactMode implements DiscoveryMode, GuideHeader, Instructions
     private readonly string $writeName;
     private readonly string $batchName;
 
+    /** @var list<string> */
+    private readonly array $pinned;
+
     private readonly ToolFinder $finder;
 
     /**
@@ -66,7 +69,7 @@ final class CompactMode implements DiscoveryMode, GuideHeader, Instructions
      */
     public function __construct(
         string $prefix = '',
-        private readonly array $pinned = [],
+        array $pinned = [],
         private readonly array $titles = [],
         ?callable $groupOf = null,
         private readonly int $maxDescribed = 10,
@@ -90,6 +93,50 @@ final class CompactMode implements DiscoveryMode, GuideHeader, Instructions
                 throw new \InvalidArgumentException(sprintf('The prefix "%s" does not make a valid tool name: %s must be 1 to 128 letters, digits, "_", "-" or ".".', $prefix, $own));
             }
         }
+        self::checkTitles($titles);
+        $this->pinned = self::pinnedNames($pinned);
+    }
+
+    /**
+     * Checked here: the shape of titles is in a docblock only, and a title
+     * under a key the mode does not read would leave the English one on
+     * every screen with nothing to say why.
+     *
+     * @param array<mixed> $titles
+     */
+    private static function checkTitles(array $titles): void
+    {
+        foreach ($titles as $key => $title) {
+            if (!in_array($key, ['search', 'read', 'write', 'batch'], true)) {
+                throw new \InvalidArgumentException(sprintf('titles takes the keys search, read, write and batch; "%s" is none of them.', $key));
+            }
+            if (!is_string($title)) {
+                throw new \InvalidArgumentException(sprintf('The title under "%s" must be a string, %s given.', $key, get_debug_type($title)));
+            }
+        }
+    }
+
+    /**
+     * Each pinned name once: named twice, a tool would be listed twice, and
+     * a client may refuse a list that holds the same name more than once.
+     *
+     * @param array<mixed> $pinned
+     *
+     * @return list<string>
+     */
+    private static function pinnedNames(array $pinned): array
+    {
+        $names = [];
+        foreach ($pinned as $name) {
+            if (!is_string($name)) {
+                throw new \InvalidArgumentException(sprintf('pinned is a list of tool names; %s given.', get_debug_type($name)));
+            }
+            if (!in_array($name, $names, true)) {
+                $names[] = $name;
+            }
+        }
+
+        return $names;
     }
 
     public function name(): string

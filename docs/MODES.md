@@ -169,11 +169,15 @@ Three tools: `search_tools`, `run_read_tool`, `run_write_tool`, and a fourth,
   is marked `destructiveHint`, and its description asks the client to show
   the whole list before the one confirmation. The search learns once per
   batch, from the first item that succeeds.
-- `pinned` tools are listed as themselves, next to the three.
+- `pinned` tools are listed as themselves, next to the three; a name given
+  twice is listed once.
 - A `prefix` that makes no valid tool name (a space, or more than 128
   characters with the name) is refused in the constructor, as the grouped
   mode refuses a group: the host learns of it at boot, not on the first
   `tools/list`. `run_write_batch` is only checked when it is on.
+- `titles` takes the keys `search`, `read`, `write` and `batch`. Any other
+  key, `run_read_tool` say, is refused in the constructor: it would leave
+  the English title on every screen without a word.
 - The guide header (see [Guides](#guides)) says which runner each tool a
   prompt names goes through, and which of them are pinned and called
   directly.
@@ -224,7 +228,9 @@ its names without the list. A tool whose `groupOf` is not a declared group
 (an empty string, say) is listed as itself and called by its own name, which
 is also how a host pins a ping. A group whose names would not make a valid
 tool name, or that clashes with another group's change tool, is refused in
-the constructor. Pick a `prefix` if a host tool could carry a group's name:
+the constructor, and so are `groups` given as a plain list of names (its
+keys would be 0, 1, 2, so no tool would fall in a group) and a
+`changeTitles` key that is not a group. Pick a `prefix` if a host tool could carry a group's name:
 `Discovery` throws `InvalidTool` on the first request that meets such a host
 tool, since it could never be called.
 

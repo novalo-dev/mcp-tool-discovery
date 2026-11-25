@@ -300,6 +300,16 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **Titles and groups the mode would never read are refused when it is
+  built.** `new CompactMode(titles: ['run_read_tool' => '...'])` used to be
+  accepted, and the runner kept its English title on every screen;
+  `new GroupedMode($groupOf, ['files', 'tickets'])` keyed its groups 0 and
+  1, so no tool fell in one and every tool was listed as itself; a
+  `changeTitles` key that names no group was dropped. Each now throws
+  `InvalidArgumentException` naming the key, and so does a title that is
+  not a string. A tool named twice in `pinned` is listed once: it used to
+  appear twice in `tools/list`, which a strict client may refuse.
+
 - **A bad prefix is refused when the compact or gateway mode is built.**
   `new CompactMode(prefix: 'acme tools ')` used to be accepted, then
   `tools/list` threw `InvalidTool` on every request, naming

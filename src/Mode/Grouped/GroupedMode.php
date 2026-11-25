@@ -73,6 +73,7 @@ final class GroupedMode implements DiscoveryMode, GuideHeader, Instructions
         if ($maxDescribed < 1) {
             throw new \InvalidArgumentException('A call must be able to describe at least one action.');
         }
+        self::checkTitles($groups, $changeTitles);
         foreach (array_keys($groups) as $group) {
             $read = $prefix . $group;
             $change = $read . self::CHANGE_SUFFIX;
@@ -86,6 +87,35 @@ final class GroupedMode implements DiscoveryMode, GuideHeader, Instructions
             }
             $this->readNames[$read] = $group;
             $this->changeNames[$change] = $group;
+        }
+    }
+
+    /**
+     * Checked here: both maps are typed in a docblock only, and each wrong
+     * shape would show late and quietly. A plain list of names keys its
+     * groups 0, 1, 2, so no tool falls in one and every tool is listed as
+     * itself; a change title under a misspelled group keeps the default.
+     *
+     * @param array<mixed> $groups
+     * @param array<mixed> $changeTitles
+     */
+    private static function checkTitles(array $groups, array $changeTitles): void
+    {
+        if ($groups !== [] && array_is_list($groups)) {
+            throw new \InvalidArgumentException('groups maps each group\'s name to its title, e.g. [\'files\' => \'Files\'], not a list of names.');
+        }
+        foreach ($groups as $group => $title) {
+            if (!is_string($title)) {
+                throw new \InvalidArgumentException(sprintf('The title of the group "%s" must be a string, %s given.', $group, get_debug_type($title)));
+            }
+        }
+        foreach ($changeTitles as $group => $title) {
+            if (!isset($groups[$group])) {
+                throw new \InvalidArgumentException(sprintf('changeTitles names the group "%s", which is not in groups.', $group));
+            }
+            if (!is_string($title)) {
+                throw new \InvalidArgumentException(sprintf('The change title of the group "%s" must be a string, %s given.', $group, get_debug_type($title)));
+            }
         }
     }
 

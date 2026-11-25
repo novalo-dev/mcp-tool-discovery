@@ -246,6 +246,32 @@ final class GroupedModeTest extends TestCase
         new GroupedMode([Groups::class, 'of'], ['files' => 'Files', 'files_change' => 'Other']);
     }
 
+    public function testGroupsGivenAsAListOfNamesAreRefusedAtBoot(): void
+    {
+        /** @var array<mixed> $groups keyed 0 and 1, so no tool would fall in a group */
+        $groups = ['files', 'tickets'];
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('not a list of names');
+        new GroupedMode([Groups::class, 'of'], $groups);
+    }
+
+    public function testAChangeTitleForAGroupThatDoesNotExistIsRefusedAtBoot(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('"ticket"');
+        new GroupedMode([Groups::class, 'of'], ['files' => 'Files', 'tickets' => 'Tickets'], changeTitles: ['ticket' => 'Change tickets']);
+    }
+
+    public function testAGroupTitleThatIsNotAStringIsRefusedAtBoot(): void
+    {
+        /** @var array<string, mixed> $groups */
+        $groups = ['files' => ['Files']];
+
+        $this->expectException(\InvalidArgumentException::class);
+        new GroupedMode([Groups::class, 'of'], $groups);
+    }
+
     public function testTheGuideHeaderSaysWhichGroupToolRunsEachAction(): void
     {
         $header = Groups::mode('acme_')->guideHeader(['acme_get_file', 'acme_set_ticket_status', 'acme_list_users', 'acme_nope'], RecordingGate::fixtureTools()->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_list_users'));
