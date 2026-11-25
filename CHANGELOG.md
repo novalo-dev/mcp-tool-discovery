@@ -349,6 +349,11 @@ becomes the next version's section when it is published.
   other on a large index whatever the places of the marks. The ranking of
   every request of the benchmark is unchanged.
 
+- An index read from the cache is used only when it was built over exactly
+  the tools being searched, whatever the cache hands back for a key;
+  otherwise it is built again, so a search never knows the words of a tool
+  the caller does not see.
+
 ## 0.7.0 - 2026-11-23
 
 ### Added

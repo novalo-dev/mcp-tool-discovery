@@ -405,6 +405,13 @@ final class ToolSearch
         $key = hash('xxh128', serialize($documents) . $options->indexKey());
         $saved = $cache->get($key);
         $index = $saved === null ? null : ToolIndex::fromArray($saved, $analyzer);
+        // The key is a hash of the tools, not the tools: an index saved for
+        // others, through a collision or a host cache that mixes its keys,
+        // would hold the words of tools this caller does not see. Only an
+        // index of exactly the tools searched is used.
+        if ($index !== null && $index->ids() !== array_keys($documents)) {
+            $index = null;
+        }
         if ($index === null) {
             // With what alike() reads: any search meeting a word the tools lack
             // needs it, and working it out again at each request cost more

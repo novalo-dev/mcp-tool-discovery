@@ -15,6 +15,7 @@ namespace Novalo\McpToolDiscovery\Tests\Search;
 
 use Novalo\McpToolDiscovery\Search\Analyzer;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Cache\IndexCache;
 use Novalo\McpToolDiscovery\Search\Cache\MemoryIndexCache;
 use Novalo\McpToolDiscovery\Search\Learning\Counts;
 use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
@@ -539,6 +540,38 @@ final class ToolSearchTest extends TestCase
         // Built over the tools this caller may see, never read from an index
         // that holds a tool hidden from them.
         self::assertNotContains('acme_set_ticket_status', self::names((new ToolSearch($fewer, cache: $cache))->search(new SearchQuery('change', 'ticket status'))));
+    }
+
+    public function testAnIndexSavedForOtherToolsIsBuiltAgain(): void
+    {
+        // A cache that hands back the first index it kept whatever the key,
+        // as a host cache that mixes its keys would.
+        $cache = new class implements IndexCache {
+            /** @var array<array-key, mixed>|null */
+            private ?array $index = null;
+
+            public function get(string $key): ?array
+            {
+                return $this->index;
+            }
+
+            public function set(string $key, array $index): void
+            {
+                $this->index ??= $index;
+            }
+        };
+        $all = RecordingGate::fixtureTools();
+        $fewer = $all->filter(static fn(Tool $tool): bool => $tool->name !== 'acme_share_file');
+        $query = SearchQuery::text('share a file so a person can access and edit it');
+        new ToolSearch($all, cache: $cache);
+
+        $fresh = (new ToolSearch($fewer))->find($query);
+        $cached = (new ToolSearch($fewer, cache: $cache))->find($query);
+
+        // The words only the hidden tool uses stay unknown to this caller.
+        self::assertSame($fresh->unmatched, $cached->unmatched);
+        self::assertSame($fresh->searchId, $cached->searchId);
+        self::assertSame(self::names($fresh->tools), self::names($cached->tools));
     }
 
     public function testABrokenCacheEntryIsBuiltAgain(): void
