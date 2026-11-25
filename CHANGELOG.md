@@ -10,6 +10,18 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A wine cellar written in Georgian on the search benchmark.** 40 tools
+  in English snake_case, with Georgian titles and descriptions, most of
+  them neighbours on one object (fill a qvevri, seal it, open it, wash it;
+  plan a bottling, cancel it, record it). Its 100 requests were written
+  before any of them was run, with the verbs as people type them and 13 of
+  them in Mtavruli, the Georgian capitals. Nothing was tuned on it: 42 of
+  its 50 test requests come first in fields, 49 in the top 3, 33 as one
+  sentence, and learning loses none. The benchmark now holds 3345 requests
+  over thirty servers; its floors move to 1287 and 1505 in fields and 1410
+  asked again, and the laravel/mcp line to 534 and 802 as one sentence and
+  924 and 1199 with the fields joined.
+
 - **A server on logiscape/mcp-sdk-php in the host examples.**
   `docs/examples/logiscape/` serves the notes tools on the other MCP SDK for
   PHP many servers run on, pinned at 2.0.2, over stdio. The library answers

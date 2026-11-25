@@ -32,8 +32,8 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1245 times
-out of 1626 in fields, and 939 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1287 times
+out of 1676 in fields, and 972 times as one sentence.
 
 ## How a tool is scored
 
@@ -471,7 +471,7 @@ skipped.
 
 ## The measures
 
-Twenty-nine fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirty fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -498,18 +498,19 @@ OpenAPI (40 tools, `post_devices_device_id_reboot`), a ferry line
 written in Turkish (40 tools, `ticket_refund`), a kindergarten written
 in Vietnamese (40 tools, `absence_notice_cancel`), a fire station
 written in Spanish (40 tools, `vehiculo_alta`), a driving school
-written in Persian (40 tools, `exam_theory_book`) and a chess club
-written in Armenian (40 tools, `pairing_swap`). 3245 requests, each written as one
+written in Persian (40 tools, `exam_theory_book`), a chess club
+written in Armenian (40 tools, `pairing_swap`) and a wine cellar
+written in Georgian (40 tools, `qvevri_seal`). 3345 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1626 requests | Right tool first | Top 3 |
+| Test half, 1676 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1245 | 1456 |
-| The same request as one sentence | 939 | 1208 |
-| In fields, after every train request was run once | 1248 | 1456 |
-| In fields, after the test requests were run once, then asked again | 1364 | 1516 |
+| The request in fields | 1287 | 1505 |
+| The same request as one sentence | 972 | 1249 |
+| In fields, after every train request was run once | 1290 | 1505 |
+| In fields, after the test requests were run once, then asked again | 1410 | 1565 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -519,10 +520,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 517 | 774 |
-| The fields joined into one sentence | 904 | 1166 |
+| The request as one sentence | 534 | 802 |
+| The fields joined into one sentence | 924 | 1199 |
 
-As one sentence it trails on each of the twenty-nine servers, the English ones
+As one sentence it trails on each of the thirty servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1010,6 +1011,27 @@ no Unicode mapping joins them (NFKC gives `եւ`). What it misses is the
 endings of a verb that the tools write in another form (`չեղարկիր`, cancel,
 against `չեղարկում`) and neighbours of one object (the next pairing to
 publish finds the pairing itself).
+
+The wine cellar is written in Georgian, in Mkhedruli, with tool names in
+English snake_case (`qvevri_fill`, `qvevri_seal`, `wine_transfer`). Its 100
+requests, written on 2026-11-25 before any of them was run, use the verbs
+as people type them, imperatives with their prefixes (`გააუქმე`, cancel)
+against the verbal nouns of the titles (`გაუქმება`), and 13 of them are
+typed in Mtavruli, the capitals Unicode 11 added (`ᲓᲐᲮᲣᲠᲔ`), as a phone
+set to capitals or a heading writes them. Its tools are neighbours by
+design (fill a qvevri, seal it, open it, wash it; plan a bottling, cancel
+it, record it; book a tasting, move it, cancel it). Nothing was tuned on it:
+42 of its 50 test requests find the right tool first in fields, 49 in the
+top 3, 33 as one sentence; learned from its train half, 42 again; asked
+again, 46. Its train half scores 40 in fields. The capitals need nothing of
+their own: the simple lowercase of mbstring maps Mtavruli to Mkhedruli, and
+the 13 requests typed that way find their tool in the top 3 in fields, 9
+of them first. A host without
+mbstring lowers ASCII only and would miss them, as it misses every other
+script with capitals. What it misses is neighbours of one object (bottles
+to count find the bottling that records them, a bottling to plan finds the
+one to cancel) and a verb of another root than the title's (`ჩაწერე`,
+write down, for `მიღება`, reception).
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
