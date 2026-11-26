@@ -350,7 +350,10 @@ request as PHP-FPM runs it. The caller is no longer the process, so the gate
 and the `Discovery` are built for the caller each request names, as in the
 HTTP example written by hand.
 [tests/Logiscape/LogiscapeHttpServerTest.php](../tests/Logiscape/LogiscapeHttpServerTest.php)
-calls it over HTTP in the same CI job.
+calls it over HTTP in the same CI job. What every server that keeps a
+session between requests must answer is written once, in
+[tests/Examples/SessionHttpServerTestCase.php](../tests/Examples/SessionHttpServerTestCase.php):
+an example on another SDK extends it and names its folder.
 
 ```
 php -S 127.0.0.1:8080 docs/examples/logiscape/http-server.php
@@ -421,7 +424,8 @@ PHP-FPM runs it. The SDK keeps the session between requests; the caller is no
 longer the process, so the gate and the `Discovery` are built for the caller
 each request names, as in the HTTP example written by hand.
 [tests/Sdk/SdkHttpServerTest.php](../tests/Sdk/SdkHttpServerTest.php) calls it
-over HTTP in the same CI job.
+over HTTP in the same CI job, with the same checks as the server on
+logiscape/mcp-sdk-php.
 
 ```
 php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
