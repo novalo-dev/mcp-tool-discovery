@@ -61,7 +61,8 @@ The benchmark says where the search still misses, in
   sound (a coffee washing station) and a third large English one, 150
   tools in kebab-case, verb first (an IT service desk) and an English one
   where most tools share an object with four others, in PascalCase (a
-  leisure centre) are in.
+  leisure centre) and a fourth large English one, 160 tools in camelCase,
+  verb first, many on the same object (a conference organiser) are in.
 - **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
   marks now meets the tool word it spells, a Greek word typed in capitals
   and a Russian `е` for `ё` included. `й` typed as `и` lies within the

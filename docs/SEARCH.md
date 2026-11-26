@@ -105,8 +105,8 @@ power of 0.1 to 0.7, or a bonus per field, with or without a threshold of
 20% to 60% of the field's best: 1593 to 1627 first, never above the base,
 and the top 3 down to 1742).
 
-On the benchmark below, the same requests find the right tool first 1514 times
-out of 1901 in fields, and 1130 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1587 times
+out of 1981 in fields, and 1173 times as one sentence.
 
 ## How a tool is scored
 
@@ -672,18 +672,19 @@ written in Armenian (40 tools, `pairing_swap`), a wine cellar
 written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
 written in Amharic (40 tools, `drying_bed_assign`), a community garden
 in English camelCase (40 tools, `swapWateringDuty`) and an IT service
-desk (150 tools, `link-incident-problem`) and a leisure centre in English
-PascalCase (40 tools, `FreezeMembership`). 3795 requests, each written as one
+desk (150 tools, `link-incident-problem`), a leisure centre in English
+PascalCase (40 tools, `FreezeMembership`) and a conference organiser in
+English camelCase (160 tools, `promoteFromWaitlist`). 3955 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1901 requests | Right tool first | Top 3 |
+| Test half, 1981 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1514 | 1708 |
-| The same request as one sentence | 1130 | 1440 |
-| In fields, after every train request was run once | 1515 | 1708 |
-| In fields, after the test requests were run once, then asked again | 1638 | 1780 |
+| The request in fields | 1587 | 1785 |
+| The same request as one sentence | 1173 | 1496 |
+| In fields, after every train request was run once | 1587 | 1785 |
+| In fields, after the test requests were run once, then asked again | 1716 | 1859 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -693,10 +694,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 631 | 932 |
-| The fields joined into one sentence | 1066 | 1376 |
+| The request as one sentence | 657 | 972 |
+| The fields joined into one sentence | 1136 | 1454 |
 
-As one sentence it trails on each of the thirty-four servers, the English ones
+As one sentence it trails on each of the thirty-five servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1264,6 +1265,26 @@ train half scores 32 and 38. What it misses is a verb no tool uses
 ("resume", "quit", "pay back", "bump"), which leaves only the object, shared
 by five tools, and two neighbours the request does not tell apart (taking
 a member off a class finds the tool that cancels the class).
+
+The conference organiser is the fourth large server in English and the
+largest after the hosting panel: 160 tools in camelCase, verb first, with
+eight to thirteen on each of a session (reschedule, move to another room,
+extend, shorten, split, merge, lock), a speaker (invite, confirm, record a
+decline, replace, remove), a submission to the call for papers (revise,
+withdraw, accept, reject, waitlist, reopen) and a registration (transfer,
+change the pass, confirm, check in, undo a check-in), and a room that is
+either a meeting room or a hotel room. Its 160 requests, one per tool,
+were written on 2026-11-26 before any of them was run, in the words of an
+organiser (push back, call off, chase, fold into, pulled out). Nothing was
+tuned on it, and the cut at 60% holds: 73 of its 80 test requests come
+first in fields, 77 in the top 3, with 2.64 tools in an answer; 43 as one
+sentence; asked again, 78. Its train half scores 73 and 79. What it misses
+is two neighbours of the same object that the request does not tell apart
+(said yes finds the tool that records a no, call off finds postpone) and a
+reading tool whose object is in the title of the tools that change it
+(the closing date of the call for papers finds open and extend, and the
+cut leaves nothing else). Learned from the train half, one of its test
+requests drops a place and the total stays level.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

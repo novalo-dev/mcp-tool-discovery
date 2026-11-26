@@ -10,6 +10,20 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **A conference organiser with 160 tools on the search benchmark.** The
+  fourth large server in English: camelCase names, verb first, with eight
+  to thirteen tools on each of a session, a speaker, a submission and a
+  registration (`rescheduleSession`, `moveSessionRoom`, `splitSession`,
+  `replaceSpeaker`, `waitlistSubmission`, `transferRegistration`), and a
+  room that is either a meeting room or a hotel room. Its 160 requests,
+  one per tool, were written before any of them was run, in the words of
+  an organiser (push back, call off, chase, pulled out). Nothing was tuned
+  on it, and the cut at 60% holds: on its test half, 73 of 80 come first in
+  fields and 77 in the top 3. The benchmark now holds 3955 requests over
+  thirty-five servers; its floors move to 1587 and 1785 in fields, 1716
+  asked again and 1173 and 1496 as one sentence, and the laravel/mcp line
+  to 657 and 972 as one sentence and 1136 and 1454 with the fields joined.
+
 - **The file cache and the file learning store say why they failed.**
   `FileIndexCache` and `FileLearningStore` take a second, optional
   argument, a callable given the reason each time an index could not be
