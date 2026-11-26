@@ -22,17 +22,51 @@ Said in separate fields, each part can be weighed on its own:
 
 | Field | Weight | Holds |
 |---|---|---|
-| `action` | 0.5 | what to do: "change", "list", "restore" |
+| `action` | 0.8 | what to do: "change", "list", "restore" |
 | `object` | 1 | what it is done to: "ticket status", "backup" |
 | `description` | 1 | the request in a short sentence |
 | `text` (`query` in `search_tools`) | 1 | free keywords |
 
 Each field is scored against the index on its own, then the scores are added
 with these weights. No field is required and none is parsed: the library does
-not know what a verb or an object is. The action counts least because many
-tools share it ("list", "get"); the object and the description tell them apart.
+not know what a verb or an object is. The action counts a little less because
+many tools share it ("list", "get"); among the tools of one object, it is what
+tells them apart.
 
-On the benchmark below, the same requests find the right tool first 1472 times
+**Each field is tempered by its own best match** before the fields are added:
+its scores are divided by the square root of its best score
+(`SearchOptions::fieldBalance`, 0.5). A field still counts more when it
+matches more, but less than in proportion: an object of several words that
+every neighbour shares ("holiday request") used to outweigh the one verb that
+told them apart ("approve"), by its size rather than by what it says, and
+"approve | holiday request | validate time off" found `leave.request` before
+`leave.approve`. A sentence is one field: the order of its tools does not
+change.
+Chosen on the train half (1894 requests, base 1603 first in fields, 1762 in
+the top 3, 1604 learned on two folds, 1697 asked again), with the weight of
+the action, since the two move together: the action alone at 0.6 or 0.7 gave
+1610 and 1609; the balance at 0.5 with the action at 0.5 gave 1595, at 0.6
+1613, at 0.7 1620, at 0.75 1627 (1767 in the top 3), at 0.8 **1627** (1769 in
+the top 3, 1627 learned on two folds, 1716 asked again), at 0.85 1624 and at
+0.9 1622; the balance at 0.4, 0.45, 0.55 and 0.6 with the action at 0.7 or
+0.8 gave 1619 to 1625; at 1, every field counted by its share of its best
+match alone, 1494 to 1549. On the test half, in fields from 1472 to 1514
+first (1707 to 1708 in the top 3), learned from the other half from 1472 to
+1515, asked again from 1610 to 1638 first and 1769 to 1780 in the top 3; a
+sentence is ranked as before. A search answers 2.50 tools on average instead
+of 2.43, about 2.5% more bytes, since the gaps the cut reads are narrower. A
+host gives `fieldBalance: 0.0` and `queryWeights: ['action' => 0.5]` to rank
+as before.
+
+Tried on the same half and not kept: each field divided by the number of its
+words to a power instead of by its best match (1575 to 1606), BM25's `b` of
+one field of the tools apart (name, title, description at 0.5 or 1,
+parameters at 0.3: 1599 to 1603), a floor added to each term found (BM25+,
+1590 to 1602), the rarity of a word raised to a power (0.75 to 1.5: 1590 to
+1599), and a sentence read with the weights of a description (1287 to 1244
+as one sentence).
+
+On the benchmark below, the same requests find the right tool first 1514 times
 out of 1901 in fields, and 1111 times as one sentence.
 
 ## How a tool is scored
@@ -86,7 +120,7 @@ a share of the best score of one field (70% to 95%) counted as equal in it
 
 A host changes a weight by naming its field: `new SearchOptions(weights:
 ['title' => 3.0])` raises the title and keeps the other three at their
-defaults, as `queryWeights: ['action' => 0.8]` does for a request. A weight
+defaults, as `queryWeights: ['action' => 0.6]` does for a request. A weight
 of 0 leaves the field out. A field the search does not have, a negative
 weight, NAN, or every field at 0 is refused when the options are built.
 
@@ -607,10 +641,10 @@ and gives the score.
 
 | Test half, 1901 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1472 | 1707 |
+| The request in fields | 1514 | 1708 |
 | The same request as one sentence | 1111 | 1418 |
-| In fields, after every train request was run once | 1472 | 1707 |
-| In fields, after the test requests were run once, then asked again | 1610 | 1769 |
+| In fields, after every train request was run once | 1515 | 1708 |
+| In fields, after the test requests were run once, then asked again | 1638 | 1780 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

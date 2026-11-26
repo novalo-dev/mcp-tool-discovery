@@ -100,7 +100,15 @@ final class ToolSearch
             $weight = $this->options->queryWeights[$field] ?? 1.0;
             // The description says what the tool is about; the other fields
             // name it (see SearchOptions::DESCRIPTION_WEIGHTS).
-            foreach ($this->index->score($text, $field === 'description') as $name => $score) {
+            $fieldScores = $this->index->score($text, $field === 'description');
+            if ($fieldScores === []) {
+                continue;
+            }
+            // Tempered by the field's own best match: an object of several
+            // words that every neighbour shares outscored the one verb that
+            // told them apart, by its size rather than by what it says.
+            $weight /= max($fieldScores) ** $this->options->fieldBalance;
+            foreach ($fieldScores as $name => $score) {
                 // A cast would be undone: PHP keys "123" as an integer anyway, so
                 // the names are made strings again once ranked.
                 $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;

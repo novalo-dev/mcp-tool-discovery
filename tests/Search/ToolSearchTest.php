@@ -907,6 +907,25 @@ final class ToolSearchTest extends TestCase
         self::assertSame(self::names((new ToolSearch($tools, new SearchOptions(descriptionWeights: SearchOptions::WEIGHTS)))->search($sentence)), self::names((new ToolSearch($tools))->search($sentence)));
     }
 
+    public function testAFieldThatMatchesMoreDoesNotOutweighTheOthersByItsSizeAlone(): void
+    {
+        $sensors = RecordingGate::server('sensors');
+        $ops = RecordingGate::server('ops');
+        $raw = new SearchOptions(fieldBalance: 0.0);
+        $query = new SearchQuery('add', 'webhook', 'URL');
+        $freight = new SearchQuery('follow', 'freight', 'delivered yet');
+
+        // The name of the delete tool says "webhooks" and "webhook": added
+        // raw, the object put it before the tool that creates one.
+        self::assertSame('post_webhooks', self::names((new ToolSearch($sensors))->search($query))[0] ?? null);
+        self::assertSame('delete_webhooks_webhook_id', self::names((new ToolSearch($sensors, $raw))->search($query))[0] ?? null);
+        self::assertSame('cargo.track', self::names((new ToolSearch($ops))->search($freight))[0] ?? null);
+        self::assertNotSame('cargo.track', self::names((new ToolSearch($ops, $raw))->search($freight))[0] ?? null);
+        // A sentence is one field: tempered as a whole, its order stays.
+        $sentence = SearchQuery::text('add a webhook to an URL');
+        self::assertSame(self::names((new ToolSearch($sensors, $raw))->search($sentence)), self::names((new ToolSearch($sensors))->search($sentence)));
+    }
+
     public function testAWordTypedWithoutItsMarksFindsTheToolThatSpellsIt(): void
     {
         $tools = ToolSet::of([

@@ -368,10 +368,10 @@ score:
 
 | Test half, 1901 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1472** | **1707** |
+| The request in fields | **1514** | **1708** |
 | The same request as one sentence | 1111 | 1418 |
-| In fields, after learning from the other half | 1472 | 1707 |
-| In fields, asked a second time | 1610 | 1769 |
+| In fields, after learning from the other half | 1515 | 1708 |
+| In fields, asked a second time | 1638 | 1780 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

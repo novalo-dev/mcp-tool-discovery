@@ -37,6 +37,23 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A field of a request that matches more no longer outweighs the others
+  by its size alone, and the action counts 0.8 instead of 0.5.** Each
+  field's scores are now divided by the square root of its own best score
+  before the fields are added (`SearchOptions::fieldBalance`, 0.5). An
+  object of several words that every neighbour shares used to outweigh the
+  one verb that told them apart: "add | webhook | URL" found the tool that
+  deletes a webhook, whose name says "webhook" twice, before the one that
+  creates it. Chosen on the train half with the weight of the action; on
+  the test half the requests in fields come first 1514 times out of 1901
+  instead of 1472 (1708 in the top 3 instead of 1707), learned from the
+  other half 1515 instead of 1472, and asked again 1638 instead of 1610
+  (1780 in the top 3 instead of 1769). A sentence is one field and is
+  ranked as before. A search answers 2.50 tools on average instead of 2.43.
+  The floors move to 1514 and 1708 in fields and 1638 asked again. Give
+  `fieldBalance: 0.0` and `queryWeights: ['action' => 0.5]` to rank as
+  before; a balance outside 0 to 1, or NAN, is refused.
+
 - **The description of a request reads the tools with weights of its own.**
   The action and the object name a tool; the description says what it
   should be about, so it now counts a tool's name and title at 0.5 each

@@ -40,7 +40,7 @@ final class SearchOptions
     public const DESCRIPTION_WEIGHTS = ['name' => 0.5, 'title' => 0.5, 'description' => 1.0, 'parameters' => 0.5];
 
     /** How much each field of a query counts, unless the host says otherwise. */
-    public const QUERY_WEIGHTS = ['action' => 0.5, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0];
+    public const QUERY_WEIGHTS = ['action' => 0.8, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0];
 
     /** @var array<string, float> every field of a tool, the defaults under what the host gave */
     public readonly array $weights;
@@ -84,6 +84,7 @@ final class SearchOptions
         public readonly float $learningWeight = 0.75,
         public readonly int $learningCap = 5,
         array $descriptionWeights = self::DESCRIPTION_WEIGHTS,
+        public readonly float $fieldBalance = 0.5,
     ) {
         // NAN passes every comparison below, and would rank every tool NAN.
         if (!is_finite($cut) || $cut < 0 || $cut > 1) {
@@ -97,6 +98,9 @@ final class SearchOptions
         }
         if (!is_finite($trigramWeight) || $trigramWeight < 0) {
             throw new \InvalidArgumentException('The trigram weight cannot be negative.');
+        }
+        if (!is_finite($fieldBalance) || $fieldBalance < 0 || $fieldBalance > 1) {
+            throw new \InvalidArgumentException('The field balance is a power of the best score of a field, between 0 and 1.');
         }
         // Merged over the defaults: an array given by name replaces the whole
         // default, so ['title' => 3.0] used to leave the name, the
