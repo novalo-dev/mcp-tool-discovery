@@ -37,6 +37,15 @@ final class SearchOptionsTest extends TestCase
         self::assertSame('acme_delete_file', (new ToolSearch(RecordingGate::fixtureTools(), $options))->search('trash')[0]->name ?? null);
     }
 
+    public function testTheDescriptionOfARequestHasWeightsOfItsOwn(): void
+    {
+        $options = new SearchOptions(descriptionWeights: ['title' => 1.0]);
+
+        self::assertSame(['name' => 0.5, 'title' => 1.0, 'description' => 1.0, 'parameters' => 0.5], $options->descriptionWeights);
+        // The weights decide the index, so each setting keeps its own.
+        self::assertNotSame((new SearchOptions())->indexKey(), $options->indexKey());
+    }
+
     public function testAWeightOfZeroLeavesAFieldOutOfTheRanking(): void
     {
         $options = new SearchOptions(weights: ['description' => 0]);
@@ -55,6 +64,8 @@ final class SearchOptionsTest extends TestCase
         yield 'a negative weight' => [static fn(): SearchOptions => new SearchOptions(weights: ['title' => -1.0]), '"title"'];
         yield 'a weight that is not a number' => [static fn(): SearchOptions => new SearchOptions(weights: ['title' => NAN]), '"title"'];
         yield 'every tool field at zero' => [static fn(): SearchOptions => new SearchOptions(weights: ['name' => 0, 'title' => 0, 'description' => 0, 'parameters' => 0]), 'above 0'];
+        yield 'a tool field the description does not read' => [static fn(): SearchOptions => new SearchOptions(descriptionWeights: ['summary' => 1.0]), '"summary"'];
+        yield 'every tool field at zero for the description' => [static fn(): SearchOptions => new SearchOptions(descriptionWeights: ['name' => 0, 'title' => 0, 'description' => 0, 'parameters' => 0]), 'above 0'];
         yield 'every query field at zero' => [static fn(): SearchOptions => new SearchOptions(queryWeights: ['action' => 0, 'object' => 0, 'description' => 0, 'text' => 0]), 'above 0'];
         yield 'a cut that is not a number' => [static fn(): SearchOptions => new SearchOptions(cut: NAN), 'cut'];
         yield 'a negative trigram weight' => [static fn(): SearchOptions => new SearchOptions(trigramWeight: -0.1), 'trigram'];

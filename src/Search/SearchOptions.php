@@ -28,11 +28,25 @@ final class SearchOptions
     /** How much a match counts in each field of a tool, unless the host says otherwise. */
     public const WEIGHTS = ['name' => 1.0, 'title' => 2.0, 'description' => 1.0, 'parameters' => 0.5];
 
+    /**
+     * How much a match counts in each field of a tool for the description of
+     * a request, unless the host says otherwise. The action and the object
+     * name a tool; the description says what it should be about, so it is
+     * read mostly against what the tools say they do. With the name and the
+     * title weighed as for the other fields, a word of it in the titles of
+     * other objects won: "details" found "File details" before the user the
+     * object named. Chosen on the train half; see docs/SEARCH.md.
+     */
+    public const DESCRIPTION_WEIGHTS = ['name' => 0.5, 'title' => 0.5, 'description' => 1.0, 'parameters' => 0.5];
+
     /** How much each field of a query counts, unless the host says otherwise. */
     public const QUERY_WEIGHTS = ['action' => 0.5, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0];
 
     /** @var array<string, float> every field of a tool, the defaults under what the host gave */
     public readonly array $weights;
+
+    /** @var array<string, float> every field of a tool for the description of a request, the defaults under what the host gave */
+    public readonly array $descriptionWeights;
 
     /** @var array<string, float> every field of a query, the defaults under what the host gave */
     public readonly array $queryWeights;
@@ -55,6 +69,9 @@ final class SearchOptions
      * @param float $learningWeight how far what was learned may lift a tool, as a share of
      *        the best score; 0 turns learning off even with a store
      * @param int $learningCap the successes after which a word lifts a tool no further
+     * @param array<string, float> $descriptionWeights how much a match counts in each field of a tool
+     *        for the description of a request, as $weights for the other fields; give it the same
+     *        as $weights to read every field of a request alike
      */
     public function __construct(
         array $weights = self::WEIGHTS,
@@ -66,6 +83,7 @@ final class SearchOptions
         public readonly array $stopWords = [],
         public readonly float $learningWeight = 0.75,
         public readonly int $learningCap = 5,
+        array $descriptionWeights = self::DESCRIPTION_WEIGHTS,
     ) {
         // NAN passes every comparison below, and would rank every tool NAN.
         if (!is_finite($cut) || $cut < 0 || $cut > 1) {
@@ -85,6 +103,7 @@ final class SearchOptions
         // description and the parameters out of the index without a word.
         $this->weights = self::weighed($weights, self::WEIGHTS, 'weights');
         $this->queryWeights = self::weighed($queryWeights, self::QUERY_WEIGHTS, 'queryWeights');
+        $this->descriptionWeights = self::weighed($descriptionWeights, self::DESCRIPTION_WEIGHTS, 'descriptionWeights');
         self::strings($stopWords);
         $this->synonyms = self::words($synonyms, new Analyzer($stopWords));
     }
@@ -94,7 +113,7 @@ final class SearchOptions
      */
     public function indexKey(): string
     {
-        return serialize([$this->weights, $this->trigramWeight, $this->stopWords]);
+        return serialize([$this->weights, $this->descriptionWeights, $this->trigramWeight, $this->stopWords]);
     }
 
     /**

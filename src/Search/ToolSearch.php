@@ -98,7 +98,9 @@ final class ToolSearch
             $text = $this->expand(self::bounded($text));
             array_push($tokens, ...$this->analyzer->tokens($text));
             $weight = $this->options->queryWeights[$field] ?? 1.0;
-            foreach ($this->index->score($text) as $name => $score) {
+            // The description says what the tool is about; the other fields
+            // name it (see SearchOptions::DESCRIPTION_WEIGHTS).
+            foreach ($this->index->score($text, $field === 'description') as $name => $score) {
                 // A cast would be undone: PHP keys "123" as an integer anyway, so
                 // the names are made strings again once ranked.
                 $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;
@@ -398,7 +400,7 @@ final class ToolSearch
         // the words alike a word reads is then built only if a search meets
         // a word the tools lack.
         if ($cache === null) {
-            return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
+            return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, false, $options->descriptionWeights);
         }
         // The key covers every text indexed, so it changes with any tool and
         // differs between callers who see different tools.
@@ -416,7 +418,7 @@ final class ToolSearch
             // With what alike() reads: any search meeting a word the tools lack
             // needs it, and working it out again at each request cost more
             // than the search itself.
-            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, true);
+            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, true, $options->descriptionWeights);
             $cache->set($key, $index->toArray());
         }
 

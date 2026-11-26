@@ -32,7 +32,7 @@ with these weights. No field is required and none is parsed: the library does
 not know what a verb or an object is. The action counts least because many
 tools share it ("list", "get"); the object and the description tell them apart.
 
-On the benchmark below, the same requests find the right tool first 1456 times
+On the benchmark below, the same requests find the right tool first 1472 times
 out of 1901 in fields, and 1111 times as one sentence.
 
 ## How a tool is scored
@@ -51,6 +51,38 @@ own. A rare word weighs more than a common one: "rollback" counts more than
 "file", which many tools mention, and a prefix every tool carries ("acme_")
 counts almost nothing. That is why the library needs no list of stop words and
 no rule to strip a prefix. A word repeated earns less each time.
+
+**The description of a request reads the tools with weights of its own**:
+name 0.5, title 0.5, description 1, parameters 0.5
+(`SearchOptions::DESCRIPTION_WEIGHTS`). The action and the object name a
+tool; the description says what it should be about, which the tools say in
+their descriptions. Weighed like the other fields, a word of it that sits in
+the titles of other objects took the first place: "get | crew member |
+details" found "Flight details", "Gate details" and "Aircraft details"
+before "Crew member".
+Chosen on the train half (1894 requests, base 1595 first in fields, 1756 in
+the top 3, 1687 asked again): name 1 and title 1 gave 1598, name 0.5 and
+title 1 gave 1596, name 0.25 and title 0.5 gave 1604 but lost one request
+asked again in the top 3, name and title at 0.25 gave 1600, description at
+1.5 gave 1594 and parameters at 0.25 or 1 gave less; name 0.5 and title 0.5
+gave 1603 in fields, 1762 in the top 3, 1604 learned on two folds and 1697
+asked again, better or equal on every line. On the test half, in fields
+from 1456 to 1472 first (1703 to 1707 in the top 3), learned from the other
+half from 1458 to 1472, asked again from 1594 to 1610 first, 1771 to 1769 in
+the top 3. A sentence has no description and is read as before. The index
+keeps only the weighted frequencies the second weighting changes, those of
+the words of a name or a title: a cached index of 150 tools grows from about
+580 KB to 730 KB, and a cached search takes 3 to 10% longer. A host gives
+`descriptionWeights` the same as `weights` to read every field of a request
+alike, as before.
+
+Tried with it on the same half and not kept: BM25's `k1` from 0.6 to 3 and
+`b` from 0.3 to 1 (1.2 and 0.75 stay the best, 1595), trigrams of the words
+the tools hold counted less than those of unknown words (1587 at half, 1491
+without), a description scored only as far as the action and the object
+found the tool (1543 to 1598, and the top 3 down to 1694), and tools within
+a share of the best score of one field (70% to 95%) counted as equal in it
+(1590 to 1597 first).
 
 A host changes a weight by naming its field: `new SearchOptions(weights:
 ['title' => 3.0])` raises the title and keeps the other three at their
@@ -575,10 +607,10 @@ and gives the score.
 
 | Test half, 1901 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1456 | 1703 |
+| The request in fields | 1472 | 1707 |
 | The same request as one sentence | 1111 | 1418 |
-| In fields, after every train request was run once | 1458 | 1703 |
-| In fields, after the test requests were run once, then asked again | 1594 | 1771 |
+| In fields, after every train request was run once | 1472 | 1707 |
+| In fields, after the test requests were run once, then asked again | 1610 | 1769 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,

@@ -26,6 +26,26 @@ becomes the next version's section when it is published.
   file where that directory should be: the search still answers, and the
   log names the reason.
 
+### Changed
+
+- **The description of a request reads the tools with weights of its own.**
+  The action and the object name a tool; the description says what it
+  should be about, so it now counts a tool's name and title at 0.5 each
+  instead of 1 and 2, its description and parameters as before
+  (`SearchOptions::DESCRIPTION_WEIGHTS`, `descriptionWeights`). A word of
+  the description found in the titles of other objects used to win:
+  "get | crew member | details" listed "Flight details" and "Gate details"
+  before "Crew member". Chosen on the train half; on the test half the
+  requests in fields come first 1472 times out of 1901 instead of 1456
+  (1707 in the top 3 instead of 1703), learned from the other half 1472
+  instead of 1458, and asked again 1610 instead of 1594 (1769 in the top 3
+  instead of 1771). A sentence is ranked as before. The floors move to 1472
+  and 1707 in fields and 1610 asked again. The index keeps the frequencies
+  this weighting changes beside the others: a cached index of 150 tools
+  grows by about a quarter and a cached search takes 3 to 10% longer, and
+  the saved format changes, so a cached index is built again once. Give
+  `descriptionWeights` the same as `weights` to rank as before.
+
 ### Fixed
 
 - **A path that can never work is refused when the store is built.** An
