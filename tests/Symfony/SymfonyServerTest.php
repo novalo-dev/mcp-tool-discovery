@@ -15,6 +15,7 @@ namespace Novalo\McpToolDiscovery\Tests\Symfony;
 
 use Example\Notes\Symfony\Kernel;
 use Novalo\McpToolDiscovery\Tests\Examples\HttpServerTestCase;
+use Novalo\McpToolDiscovery\Tests\Examples\KeepsIndexOnDisk;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -25,6 +26,8 @@ use Symfony\Component\HttpFoundation\Request;
  */
 final class SymfonyServerTest extends HttpServerTestCase
 {
+    use KeepsIndexOnDisk;
+
     private const EXAMPLE = __DIR__ . '/../../docs/examples/symfony';
 
     public static function setUpBeforeClass(): void

@@ -192,7 +192,7 @@ application writes the same entries in `config/packages/security.yaml` and
 | The caller | a stateless firewall on `/mcp` with `access_token`, whose [TokenHandler](examples/symfony/src/TokenHandler.php) names a user | the controller never reads the token; a request with no token reaches it with no user and is answered 401 |
 | Who sees a tool | [ToolVoter](examples/symfony/src/ToolVoter.php), asked through `isGranted()` by [SecurityGate](examples/symfony/src/SecurityGate.php)'s `visible()` | the permission lives where the application keeps every other one, and the role hierarchy applies to tools too |
 | What a call may carry and does | `NotesTools`, in `notes.php`, the same rules `NotesGate` uses | only the decision of who sees what is Symfony's; the tools keep their own checks |
-| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
+| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA`, made by `Kernel::indexCache()` with the `logger` service | the same for every caller: the cache is keyed by the tools a caller may see; a directory the server cannot write never fails a request, so the reason goes to the logger at error, the lowest level that the logger FrameworkBundle gives without Monolog writes, or every search would build the index again unseen |
 | The notes | a shared service | they stand for the host's database, which the container already gives its services |
 | The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
 
@@ -236,7 +236,7 @@ application puts the guard in its own `config/auth.php`, as
 | Who sees a tool | the ability `see-mcp-tool`, defined on Laravel's gate and asked through `allows()` by [AbilityGate](examples/laravel/app/AbilityGate.php)'s `visible()`, for `forUser()` of the caller | the permission lives where the application keeps every other one, and a `Gate::before()` of the application applies to tools too |
 | The route | `Route::any('/mcp')`, outside the `web` group | the session, the cookies and the CSRF check of that group are for a browser; the controller answers 405 for the methods the transport does not take |
 | What a call may carry and does | `NotesTools`, in `notes.php` | only the decision of who sees what is Laravel's; the tools keep their own checks |
-| `SearchSetup`, with a `FileIndexCache` | a singleton, the cache in the directory of `config('mcp.data')` | the same for every caller: the cache is keyed by the tools a caller may see |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, the cache in the directory of `config('mcp.data')`, its failures sent to the application's log at error | the same for every caller: the cache is keyed by the tools a caller may see; a directory the server cannot write never fails a request, so the reason goes to the log, or every search would build the index again unseen |
 | The gate and the `Discovery` | not bound in the container: the controller builds them in each request | a singleton would hand one caller's gate to the next request Octane serves, where the container outlives the request |
 
 A guard keeps the user it found. Octane forgets the guards after each
@@ -296,7 +296,7 @@ php -S 127.0.0.1:8080 docs/examples/laravel-mcp/public/app.php
 | What a call may carry | the tool's `handle()`, so `authorize()` lets every call through | laravel/mcp tools validate their arguments themselves and answer an error result |
 | The revision | `io.modelcontextprotocol/protocolVersion` of the request's `_meta` on 2026-07-28, else the `MCP-Protocol-Version` header, else 2025-03-26 over HTTP | laravel/mcp keeps no session; over stdio, where there is no header, the methods answer in the newest revision with a handshake |
 | Progress notifications | dropped | a tool run through a runner would stream them under a request the client did not send |
-| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method, its failures sent to the application's log at error | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
 
 laravel/mcp also ships a `ToolSearch` of its own; the README compares the two
 searches on the same benchmark.

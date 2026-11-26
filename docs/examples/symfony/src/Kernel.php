@@ -17,6 +17,7 @@ use Example\Notes\Notes;
 use Example\Notes\NotesTools;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -52,6 +53,22 @@ final class Kernel extends BaseKernel
         }
 
         return new Notes($data . '/notes.json');
+    }
+
+    /**
+     * A cache that cannot write never fails a request, so a directory left
+     * unwritable would only show as every search building its index again:
+     * the reason goes to the application's logger, at error rather than
+     * warning, since every request pays for a new index until the directory
+     * is fixed. The logger FrameworkBundle gives without Monolog writes
+     * nothing below error to stderr, and the fingers_crossed handler of
+     * Monolog's production recipe writes a warning only beside an error.
+     */
+    public static function indexCache(string $directory, LoggerInterface $logger): FileIndexCache
+    {
+        return new FileIndexCache($directory, static function (string $why) use ($logger): void {
+            $logger->error('notes: ' . $why);
+        });
     }
 
     protected function configureContainer(ContainerConfigurator $container): void
@@ -103,7 +120,8 @@ final class Kernel extends BaseKernel
         $services->set(SearchSetup::class)
             ->args(['$cache' => service('mcp.index_cache')]);
         $services->set('mcp.index_cache', FileIndexCache::class)
-            ->args(['%env(MCP_NOTES_DATA)%/index']);
+            ->factory([self::class, 'indexCache'])
+            ->args(['%env(MCP_NOTES_DATA)%/index', service('logger')]);
 
         // The Discovery is not a service: it holds the gate of one caller,
         // and a shared service would hand it to the next request a worker

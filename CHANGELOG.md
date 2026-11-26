@@ -26,6 +26,15 @@ becomes the next version's section when it is published.
   file where that directory should be: the search still answers, and the
   log names the reason.
 
+- **The Symfony and Laravel examples log why the index cache failed.**
+  The Symfony application builds its `FileIndexCache` with
+  `Kernel::indexCache()`, which hands each failure to the `logger`
+  service; the Laravel application and the laravel/mcp server hand it to
+  the application's log. Both log at error, since the logger
+  FrameworkBundle gives without Monolog writes nothing below it. The test
+  of the plain server, a file where the directory of the index should be,
+  now runs against the Symfony and Laravel applications too.
+
 ### Changed
 
 - **The description of a request reads the tools with weights of its own.**
