@@ -22,8 +22,8 @@ becomes the next version's section when it is published.
   and the HTTP servers on the official PHP SDK and on logiscape/mcp-sdk-php
   build their `FileIndexCache` with `indexCache()` of `notes.php`, which
   hands each failure to `error_log()`, so a host that copies them sees a
-  directory it cannot write in its log. A test runs the plain server with a
-  file where that directory should be: the search still answers, and the
+  directory it cannot write in its log. A test runs each of the three with
+  a file where that directory should be: the search still answers, and the
   log names the reason.
 
 - **The Symfony and Laravel examples log why the index cache failed.**

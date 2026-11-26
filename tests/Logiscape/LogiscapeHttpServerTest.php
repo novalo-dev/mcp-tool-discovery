@@ -43,10 +43,7 @@ final class LogiscapeHttpServerTest extends TestCase
             self::markTestSkipped('Run composer install in docs/examples/logiscape first.');
         }
         self::$data = sys_get_temp_dir() . '/mcp-logiscape-http-example-' . bin2hex(random_bytes(6));
-        self::$server = LocalServer::start(
-            static fn(string $address): array => [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/logiscape/http-server.php'],
-            ['MCP_NOTES_DATA' => self::$data],
-        );
+        self::$server = LocalServer::start(self::command(...), ['MCP_NOTES_DATA' => self::$data]);
         self::$url = self::$server->url();
     }
 
@@ -153,6 +150,39 @@ final class LogiscapeHttpServerTest extends TestCase
         self::call('notes_search_tools', ['query' => 'note'], self::READER, self::open(self::READER));
 
         self::assertNotSame([], glob(self::$data . '/index/*.php') ?: []);
+    }
+
+    // A cache that cannot write never fails the request, so the server must
+    // say why somewhere, or it builds its index on every search unseen.
+    public function testAnIndexThatCannotBeKeptIsSaidInTheErrorLog(): void
+    {
+        $data = sys_get_temp_dir() . '/mcp-logiscape-http-example-' . bin2hex(random_bytes(6));
+        mkdir($data, 0o700, true);
+        // A file where the directory of the index should be.
+        touch($data . '/index');
+        $server = LocalServer::start(self::command(...), ['MCP_NOTES_DATA' => $data]);
+        // The helpers below talk to the server of the class: this one stands
+        // in for it until the test ends.
+        $url = self::$url;
+        self::$url = $server->url();
+        try {
+            [$status, $found] = self::call('notes_search_tools', ['action' => 'add', 'object' => 'note'], self::READER, self::open(self::READER));
+            self::assertSame(200, $status);
+            self::assertSame('notes_add', $found['result']['structuredContent']['tools'][0]['name'] ?? null);
+            self::assertStringContainsString('notes: The index cache cannot create the directory ' . $data . '/index', $server->errors());
+        } finally {
+            self::$url = $url;
+            $server->stop();
+            LocalServer::remove($data);
+        }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private static function command(string $address): array
+    {
+        return [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/logiscape/http-server.php'];
     }
 
     /**
