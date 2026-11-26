@@ -26,6 +26,11 @@ namespace Novalo\McpToolDiscovery\Search;
  * documents that share a term with the query. Visiting every document for
  * every term was most of the cost of a search once the index is cached.
  *
+ * A second weighting of the same fields may be kept beside the first, for
+ * text that describes what a document is about rather than naming it (see
+ * build()): the frequencies are worked out twice, the words, the documents
+ * and what finding words alike reads only once.
+ *
  * Building it is the cost of a search, so it can be saved as a plain array
  * (toArray) and restored (fromArray) by a cache. It knows nothing of tools:
  * any document with text fields fits.
@@ -44,7 +49,7 @@ final class ToolIndex
      * changes, so an old cache entry is rebuilt rather than compared with
      * terms it never held.
      */
-    private const FORMAT = 10;
+    private const FORMAT = 11;
 
     /**
      * How alike a word the tools do not use and a word they do must be to be
@@ -143,6 +148,9 @@ final class ToolIndex
      *        weighted frequency, the fields' weights and lengths already applied
      * @param array<array-key, array<int|string, float>> $grams the same for trigrams
      * @param array{array<array-key, list<int>>, list<int>}|null $nearby see invert(); null until alike() needs it
+     * @param array<array-key, array<int|string, float>>|null $contextWords the words under the second
+     *        weighting; null when there is none, and the first is read in its place
+     * @param array<array-key, array<int|string, float>>|null $contextGrams the same for trigrams
      *
      * Keys are array-key, not string: PHP turns a key such as "123", a trigram
      * of a word with digits, into an integer, and looks it up the same way.
@@ -154,6 +162,8 @@ final class ToolIndex
         private readonly array $grams,
         private readonly float $trigramWeight,
         private ?array $nearby = null,
+        private readonly ?array $contextWords = null,
+        private readonly ?array $contextGrams = null,
     ) {}
 
     /**
@@ -162,9 +172,24 @@ final class ToolIndex
      * @param float $trigramWeight how much trigram matches count against whole-word matches
      * @param bool $nearby whether what alike() reads is built now and kept with the index, rather than at
      *        the first query holding a word no document does
+     * @param array<string, float>|null $contextWeights a second weighting of the same fields, read by
+     *        score() when asked for context; null, or the same as $weights, keeps none
      */
-    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6, bool $nearby = false): self
+    public static function build(iterable $documents, array $weights, Analyzer $analyzer = new Analyzer(), float $trigramWeight = 0.6, bool $nearby = false, ?array $contextWeights = null): self
     {
+        if ($contextWeights !== null) {
+            // The fields are cut once, so the second weighting reads the
+            // same ones, in the same order: a field only it names is not
+            // indexed, and one it leaves out counts nothing, as in $weights.
+            $ordered = [];
+            foreach ($weights as $field => $weight) {
+                $ordered[$field] = $contextWeights[$field] ?? 0.0;
+            }
+            $contextWeights = $ordered;
+            if ($contextWeights === $weights) {
+                $contextWeights = null;
+            }
+        }
         $counts = [];
         $totals = [];
         $trigrams = [];
@@ -182,11 +207,64 @@ final class ToolIndex
                 $totals[$field][1] = ($totals[$field][1] ?? 0) + count($fieldGrams);
             }
         }
+        [$words, $grams] = self::weigh($counts, $totals, $weights);
+        [$contextWords, $contextGrams] = $contextWeights === null ? [null, null] : self::weigh($counts, $totals, $contextWeights);
+        if ($contextWords !== null && $contextGrams !== null) {
+            // Only what the second weighting changes is kept: a term held in
+            // fields both weigh alike scores the same under either, and most
+            // terms of a tool sit in its description alone. Kept whole, the
+            // second weighting doubled the index a cache holds.
+            $contextWords = self::changed($contextWords, $words);
+            $contextGrams = self::changed($contextGrams, $grams);
+        }
+
+        // Built here, from the trigrams already cut, and kept by the cache:
+        // working them out again at each request cost more than the search
+        // itself.
+        $inverted = $nearby ? self::invert($words, $trigrams) : null;
+
+        return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight, $inverted, $contextWords, $contextGrams);
+    }
+
+    /**
+     * The entries of the second weighting that differ from the first.
+     *
+     * @param array<array-key, array<int|string, float>> $context
+     * @param array<array-key, array<int|string, float>> $plain
+     *
+     * @return array<array-key, array<int|string, float>>
+     */
+    private static function changed(array $context, array $plain): array
+    {
+        $changed = [];
+        foreach ($context as $term => $documents) {
+            foreach ($documents as $id => $weighted) {
+                if ($weighted !== ($plain[$term][$id] ?? null)) {
+                    $changed[$term][$id] = $weighted;
+                }
+            }
+        }
+
+        return $changed;
+    }
+
+    /**
+     * The weighted frequency of each word and trigram in each document.
+     *
+     * A term's weighted frequency in a document does not depend on the
+     * query, so it is worked out once at build rather than at every search.
+     *
+     * @param array<int|string, array<string, array{array<array-key, int>, int, array<array-key, int>, int}>> $counts
+     * @param array<string, array{0?: int, 1?: int}> $totals
+     * @param array<string, float> $weights
+     *
+     * @return array{array<array-key, array<int|string, float>>, array<array-key, array<int|string, float>>}
+     */
+    private static function weigh(array $counts, array $totals, array $weights): array
+    {
         $count = max(1, count($counts));
         $words = [];
         $grams = [];
-        // A term's weighted frequency in a document does not depend on the
-        // query, so it is worked out once here rather than at every search.
         foreach ($counts as $id => $fields) {
             foreach ($weights as $field => $weight) {
                 [$fieldWords, $wordLength, $fieldGrams, $gramLength] = $fields[$field];
@@ -201,12 +279,7 @@ final class ToolIndex
             }
         }
 
-        // Built here, from the trigrams already cut, and kept by the cache:
-        // working them out again at each request cost more than the search
-        // itself.
-        $inverted = $nearby ? self::invert($words, $trigrams) : null;
-
-        return new self($analyzer, array_keys($counts), $words, $grams, $trigramWeight, $inverted);
+        return [$words, $grams];
     }
 
     /**
@@ -237,10 +310,18 @@ final class ToolIndex
     /**
      * Every document that matches at least one term, with its score.
      *
+     * @param bool $context whether the query describes what is wanted rather than naming it, and is
+     *        scored under the second weighting when the index keeps one
+     * @param float $lengthPower the power of the number of query tokens the trigram scores are
+     *        divided by, beside the terms each token is cut into: 1 divides them by the number
+     *        of terms of the whole query
+     *
      * @return array<int|string, float> id => score, in index order
      */
-    public function score(string $query): array
+    public function score(string $query, bool $context = false, float $lengthPower = 1.0): array
     {
+        $changedWords = $context ? $this->contextWords : null;
+        $changedGrams = $context ? $this->contextGrams : null;
         $words = $this->analyzer->words($query);
         if ($words === []) {
             return [];
@@ -250,8 +331,8 @@ final class ToolIndex
             array_push($grams, ...Analyzer::trigrams($word));
         }
         $words = array_values(array_unique($words));
-        $wordScores = $this->bm25f($words, $this->words);
-        $gramScores = $this->bm25f(array_values(array_unique($grams)), $this->grams);
+        $wordScores = $this->bm25f($words, $this->words, $changedWords);
+        $gramScores = $this->bm25f(array_values(array_unique($grams)), $this->grams, $changedGrams);
         // A word no tool uses ("reservation") still reaches the tools by its
         // trigrams, but pooled with the others, trigrams find any word with
         // a common piece ("service" by "ser", "vic"). The words alike it as
@@ -268,18 +349,24 @@ final class ToolIndex
                 $matches[$spelled] = 1.0;
             }
             foreach ($matches as $alike => $dice) {
-                foreach ($this->bm25f([(string) $alike], $this->words) as $id => $score) {
+                foreach ($this->bm25f([(string) $alike], $this->words, $changedWords) as $id => $score) {
                     $wordScores[$id] = ($wordScores[$id] ?? 0.0) + self::ALIKE_WEIGHT * $dice * $score;
                 }
             }
         }
 
+        // The trigrams are divided by the number of query words, so a long
+        // query does not let its many trigrams outweigh the words themselves.
+        // The caller may soften that for a sentence (lengthPower below 1, see
+        // SearchOptions::textTrigramPower), and only over its tokens: a run of
+        // Burmese or Thai is one token cut into many pairs, and softened over
+        // its pairs, its trigrams found tools the run never named.
+        $tokens = max(1, min(count($words), count(array_unique($this->analyzer->tokens($query)))));
+        $divisor = count($words) / $tokens * $tokens ** $lengthPower;
         $scores = [];
         foreach ($this->ids as $id) {
             $score = ($wordScores[$id] ?? 0.0)
-                // Divided by the number of query words, so a long query does
-                // not let its many trigrams outweigh the words themselves.
-                + $this->trigramWeight * ($gramScores[$id] ?? 0.0) / count($words);
+                + $this->trigramWeight * ($gramScores[$id] ?? 0.0) / $divisor;
             if ($score > 0) {
                 $scores[$id] = $score;
             }
@@ -296,10 +383,13 @@ final class ToolIndex
      *
      * @param list<string> $terms
      * @param array<array-key, array<int|string, float>> $postings
+     * @param array<array-key, array<int|string, float>>|null $changed the entries the second weighting
+     *        gives otherwise, read in place of those of $postings; both hold the same terms and
+     *        documents, a weight of 0 included, so the documents counted for a term are the same
      *
      * @return array<int|string, float>
      */
-    private function bm25f(array $terms, array $postings): array
+    private function bm25f(array $terms, array $postings, ?array $changed = null): array
     {
         $documents = count($this->ids);
         $scores = [];
@@ -309,7 +399,9 @@ final class ToolIndex
             }
             $frequency = count($postings[$term]);
             $idf = log(1 + ($documents - $frequency + 0.5) / ($frequency + 0.5));
+            $own = $changed[$term] ?? [];
             foreach ($postings[$term] as $id => $weighted) {
+                $weighted = $own[$id] ?? $weighted;
                 if ($weighted > 0) {
                     $scores[$id] = ($scores[$id] ?? 0.0) + $idf * $weighted * (self::K1 + 1) / ($weighted + self::K1);
                 }
@@ -691,6 +783,8 @@ final class ToolIndex
             'grams' => $this->grams,
             'trigramWeight' => $this->trigramWeight,
             'nearby' => $this->nearby,
+            'contextWords' => $this->contextWords,
+            'contextGrams' => $this->contextGrams,
         ];
     }
 
@@ -723,7 +817,16 @@ final class ToolIndex
         if ($nearby !== null && !(is_array($nearby) && is_array($nearby[0] ?? null) && is_array($nearby[1] ?? null))) {
             return null;
         }
+        $contextWords = $saved['contextWords'] ?? null;
+        $contextGrams = $saved['contextGrams'] ?? null;
+        // Both or neither: one without the other would score a description
+        // under two weightings at once.
+        if (!(is_array($contextWords) && is_array($contextGrams)) && !($contextWords === null && $contextGrams === null)) {
+            return null;
+        }
         /** @var array{array<array-key, list<int>>, list<int>}|null $nearby */
-        return new self($analyzer, $ids, $words, $grams, (float) $saved['trigramWeight'], $nearby);
+        /** @var array<array-key, array<int|string, float>>|null $contextWords */
+        /** @var array<array-key, array<int|string, float>>|null $contextGrams */
+        return new self($analyzer, $ids, $words, $grams, (float) $saved['trigramWeight'], $nearby, $contextWords, $contextGrams);
     }
 }

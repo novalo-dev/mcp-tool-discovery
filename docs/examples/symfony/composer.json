@@ -6,8 +6,8 @@
     "require": {
         "php": ">=8.1",
         "novalo/mcp-tool-discovery": "*@dev",
-        "symfony/framework-bundle": "6.4.49",
-        "symfony/security-bundle": "6.4.49"
+        "symfony/framework-bundle": "6.4.51",
+        "symfony/security-bundle": "6.4.51"
     },
     "autoload": {
         "psr-4": {

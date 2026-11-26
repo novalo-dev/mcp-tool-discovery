@@ -596,6 +596,20 @@ final class ToolSearchTest extends TestCase
         foreach (['change the ticket status', 'roll back a deployment', 'statuses', 'nothing like it'] as $query) {
             self::assertSame($built->score($query), $restored->score($query));
         }
+
+        // With the weights of a description beside them, both kept.
+        $both = ToolIndex::build($documents, ['name' => 1.0, 'title' => 2.0, 'description' => 1.0], contextWeights: ['name' => 0.5, 'title' => 0.5]);
+        $restored = ToolIndex::fromArray($both->toArray());
+        self::assertNotNull($restored);
+        foreach (['change the ticket status', 'roll back a deployment', 'statuses', 'rollbak'] as $query) {
+            self::assertSame($both->score($query, true), $restored->score($query, true));
+            self::assertSame($built->score($query), $restored->score($query));
+        }
+        self::assertNotSame($both->score('ticket status', true), $both->score('ticket status'));
+        // The same weights twice keep nothing more.
+        self::assertNull(ToolIndex::build($documents, ['name' => 1.0, 'title' => 2.0], contextWeights: ['title' => 2.0, 'name' => 1.0])->toArray()['contextWords']);
+        // One half of the second weighting is a broken entry, not a first one.
+        self::assertNull(ToolIndex::fromArray(['contextGrams' => null] + $both->toArray()));
     }
 
     public function testTheClosestWordIsTheSameHoweverTheIndexWasMade(): void
@@ -870,6 +884,63 @@ final class ToolSearchTest extends TestCase
 
         $search->learn($result->searchId, '42');
         self::assertSame(['42', '123'], self::names($search->search('backup archive')), 'what was learned lifts a numeric name too');
+    }
+
+    public function testAWordOfTheDescriptionInTheTitleOfAnotherObjectDoesNotWin(): void
+    {
+        $tools = ToolSet::of([
+            ['name' => 'user.get', 'title' => 'User', 'description' => 'Shows one user: name, email, roles and last sign-in.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'user.list', 'title' => 'Users', 'description' => 'Lists the users with their roles.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'user.remove', 'title' => 'Remove a user', 'description' => 'Deletes the account of a user who has left.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'file.get', 'title' => 'File details', 'description' => 'Shows one file: size, owner and when it last changed.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'folder.get', 'title' => 'Folder details', 'description' => 'Shows one folder: its owner and who may open it.', 'inputSchema' => ['type' => 'object']],
+            ['name' => 'ticket.get', 'title' => 'Ticket details', 'description' => 'Shows one ticket: status, assignee and replies.', 'inputSchema' => ['type' => 'object']],
+        ]);
+        $query = new SearchQuery('get', 'user', 'details');
+
+        // "details" is in three titles and no word of the user's tools: read
+        // as a title, it put the three ahead of the user the object names.
+        self::assertSame('user.get', self::names((new ToolSearch($tools))->search($query))[0] ?? null);
+        self::assertSame('file.get', self::names((new ToolSearch($tools, new SearchOptions(descriptionWeights: SearchOptions::WEIGHTS)))->search($query))[0] ?? null);
+        // A sentence has no description: the text keeps the weights of the tools.
+        $sentence = SearchQuery::text('details');
+        self::assertSame(self::names((new ToolSearch($tools, new SearchOptions(descriptionWeights: SearchOptions::WEIGHTS)))->search($sentence)), self::names((new ToolSearch($tools))->search($sentence)));
+    }
+
+    public function testAFieldThatMatchesMoreDoesNotOutweighTheOthersByItsSizeAlone(): void
+    {
+        $sensors = RecordingGate::server('sensors');
+        $ops = RecordingGate::server('ops');
+        $raw = new SearchOptions(fieldBalance: 0.0);
+        $query = new SearchQuery('add', 'webhook', 'URL');
+        $freight = new SearchQuery('follow', 'freight', 'delivered yet');
+
+        // The name of the delete tool says "webhooks" and "webhook": added
+        // raw, the object put it before the tool that creates one.
+        self::assertSame('post_webhooks', self::names((new ToolSearch($sensors))->search($query))[0] ?? null);
+        self::assertSame('delete_webhooks_webhook_id', self::names((new ToolSearch($sensors, $raw))->search($query))[0] ?? null);
+        self::assertSame('cargo.track', self::names((new ToolSearch($ops))->search($freight))[0] ?? null);
+        self::assertNotSame('cargo.track', self::names((new ToolSearch($ops, $raw))->search($freight))[0] ?? null);
+        // A sentence is one field: tempered as a whole, its order stays.
+        $sentence = SearchQuery::text('add a webhook to an URL');
+        self::assertSame(self::names((new ToolSearch($sensors, $raw))->search($sentence)), self::names((new ToolSearch($sensors))->search($sentence)));
+    }
+
+    public function testASentenceKeepsTheTrigramsOfItsWords(): void
+    {
+        $ops = RecordingGate::server('ops');
+        $sentence = SearchQuery::text('add an extra flight to Madrid');
+        $fields = new SearchQuery('add', 'flight', 'extra flight to Madrid');
+        $whole = new SearchOptions(textTrigramPower: 1.0);
+
+        // "add an extra flight" finds the tool that schedules one either way.
+        // Two words more and its trigrams were divided by six instead of four,
+        // which let the tool that adds an aircraft come first.
+        self::assertSame('flight.schedule', self::names((new ToolSearch($ops, $whole))->search(SearchQuery::text('add an extra flight')))[0] ?? null);
+        self::assertSame('flight.schedule', self::names((new ToolSearch($ops))->search($sentence))[0] ?? null);
+        self::assertSame('aircraft.add', self::names((new ToolSearch($ops, $whole))->search($sentence))[0] ?? null);
+        // The fields are divided by their whole length, as before.
+        self::assertSame(self::names((new ToolSearch($ops, $whole))->search($fields)), self::names((new ToolSearch($ops))->search($fields)));
     }
 
     public function testAWordTypedWithoutItsMarksFindsTheToolThatSpellsIt(): void

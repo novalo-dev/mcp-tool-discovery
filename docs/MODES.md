@@ -16,55 +16,7 @@ own tools reach the host's tools. Four are written:
 
 A client sends the list of tools to the model with every request, so the list
 is the cost that repeats. A search answer enters the conversation once, when
-the client looks for a tool. Measured on the benchmark servers, in bytes of
-JSON on `2025-11-25` (`composer benchmark` prints this table, and
-[ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
-
-| Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
-|---|---|---|---|---|---|---|
-| workspace | 50 | 16,147 | 2,871 | 1,839 | 13,982 | 1,161 |
-| platform | 40 | 12,829 | 2,871 | 1,839 | - | 851 |
-| people | 40 | 12,814 | 2,871 | 1,839 | - | 854 |
-| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,082 |
-| school | 40 | 15,096 | 2,871 | 1,839 | - | 1,086 |
-| hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,342 |
-| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,416 |
-| newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,682 |
-| estate | 40 | 12,284 | 2,871 | 1,839 | - | 813 |
-| depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,353 |
-| arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,390 |
-| academy | 40 | 12,433 | 2,871 | 1,839 | - | 765 |
-| garage | 40 | 15,281 | 2,871 | 1,839 | - | 1,315 |
-| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,619 |
-| clinic | 40 | 13,592 | 2,871 | 1,839 | - | 1,293 |
-| water | 40 | 17,857 | 2,871 | 1,839 | - | 2,997 |
-| mill | 40 | 19,842 | 2,871 | 1,839 | - | 1,635 |
-| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,386 |
-| bikes | 40 | 12,966 | 2,871 | 1,839 | - | 955 |
-| ops | 150 | 50,720 | 2,871 | 1,839 | - | 1,015 |
-| theatre | 40 | 15,392 | 2,871 | 1,839 | - | 1,247 |
-| marina | 40 | 13,812 | 2,871 | 1,839 | - | 1,001 |
-| post | 40 | 17,780 | 2,871 | 1,839 | - | 1,232 |
-| sensors | 40 | 17,209 | 2,871 | 1,839 | - | 1,578 |
-| ferry | 40 | 12,772 | 2,871 | 1,839 | - | 946 |
-| kinder | 40 | 13,663 | 2,871 | 1,839 | - | 1,222 |
-| fire | 40 | 13,864 | 2,871 | 1,839 | - | 881 |
-| drive | 40 | 15,424 | 2,871 | 1,839 | - | 1,175 |
-| chess | 40 | 16,197 | 2,871 | 1,839 | - | 1,267 |
-| cellar | 40 | 19,520 | 2,871 | 1,839 | - | 1,984 |
-| coffee | 40 | 14,401 | 2,871 | 1,839 | - | 1,042 |
-| garden | 40 | 12,309 | 2,871 | 1,839 | - | 810 |
-| desk | 150 | 49,454 | 2,871 | 1,839 | - | 1,231 |
-| leisure | 40 | 13,467 | 2,871 | 1,839 | - | 1,135 |
-
-The search is the mean over the test half of the benchmark requests, text
-content only: the structured copy carries the same data. For English JSON a
-token is about four bytes. The fixture tools are short, about 300 bytes each,
-except the newsroom's, about 500 bytes, written as many real servers write
-them; tools with longer descriptions and schemas widen every gap. Only the
-workspace declares groups, in
-[tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
-tools stay outside them, listed as themselves.
+the client looks for a tool. Each mode weighs those two differently:
 
 - **Compact** is the default. Its list is the same size whatever the server,
   under a quarter of the whole list from 40 tools, and the list with one
@@ -81,9 +33,63 @@ tools stay outside them, listed as themselves.
   server. On the workspace its 8 tools take 7,154 bytes where the 28
   actions they stand for would take 9,299: on short tools it saves almost a
   quarter, more as the schemas grow.
-- **Direct** lists every tool as itself, the first column. It suits a server
-  with a few tools, where a search would cost more than it saves, and the
-  host that lets its users turn the other modes off.
+- **Direct** lists every tool as itself, the first column of the table
+  below. On the benchmark servers the compact list alone weighs as much as 4
+  to 9 tools listed as themselves, and 8 to 13 with one search: under about
+  ten tools, Direct sends less. It also suits the host that lets its users
+  turn the other modes off.
+
+The figures behind each line, measured on the benchmark servers in bytes of
+JSON on `2025-11-25` (`composer benchmark` prints this table, and
+[ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
+
+| Server | Tools | Direct (every tool as itself) | Compact | Gateway | Grouped | One compact search |
+|---|---|---|---|---|---|---|
+| workspace | 50 | 16,147 | 2,871 | 1,839 | 13,982 | 1,176 |
+| platform | 40 | 12,829 | 2,871 | 1,839 | - | 850 |
+| people | 40 | 12,814 | 2,871 | 1,839 | - | 884 |
+| library | 40 | 14,550 | 2,871 | 1,839 | - | 1,127 |
+| school | 40 | 15,096 | 2,871 | 1,839 | - | 1,258 |
+| hosting | 176 | 60,640 | 2,871 | 1,839 | - | 1,185 |
+| city | 40 | 19,334 | 2,871 | 1,839 | - | 1,449 |
+| newsroom | 40 | 20,067 | 2,871 | 1,839 | - | 1,896 |
+| estate | 40 | 12,284 | 2,871 | 1,839 | - | 834 |
+| depot | 40 | 17,134 | 2,871 | 1,839 | - | 1,334 |
+| arena | 40 | 15,693 | 2,871 | 1,839 | - | 1,413 |
+| academy | 40 | 12,433 | 2,871 | 1,839 | - | 776 |
+| garage | 40 | 15,281 | 2,871 | 1,839 | - | 1,446 |
+| hotel | 40 | 19,096 | 2,871 | 1,839 | - | 1,661 |
+| clinic | 40 | 13,592 | 2,871 | 1,839 | - | 1,297 |
+| water | 40 | 17,857 | 2,871 | 1,839 | - | 2,951 |
+| mill | 40 | 19,842 | 2,871 | 1,839 | - | 1,664 |
+| museum | 40 | 16,670 | 2,871 | 1,839 | - | 1,411 |
+| bikes | 40 | 12,966 | 2,871 | 1,839 | - | 984 |
+| ops | 150 | 50,720 | 2,871 | 1,839 | - | 1,035 |
+| theatre | 40 | 15,392 | 2,871 | 1,839 | - | 1,248 |
+| marina | 40 | 13,812 | 2,871 | 1,839 | - | 1,015 |
+| post | 40 | 17,780 | 2,871 | 1,839 | - | 1,315 |
+| sensors | 40 | 17,209 | 2,871 | 1,839 | - | 1,625 |
+| ferry | 40 | 12,772 | 2,871 | 1,839 | - | 1,041 |
+| kinder | 40 | 13,663 | 2,871 | 1,839 | - | 1,403 |
+| fire | 40 | 13,864 | 2,871 | 1,839 | - | 883 |
+| drive | 40 | 15,424 | 2,871 | 1,839 | - | 1,152 |
+| chess | 40 | 16,197 | 2,871 | 1,839 | - | 1,256 |
+| cellar | 40 | 19,520 | 2,871 | 1,839 | - | 1,953 |
+| coffee | 40 | 14,401 | 2,871 | 1,839 | - | 1,091 |
+| garden | 40 | 12,309 | 2,871 | 1,839 | - | 830 |
+| desk | 150 | 49,454 | 2,871 | 1,839 | - | 1,105 |
+| leisure | 40 | 13,467 | 2,871 | 1,839 | - | 1,102 |
+| summit | 160 | 53,994 | 2,871 | 1,839 | - | 932 |
+| campus | 150 | 98,166 | 2,871 | 1,839 | - | 2,592 |
+
+The search is the mean over the test half of the benchmark requests, text
+content only: the structured copy carries the same data. For English JSON a
+token is about four bytes. The fixture tools are short, about 300 bytes each,
+except the newsroom's, about 500 bytes, written as many real servers write
+them; tools with longer descriptions and schemas widen every gap. Only the
+workspace declares groups, in
+[tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
+tools stay outside them, listed as themselves.
 
 To see each one on a client of your own before choosing, the example server
 over stdio takes the mode by name, on the same four tools:

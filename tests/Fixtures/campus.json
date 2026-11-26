@@ -1,0 +1,3376 @@
+[
+ {
+  "name": "core_course_get_courses",
+  "description": "Use this tool to get the courses of the site, with their ID, full name, short name, category, start and end dates and whether they are visible to students. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "categoryid": {
+     "type": "string",
+     "description": "Only return courses of this category"
+    },
+    "ids": {
+     "type": "string",
+     "description": "Comma separated list of course IDs to return"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_search_courses",
+  "description": "Use this tool to search courses by a word of their full name, short name or summary, or by a tag, and get the courses that match with their ID and category. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "criterianame": {
+     "type": "string",
+     "description": "What to search on: search, tagid or modulelist"
+    },
+    "criteriavalue": {
+     "type": "string",
+     "description": "The word or ID to search for"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_get_contents",
+  "description": "Use this tool to get the contents of one course: its sections in order, and in each section the activities and resources it holds, with their type, name, visibility and completion settings. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_create_courses",
+  "description": "Use this tool to create one or more new courses in a category, with a full name, a short name, a format such as topics or weekly, a start date and an optional end date. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "fullname": {
+     "type": "string",
+     "description": "Full name of the course"
+    },
+    "shortname": {
+     "type": "string",
+     "description": "Short name, unique on the site"
+    },
+    "categoryid": {
+     "type": "string",
+     "description": "ID of the category"
+    },
+    "format": {
+     "type": "string",
+     "description": "Course format, topics or weekly"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_update_courses",
+  "description": "Use this tool to change the settings of existing courses: full name, short name, summary, category, start and end dates, format or visibility to students. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "fullname": {
+     "type": "string",
+     "description": "New full name"
+    },
+    "visible": {
+     "type": "string",
+     "description": "1 to show the course to students, 0 to hide it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_delete_courses",
+  "description": "Use this tool to delete courses entirely, with their activities, enrolments, grades and files. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseids": {
+     "type": "string",
+     "description": "IDs of the courses to delete"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_course_duplicate_course",
+  "description": "Use this tool to duplicate a course into a new course with a new name, copying its sections, activities and resources, and optionally its enrolled users. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course to copy"
+    },
+    "fullname": {
+     "type": "string",
+     "description": "Full name of the copy"
+    },
+    "shortname": {
+     "type": "string",
+     "description": "Short name of the copy"
+    },
+    "userdata": {
+     "type": "string",
+     "description": "1 to copy users and their data too"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_import_course",
+  "description": "Use this tool to import the activities and resources of one course into another existing course, adding them after the content it already has. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "importfrom": {
+     "type": "string",
+     "description": "ID of the course to take the content from"
+    },
+    "importto": {
+     "type": "string",
+     "description": "ID of the course that receives it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_get_categories",
+  "description": "Use this tool to get the course categories of the site, with their ID, name, parent category, number of courses and visibility. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "parent": {
+     "type": "string",
+     "description": "Only return the categories under this one"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_delete_categories",
+  "description": "Use this tool to delete a course category, moving its courses to another category or deleting them with it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string",
+     "description": "ID of the category"
+    },
+    "newparent": {
+     "type": "string",
+     "description": "ID of the category that receives its courses"
+    },
+    "recursive": {
+     "type": "string",
+     "description": "1 to delete its courses too"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_course_edit_section",
+  "description": "Use this tool to hide, show, rename or highlight a section of a course, or to add a new empty section at the end of the course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "sectionid": {
+     "type": "string",
+     "description": "ID of the section"
+    },
+    "action": {
+     "type": "string",
+     "description": "hide, show, rename, highlight or add"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_reset_course",
+  "description": "Use this tool to reset a course for a new term: it removes the enrolments, grades, submissions, quiz attempts and forum posts but keeps the activities and resources. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "options": {
+     "type": "string",
+     "description": "What to remove: enrolments, grades, submissions, attempts, posts"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_enrol_get_enrolled_users",
+  "description": "Use this tool to get the users enrolled in a course, with their ID, full name, e-mail, roles, groups and last access to the course. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Only users of this group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_enrol_get_users_courses",
+  "description": "Use this tool to get the courses one user is enrolled in, with the course ID, name, progress and the date of the user's last access to each. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrol_manual_enrol_users",
+  "description": "Use this tool to enrol users in a course by hand, with a role such as student or teacher and an optional start and end date for the enrolment. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "roleid": {
+     "type": "string",
+     "description": "ID of the role, 5 for student"
+    },
+    "timeend": {
+     "type": "string",
+     "description": "End of the enrolment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrol_manual_unenrol_users",
+  "description": "Use this tool to unenrol users from a course: their enrolment is removed and their grades and submissions in that course are no longer shown. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "enrol_self_enrol_user",
+  "description": "Use this tool to enrol the calling user in a course that allows self enrolment, giving the enrolment key when the course has one. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "password": {
+     "type": "string",
+     "description": "The enrolment key, if the course has one"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrol_self_set_key",
+  "description": "Use this tool to set, change or remove the enrolment key students type to enrol themselves in a course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "password": {
+     "type": "string",
+     "description": "The new key, empty to remove it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_enrol_suspend_enrolment",
+  "description": "Use this tool to suspend the enrolment of a user in a course: the user stays in the participants but cannot enter the course until the enrolment is active again. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_enrol_reactivate_enrolment",
+  "description": "Use this tool to make a suspended enrolment active again, so the user can enter the course with the grades and work kept. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_enrol_extend_enrolment",
+  "description": "Use this tool to change the start or end date of a user's enrolment in a course, for example to give a learner more time before access ends. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "timeend": {
+     "type": "string",
+     "description": "New end date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrol_guest_set_access",
+  "description": "Use this tool to allow or forbid guest access to a course, so visitors without an account can look at it, with an optional password. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "status": {
+     "type": "string",
+     "description": "1 to allow guests, 0 to forbid"
+    },
+    "password": {
+     "type": "string",
+     "description": "Optional password for guests"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_get_users",
+  "description": "Use this tool to search user accounts by name, e-mail, ID number or other profile field and get their ID, full name, e-mail, department, last access and whether they are suspended. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "key": {
+     "type": "string",
+     "description": "The field to search: firstname, lastname, email, idnumber"
+    },
+    "value": {
+     "type": "string",
+     "description": "The value to search for"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_get_users_by_field",
+  "description": "Use this tool to get the full profiles of the users whose ID, username or ID number you already know, with all their profile fields and custom fields. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "field": {
+     "type": "string",
+     "description": "id, username, idnumber or email"
+    },
+    "values": {
+     "type": "string",
+     "description": "The values of that field"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_create_users",
+  "description": "Use this tool to create user accounts with a username, a password or a request to create one, first name, last name, e-mail and optional profile fields. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "username": {
+     "type": "string",
+     "description": "Username, lower case"
+    },
+    "firstname": {
+     "type": "string",
+     "description": "First name"
+    },
+    "lastname": {
+     "type": "string",
+     "description": "Last name"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail address"
+    },
+    "createpassword": {
+     "type": "string",
+     "description": "1 to e-mail the user a new password"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_update_users",
+  "description": "Use this tool to change the profile of existing users: name, e-mail, department, city, language, authentication method or custom fields. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "email": {
+     "type": "string",
+     "description": "New e-mail"
+    },
+    "department": {
+     "type": "string",
+     "description": "New department"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_delete_users",
+  "description": "Use this tool to delete user accounts: they can no longer log in and are removed from all their courses. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userids": {
+     "type": "string",
+     "description": "IDs of the users"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_user_suspend_user",
+  "description": "Use this tool to suspend a user account so the person cannot log in any more, keeping the account, its enrolments and its history. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_unsuspend_user",
+  "description": "Use this tool to lift the suspension of a user account so the person can log in again with the same enrolments and history. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_reset_password",
+  "description": "Use this tool to send a user an e-mail with a link to choose a new password, or to force the user to change the password at the next login. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "force": {
+     "type": "string",
+     "description": "1 to force a change at the next login"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_get_preferences",
+  "description": "Use this tool to get the preferences of a user: language, time zone, e-mail digest type, forum tracking, editor and notification settings. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_get_login_history",
+  "description": "Use this tool to get the last logins of a user: the date and time of each, the IP address and the device, and the date of first and last access to the site. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "limit": {
+     "type": "string",
+     "description": "How many logins to return"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_role_assign_roles",
+  "description": "Use this tool to give a user a role in a context: teacher, non-editing teacher, student or manager in a course or a category, or a role for the whole site. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "roleid": {
+     "type": "string",
+     "description": "ID of the role"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "contextid": {
+     "type": "string",
+     "description": "ID of the context"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_role_unassign_roles",
+  "description": "Use this tool to take a role away from a user in a context, such as removing the teacher role of someone in a course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "roleid": {
+     "type": "string",
+     "description": "ID of the role"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "contextid": {
+     "type": "string",
+     "description": "ID of the context"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_role_get_user_roles",
+  "description": "Use this tool to get the roles a user holds, in each course, category and on the site, with the context of each. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_role_override_capability",
+  "description": "Use this tool to change one permission of a role in a context, allowing or preventing it, for example letting students rate posts in one forum. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "roleid": {
+     "type": "string",
+     "description": "ID of the role"
+    },
+    "capability": {
+     "type": "string",
+     "description": "The capability, such as mod/forum:rate"
+    },
+    "contextid": {
+     "type": "string",
+     "description": "ID of the context"
+    },
+    "permission": {
+     "type": "string",
+     "description": "allow, prevent or inherit"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_role_check_capability",
+  "description": "Use this tool to check whether a user has a capability in a context, and which role or override gives or refuses it. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "capability": {
+     "type": "string",
+     "description": "The capability to check"
+    },
+    "contextid": {
+     "type": "string",
+     "description": "ID of the context"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_get_course_groups",
+  "description": "Use this tool to get the groups of a course with their ID, name, description, enrolment key and number of members. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_create_groups",
+  "description": "Use this tool to create groups in a course, each with a name, an optional description and an optional enrolment key that puts a student straight into it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name of the group"
+    },
+    "description": {
+     "type": "string",
+     "description": "Description"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_update_groups",
+  "description": "Use this tool to rename a group of a course or change its description or enrolment key. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "id": {
+     "type": "string",
+     "description": "ID of the group"
+    },
+    "name": {
+     "type": "string",
+     "description": "New name"
+    },
+    "enrolmentkey": {
+     "type": "string",
+     "description": "New key"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_delete_groups",
+  "description": "Use this tool to delete groups of a course; their members stay enrolled in the course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "groupids": {
+     "type": "string",
+     "description": "IDs of the groups"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_group_add_group_members",
+  "description": "Use this tool to add users who are enrolled in a course to one of its groups. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "groupid": {
+     "type": "string",
+     "description": "ID of the group"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_delete_group_members",
+  "description": "Use this tool to take users out of a group of a course; they stay enrolled in the course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "groupid": {
+     "type": "string",
+     "description": "ID of the group"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_get_group_members",
+  "description": "Use this tool to get the members of one group with their ID, full name and e-mail. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "groupid": {
+     "type": "string",
+     "description": "ID of the group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_create_groupings",
+  "description": "Use this tool to create a grouping in a course, a set of groups that an activity can be given to, and to put groups in it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name of the grouping"
+    },
+    "groupids": {
+     "type": "string",
+     "description": "IDs of the groups in it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_group_auto_create_groups",
+  "description": "Use this tool to split the students of a course into groups automatically, by a number of groups or a number of members in each, at random or by name. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "groupby": {
+     "type": "string",
+     "description": "groups or members"
+    },
+    "number": {
+     "type": "string",
+     "description": "How many groups or members"
+    },
+    "allocate": {
+     "type": "string",
+     "description": "random, firstname or lastname"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_cohort_get_cohorts",
+  "description": "Use this tool to get the cohorts of the site or of a category, site-wide sets of users such as a year or a department, with their ID, name and number of members. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "contextid": {
+     "type": "string",
+     "description": "Only the cohorts of this context"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_cohort_create_cohorts",
+  "description": "Use this tool to create a cohort, a set of users of the whole site or a category, with a name, an ID number and a description. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name of the cohort"
+    },
+    "idnumber": {
+     "type": "string",
+     "description": "ID number"
+    },
+    "categoryid": {
+     "type": "string",
+     "description": "Category, empty for the whole site"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_cohort_add_cohort_members",
+  "description": "Use this tool to add users to a cohort. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cohortid": {
+     "type": "string",
+     "description": "ID of the cohort"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_cohort_delete_cohort_members",
+  "description": "Use this tool to remove users from a cohort; their accounts and their courses are kept. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cohortid": {
+     "type": "string",
+     "description": "ID of the cohort"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_cohort_sync_course",
+  "description": "Use this tool to link a cohort to a course, so every member of the cohort is enrolled in the course and later members are enrolled when they join the cohort. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cohortid": {
+     "type": "string",
+     "description": "ID of the cohort"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "roleid": {
+     "type": "string",
+     "description": "Role given in the course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_get_assignments",
+  "description": "Use this tool to get the assignments of one or more courses, with their ID, name, due date, cut-off date, grading due date and the type of submission they take. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseids": {
+     "type": "string",
+     "description": "IDs of the courses"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_get_submissions",
+  "description": "Use this tool to get the submissions of an assignment, with for each student the status, the date submitted, the files and the online text. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "status": {
+     "type": "string",
+     "description": "Only submissions of this status, such as submitted or draft"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_get_submission_status",
+  "description": "Use this tool to get the status of one student's submission for an assignment: draft or submitted, the time left before the due date, any extension and the feedback. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_save_submission",
+  "description": "Use this tool to save the calling user's submission for an assignment, its online text or the files of a draft area, as a draft that can still be changed. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "onlinetext": {
+     "type": "string",
+     "description": "The text"
+    },
+    "filesid": {
+     "type": "string",
+     "description": "ID of the draft area with the files"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_submit_for_grading",
+  "description": "Use this tool to submit the calling user's draft submission for grading; after this it can no longer be changed unless a teacher reverts it to draft. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "acceptsubmissionstatement": {
+     "type": "string",
+     "description": "1 to accept the statement that the work is the student's own"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_revert_submission_to_draft",
+  "description": "Use this tool to put a student's submitted work back to draft, so the student can change it and submit it again. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_save_grade",
+  "description": "Use this tool to save the grade of one student for an assignment, with an optional feedback comment, and to choose whether to allow another attempt. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    },
+    "grade": {
+     "type": "string",
+     "description": "The grade"
+    },
+    "feedback": {
+     "type": "string",
+     "description": "Feedback comment"
+    },
+    "addattempt": {
+     "type": "string",
+     "description": "1 to allow another attempt"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_get_grades",
+  "description": "Use this tool to get the grades given for an assignment, with for each student the grade, the date graded and the marker. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_add_feedback_comment",
+  "description": "Use this tool to add a feedback comment or a feedback file to a student's submission without changing the grade. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    },
+    "comment": {
+     "type": "string",
+     "description": "The comment"
+    },
+    "filesid": {
+     "type": "string",
+     "description": "Draft area of feedback files"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_grant_extension",
+  "description": "Use this tool to give one or more students a later due date for an assignment than the rest of the class. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userids": {
+     "type": "string",
+     "description": "IDs of the students"
+    },
+    "dates": {
+     "type": "string",
+     "description": "The new due date of each"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_remove_extension",
+  "description": "Use this tool to remove the extension of a student, who then has the same due date as the class again. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_lock_submissions",
+  "description": "Use this tool to stop students from changing or adding submissions for an assignment, even before the due date. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userids": {
+     "type": "string",
+     "description": "IDs of the students"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_release_grades",
+  "description": "Use this tool to release the grades of an assignment that uses marking workflow, so students can see their grades and feedback. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userids": {
+     "type": "string",
+     "description": "IDs of the students"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_assign_create_assignment",
+  "description": "Use this tool to add an assignment to a section of a course, with a name, instructions, a due date, the types of submission and the maximum grade. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "section": {
+     "type": "string",
+     "description": "Section number"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "duedate": {
+     "type": "string",
+     "description": "Due date"
+    },
+    "grade": {
+     "type": "string",
+     "description": "Maximum grade"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_get_quizzes",
+  "description": "Use this tool to get the quizzes of one or more courses, with their ID, name, open and close dates, time limit, number of attempts allowed and grading method. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseids": {
+     "type": "string",
+     "description": "IDs of the courses"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_create_quiz",
+  "description": "Use this tool to add a quiz to a section of a course, with a name, open and close dates, a time limit, the attempts allowed and the grading method. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "section": {
+     "type": "string",
+     "description": "Section number"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "timelimit": {
+     "type": "string",
+     "description": "Time limit in seconds"
+    },
+    "attempts": {
+     "type": "string",
+     "description": "Attempts allowed"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_get_attempts",
+  "description": "Use this tool to get the attempts of a quiz, with for each the student, the state, the start and finish times and the grade. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    },
+    "userid": {
+     "type": "string",
+     "description": "Only the attempts of this student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_get_attempt_review",
+  "description": "Use this tool to get one finished quiz attempt in full: each question, the answer given, whether it was right, the marks and the feedback. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attemptid": {
+     "type": "string",
+     "description": "ID of the attempt"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_start_attempt",
+  "description": "Use this tool to start a new attempt at a quiz for the calling user, giving the quiz password if there is one. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    },
+    "password": {
+     "type": "string",
+     "description": "Quiz password"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_finish_attempt",
+  "description": "Use this tool to submit the calling user's open attempt at a quiz, so it is graded; the answers can no longer be changed. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attemptid": {
+     "type": "string",
+     "description": "ID of the attempt"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_regrade_attempts",
+  "description": "Use this tool to grade the attempts of a quiz again, after a question or its correct answer was changed. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    },
+    "attemptids": {
+     "type": "string",
+     "description": "IDs of the attempts, empty for all"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_delete_attempts",
+  "description": "Use this tool to delete attempts at a quiz, removing their answers and their grades. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attemptids": {
+     "type": "string",
+     "description": "IDs of the attempts"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "mod_quiz_override_user",
+  "description": "Use this tool to give one student or one group settings of their own for a quiz: other open and close dates, a longer time limit or more attempts. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    },
+    "timelimit": {
+     "type": "string",
+     "description": "Time limit in seconds"
+    },
+    "attempts": {
+     "type": "string",
+     "description": "Attempts allowed"
+    },
+    "timeclose": {
+     "type": "string",
+     "description": "Close date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_delete_override",
+  "description": "Use this tool to remove the settings of their own given to a student or a group for a quiz, who then follow the quiz settings again. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "overrideid": {
+     "type": "string",
+     "description": "ID of the override"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_get_statistics",
+  "description": "Use this tool to get the statistics of a quiz: the average grade, and for each question its facility index, discrimination index and how often each answer was chosen. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_quiz_add_question",
+  "description": "Use this tool to add a question from the question bank, or a random question from a category, to a page of a quiz. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "quizid": {
+     "type": "string",
+     "description": "ID of the quiz"
+    },
+    "questionid": {
+     "type": "string",
+     "description": "ID of the question"
+    },
+    "page": {
+     "type": "string",
+     "description": "Page of the quiz"
+    },
+    "random": {
+     "type": "string",
+     "description": "1 to add a random question from a category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_question_create_question",
+  "description": "Use this tool to create a question in a category of the question bank: multiple choice, true or false, short answer, numerical, matching or essay, with its answers and feedback. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "categoryid": {
+     "type": "string",
+     "description": "ID of the question category"
+    },
+    "qtype": {
+     "type": "string",
+     "description": "Question type"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "questiontext": {
+     "type": "string",
+     "description": "The question"
+    },
+    "answers": {
+     "type": "string",
+     "description": "The answers and their marks"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_question_delete_question",
+  "description": "Use this tool to delete a question from the question bank; a question used in a quiz is hidden instead. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "questionid": {
+     "type": "string",
+     "description": "ID of the question"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_question_import_questions",
+  "description": "Use this tool to import questions into a category of the question bank from a file in GIFT, Moodle XML or Aiken format. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "categoryid": {
+     "type": "string",
+     "description": "ID of the category"
+    },
+    "format": {
+     "type": "string",
+     "description": "gift, xml or aiken"
+    },
+    "filesid": {
+     "type": "string",
+     "description": "Draft area with the file"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_question_export_questions",
+  "description": "Use this tool to export the questions of a category of the question bank to a file in GIFT or Moodle XML format, and get the file. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "categoryid": {
+     "type": "string",
+     "description": "ID of the category"
+    },
+    "format": {
+     "type": "string",
+     "description": "gift or xml"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_get_forums",
+  "description": "Use this tool to get the forums of one or more courses, with their ID, name, type, the number of discussions and whether students are subscribed. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseids": {
+     "type": "string",
+     "description": "IDs of the courses"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_get_discussions",
+  "description": "Use this tool to get the discussions of a forum, with their subject, author, number of replies, date of the last post and whether they are pinned or locked. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "forumid": {
+     "type": "string",
+     "description": "ID of the forum"
+    },
+    "sortorder": {
+     "type": "string",
+     "description": "Order of the discussions"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_get_discussion_posts",
+  "description": "Use this tool to get the posts of one discussion of a forum, in order, with their author, date, message and attachments. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "discussionid": {
+     "type": "string",
+     "description": "ID of the discussion"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_add_discussion",
+  "description": "Use this tool to start a new discussion in a forum, with a subject, a message, optional attachments and an optional group. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "forumid": {
+     "type": "string",
+     "description": "ID of the forum"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_add_post",
+  "description": "Use this tool to reply to a post of a forum discussion, with a subject, a message and optional attachments. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "postid": {
+     "type": "string",
+     "description": "ID of the post replied to"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_delete_post",
+  "description": "Use this tool to delete a forum post and the replies under it, or a whole discussion when the post is the first one. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "postid": {
+     "type": "string",
+     "description": "ID of the post"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "mod_forum_pin_discussion",
+  "description": "Use this tool to pin or unpin a discussion, so it stays at the top of its forum. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "discussionid": {
+     "type": "string",
+     "description": "ID of the discussion"
+    },
+    "pinned": {
+     "type": "string",
+     "description": "1 to pin, 0 to unpin"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_lock_discussion",
+  "description": "Use this tool to lock a discussion so nobody can reply any more, or to unlock it, optionally from a date. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "discussionid": {
+     "type": "string",
+     "description": "ID of the discussion"
+    },
+    "locked": {
+     "type": "string",
+     "description": "1 to lock, 0 to unlock"
+    },
+    "timelocked": {
+     "type": "string",
+     "description": "Date from which it is locked"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_move_discussion",
+  "description": "Use this tool to move a discussion with all its posts to another forum of the same course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "discussionid": {
+     "type": "string",
+     "description": "ID of the discussion"
+    },
+    "forumid": {
+     "type": "string",
+     "description": "ID of the forum that receives it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_subscribe_user",
+  "description": "Use this tool to subscribe a user to a forum or to one discussion, so the user gets an e-mail for each new post. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "forumid": {
+     "type": "string",
+     "description": "ID of the forum"
+    },
+    "discussionid": {
+     "type": "string",
+     "description": "Only this discussion"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_forum_unsubscribe_user",
+  "description": "Use this tool to unsubscribe a user from a forum or from one discussion, so the user no longer gets e-mails for its posts. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "forumid": {
+     "type": "string",
+     "description": "ID of the forum"
+    },
+    "discussionid": {
+     "type": "string",
+     "description": "Only this discussion"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_get_gradebook",
+  "description": "Use this tool to get the gradebook of one student in a course: every grade item, the grade, the range, the percentage, the weight and the course total. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_get_grader_report",
+  "description": "Use this tool to get the grader report of a course: a row per student and a column per grade item, with the course total for each student. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Only the students of this group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_update_grade",
+  "description": "Use this tool to set or override the grade of a student for a grade item by hand, with an optional feedback, whatever the activity gave. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "itemid": {
+     "type": "string",
+     "description": "ID of the grade item"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    },
+    "grade": {
+     "type": "string",
+     "description": "The grade"
+    },
+    "feedback": {
+     "type": "string",
+     "description": "Feedback"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_create_item",
+  "description": "Use this tool to add a grade item to the gradebook of a course that is not tied to an activity, such as an oral exam or a lab practical marked offline. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "itemname": {
+     "type": "string",
+     "description": "Name"
+    },
+    "grademax": {
+     "type": "string",
+     "description": "Maximum grade"
+    },
+    "categoryid": {
+     "type": "string",
+     "description": "Grade category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_delete_item",
+  "description": "Use this tool to delete a grade item of the gradebook that is not tied to an activity, with the grades it holds. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "itemid": {
+     "type": "string",
+     "description": "ID of the grade item"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_grades_set_category_weights",
+  "description": "Use this tool to change the weight of the grade items and grade categories of a course in the course total. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "weights": {
+     "type": "string",
+     "description": "The weight of each item or category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_lock_item",
+  "description": "Use this tool to lock or unlock a grade item, so its grades can no longer be changed by the activity or by hand. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "itemid": {
+     "type": "string",
+     "description": "ID of the grade item"
+    },
+    "locked": {
+     "type": "string",
+     "description": "1 to lock, 0 to unlock"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_export_grades",
+  "description": "Use this tool to export the grades of a course to a spreadsheet, CSV or ODS file, with the items and the students chosen. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "format": {
+     "type": "string",
+     "description": "csv, xlsx or ods"
+    },
+    "itemids": {
+     "type": "string",
+     "description": "Grade items to export"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_grades_import_grades",
+  "description": "Use this tool to import grades into the gradebook of a course from a CSV file, mapping a column to the students and the others to grade items. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "filesid": {
+     "type": "string",
+     "description": "Draft area with the file"
+    },
+    "mapfrom": {
+     "type": "string",
+     "description": "Column that names the students"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_get_events",
+  "description": "Use this tool to get the events of the calendar between two dates, for the site, a category, a course, a group or the calling user. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "timestart": {
+     "type": "string",
+     "description": "From"
+    },
+    "timeend": {
+     "type": "string",
+     "description": "To"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "Only the events of this course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_create_event",
+  "description": "Use this tool to add an event to the calendar of the site, a category, a course, a group or the calling user, with a name, a date, a duration and an optional repeat. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "timestart": {
+     "type": "string",
+     "description": "Start"
+    },
+    "timeduration": {
+     "type": "string",
+     "description": "Duration"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "Course"
+    },
+    "repeats": {
+     "type": "string",
+     "description": "Number of weekly repeats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_update_event",
+  "description": "Use this tool to change the name, date, duration or description of a calendar event. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "eventid": {
+     "type": "string",
+     "description": "ID of the event"
+    },
+    "timestart": {
+     "type": "string",
+     "description": "New start"
+    },
+    "name": {
+     "type": "string",
+     "description": "New name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_delete_event",
+  "description": "Use this tool to delete a calendar event, and optionally the events that repeat it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "eventid": {
+     "type": "string",
+     "description": "ID of the event"
+    },
+    "repeat": {
+     "type": "string",
+     "description": "1 to delete the repeats too"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_calendar_get_upcoming",
+  "description": "Use this tool to get what is due soon for the calling user: the assignments, quizzes and other activities with a deadline in the coming days, and the course events. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "lookahead": {
+     "type": "string",
+     "description": "Number of days ahead"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "Only this course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_export_ical",
+  "description": "Use this tool to get an iCal address of the calendar of the calling user, to subscribe to it from another calendar application. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "what": {
+     "type": "string",
+     "description": "all, courses or user"
+    },
+    "time": {
+     "type": "string",
+     "description": "recentupcoming or custom"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_calendar_import_ical",
+  "description": "Use this tool to import the events of an iCal file or address into the calendar of a course or of the calling user. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "url": {
+     "type": "string",
+     "description": "Address of the iCal feed"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "Course that receives the events"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_message_send_message",
+  "description": "Use this tool to send a private message from the calling user to one or more users, who see it in their messages and may get an e-mail. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "touserid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "text": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_message_get_conversations",
+  "description": "Use this tool to get the conversations of the calling user, private and group conversations, with the other members, the last message and the number of unread messages. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "description": "private or group"
+    },
+    "favourites": {
+     "type": "string",
+     "description": "1 for starred conversations only"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_message_get_conversation_messages",
+  "description": "Use this tool to get the messages of one conversation, in order, with the sender, the time sent and the text. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "conversationid": {
+     "type": "string",
+     "description": "ID of the conversation"
+    },
+    "limitnum": {
+     "type": "string",
+     "description": "How many messages"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_message_mark_read",
+  "description": "Use this tool to mark the messages of a conversation or all the notifications of the calling user as read. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "conversationid": {
+     "type": "string",
+     "description": "ID of the conversation"
+    },
+    "notifications": {
+     "type": "string",
+     "description": "1 to mark the notifications instead"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_message_delete_conversation",
+  "description": "Use this tool to delete a conversation for the calling user; the other members keep their copy. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "conversationid": {
+     "type": "string",
+     "description": "ID of the conversation"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_message_send_bulk",
+  "description": "Use this tool to send the same message to all the participants of a course, or to those of a group or a role, each as a private message. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Only this group"
+    },
+    "roleid": {
+     "type": "string",
+     "description": "Only this role"
+    },
+    "text": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_attendance_get_sessions",
+  "description": "Use this tool to get the sessions of an attendance register, with their date, duration, group and whether attendance was taken. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attendanceid": {
+     "type": "string",
+     "description": "ID of the attendance register"
+    },
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_attendance_add_session",
+  "description": "Use this tool to add sessions to an attendance register, one or repeated each week, for the course or a group. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attendanceid": {
+     "type": "string",
+     "description": "ID of the attendance register"
+    },
+    "sessdate": {
+     "type": "string",
+     "description": "Date and time"
+    },
+    "duration": {
+     "type": "string",
+     "description": "Duration"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Group"
+    },
+    "repeat": {
+     "type": "string",
+     "description": "Weekly repeats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_attendance_delete_session",
+  "description": "Use this tool to delete sessions of an attendance register, with the attendance taken for them. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sessionids": {
+     "type": "string",
+     "description": "IDs of the sessions"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "mod_attendance_take",
+  "description": "Use this tool to record attendance for a session: present, late, excused or absent for each student, with an optional remark. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sessionid": {
+     "type": "string",
+     "description": "ID of the session"
+    },
+    "statuses": {
+     "type": "string",
+     "description": "The status of each student"
+    },
+    "remarks": {
+     "type": "string",
+     "description": "Remarks"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_attendance_get_user_report",
+  "description": "Use this tool to get the attendance of one student in a course: each session with its status, and the share of sessions present, late and absent. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "attendanceid": {
+     "type": "string",
+     "description": "ID of the attendance register"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_attendance_excuse_absence",
+  "description": "Use this tool to change an absence of a student into an excused absence, with the reason, for example after a medical note. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sessionid": {
+     "type": "string",
+     "description": "ID of the session"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the student"
+    },
+    "remark": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_get_activities_status",
+  "description": "Use this tool to get the completion of each activity of a course for one user: complete, incomplete, passed or failed, with the date. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_get_course_status",
+  "description": "Use this tool to get whether a user has completed a course, which completion criteria are met and the date of completion. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_override_activity",
+  "description": "Use this tool to mark an activity complete or incomplete for a user by hand, whatever its completion rules say. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cmid": {
+     "type": "string",
+     "description": "ID of the activity"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "newstate": {
+     "type": "string",
+     "description": "1 complete, 0 incomplete"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_mark_course_self",
+  "description": "Use this tool to mark a course as completed by the calling user, when the course allows students to mark it themselves. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_set_criteria",
+  "description": "Use this tool to set what completes a course: the activities to complete, a grade to reach, a date, a duration of enrolment or a manual mark by a role. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "activities": {
+     "type": "string",
+     "description": "Activities to complete"
+    },
+    "grade": {
+     "type": "string",
+     "description": "Grade to reach"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_completion_get_progress_report",
+  "description": "Use this tool to get the completion report of a course: a row per student and a column per activity, with the share of the course each student has completed. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "groupid": {
+     "type": "string",
+     "description": "Only this group"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_badges_get_user_badges",
+  "description": "Use this tool to get the badges a user has earned, with their name, the course, the date issued and the date they expire. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_badges_award_badge",
+  "description": "Use this tool to award a badge to a user by hand, when the badge is awarded manually by a role. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "badgeid": {
+     "type": "string",
+     "description": "ID of the badge"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_badges_revoke_badge",
+  "description": "Use this tool to take back a badge that was awarded to a user. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "badgeid": {
+     "type": "string",
+     "description": "ID of the badge"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tool_certificate_issue",
+  "description": "Use this tool to issue a certificate from a template to a user, with its own code that anyone can check, and send it by e-mail. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "templateid": {
+     "type": "string",
+     "description": "ID of the template"
+    },
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "expires": {
+     "type": "string",
+     "description": "Expiry date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "tool_certificate_verify",
+  "description": "Use this tool to check the code printed on a certificate and get who it was issued to, from which template, when, and whether it has expired. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "code": {
+     "type": "string",
+     "description": "The code on the certificate"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_files_get_files",
+  "description": "Use this tool to get the files and folders of a file area, such as the private files of the calling user or the files of an activity, with their name, size and date. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "contextid": {
+     "type": "string",
+     "description": "ID of the context"
+    },
+    "component": {
+     "type": "string",
+     "description": "Component"
+    },
+    "filearea": {
+     "type": "string",
+     "description": "File area"
+    },
+    "filepath": {
+     "type": "string",
+     "description": "Folder"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_files_upload",
+  "description": "Use this tool to upload a file to the private files of the calling user or to a draft area, giving its name and its content in base64. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "filename": {
+     "type": "string",
+     "description": "Name of the file"
+    },
+    "filecontent": {
+     "type": "string",
+     "description": "Content in base64"
+    },
+    "filearea": {
+     "type": "string",
+     "description": "private or draft"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_files_delete_file",
+  "description": "Use this tool to delete a file from the private files of the calling user or from a draft area. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "filename": {
+     "type": "string",
+     "description": "Name of the file"
+    },
+    "filepath": {
+     "type": "string",
+     "description": "Folder"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "core_files_get_quota",
+  "description": "Use this tool to get how much of the private files space of the calling user is used and how much is left. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_resource_add",
+  "description": "Use this tool to add a file to a section of a course as a resource students can open or download, with a name and a description. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "section": {
+     "type": "string",
+     "description": "Section number"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "filesid": {
+     "type": "string",
+     "description": "Draft area with the file"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mod_url_add",
+  "description": "Use this tool to add a link to a web page to a section of a course, with a name, the address and how it opens. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "section": {
+     "type": "string",
+     "description": "Section number"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "externalurl": {
+     "type": "string",
+     "description": "Address"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_move_module",
+  "description": "Use this tool to move an activity or a resource to another section of its course, or to another place in the same section. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cmid": {
+     "type": "string",
+     "description": "ID of the activity"
+    },
+    "sectionid": {
+     "type": "string",
+     "description": "Section that receives it"
+    },
+    "beforemod": {
+     "type": "string",
+     "description": "Activity it goes before"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_toggle_module_visibility",
+  "description": "Use this tool to hide an activity or a resource from students, or to show it again, without deleting it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cmid": {
+     "type": "string",
+     "description": "ID of the activity"
+    },
+    "visible": {
+     "type": "string",
+     "description": "1 to show, 0 to hide"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_course_delete_module",
+  "description": "Use this tool to delete an activity or a resource from a course, with its submissions, attempts, posts and grades. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "cmid": {
+     "type": "string",
+     "description": "ID of the activity"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "report_log_get_logs",
+  "description": "Use this tool to get the log of a course or of the site: who did what and when, with the event, the IP address and the object it was done on, filtered by user, date or activity. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "userid": {
+     "type": "string",
+     "description": "Only this user"
+    },
+    "date": {
+     "type": "string",
+     "description": "Day"
+    },
+    "modid": {
+     "type": "string",
+     "description": "Only this activity"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_participation_get",
+  "description": "Use this tool to get the participation in one activity of a course: for each student, how many times they viewed it and how many times they posted or submitted. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "cmid": {
+     "type": "string",
+     "description": "ID of the activity"
+    },
+    "roleid": {
+     "type": "string",
+     "description": "Role"
+    },
+    "timefrom": {
+     "type": "string",
+     "description": "From"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_engagement_get_inactive",
+  "description": "Use this tool to get the students of a course who have not accessed it for a number of days, with the date of their last access and their progress. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "days": {
+     "type": "string",
+     "description": "Days without access"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "report_coursesize_get",
+  "description": "Use this tool to get how much disk space each course takes, with its files, backups and the share of the whole site. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "categoryid": {
+     "type": "string",
+     "description": "Only the courses of this category"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_backup_create_backup",
+  "description": "Use this tool to start a backup of a course, with or without its users and their data, and get its ID to follow it. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    },
+    "users": {
+     "type": "string",
+     "description": "1 to include users and their data"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_backup_get_backups",
+  "description": "Use this tool to get the backups of a course, with their file name, size, date and whether they hold users. Returns an empty list and a warning when nothing matches. Only the records the calling user is allowed to see in each course are returned, and the capabilities checked are listed in the warnings. Results are paginated: pass page and perpage to read further, and the total number of records is returned with each page.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "courseid": {
+     "type": "string",
+     "description": "ID of the course"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_backup_restore_backup",
+  "description": "Use this tool to restore a course backup into a new course or into an existing course, adding to or replacing its content. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "backupid": {
+     "type": "string",
+     "description": "ID of the backup"
+    },
+    "target": {
+     "type": "string",
+     "description": "new, add or replace"
+    },
+    "courseid": {
+     "type": "string",
+     "description": "Course that receives it"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_backup_delete_backup",
+  "description": "Use this tool to delete a backup file of a course. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed. This cannot be undone.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "backupid": {
+     "type": "string",
+     "description": "ID of the backup"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "mod_assign_unlock_submissions",
+  "description": "Use this tool to let students change or add submissions for an assignment again after they were locked. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "assignid": {
+     "type": "string",
+     "description": "ID of the assignment"
+    },
+    "userids": {
+     "type": "string",
+     "description": "IDs of the students"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "core_user_set_preferences",
+  "description": "Use this tool to change the preferences of a user: language, time zone, e-mail digest type, forum tracking, editor and notification settings. The calling user needs the matching capability in the context of the course or of the site. Returns the IDs of the records changed and a list of warnings for those that could not be changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "userid": {
+     "type": "string",
+     "description": "ID of the user"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name of the preference"
+    },
+    "value": {
+     "type": "string",
+     "description": "New value"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ }
+]

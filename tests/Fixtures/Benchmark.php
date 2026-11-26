@@ -40,7 +40,7 @@ use Novalo\McpToolDiscovery\Tool\ToolSet;
 final class Benchmark
 {
     /** The server each request is asked of => its fixture file. */
-    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors', 'ferry' => 'ferry', 'kinder' => 'kinder', 'fire' => 'fire', 'drive' => 'drive', 'chess' => 'chess', 'cellar' => 'cellar', 'coffee' => 'coffee', 'garden' => 'garden', 'desk' => 'desk', 'leisure' => 'leisure'];
+    public const SERVERS = ['workspace' => 'tools', 'platform' => 'platform', 'people' => 'people', 'library' => 'library', 'school' => 'school', 'hosting' => 'hosting', 'city' => 'city', 'newsroom' => 'newsroom', 'estate' => 'estate', 'depot' => 'depot', 'arena' => 'arena', 'academy' => 'academy', 'garage' => 'garage', 'hotel' => 'hotel', 'clinic' => 'clinic', 'water' => 'water', 'mill' => 'mill', 'museum' => 'museum', 'bikes' => 'bikes', 'ops' => 'ops', 'theatre' => 'theatre', 'marina' => 'marina', 'post' => 'post', 'sensors' => 'sensors', 'ferry' => 'ferry', 'kinder' => 'kinder', 'fire' => 'fire', 'drive' => 'drive', 'chess' => 'chess', 'cellar' => 'cellar', 'coffee' => 'coffee', 'garden' => 'garden', 'desk' => 'desk', 'leisure' => 'leisure', 'summit' => 'summit', 'campus' => 'campus'];
 
     /**
      * Four measures on the test half:

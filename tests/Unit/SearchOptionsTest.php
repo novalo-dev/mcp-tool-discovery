@@ -29,12 +29,21 @@ final class SearchOptionsTest extends TestCase
 {
     public function testAWeightGivenAloneKeepsTheOtherFields(): void
     {
-        $options = new SearchOptions(weights: ['title' => 3.0], queryWeights: ['action' => 0.8]);
+        $options = new SearchOptions(weights: ['title' => 3.0], queryWeights: ['action' => 0.6]);
 
         self::assertSame(['name' => 1.0, 'title' => 3.0, 'description' => 1.0, 'parameters' => 0.5], $options->weights);
-        self::assertSame(['action' => 0.8, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0], $options->queryWeights);
+        self::assertSame(['action' => 0.6, 'object' => 1.0, 'description' => 1.0, 'text' => 1.0], $options->queryWeights);
         // "trash" is only in the description of the delete tool.
         self::assertSame('acme_delete_file', (new ToolSearch(RecordingGate::fixtureTools(), $options))->search('trash')[0]->name ?? null);
+    }
+
+    public function testTheDescriptionOfARequestHasWeightsOfItsOwn(): void
+    {
+        $options = new SearchOptions(descriptionWeights: ['title' => 1.0]);
+
+        self::assertSame(['name' => 0.5, 'title' => 1.0, 'description' => 1.0, 'parameters' => 0.5], $options->descriptionWeights);
+        // The weights decide the index, so each setting keeps its own.
+        self::assertNotSame((new SearchOptions())->indexKey(), $options->indexKey());
     }
 
     public function testAWeightOfZeroLeavesAFieldOutOfTheRanking(): void
@@ -55,8 +64,14 @@ final class SearchOptionsTest extends TestCase
         yield 'a negative weight' => [static fn(): SearchOptions => new SearchOptions(weights: ['title' => -1.0]), '"title"'];
         yield 'a weight that is not a number' => [static fn(): SearchOptions => new SearchOptions(weights: ['title' => NAN]), '"title"'];
         yield 'every tool field at zero' => [static fn(): SearchOptions => new SearchOptions(weights: ['name' => 0, 'title' => 0, 'description' => 0, 'parameters' => 0]), 'above 0'];
+        yield 'a tool field the description does not read' => [static fn(): SearchOptions => new SearchOptions(descriptionWeights: ['summary' => 1.0]), '"summary"'];
+        yield 'every tool field at zero for the description' => [static fn(): SearchOptions => new SearchOptions(descriptionWeights: ['name' => 0, 'title' => 0, 'description' => 0, 'parameters' => 0]), 'above 0'];
         yield 'every query field at zero' => [static fn(): SearchOptions => new SearchOptions(queryWeights: ['action' => 0, 'object' => 0, 'description' => 0, 'text' => 0]), 'above 0'];
         yield 'a cut that is not a number' => [static fn(): SearchOptions => new SearchOptions(cut: NAN), 'cut'];
+        yield 'a field balance above 1' => [static fn(): SearchOptions => new SearchOptions(fieldBalance: 1.5), 'field balance'];
+        yield 'a field balance that is not a number' => [static fn(): SearchOptions => new SearchOptions(fieldBalance: NAN), 'field balance'];
+        yield 'a text trigram power above 1' => [static fn(): SearchOptions => new SearchOptions(textTrigramPower: 2.0), 'text trigram power'];
+        yield 'a text trigram power that is not a number' => [static fn(): SearchOptions => new SearchOptions(textTrigramPower: NAN), 'text trigram power'];
         yield 'a negative trigram weight' => [static fn(): SearchOptions => new SearchOptions(trigramWeight: -0.1), 'trigram'];
         yield 'an infinite learning weight' => [static fn(): SearchOptions => new SearchOptions(learningWeight: INF), 'learning'];
         yield 'a synonym of two words' => [static fn(): SearchOptions => new SearchOptions(synonyms: ['team meeting' => 'calendar event']), '"team meeting"'];

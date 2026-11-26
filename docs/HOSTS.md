@@ -15,6 +15,25 @@ Two of the SDK servers keep their tools outside the SDK, over stdio and over
 HTTP; the other two keep them in the SDK's own registry, added with
 `addTool()` or found by their `#[McpTool]` attribute.
 
+Start from the server closest to yours; each section says only what changes
+from the one it builds on, and its tables name the parts to copy.
+
+| Your server | Start from | Its file |
+|---|---|---|
+| written by hand, started by the client as a process | [A server over stdio](#a-server-over-stdio) | [stdio-server.php](examples/stdio-server.php) |
+| written by hand, one process per request behind PHP-FPM or a web server | [A server over HTTP](#a-server-over-http) | [http-server.php](examples/http-server.php) |
+| one process serving every request: ReactPHP, RoadRunner, Swoole, FrankenPHP | [A server that stays up](#a-server-that-stays-up-on-reactphp) | [react/server.php](examples/react/server.php) |
+| a route of a Symfony application | [A server in a Symfony application](#a-server-in-a-symfony-application) | [McpController](examples/symfony/src/McpController.php) |
+| a route of a Laravel application, with no MCP package | [A server in a Laravel application](#a-server-in-a-laravel-application) | [McpController](examples/laravel/app/McpController.php) |
+| a `Server` class of laravel/mcp | [A server written with laravel/mcp](#a-server-written-with-laravelmcp) | [NotesServer](examples/laravel-mcp/app/NotesServer.php) |
+| logiscape/mcp-sdk-php, over stdio or its HTTP runner | [A server on logiscape/mcp-sdk-php](#a-server-on-logiscapemcp-sdk-php), then [its HTTP runner](#over-the-sdks-http-runner) | [logiscape/server.php](examples/logiscape/server.php) |
+| the official SDK, tools kept by your own code | [A server on the official PHP SDK](#a-server-on-the-official-php-sdk), then [its HTTP transport](#over-the-sdks-http-transport) | [sdk/server.php](examples/sdk/server.php) |
+| the official SDK, tools added with `addTool()` | [Tools already in the SDK's registry](#tools-already-in-the-sdks-registry) | [sdk/registry.php](examples/sdk/registry.php) |
+| the official SDK, tools marked `#[McpTool]` | [Tools found by their attribute](#tools-found-by-their-attribute) | [sdk/attributes.php](examples/sdk/attributes.php) |
+
+Whichever it is, [What a host must keep](#what-a-host-must-keep) holds for
+every server, and is the list to check before the first client connects.
+
 ---
 
 ## A server over stdio
@@ -94,7 +113,7 @@ What changes from stdio:
 | The caller | the `Authorization` header of each request, read by `roleOf()` | the gate is built for the caller this request names, so a `Discovery` lives for one request |
 | The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version`. In the stateless revision each request names it in `_meta` instead | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
 | The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
-| The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
+| The search index | `FileIndexCache` in the same directory, made by `indexCache()` of `notes.php`, which hands its failures to `error_log()` | built once, then read by every request instead of built again; a directory the server cannot write never fails a request, so the reason goes to the log, or every search would build the index again unseen |
 
 The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
@@ -192,7 +211,7 @@ application writes the same entries in `config/packages/security.yaml` and
 | The caller | a stateless firewall on `/mcp` with `access_token`, whose [TokenHandler](examples/symfony/src/TokenHandler.php) names a user | the controller never reads the token; a request with no token reaches it with no user and is answered 401 |
 | Who sees a tool | [ToolVoter](examples/symfony/src/ToolVoter.php), asked through `isGranted()` by [SecurityGate](examples/symfony/src/SecurityGate.php)'s `visible()` | the permission lives where the application keeps every other one, and the role hierarchy applies to tools too |
 | What a call may carry and does | `NotesTools`, in `notes.php`, the same rules `NotesGate` uses | only the decision of who sees what is Symfony's; the tools keep their own checks |
-| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA` | the same for every caller: the cache is keyed by the tools a caller may see |
+| `SearchSetup`, with a `FileIndexCache` | a shared service, the cache in the directory of `MCP_NOTES_DATA`, made by `Kernel::indexCache()` with the `logger` service | the same for every caller: the cache is keyed by the tools a caller may see; a directory the server cannot write never fails a request, so the reason goes to the logger at error, the lowest level that the logger FrameworkBundle gives without Monolog writes, or every search would build the index again unseen |
 | The notes | a shared service | they stand for the host's database, which the container already gives its services |
 | The gate and the `Discovery` | not services: the controller builds them in each request | a shared service would hand one caller's gate to the next request a worker serves (FrankenPHP, RoadRunner, Swoole), where the container outlives the request |
 
@@ -236,7 +255,7 @@ application puts the guard in its own `config/auth.php`, as
 | Who sees a tool | the ability `see-mcp-tool`, defined on Laravel's gate and asked through `allows()` by [AbilityGate](examples/laravel/app/AbilityGate.php)'s `visible()`, for `forUser()` of the caller | the permission lives where the application keeps every other one, and a `Gate::before()` of the application applies to tools too |
 | The route | `Route::any('/mcp')`, outside the `web` group | the session, the cookies and the CSRF check of that group are for a browser; the controller answers 405 for the methods the transport does not take |
 | What a call may carry and does | `NotesTools`, in `notes.php` | only the decision of who sees what is Laravel's; the tools keep their own checks |
-| `SearchSetup`, with a `FileIndexCache` | a singleton, the cache in the directory of `config('mcp.data')` | the same for every caller: the cache is keyed by the tools a caller may see |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, the cache in the directory of `config('mcp.data')`, its failures sent to the application's log at error | the same for every caller: the cache is keyed by the tools a caller may see; a directory the server cannot write never fails a request, so the reason goes to the log, or every search would build the index again unseen |
 | The gate and the `Discovery` | not bound in the container: the controller builds them in each request | a singleton would hand one caller's gate to the next request Octane serves, where the container outlives the request |
 
 A guard keeps the user it found. Octane forgets the guards after each
@@ -296,7 +315,7 @@ php -S 127.0.0.1:8080 docs/examples/laravel-mcp/public/app.php
 | What a call may carry | the tool's `handle()`, so `authorize()` lets every call through | laravel/mcp tools validate their arguments themselves and answer an error result |
 | The revision | `io.modelcontextprotocol/protocolVersion` of the request's `_meta` on 2026-07-28, else the `MCP-Protocol-Version` header, else 2025-03-26 over HTTP | laravel/mcp keeps no session; over stdio, where there is no header, the methods answer in the newest revision with a handshake |
 | Progress notifications | dropped | a tool run through a runner would stream them under a request the client did not send |
-| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
+| `SearchSetup`, with a `FileIndexCache` | a singleton, injected into each method, its failures sent to the application's log at error | laravel/mcp builds the methods for each message, so the Discovery and its gate never outlive the request |
 
 laravel/mcp also ships a `ToolSearch` of its own; the README compares the two
 searches on the same benchmark.
@@ -350,7 +369,10 @@ request as PHP-FPM runs it. The caller is no longer the process, so the gate
 and the `Discovery` are built for the caller each request names, as in the
 HTTP example written by hand.
 [tests/Logiscape/LogiscapeHttpServerTest.php](../tests/Logiscape/LogiscapeHttpServerTest.php)
-calls it over HTTP in the same CI job.
+calls it over HTTP in the same CI job. What every server that keeps a
+session between requests must answer is written once, in
+[tests/Examples/SessionHttpServerTestCase.php](../tests/Examples/SessionHttpServerTestCase.php):
+an example on another SDK extends it and names its folder.
 
 ```
 php -S 127.0.0.1:8080 docs/examples/logiscape/http-server.php
@@ -367,7 +389,7 @@ What changes from the server over stdio:
 | The answer | `enable_sse` left off | the runner then answers in JSON, the body `instruct()` reads |
 | The origin | `allowed_origins` set to the local host | the runner checks `Origin` only when told which hosts may send one, and the SDK's `McpServer` sets them for the built-in server alone |
 | Who a session serves | anyone who sends its `Mcp-Session-Id`, unless the SDK's OAuth is on | harmless here: a session holds the revision, never a right, and the gate is built from the token of each request |
-| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | as on the official SDK over HTTP: nothing in memory outlives the request, and a learning store would be shared by every caller |
+| The search | a `SearchSetup` with the `FileIndexCache` of `indexCache()`, which logs why it failed, and no learning store | as on the official SDK over HTTP: nothing in memory outlives the request, and a learning store would be shared by every caller |
 
 The stateless revision `2026-07-28` needs no session: the runner reads its
 revision from `_meta`, answers `server/discover` with the instructions, and
@@ -421,7 +443,8 @@ PHP-FPM runs it. The SDK keeps the session between requests; the caller is no
 longer the process, so the gate and the `Discovery` are built for the caller
 each request names, as in the HTTP example written by hand.
 [tests/Sdk/SdkHttpServerTest.php](../tests/Sdk/SdkHttpServerTest.php) calls it
-over HTTP in the same CI job.
+over HTTP in the same CI job, with the same checks as the server on
+logiscape/mcp-sdk-php.
 
 ```
 php -S 127.0.0.1:8080 docs/examples/sdk/http-server.php
@@ -435,7 +458,7 @@ What changes from the server over stdio:
 | The request | `Psr17Factory::createServerRequestFromGlobals()`, and `nyholm/psr7` in `composer.json` | the transport takes a PSR-7 request; the SDK finds a PSR-17 factory but ships none |
 | The session | `setSession(new FileSessionStore(...))` and a `FileSessionLock` on the same directory | without a store the SDK serves HTTP with no session at all; in files, the revision a client agreed on reaches its next requests, and two requests of one session do not overwrite each other |
 | Who a session serves | the caller set as the request's `StreamableHttpTransport::PRINCIPAL_ATTRIBUTE` | the SDK answers 404 to another caller sending the session's `Mcp-Session-Id`, so one caller's gate never runs on another's session |
-| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
+| The search | a `SearchSetup` with the `FileIndexCache` of `indexCache()`, which logs why it failed, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
 
 The stateless revision `2026-07-28` needs no session: the SDK reads its
 revision from `_meta` and asks for the `Mcp-Method` header, and the handler

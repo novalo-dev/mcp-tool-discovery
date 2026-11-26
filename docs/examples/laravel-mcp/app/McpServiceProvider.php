@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
+use Psr\Log\LoggerInterface;
 
 use const Example\Notes\TOKENS;
 
@@ -41,7 +42,18 @@ final class McpServiceProvider extends ServiceProvider
 
             return new Notes($data . '/notes.json');
         });
-        $this->app->singleton(SearchSetup::class, fn(): SearchSetup => new SearchSetup(cache: new FileIndexCache($this->data() . '/index')));
+        // A cache that cannot write never fails a request, so a directory
+        // left unwritable would only show as every search building its index
+        // again: the reason goes to the application's log, at error rather
+        // than warning, since every request pays for a new index until the
+        // directory is fixed and many applications keep nothing below error.
+        // The logger is asked for only when something failed.
+        $this->app->singleton(SearchSetup::class, fn(): SearchSetup => new SearchSetup(cache: new FileIndexCache(
+            $this->data() . '/index',
+            function (string $why): void {
+                $this->app->make(LoggerInterface::class)->error('notes: ' . $why);
+            },
+        )));
     }
 
     public function boot(AuthManager $auth): void

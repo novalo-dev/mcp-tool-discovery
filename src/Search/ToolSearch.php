@@ -98,7 +98,20 @@ final class ToolSearch
             $text = $this->expand(self::bounded($text));
             array_push($tokens, ...$this->analyzer->tokens($text));
             $weight = $this->options->queryWeights[$field] ?? 1.0;
-            foreach ($this->index->score($text) as $name => $score) {
+            // The description says what the tool is about; the other fields
+            // name it (see SearchOptions::DESCRIPTION_WEIGHTS).
+            // A sentence has to name the tool alone, often in forms the tools
+            // do not write: its trigrams are divided by less than its length
+            // (see SearchOptions::textTrigramPower).
+            $fieldScores = $this->index->score($text, $field === 'description', $field === 'text' ? $this->options->textTrigramPower : 1.0);
+            if ($fieldScores === []) {
+                continue;
+            }
+            // Tempered by the field's own best match: an object of several
+            // words that every neighbour shares outscored the one verb that
+            // told them apart, by its size rather than by what it says.
+            $weight /= max($fieldScores) ** $this->options->fieldBalance;
+            foreach ($fieldScores as $name => $score) {
                 // A cast would be undone: PHP keys "123" as an integer anyway, so
                 // the names are made strings again once ranked.
                 $scores[$name] = ($scores[$name] ?? 0.0) + $weight * $score;
@@ -398,7 +411,7 @@ final class ToolSearch
         // the words alike a word reads is then built only if a search meets
         // a word the tools lack.
         if ($cache === null) {
-            return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight);
+            return ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, false, $options->descriptionWeights);
         }
         // The key covers every text indexed, so it changes with any tool and
         // differs between callers who see different tools.
@@ -416,7 +429,7 @@ final class ToolSearch
             // With what alike() reads: any search meeting a word the tools lack
             // needs it, and working it out again at each request cost more
             // than the search itself.
-            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, true);
+            $index = ToolIndex::build($documents, $options->weights, $analyzer, $options->trigramWeight, true, $options->descriptionWeights);
             $cache->set($key, $index->toArray());
         }
 

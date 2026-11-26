@@ -1,0 +1,3414 @@
+[
+ {
+  "name": "listEvents",
+  "title": "Events",
+  "description": "Lists the editions of the conference with their dates, city and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "state": {
+     "type": "string",
+     "description": "draft, published, postponed or cancelled"
+    },
+    "year": {
+     "type": "string",
+     "description": "Year"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getEvent",
+  "title": "Event details",
+  "description": "Gives an event with its dates, venue, tracks and the number of people registered.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createEvent",
+  "title": "Create an event",
+  "description": "Creates a new edition of the conference as a draft, with its name and dates.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "start": {
+     "type": "string",
+     "description": "First day"
+    },
+    "end": {
+     "type": "string",
+     "description": "Last day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "updateEventDates",
+  "title": "Change the event dates",
+  "description": "Moves the first and last day of an event that is still a draft or published.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "start": {
+     "type": "string",
+     "description": "First day"
+    },
+    "end": {
+     "type": "string",
+     "description": "Last day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publishEvent",
+  "title": "Publish an event",
+  "description": "Makes an event and its agenda visible on the public site and opens registration.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpublishEvent",
+  "title": "Unpublish an event",
+  "description": "Takes an event off the public site; registrations already made are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "postponeEvent",
+  "title": "Postpone an event",
+  "description": "Marks an event as postponed without new dates and tells everyone registered.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message to the registered people"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelEvent",
+  "title": "Cancel an event",
+  "description": "Cancels an event, closes registration and tells speakers, sponsors and everyone registered.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "archiveEvent",
+  "title": "Archive an event",
+  "description": "Moves a past event to the archive, read only, with its agenda and recordings.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cloneEvent",
+  "title": "Copy an event",
+  "description": "Creates a draft from an earlier event with the same tracks, rooms and pass types, and no people.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event to copy"
+    },
+    "name": {
+     "type": "string",
+     "description": "New name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listVenues",
+  "title": "Venues",
+  "description": "Lists the venues the conference has used or may use, with their city and number of rooms.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "city": {
+     "type": "string",
+     "description": "City"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getVenue",
+  "title": "Venue details",
+  "description": "Gives a venue with its address, contact, rooms and access notes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "venue": {
+     "type": "string",
+     "description": "Venue id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addVenue",
+  "title": "Add a venue",
+  "description": "Records a new venue with its address and contact person.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "address": {
+     "type": "string",
+     "description": "Address"
+    },
+    "contact": {
+     "type": "string",
+     "description": "Contact person"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "updateVenueContact",
+  "title": "Change the venue contact",
+  "description": "Changes the contact person, phone or e-mail of a venue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "venue": {
+     "type": "string",
+     "description": "Venue id"
+    },
+    "contact": {
+     "type": "string",
+     "description": "Contact person"
+    },
+    "phone": {
+     "type": "string",
+     "description": "Phone"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "retireVenue",
+  "title": "Retire a venue",
+  "description": "Stops offering a venue for new events; past events keep it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "venue": {
+     "type": "string",
+     "description": "Venue id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listRooms",
+  "title": "Rooms",
+  "description": "Lists the rooms of a venue with their capacity, floor and equipment.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "venue": {
+     "type": "string",
+     "description": "Venue id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getRoom",
+  "title": "Room details",
+  "description": "Gives a room with its capacity, equipment and the sessions held in it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addRoom",
+  "title": "Add a room",
+  "description": "Adds a meeting room to a venue with its capacity and floor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "venue": {
+     "type": "string",
+     "description": "Venue id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "capacity": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setRoomCapacity",
+  "title": "Set the room capacity",
+  "description": "Changes the number of seats of a meeting room, for example after a new layout.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    },
+    "capacity": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "closeRoom",
+  "title": "Close a room",
+  "description": "Takes a meeting room out of use for a period, for works or a private use.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    },
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "until": {
+     "type": "string",
+     "description": "Until"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reopenRoom",
+  "title": "Reopen a room",
+  "description": "Puts a closed meeting room back in use.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "bookRoom",
+  "title": "Book a room",
+  "description": "Holds a meeting room for a slot that is not a session, such as a rehearsal or a press briefing.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "end": {
+     "type": "string",
+     "description": "End"
+    },
+    "purpose": {
+     "type": "string",
+     "description": "Purpose"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releaseRoom",
+  "title": "Release a room booking",
+  "description": "Frees a slot booked in a meeting room.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booking": {
+     "type": "string",
+     "description": "Booking id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listTracks",
+  "title": "Tracks",
+  "description": "Lists the tracks of an event with their chair and number of sessions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createTrack",
+  "title": "Create a track",
+  "description": "Adds a themed track to an event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "renameTrack",
+  "title": "Rename a track",
+  "description": "Changes the name or description of a track.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    },
+    "name": {
+     "type": "string",
+     "description": "New name"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mergeTracks",
+  "title": "Merge tracks",
+  "description": "Moves every session of one track into another and removes the first.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "from": {
+     "type": "string",
+     "description": "Track to empty"
+    },
+    "into": {
+     "type": "string",
+     "description": "Track kept"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "deleteTrack",
+  "title": "Delete a track",
+  "description": "Removes an empty track from an event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "assignTrackChair",
+  "title": "Assign a track chair",
+  "description": "Names the person who chairs a track and decides its programme.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    },
+    "person": {
+     "type": "string",
+     "description": "Person"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listSessions",
+  "title": "Sessions",
+  "description": "Lists the sessions of an event with their slot, room, track and speakers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "track": {
+     "type": "string",
+     "description": "Track"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSession",
+  "title": "Session details",
+  "description": "Gives a session with its abstract, slot, room, speakers and seats taken.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createSession",
+  "title": "Create a session",
+  "description": "Adds a talk, panel or workshop to the agenda in a slot and a room.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "room": {
+     "type": "string",
+     "description": "Room"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rescheduleSession",
+  "title": "Reschedule a session",
+  "description": "Moves a session to another day or time, keeping its room when it is free.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "start": {
+     "type": "string",
+     "description": "New start"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "moveSessionRoom",
+  "title": "Move a session to another room",
+  "description": "Puts a session in another room at the same time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "room": {
+     "type": "string",
+     "description": "Room id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "extendSession",
+  "title": "Extend a session",
+  "description": "Makes a session longer by a number of minutes when the room is free after it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "minutes": {
+     "type": "string",
+     "description": "Minutes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "shortenSession",
+  "title": "Shorten a session",
+  "description": "Makes a session shorter by a number of minutes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "minutes": {
+     "type": "string",
+     "description": "Minutes"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelSession",
+  "title": "Cancel a session",
+  "description": "Removes a session from the agenda and tells the people who saved it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "splitSession",
+  "title": "Split a session",
+  "description": "Cuts a long session into two parts with a break between them.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "at": {
+     "type": "string",
+     "description": "Time of the cut"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "mergeSessions",
+  "title": "Merge sessions",
+  "description": "Joins two sessions of the same track into one slot, keeping all speakers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "First session"
+    },
+    "second": {
+     "type": "string",
+     "description": "Second session"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "setSessionCapacity",
+  "title": "Set the session capacity",
+  "description": "Limits the number of seats people can reserve for a session, below the room size.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "seats": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publishSession",
+  "title": "Publish a session",
+  "description": "Shows a session on the public agenda.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "lockSession",
+  "title": "Lock a session",
+  "description": "Stops changes to a session so its slot and speakers stay as printed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listSpeakers",
+  "title": "Speakers",
+  "description": "Lists the speakers of an event with their sessions and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "state": {
+     "type": "string",
+     "description": "invited, confirmed or declined"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSpeaker",
+  "title": "Speaker details",
+  "description": "Gives a speaker with their bio, photo, sessions and travel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inviteSpeaker",
+  "title": "Invite a speaker",
+  "description": "Sends an invitation to speak in a session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "confirmSpeaker",
+  "title": "Confirm a speaker",
+  "description": "Marks an invited speaker as confirmed for their session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "declineSpeaker",
+  "title": "Record a speaker decline",
+  "description": "Records that an invited speaker said no and frees their place in the session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "replaceSpeaker",
+  "title": "Replace a speaker",
+  "description": "Puts another person in place of a speaker in a session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail of the new speaker"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "removeSpeaker",
+  "title": "Remove a speaker",
+  "description": "Takes a speaker off a session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    },
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "updateSpeakerBio",
+  "title": "Update a speaker bio",
+  "description": "Changes the bio, photo or job title shown for a speaker.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    },
+    "bio": {
+     "type": "string",
+     "description": "Bio"
+    },
+    "photo": {
+     "type": "string",
+     "description": "Photo link"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setSpeakerTravel",
+  "title": "Set speaker travel",
+  "description": "Records the flights, arrival and hotel nights of a speaker.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "speaker": {
+     "type": "string",
+     "description": "Speaker id"
+    },
+    "arrival": {
+     "type": "string",
+     "description": "Arrival"
+    },
+    "departure": {
+     "type": "string",
+     "description": "Departure"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listSubmissions",
+  "title": "Submissions",
+  "description": "Lists the talk proposals sent to the call for papers with their track and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "state": {
+     "type": "string",
+     "description": "submitted, accepted, rejected, waitlisted or withdrawn"
+    },
+    "track": {
+     "type": "string",
+     "description": "Track"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSubmission",
+  "title": "Submission details",
+  "description": "Gives a talk proposal with its abstract, authors, reviews and history.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createSubmission",
+  "title": "Create a submission",
+  "description": "Records a talk proposal for an author, as the call for papers form does.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "abstract": {
+     "type": "string",
+     "description": "Abstract"
+    },
+    "author": {
+     "type": "string",
+     "description": "Author e-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reviseSubmission",
+  "title": "Revise a submission",
+  "description": "Changes the title, abstract or authors of a proposal before the decision.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "abstract": {
+     "type": "string",
+     "description": "Abstract"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "withdrawSubmission",
+  "title": "Withdraw a submission",
+  "description": "Takes back a proposal at the request of its author.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "acceptSubmission",
+  "title": "Accept a submission",
+  "description": "Accepts a proposal and tells its authors; a session can then be made from it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "rejectSubmission",
+  "title": "Reject a submission",
+  "description": "Turns down a proposal and tells its authors.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "message": {
+     "type": "string",
+     "description": "Message"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "waitlistSubmission",
+  "title": "Waitlist a submission",
+  "description": "Keeps a proposal in reserve in case an accepted talk drops out.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reopenSubmission",
+  "title": "Reopen a submission",
+  "description": "Puts a decided proposal back to submitted so it can be judged again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assignSubmissionTrack",
+  "title": "Assign a submission to a track",
+  "description": "Puts a proposal in the track whose chair will judge it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "flagSubmissionConflict",
+  "title": "Flag a conflict of interest",
+  "description": "Marks that a reviewer must not judge a proposal, for example a colleague of an author.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "reviewer": {
+     "type": "string",
+     "description": "Reviewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listReviews",
+  "title": "Reviews",
+  "description": "Lists the reviews of the proposals of a track with their score and reviewer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    },
+    "reviewer": {
+     "type": "string",
+     "description": "Reviewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assignReviewer",
+  "title": "Assign a reviewer",
+  "description": "Asks a reviewer to judge a proposal.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "reviewer": {
+     "type": "string",
+     "description": "Reviewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unassignReviewer",
+  "title": "Unassign a reviewer",
+  "description": "Takes a proposal off the list of a reviewer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "reviewer": {
+     "type": "string",
+     "description": "Reviewer"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "submitReview",
+  "title": "Submit a review",
+  "description": "Records the score and comments of a reviewer on a proposal.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "submission": {
+     "type": "string",
+     "description": "Submission id"
+    },
+    "score": {
+     "type": "string",
+     "description": "Score from 1 to 5"
+    },
+    "comments": {
+     "type": "string",
+     "description": "Comments"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "updateReview",
+  "title": "Update a review",
+  "description": "Changes the score or comments of a review already given.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "review": {
+     "type": "string",
+     "description": "Review id"
+    },
+    "score": {
+     "type": "string",
+     "description": "Score"
+    },
+    "comments": {
+     "type": "string",
+     "description": "Comments"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "remindReviewers",
+  "title": "Remind reviewers",
+  "description": "Sends a reminder to the reviewers who still have proposals to judge.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getReviewScores",
+  "title": "Review scores",
+  "description": "Gives the average score and spread of the reviews of each proposal, to help the decision.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "track": {
+     "type": "string",
+     "description": "Track id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getCallForPapers",
+  "title": "Call for papers",
+  "description": "Gives the call for papers of an event with its dates, tracks and number of proposals.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "openCallForPapers",
+  "title": "Open the call for papers",
+  "description": "Starts taking talk proposals until a closing date.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "closes": {
+     "type": "string",
+     "description": "Closing date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "closeCallForPapers",
+  "title": "Close the call for papers",
+  "description": "Stops taking talk proposals now.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "extendCallForPapers",
+  "title": "Extend the call for papers",
+  "description": "Moves the closing date of the call for papers later.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "closes": {
+     "type": "string",
+     "description": "New closing date"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listRegistrations",
+  "title": "Registrations",
+  "description": "Lists the people registered for an event with their pass type and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "pass": {
+     "type": "string",
+     "description": "Pass type"
+    },
+    "state": {
+     "type": "string",
+     "description": "pending, confirmed or cancelled"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getRegistration",
+  "title": "Registration details",
+  "description": "Gives a registration with the attendee, pass type, sessions saved and check-in.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "registerAttendee",
+  "title": "Register an attendee",
+  "description": "Registers a person for an event on a pass type.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    },
+    "pass": {
+     "type": "string",
+     "description": "Pass type"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "transferRegistration",
+  "title": "Transfer a registration",
+  "description": "Gives a registration to another person who will come instead.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    },
+    "name": {
+     "type": "string",
+     "description": "New name"
+    },
+    "email": {
+     "type": "string",
+     "description": "New e-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelRegistration",
+  "title": "Cancel a registration",
+  "description": "Cancels the place of an attendee and frees it for the waitlist.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "upgradeRegistration",
+  "title": "Change the pass of a registration",
+  "description": "Moves a registration to another pass type, for example from one day to the full event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    },
+    "pass": {
+     "type": "string",
+     "description": "New pass type"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "confirmRegistration",
+  "title": "Confirm a registration",
+  "description": "Confirms a pending registration, for example once its company approved it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "resendConfirmation",
+  "title": "Resend the confirmation",
+  "description": "Sends the confirmation e-mail of a registration again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "checkInAttendee",
+  "title": "Check in an attendee",
+  "description": "Marks an attendee as arrived at the venue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "undoCheckIn",
+  "title": "Undo a check-in",
+  "description": "Removes a check-in recorded by mistake.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listPassTypes",
+  "title": "Pass types",
+  "description": "Lists the pass types of an event with their days, seats and how many are taken.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createPassType",
+  "title": "Create a pass type",
+  "description": "Adds a pass type, such as one day, full event or student, with its seats.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "seats": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setPassCapacity",
+  "title": "Set the pass capacity",
+  "description": "Changes how many registrations a pass type allows.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pass": {
+     "type": "string",
+     "description": "Pass type"
+    },
+    "seats": {
+     "type": "string",
+     "description": "Seats"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "closePassType",
+  "title": "Close a pass type",
+  "description": "Stops new registrations on a pass type; those made are kept.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "pass": {
+     "type": "string",
+     "description": "Pass type"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listWaitlist",
+  "title": "Waitlist",
+  "description": "Lists the people waiting for a place, in order, for an event or a session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addToWaitlist",
+  "title": "Add to the waitlist",
+  "description": "Puts a person on the waitlist of an event or a full session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "promoteFromWaitlist",
+  "title": "Give a place from the waitlist",
+  "description": "Gives a freed place to the next person on the waitlist, or to the one named.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "removeFromWaitlist",
+  "title": "Remove from the waitlist",
+  "description": "Takes a person off the waitlist.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "entry": {
+     "type": "string",
+     "description": "Waitlist entry id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listBadges",
+  "title": "Badges",
+  "description": "Lists the badges printed for an event and those still to print.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "printed": {
+     "type": "string",
+     "description": "Printed or not"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "printBadge",
+  "title": "Print a badge",
+  "description": "Prints the name badge of an attendee, speaker or staff member.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reprintBadge",
+  "title": "Reprint a badge",
+  "description": "Prints a badge again after a loss or a change of name.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "badge": {
+     "type": "string",
+     "description": "Badge id"
+    },
+    "reason": {
+     "type": "string",
+     "description": "Reason"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "voidBadge",
+  "title": "Void a badge",
+  "description": "Makes a badge unusable at the doors, for example after a cancellation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "badge": {
+     "type": "string",
+     "description": "Badge id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listSponsors",
+  "title": "Sponsors",
+  "description": "Lists the sponsors of an event with their level, booth and state.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "level": {
+     "type": "string",
+     "description": "Level"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSponsor",
+  "title": "Sponsor details",
+  "description": "Gives a sponsor with its level, contact, booth and passes included.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sponsor": {
+     "type": "string",
+     "description": "Sponsor id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "addSponsor",
+  "title": "Add a sponsor",
+  "description": "Records a sponsor for an event at a level.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "level": {
+     "type": "string",
+     "description": "gold, silver or bronze"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "changeSponsorLevel",
+  "title": "Change the sponsor level",
+  "description": "Moves a sponsor to a higher or lower level.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sponsor": {
+     "type": "string",
+     "description": "Sponsor id"
+    },
+    "level": {
+     "type": "string",
+     "description": "Level"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "renewSponsor",
+  "title": "Renew a sponsor",
+  "description": "Carries a sponsor of a past event over to the next one at the same level.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sponsor": {
+     "type": "string",
+     "description": "Sponsor id"
+    },
+    "event": {
+     "type": "string",
+     "description": "Next event"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "dropSponsor",
+  "title": "Drop a sponsor",
+  "description": "Removes a sponsor from an event and frees its booth.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sponsor": {
+     "type": "string",
+     "description": "Sponsor id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "assignBooth",
+  "title": "Assign a booth",
+  "description": "Gives a sponsor a booth in the exhibit hall.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "sponsor": {
+     "type": "string",
+     "description": "Sponsor id"
+    },
+    "booth": {
+     "type": "string",
+     "description": "Booth id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releaseBooth",
+  "title": "Release a booth",
+  "description": "Takes a booth back from a sponsor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booth": {
+     "type": "string",
+     "description": "Booth id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listBooths",
+  "title": "Booths",
+  "description": "Lists the booths of the exhibit hall with their size and the sponsor in each.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "free": {
+     "type": "string",
+     "description": "Free only"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getBooth",
+  "title": "Booth details",
+  "description": "Gives a booth with its size, power, place on the floor plan and sponsor.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "booth": {
+     "type": "string",
+     "description": "Booth id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listVolunteers",
+  "title": "Volunteers",
+  "description": "Lists the volunteers of an event with their shifts and hours.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "enrolVolunteer",
+  "title": "Enrol a volunteer",
+  "description": "Adds a person to the volunteer team of an event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "name": {
+     "type": "string",
+     "description": "Name"
+    },
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "assignVolunteerShift",
+  "title": "Assign a volunteer shift",
+  "description": "Puts a volunteer on a shift.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volunteer": {
+     "type": "string",
+     "description": "Volunteer id"
+    },
+    "shift": {
+     "type": "string",
+     "description": "Shift id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "swapVolunteerShift",
+  "title": "Swap volunteer shifts",
+  "description": "Exchanges the shifts of two volunteers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "first": {
+     "type": "string",
+     "description": "First volunteer"
+    },
+    "second": {
+     "type": "string",
+     "description": "Second volunteer"
+    },
+    "shift": {
+     "type": "string",
+     "description": "Shift id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releaseVolunteer",
+  "title": "Release a volunteer",
+  "description": "Takes a person off the volunteer team and frees their shifts.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "volunteer": {
+     "type": "string",
+     "description": "Volunteer id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listShifts",
+  "title": "Shifts",
+  "description": "Lists the volunteer shifts of an event with their post, time and people still needed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createShift",
+  "title": "Create a shift",
+  "description": "Adds a volunteer shift at a post, such as the doors or the cloakroom.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "post": {
+     "type": "string",
+     "description": "Post"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "end": {
+     "type": "string",
+     "description": "End"
+    },
+    "people": {
+     "type": "string",
+     "description": "People needed"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelShift",
+  "title": "Cancel a shift",
+  "description": "Removes a volunteer shift and tells the volunteers on it.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "shift": {
+     "type": "string",
+     "description": "Shift id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listMeals",
+  "title": "Meals",
+  "description": "Lists the meals and coffee breaks of an event with their time and headcount.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "scheduleMeal",
+  "title": "Schedule a meal",
+  "description": "Adds a lunch, dinner or coffee break to the catering plan.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "kind": {
+     "type": "string",
+     "description": "Kind"
+    },
+    "start": {
+     "type": "string",
+     "description": "Start"
+    },
+    "room": {
+     "type": "string",
+     "description": "Room"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setMealHeadcount",
+  "title": "Set the meal headcount",
+  "description": "Changes the number of people the caterer prepares a meal for.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meal": {
+     "type": "string",
+     "description": "Meal id"
+    },
+    "people": {
+     "type": "string",
+     "description": "People"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelMeal",
+  "title": "Cancel a meal",
+  "description": "Removes a meal from the catering plan and tells the caterer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "meal": {
+     "type": "string",
+     "description": "Meal id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listDietaryNeeds",
+  "title": "Dietary needs",
+  "description": "Counts the dietary needs declared at registration, such as vegetarian or no nuts.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listRoomBlocks",
+  "title": "Hotel room blocks",
+  "description": "Lists the blocks of hotel rooms held for an event with nights and rooms taken.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "reserveRoomBlock",
+  "title": "Reserve a hotel room block",
+  "description": "Holds a number of hotel rooms for some nights at a hotel near the venue.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "hotel": {
+     "type": "string",
+     "description": "Hotel"
+    },
+    "rooms": {
+     "type": "string",
+     "description": "Rooms"
+    },
+    "nights": {
+     "type": "string",
+     "description": "Nights"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "extendRoomBlock",
+  "title": "Extend a hotel room block",
+  "description": "Adds nights or rooms to a hotel block.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "block": {
+     "type": "string",
+     "description": "Block id"
+    },
+    "rooms": {
+     "type": "string",
+     "description": "Rooms"
+    },
+    "nights": {
+     "type": "string",
+     "description": "Nights"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "releaseRoomBlock",
+  "title": "Release a hotel room block",
+  "description": "Gives the unused rooms of a hotel block back to the hotel.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "block": {
+     "type": "string",
+     "description": "Block id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "assignHotelRoom",
+  "title": "Assign a hotel room",
+  "description": "Gives a speaker or staff member a room from a hotel block for their nights.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "block": {
+     "type": "string",
+     "description": "Block id"
+    },
+    "person": {
+     "type": "string",
+     "description": "Person"
+    },
+    "nights": {
+     "type": "string",
+     "description": "Nights"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listAnnouncements",
+  "title": "Announcements",
+  "description": "Lists the e-mails and notices sent or planned for an event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "state": {
+     "type": "string",
+     "description": "sent or scheduled"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sendAnnouncement",
+  "title": "Send an announcement",
+  "description": "Sends an e-mail now to everyone registered, the speakers, the sponsors or the volunteers.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "audience": {
+     "type": "string",
+     "description": "Audience"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "body": {
+     "type": "string",
+     "description": "Body"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "scheduleAnnouncement",
+  "title": "Schedule an announcement",
+  "description": "Plans an e-mail to go out to an audience at a later time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "audience": {
+     "type": "string",
+     "description": "Audience"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "at": {
+     "type": "string",
+     "description": "Send at"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelAnnouncement",
+  "title": "Cancel an announcement",
+  "description": "Stops a planned e-mail before it goes out.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "announcement": {
+     "type": "string",
+     "description": "Announcement id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listEmailTemplates",
+  "title": "E-mail templates",
+  "description": "Lists the templates of the automatic e-mails, such as the registration confirmation.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "updateEmailTemplate",
+  "title": "Update an e-mail template",
+  "description": "Changes the subject or text of an automatic e-mail.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "template": {
+     "type": "string",
+     "description": "Template id"
+    },
+    "subject": {
+     "type": "string",
+     "description": "Subject"
+    },
+    "body": {
+     "type": "string",
+     "description": "Body"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "createSurvey",
+  "title": "Create a survey",
+  "description": "Writes a feedback survey with its questions, for an event or a session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "title": {
+     "type": "string",
+     "description": "Title"
+    },
+    "questions": {
+     "type": "string",
+     "description": "Questions"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "sendSurvey",
+  "title": "Send a survey",
+  "description": "Sends a feedback survey to the attendees who checked in.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "survey": {
+     "type": "string",
+     "description": "Survey id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "closeSurvey",
+  "title": "Close a survey",
+  "description": "Stops taking answers to a survey.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "survey": {
+     "type": "string",
+     "description": "Survey id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSurveyResults",
+  "title": "Survey results",
+  "description": "Gives the answers to a survey, question by question.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "survey": {
+     "type": "string",
+     "description": "Survey id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSessionRatings",
+  "title": "Session ratings",
+  "description": "Gives the stars attendees gave each session, with their comments.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "track": {
+     "type": "string",
+     "description": "Track"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "uploadSlides",
+  "title": "Upload slides",
+  "description": "Attaches the slides of a speaker to their session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    },
+    "file": {
+     "type": "string",
+     "description": "File"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSlides",
+  "title": "Slides",
+  "description": "Gives the slides attached to a session for download.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listRecordings",
+  "title": "Recordings",
+  "description": "Lists the video recordings of the sessions and whether they are public.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "publishRecording",
+  "title": "Publish a recording",
+  "description": "Puts the video of a session on the public site.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unpublishRecording",
+  "title": "Unpublish a recording",
+  "description": "Takes the video of a session off the public site, for example at the speaker's request.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getAgenda",
+  "title": "Agenda",
+  "description": "Gives the whole agenda of an event, day by day and room by room.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "exportAgenda",
+  "title": "Export the agenda",
+  "description": "Writes the agenda as a calendar file or a printable PDF.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "format": {
+     "type": "string",
+     "description": "ics or pdf"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "freezeAgenda",
+  "title": "Freeze the agenda",
+  "description": "Stops every change to the agenda before it goes to print.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "unfreezeAgenda",
+  "title": "Unfreeze the agenda",
+  "description": "Allows changes to a frozen agenda again.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "findScheduleConflicts",
+  "title": "Schedule conflicts",
+  "description": "Finds speakers in two sessions at once, rooms booked twice and sessions over the room size.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getAttendanceCount",
+  "title": "Attendance",
+  "description": "Gives how many people registered, checked in and did not come, per day.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getSessionAttendance",
+  "title": "Session attendance",
+  "description": "Gives how many people were in each session, from the door scans.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "getRegistrationTrend",
+  "title": "Registration trend",
+  "description": "Gives the registrations made each week since registration opened, against the last edition.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listStaff",
+  "title": "Staff",
+  "description": "Lists the organisers who can use this back office, with their role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "inviteStaff",
+  "title": "Invite a staff member",
+  "description": "Gives a person access to the back office with a role.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "email": {
+     "type": "string",
+     "description": "E-mail"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "setStaffRole",
+  "title": "Change a staff role",
+  "description": "Changes what an organiser may do in the back office.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff": {
+     "type": "string",
+     "description": "Staff id"
+    },
+    "role": {
+     "type": "string",
+     "description": "Role"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "revokeStaff",
+  "title": "Revoke staff access",
+  "description": "Removes the access of an organiser to the back office.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "staff": {
+     "type": "string",
+     "description": "Staff id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listShuttles",
+  "title": "Shuttles",
+  "description": "Lists the shuttle buses between the venue, the hotels and the airport.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "day": {
+     "type": "string",
+     "description": "Day"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "scheduleShuttle",
+  "title": "Schedule a shuttle",
+  "description": "Adds a shuttle run between two stops at a time.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    },
+    "from": {
+     "type": "string",
+     "description": "From"
+    },
+    "to": {
+     "type": "string",
+     "description": "To"
+    },
+    "at": {
+     "type": "string",
+     "description": "Departure"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "cancelShuttle",
+  "title": "Cancel a shuttle",
+  "description": "Removes a shuttle run and tells the people who booked a seat.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "shuttle": {
+     "type": "string",
+     "description": "Shuttle id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ },
+ {
+  "name": "listAudienceQuestions",
+  "title": "Audience questions",
+  "description": "Lists the questions the audience sent during a session, with their votes.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "session": {
+     "type": "string",
+     "description": "Session id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "approveAudienceQuestion",
+  "title": "Approve an audience question",
+  "description": "Shows a question from the audience on the screen of the session.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "question": {
+     "type": "string",
+     "description": "Question id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "hideAudienceQuestion",
+  "title": "Hide an audience question",
+  "description": "Hides a question from the audience, for example off topic or rude.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "question": {
+     "type": "string",
+     "description": "Question id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "listCertificates",
+  "title": "Attendance certificates",
+  "description": "Lists the certificates of attendance issued for an event.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "event": {
+     "type": "string",
+     "description": "Event id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": true,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "issueCertificate",
+  "title": "Issue a certificate",
+  "description": "Writes a certificate of attendance for an attendee who checked in.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "registration": {
+     "type": "string",
+     "description": "Registration id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": false
+  }
+ },
+ {
+  "name": "revokeCertificate",
+  "title": "Revoke a certificate",
+  "description": "Cancels a certificate of attendance issued by mistake.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "certificate": {
+     "type": "string",
+     "description": "Certificate id"
+    }
+   }
+  },
+  "annotations": {
+   "readOnlyHint": false,
+   "destructiveHint": true
+  }
+ }
+]

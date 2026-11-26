@@ -8,6 +8,156 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.9.0 - 2026-11-26
+
+### Added
+
+- **docs/MODES.md says from how many tools Direct costs more.** Choosing a
+  mode now opens on the four lines that decide it, before the table of
+  bytes, and the line on Direct gives a count measured on every benchmark
+  server instead of "a few tools": the compact list alone weighs as much as
+  4 to 9 tools listed as themselves, 8 to 13 with one search, so under about
+  ten tools Direct sends less. `ListCostTest` checks the count against the
+  servers, as it does the table.
+
+- **A learning platform with 150 tools on the search benchmark, named as
+  generated tools are.** The fifth large server, and the first with no
+  titles: names made of a component and an object
+  (`core_enrol_suspend_enrolment`, `mod_assign_grant_extension`), and
+  descriptions of about 340 characters that close on the same sentences for
+  every tool that reads and every tool that changes something, as many
+  real servers of that size write them. Its 150 requests, one per tool,
+  were written before any of them was run, in the words of a teacher (hand
+  in, mark, take the roll). Nothing was tuned on it: on its test half, 59
+  of 75 come first in fields, 66 in the top 3 and 24 as one sentence, with
+  3.67 tools in an answer. The benchmark now holds 4105 requests over
+  thirty-six servers; its floors move to 1646 and 1851 in fields, 1781
+  asked again and 1197 and 1530 as one sentence, and the laravel/mcp line
+  to 675 and 999 as one sentence and 1189 and 1514 with the fields joined.
+  Its long descriptions make the compact list worth fewer tools listed as
+  themselves, so docs/MODES.md now says 4 to 9 alone and 8 to 13 with a
+  search; under about ten tools, Direct still sends less.
+
+- **A conference organiser with 160 tools on the search benchmark.** The
+  fourth large server in English: camelCase names, verb first, with eight
+  to thirteen tools on each of a session, a speaker, a submission and a
+  registration (`rescheduleSession`, `moveSessionRoom`, `splitSession`,
+  `replaceSpeaker`, `waitlistSubmission`, `transferRegistration`), and a
+  room that is either a meeting room or a hotel room. Its 160 requests,
+  one per tool, were written before any of them was run, in the words of
+  an organiser (push back, call off, chase, pulled out). Nothing was tuned
+  on it, and the cut at 60% holds: on its test half, 73 of 80 come first in
+  fields and 77 in the top 3. The benchmark now holds 3955 requests over
+  thirty-five servers; its floors move to 1587 and 1785 in fields, 1716
+  asked again and 1173 and 1496 as one sentence, and the laravel/mcp line
+  to 657 and 972 as one sentence and 1136 and 1454 with the fields joined.
+
+- **The file cache and the file learning store say why they failed.**
+  `FileIndexCache` and `FileLearningStore` take a second, optional
+  argument, a callable given the reason each time an index could not be
+  kept, or the learning file could not be read or written or held no JSON
+  object. A failure still never stops a request, as before; a directory
+  left unwritable now shows in the host's log instead of a server that
+  quietly builds its index on every request and learns nothing.
+
+- **The HTTP examples log why the index cache failed.** `docs/examples/http-server.php`
+  and the HTTP servers on the official PHP SDK and on logiscape/mcp-sdk-php
+  build their `FileIndexCache` with `indexCache()` of `notes.php`, which
+  hands each failure to `error_log()`, so a host that copies them sees a
+  directory it cannot write in its log. A test runs each of the three with
+  a file where that directory should be: the search still answers, and the
+  log names the reason.
+
+- **The Symfony and Laravel examples log why the index cache failed.**
+  The Symfony application builds its `FileIndexCache` with
+  `Kernel::indexCache()`, which hands each failure to the `logger`
+  service; the Laravel application and the laravel/mcp server hand it to
+  the application's log. Both log at error, since the logger
+  FrameworkBundle gives without Monolog writes nothing below it. The test
+  of the plain server, a file where the directory of the index should be,
+  now runs against the Symfony and Laravel applications too.
+
+- **The quick start of the README logs why the cache or the store failed.**
+  Its search block hands the same `$log` to `FileIndexCache` and
+  `FileLearningStore`, so a host that copies the quick start, the page
+  most read first, no longer starts with a cache that fails without a word.
+
+- **docs/HOSTS.md opens on where to start.** A table names, for each kind
+  of server (by hand over stdio or HTTP, a process that stays up, Symfony,
+  Laravel, laravel/mcp, logiscape/mcp-sdk-php, the official SDK with its
+  tools outside its registry, added with `addTool()` or marked
+  `#[McpTool]`), the section to read and the file to copy, so a host finds
+  its case among twelve servers without reading the page from the top.
+
+### Changed
+
+- **A request in one sentence keeps more of its trigrams.** The trigram
+  scores of the text of a request (`query` in `search_tools`) are now
+  divided by the number of its words to the power 0.4 instead of by the
+  number itself (`SearchOptions::textTrigramPower`); a word of a script
+  written without spaces, cut into pairs, still counts its pairs in full,
+  and the other fields are divided as before. A sentence names the tool
+  alone, often in forms the tools do not write, and each word it added
+  weighed the trigrams that reach them less: "add an extra flight to Madrid" found the tool that
+  adds an aircraft before the one that schedules a flight. Chosen on the
+  train half; on the test half one sentence finds the right tool first
+  1130 times out of 1901 instead of 1111, and in the top 3 1440 times
+  instead of 1418. Requests in fields are ranked as before. A new floor
+  holds the sentence at 1130 and 1440. Give `textTrigramPower: 1.0` to
+  rank as before; a power outside 0 to 1, or NAN, is refused.
+
+- **A field of a request that matches more no longer outweighs the others
+  by its size alone, and the action counts 0.8 instead of 0.5.** Each
+  field's scores are now divided by the square root of its own best score
+  before the fields are added (`SearchOptions::fieldBalance`, 0.5). An
+  object of several words that every neighbour shares used to outweigh the
+  one verb that told them apart: "add | webhook | URL" found the tool that
+  deletes a webhook, whose name says "webhook" twice, before the one that
+  creates it. Chosen on the train half with the weight of the action; on
+  the test half the requests in fields come first 1514 times out of 1901
+  instead of 1472 (1708 in the top 3 instead of 1707), learned from the
+  other half 1515 instead of 1472, and asked again 1638 instead of 1610
+  (1780 in the top 3 instead of 1769). A sentence is one field and is
+  ranked as before. A search answers 2.50 tools on average instead of 2.43.
+  The floors move to 1514 and 1708 in fields and 1638 asked again. Give
+  `fieldBalance: 0.0` and `queryWeights: ['action' => 0.5]` to rank as
+  before; a balance outside 0 to 1, or NAN, is refused.
+
+- **The description of a request reads the tools with weights of its own.**
+  The action and the object name a tool; the description says what it
+  should be about, so it now counts a tool's name and title at 0.5 each
+  instead of 1 and 2, its description and parameters as before
+  (`SearchOptions::DESCRIPTION_WEIGHTS`, `descriptionWeights`). A word of
+  the description found in the titles of other objects used to win:
+  "get | crew member | details" listed "Flight details" and "Gate details"
+  before "Crew member". Chosen on the train half; on the test half the
+  requests in fields come first 1472 times out of 1901 instead of 1456
+  (1707 in the top 3 instead of 1703), learned from the other half 1472
+  instead of 1458, and asked again 1610 instead of 1594 (1769 in the top 3
+  instead of 1771). A sentence is ranked as before. The floors move to 1472
+  and 1707 in fields and 1610 asked again. The index keeps the frequencies
+  this weighting changes beside the others: a cached index of 150 tools
+  grows by about a quarter and a cached search takes 3 to 10% longer, and
+  the saved format changes, so a cached index is built again once. Give
+  `descriptionWeights` the same as `weights` to rank as before.
+
+### Fixed
+
+- **The Symfony example installs again.** It pinned
+  `symfony/framework-bundle` and `symfony/security-bundle` 6.4.49, which
+  Composer now refuses to install: a security advisory covers that
+  FrameworkBundle, whose router redirects could send a path starting with
+  `//` to another host. Both are pinned to 6.4.51, the release that fixes
+  it. A host that copied the example's `composer.json` should move to it
+  too.
+
+- **A path that can never work is refused when the store is built.** An
+  empty path, or one with a null byte, given to `FileIndexCache` or
+  `FileLearningStore` now throws `InvalidArgumentException` at once. Before,
+  an empty path silently kept nothing, and a null byte in the learning file
+  made `fopen()` throw `ValueError` out of the call after the tool had
+  run, so the host lost the answer of a run that had succeeded.
+
 ## 0.8.0 - 2026-11-25
 
 ### Added

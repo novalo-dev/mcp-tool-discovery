@@ -18,6 +18,7 @@ use Illuminate\Contracts\Http\Kernel;
 use Illuminate\Foundation\Application;
 use Illuminate\Http\Request;
 use Novalo\McpToolDiscovery\Tests\Examples\HttpServerTestCase;
+use Novalo\McpToolDiscovery\Tests\Examples\KeepsIndexOnDisk;
 
 /**
  * Runs docs/examples/laravel, the notes server as a Laravel application,
@@ -27,6 +28,8 @@ use Novalo\McpToolDiscovery\Tests\Examples\HttpServerTestCase;
  */
 final class LaravelServerTest extends HttpServerTestCase
 {
+    use KeepsIndexOnDisk;
+
     private const EXAMPLE = __DIR__ . '/../../docs/examples/laravel';
 
     public static function setUpBeforeClass(): void

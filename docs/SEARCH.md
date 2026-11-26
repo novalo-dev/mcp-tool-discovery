@@ -22,18 +22,91 @@ Said in separate fields, each part can be weighed on its own:
 
 | Field | Weight | Holds |
 |---|---|---|
-| `action` | 0.5 | what to do: "change", "list", "restore" |
+| `action` | 0.8 | what to do: "change", "list", "restore" |
 | `object` | 1 | what it is done to: "ticket status", "backup" |
 | `description` | 1 | the request in a short sentence |
 | `text` (`query` in `search_tools`) | 1 | free keywords |
 
 Each field is scored against the index on its own, then the scores are added
 with these weights. No field is required and none is parsed: the library does
-not know what a verb or an object is. The action counts least because many
-tools share it ("list", "get"); the object and the description tell them apart.
+not know what a verb or an object is. The action counts a little less because
+many tools share it ("list", "get"); among the tools of one object, it is what
+tells them apart.
 
-On the benchmark below, the same requests find the right tool first 1456 times
-out of 1901 in fields, and 1111 times as one sentence.
+**Each field is tempered by its own best match** before the fields are added:
+its scores are divided by the square root of its best score
+(`SearchOptions::fieldBalance`, 0.5). A field still counts more when it
+matches more, but less than in proportion: an object of several words that
+every neighbour shares ("holiday request") used to outweigh the one verb that
+told them apart ("approve"), by its size rather than by what it says, and
+"approve | holiday request | validate time off" found `leave.request` before
+`leave.approve`. A sentence is one field: the order of its tools does not
+change.
+Chosen on the train half (1894 requests, base 1603 first in fields, 1762 in
+the top 3, 1604 learned on two folds, 1697 asked again), with the weight of
+the action, since the two move together: the action alone at 0.6 or 0.7 gave
+1610 and 1609; the balance at 0.5 with the action at 0.5 gave 1595, at 0.6
+1613, at 0.7 1620, at 0.75 1627 (1767 in the top 3), at 0.8 **1627** (1769 in
+the top 3, 1627 learned on two folds, 1716 asked again), at 0.85 1624 and at
+0.9 1622; the balance at 0.4, 0.45, 0.55 and 0.6 with the action at 0.7 or
+0.8 gave 1619 to 1625; at 1, every field counted by its share of its best
+match alone, 1494 to 1549. On the test half, in fields from 1472 to 1514
+first (1707 to 1708 in the top 3), learned from the other half from 1472 to
+1515, asked again from 1610 to 1638 first and 1769 to 1780 in the top 3; a
+sentence is ranked as before. A search answers 2.50 tools on average instead
+of 2.43, about 2.5% more bytes, since the gaps the cut reads are narrower. A
+host gives `fieldBalance: 0.0` and `queryWeights: ['action' => 0.5]` to rank
+as before.
+
+Tried on the same half and not kept: each field divided by the number of its
+words to a power instead of by its best match (1575 to 1606), BM25's `b` of
+one field of the tools apart (name, title, description at 0.5 or 1,
+parameters at 0.3: 1599 to 1603), a floor added to each term found (BM25+,
+1590 to 1602), the rarity of a word raised to a power (0.75 to 1.5: 1590 to
+1599), and a sentence read with the weights of a description (1287 to 1244
+as one sentence).
+
+**A sentence keeps more of its trigrams.** In every field, the trigram
+scores are divided by the number of words, so a long request does not let
+its many trigrams outweigh the words themselves. A sentence (`text`, the
+`query` of `search_tools`) has to name the tool alone, and often does it
+in forms the tools do not write ("Adds" for "add", a verb in another
+case): divided by its whole length, the trigrams that reach those words
+weighed less with every word it added. Its trigrams are now divided by the
+number of its words to the power 0.4 (`SearchOptions::textTrigramPower`);
+"add an extra flight" found `flight.schedule` either way, but "add an
+extra flight to Madrid" found the tool that adds an aircraft first. The
+power is taken over the tokens: a run of Burmese or Lao is one token cut
+into many pairs of characters, still counted in full, or its trigrams
+found tools the run never named.
+Chosen on the train half (1894 requests, base 1287 first as one sentence,
+1540 in the top 3). Over the words: 0.75 gave 1301, 0.5 1307, 0.4 1308,
+0.3 1310, 0.25 1312 (1559 in the top 3), 0.2 1311 and 0.1 1305, and the
+same power for the other fields lost, 1623 to 1626 first in fields against
+1627, the description most. Over the tokens: 0 gave 1308, 0.15 1313, 0.2
+1314, 0.25 1315 (1560 in the top 3), 0.3 1312, **0.4 1310** (1554 in the
+top 3) and 0.5 1309. Below 0.4, "ΠΟΙΕΣ ΕΚΘΕΣΕΙΣ ΕΧΕΙ ΤΟ ΜΟΥΣΕΙΟ" (which
+exhibitions does the museum have) found the loan request of another
+"μουσείου" before the exhibitions, a request the unit tests hold: 0.4 is
+the most the train half gains with it kept. On the test half, as one
+sentence, from 1111 to 1130 first and 1418 to 1440 in the top 3; the
+requests in fields are ranked as before. A host
+gives `textTrigramPower: 1.0` to rank as before.
+
+Tried on the same half and not kept: a sentence scored word by word, each
+word divided by its own best match to a power (0 to 0.35: 1294 to 1307
+first, up to 1568 in the top 3, fewer first than the power of its length
+and a score per word); a field whose words no tool writes counted less
+(by its share of known words, 0.3 to 0.7 of its weight: 1594 to 1626 in
+fields, for the action, the object or the description alone 1613 to
+1626); and a tool found by several fields of a request counted more, as
+Lucene's coordination factor does (the share of fields that found it to a
+power of 0.1 to 0.7, or a bonus per field, with or without a threshold of
+20% to 60% of the field's best: 1593 to 1627 first, never above the base,
+and the top 3 down to 1742).
+
+On the benchmark below, the same requests find the right tool first 1646 times
+out of 2056 in fields, and 1197 times as one sentence.
 
 ## How a tool is scored
 
@@ -52,9 +125,41 @@ own. A rare word weighs more than a common one: "rollback" counts more than
 counts almost nothing. That is why the library needs no list of stop words and
 no rule to strip a prefix. A word repeated earns less each time.
 
+**The description of a request reads the tools with weights of its own**:
+name 0.5, title 0.5, description 1, parameters 0.5
+(`SearchOptions::DESCRIPTION_WEIGHTS`). The action and the object name a
+tool; the description says what it should be about, which the tools say in
+their descriptions. Weighed like the other fields, a word of it that sits in
+the titles of other objects took the first place: "get | crew member |
+details" found "Flight details", "Gate details" and "Aircraft details"
+before "Crew member".
+Chosen on the train half (1894 requests, base 1595 first in fields, 1756 in
+the top 3, 1687 asked again): name 1 and title 1 gave 1598, name 0.5 and
+title 1 gave 1596, name 0.25 and title 0.5 gave 1604 but lost one request
+asked again in the top 3, name and title at 0.25 gave 1600, description at
+1.5 gave 1594 and parameters at 0.25 or 1 gave less; name 0.5 and title 0.5
+gave 1603 in fields, 1762 in the top 3, 1604 learned on two folds and 1697
+asked again, better or equal on every line. On the test half, in fields
+from 1456 to 1472 first (1703 to 1707 in the top 3), learned from the other
+half from 1458 to 1472, asked again from 1594 to 1610 first, 1771 to 1769 in
+the top 3. A sentence has no description and is read as before. The index
+keeps only the weighted frequencies the second weighting changes, those of
+the words of a name or a title: a cached index of 150 tools grows from about
+580 KB to 730 KB, and a cached search takes 3 to 10% longer. A host gives
+`descriptionWeights` the same as `weights` to read every field of a request
+alike, as before.
+
+Tried with it on the same half and not kept: BM25's `k1` from 0.6 to 3 and
+`b` from 0.3 to 1 (1.2 and 0.75 stay the best, 1595), trigrams of the words
+the tools hold counted less than those of unknown words (1587 at half, 1491
+without), a description scored only as far as the action and the object
+found the tool (1543 to 1598, and the top 3 down to 1694), and tools within
+a share of the best score of one field (70% to 95%) counted as equal in it
+(1590 to 1597 first).
+
 A host changes a weight by naming its field: `new SearchOptions(weights:
 ['title' => 3.0])` raises the title and keeps the other three at their
-defaults, as `queryWeights: ['action' => 0.8]` does for a request. A weight
+defaults, as `queryWeights: ['action' => 0.6]` does for a request. A weight
 of 0 leaves the field out. A field the search does not have, a negative
 weight, NAN, or every field at 0 is refused when the options are built.
 
@@ -255,6 +360,23 @@ them compiled in shared memory. Its directory must be one only the server
 writes to. The files of tools that have since changed stay there; emptying the
 directory when the server is deployed is safe
 ([When the tools change](HOSTS.md#when-the-tools-change)).
+
+A cache that cannot write never stops a request: the search only builds its
+index again next time. So that a directory left unwritable does not go
+unseen, `FileIndexCache` takes a second argument, told why each time an index
+could not be kept; `FileLearningStore` takes the same for a file it cannot
+read or write, or one that holds no JSON object. An empty path, or one with a
+null byte, is refused when either is built.
+
+```php
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
+use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
+
+$log = static fn(string $reason) => error_log($reason);
+
+new FileIndexCache($cacheDir, $log);
+new FileLearningStore($learningFile, $log);
+```
 
 | Tools | No cache | Memory | Files, with OPcache |
 |---|---|---|---|
@@ -518,7 +640,7 @@ skipped.
 
 ## The measures
 
-Thirty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirty-six fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -550,18 +672,21 @@ written in Armenian (40 tools, `pairing_swap`), a wine cellar
 written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
 written in Amharic (40 tools, `drying_bed_assign`), a community garden
 in English camelCase (40 tools, `swapWateringDuty`) and an IT service
-desk (150 tools, `link-incident-problem`) and a leisure centre in English
-PascalCase (40 tools, `FreezeMembership`). 3795 requests, each written as one
+desk (150 tools, `link-incident-problem`), a leisure centre in English
+PascalCase (40 tools, `FreezeMembership`), a conference organiser in
+English camelCase (160 tools, `promoteFromWaitlist`) and a learning
+platform named as generated tools are, with no titles and long
+descriptions (150 tools, `mod_assign_grant_extension`). 4105 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1901 requests | Right tool first | Top 3 |
+| Test half, 2056 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1456 | 1703 |
-| The same request as one sentence | 1111 | 1418 |
-| In fields, after every train request was run once | 1458 | 1703 |
-| In fields, after the test requests were run once, then asked again | 1594 | 1771 |
+| The request in fields | 1646 | 1851 |
+| The same request as one sentence | 1197 | 1530 |
+| In fields, after every train request was run once | 1646 | 1851 |
+| In fields, after the test requests were run once, then asked again | 1781 | 1927 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -571,10 +696,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 631 | 932 |
-| The fields joined into one sentence | 1066 | 1376 |
+| The request as one sentence | 675 | 999 |
+| The fields joined into one sentence | 1189 | 1514 |
 
-As one sentence it trails on each of the thirty-four servers, the English ones
+As one sentence it trails on each of the thirty-six servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1142,6 +1267,54 @@ train half scores 32 and 38. What it misses is a verb no tool uses
 ("resume", "quit", "pay back", "bump"), which leaves only the object, shared
 by five tools, and two neighbours the request does not tell apart (taking
 a member off a class finds the tool that cancels the class).
+
+The conference organiser is the fourth large server in English and the
+largest after the hosting panel: 160 tools in camelCase, verb first, with
+eight to thirteen on each of a session (reschedule, move to another room,
+extend, shorten, split, merge, lock), a speaker (invite, confirm, record a
+decline, replace, remove), a submission to the call for papers (revise,
+withdraw, accept, reject, waitlist, reopen) and a registration (transfer,
+change the pass, confirm, check in, undo a check-in), and a room that is
+either a meeting room or a hotel room. Its 160 requests, one per tool,
+were written on 2026-11-26 before any of them was run, in the words of an
+organiser (push back, call off, chase, fold into, pulled out). Nothing was
+tuned on it, and the cut at 60% holds: 73 of its 80 test requests come
+first in fields, 77 in the top 3, with 2.64 tools in an answer; 43 as one
+sentence; asked again, 78. Its train half scores 73 and 79. What it misses
+is two neighbours of the same object that the request does not tell apart
+(said yes finds the tool that records a no, call off finds postpone) and a
+reading tool whose object is in the title of the tools that change it
+(the closing date of the call for papers finds open and extend, and the
+cut leaves nothing else). Learned from the train half, one of its test
+requests drops a place and the total stays level.
+
+The learning platform is the fifth large server, and the first written as
+many real servers of that size are: 150 tools named after their component
+and their object (`core_enrol_suspend_enrolment`, `mod_quiz_override_user`),
+no titles, and descriptions of about 340 characters that open on "Use this
+tool to" and close on the same two sentences, one for every tool that reads
+and one for every tool that changes something ("Returns the IDs of the
+records changed and a list of warnings"). Its 150 requests, one per tool,
+were written on 2026-11-26 before any of them was run, in the words of a
+teacher or an administrator (hand in, mark, take the roll, tick off, wipe).
+Nothing was tuned on it: 59 of its 75 test requests come first in fields,
+66 in the top 3; 24 as one sentence, against 18 for laravel/mcp; asked
+again, 65. Its train half scores 55 and 67. It is the hardest of the large
+servers, and two things make it so. With no title, the words that name a
+tool sit only in its name and in a long description, so the scores of
+neighbours lie closer: an answer holds 3.67 tools, against 2.64 on the
+conference organiser, and the search answer weighs 2,592 bytes. And the
+shared sentences carry words a request uses: "list" is in the closing
+sentence of every tool that changes something, so on the train half "list
+| participants | of a course" finds the tool that messages them first.
+Dropping from each description the runs of four to six words that a tenth
+or more of the tools share, as boilerplate is taken out of web pages, was
+tried on the train half and not kept: 1747 to 1756 first in fields against
+1755, 1361 to 1371 as one sentence against 1370, and on the learning
+platform alone 54 to 56 in fields and 18 to 21 as one sentence against 55
+and 20. BM25 already gives a word every tool holds almost no weight; what
+the shared sentences cost is a word held by half the tools, which the
+dropped runs did not single out.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.

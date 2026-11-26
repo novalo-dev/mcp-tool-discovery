@@ -20,17 +20,10 @@ namespace Novalo\McpToolDiscovery\Tests\Examples;
  */
 final class HttpServerTest extends HttpServerTestCase
 {
+    use KeepsIndexOnDisk;
+
     protected static function command(string $address): array
     {
         return [PHP_BINARY, '-S', $address, dirname(__DIR__, 2) . '/docs/examples/http-server.php'];
-    }
-
-    // Nothing in memory survives a request here: the index a search built
-    // must be on disk for the next request to read instead of building it.
-    public function testTheSearchIndexIsKeptOnDiskBetweenRequests(): void
-    {
-        self::post(['method' => 'tools/call', 'params' => ['name' => 'notes_search_tools', 'arguments' => ['query' => 'note']]], 'reader-token');
-
-        self::assertNotSame([], glob(self::$data . '/index/*.php') ?: []);
     }
 }
