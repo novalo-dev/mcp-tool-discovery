@@ -8,6 +8,8 @@ becomes the next version's section when it is published.
 
 ## Unreleased
 
+## 0.9.0 - 2026-11-26
+
 ### Added
 
 - **docs/MODES.md says from how many tools Direct costs more.** Choosing a
@@ -94,9 +96,9 @@ becomes the next version's section when it is published.
   divided by the number of its words to the power 0.4 instead of by the
   number itself (`SearchOptions::textTrigramPower`); a word of a script
   written without spaces, cut into pairs, still counts its pairs in full,
-  and the other fields are divided as before. A sentence names the tool alone, often in forms the
-  tools do not write, and each word it added weighed the trigrams that
-  reach them less: "add an extra flight to Madrid" found the tool that
+  and the other fields are divided as before. A sentence names the tool
+  alone, often in forms the tools do not write, and each word it added
+  weighed the trigrams that reach them less: "add an extra flight to Madrid" found the tool that
   adds an aircraft before the one that schedules a flight. Chosen on the
   train half; on the test half one sentence finds the right tool first
   1130 times out of 1901 instead of 1111, and in the top 3 1440 times
