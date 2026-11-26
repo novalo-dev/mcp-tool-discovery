@@ -31,6 +31,7 @@ use Novalo\McpToolDiscovery\Mode\DiscoveryMode;
 use Novalo\McpToolDiscovery\Mode\Gateway\GatewayMode;
 use Novalo\McpToolDiscovery\Mode\Grouped\GroupedMode;
 use Novalo\McpToolDiscovery\Mode\Instructions;
+use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchLog;
 use Novalo\McpToolDiscovery\Search\SearchQuery;
 use Novalo\McpToolDiscovery\Search\SearchResult;
@@ -113,6 +114,20 @@ function mode(string|false $name): DiscoveryMode
 function instructions(Discovery|Instructions $from): string
 {
     return trim('Notes kept for the team. ' . $from->instructions());
+}
+
+/**
+ * The index cache of a server where each request is a process of its own.
+ *
+ * A cache that cannot write never fails a request, so a directory left
+ * unwritable would only show as every search building its index again: the
+ * reason goes to PHP's error log, where whoever runs the server looks first.
+ */
+function indexCache(string $directory): FileIndexCache
+{
+    return new FileIndexCache($directory, static function (string $why): void {
+        error_log('notes: ' . $why);
+    });
 }
 
 /**

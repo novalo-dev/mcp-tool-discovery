@@ -28,7 +28,6 @@ namespace Example\Notes;
 
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Mode\Compact\CompactMode;
-use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 
 // In a project of your own: require 'vendor/autoload.php'.
@@ -63,7 +62,7 @@ $discovery = static function () use ($header): ?Discovery {
     return new Discovery(
         new CompactMode(prefix: 'notes_', batchLimit: 20),
         new NotesGate($role, new Notes($data . '/notes.json')),
-        new SearchSetup(cache: new FileIndexCache($data . '/index')),
+        new SearchSetup(cache: indexCache($data . '/index')),
     );
 };
 

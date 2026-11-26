@@ -35,12 +35,12 @@ use Mcp\Server\Server;
 use Mcp\Server\Transport\Http\FileSessionStore;
 use Mcp\Server\Transport\Http\HttpMessage;
 use Novalo\McpToolDiscovery\Discovery;
-use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
+use function Example\Notes\indexCache;
 use function Example\Notes\instructions;
 use function Example\Notes\mode;
 use function Example\Notes\roleOf;
@@ -82,7 +82,7 @@ $discovery = new Discovery(
     // Compact unless MCP_NOTES_MODE names direct, grouped or gateway.
     mode(getenv('MCP_NOTES_MODE')),
     new NotesGate($role, new Notes($data . '/notes.json')),
-    new SearchSetup(cache: new FileIndexCache($data . '/index')),
+    new SearchSetup(cache: indexCache($data . '/index')),
 );
 
 $server = new Server('notes');

@@ -84,6 +84,15 @@ final class LocalServer
         return 'http://' . $this->address . '/mcp';
     }
 
+    /**
+     * What the server wrote on its error output so far: PHP's error log,
+     * when no file is set for it.
+     */
+    public function errors(): string
+    {
+        return (string) file_get_contents($this->errors);
+    }
+
     public function stop(): void
     {
         if ($this->running) {

@@ -94,7 +94,7 @@ What changes from stdio:
 | The caller | the `Authorization` header of each request, read by `roleOf()` | the gate is built for the caller this request names, so a `Discovery` lives for one request |
 | The revision | `initialize` negotiates it; every later request sends it in `MCP-Protocol-Version`. In the stateless revision each request names it in `_meta` instead | there is no process to remember it. With no header the server assumes `2025-03-26`, as the specification says; a revision it does not speak gets 400 |
 | The notes | a file in `MCP_NOTES_DATA` | each request is a new process; a real server uses its database |
-| The search index | `FileIndexCache` in the same directory | built once, then read by every request instead of built again |
+| The search index | `FileIndexCache` in the same directory, made by `indexCache()` of `notes.php`, which hands its failures to `error_log()` | built once, then read by every request instead of built again; a directory the server cannot write never fails a request, so the reason goes to the log, or every search would build the index again unseen |
 
 The rest is the transport's: 405 for a `GET` (no stream to open), 202 for a
 notification, 401 without a known token, and 403 for a browser page of
@@ -367,7 +367,7 @@ What changes from the server over stdio:
 | The answer | `enable_sse` left off | the runner then answers in JSON, the body `instruct()` reads |
 | The origin | `allowed_origins` set to the local host | the runner checks `Origin` only when told which hosts may send one, and the SDK's `McpServer` sets them for the built-in server alone |
 | Who a session serves | anyone who sends its `Mcp-Session-Id`, unless the SDK's OAuth is on | harmless here: a session holds the revision, never a right, and the gate is built from the token of each request |
-| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | as on the official SDK over HTTP: nothing in memory outlives the request, and a learning store would be shared by every caller |
+| The search | a `SearchSetup` with the `FileIndexCache` of `indexCache()`, which logs why it failed, and no learning store | as on the official SDK over HTTP: nothing in memory outlives the request, and a learning store would be shared by every caller |
 
 The stateless revision `2026-07-28` needs no session: the runner reads its
 revision from `_meta`, answers `server/discover` with the instructions, and
@@ -435,7 +435,7 @@ What changes from the server over stdio:
 | The request | `Psr17Factory::createServerRequestFromGlobals()`, and `nyholm/psr7` in `composer.json` | the transport takes a PSR-7 request; the SDK finds a PSR-17 factory but ships none |
 | The session | `setSession(new FileSessionStore(...))` and a `FileSessionLock` on the same directory | without a store the SDK serves HTTP with no session at all; in files, the revision a client agreed on reaches its next requests, and two requests of one session do not overwrite each other |
 | Who a session serves | the caller set as the request's `StreamableHttpTransport::PRINCIPAL_ATTRIBUTE` | the SDK answers 404 to another caller sending the session's `Mcp-Session-Id`, so one caller's gate never runs on another's session |
-| The search | a `SearchSetup` with a `FileIndexCache`, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
+| The search | a `SearchSetup` with the `FileIndexCache` of `indexCache()`, which logs why it failed, and no learning store | nothing in memory outlives the request; the cache is keyed by the tools a caller may see, while a learning store would be shared by every caller, which is the host's choice, as in the ReactPHP example |
 
 The stateless revision `2026-07-28` needs no session: the SDK reads its
 revision from `_meta` and asks for the `Mcp-Method` header, and the handler

@@ -175,10 +175,11 @@ abstract class HttpServerTestCase extends TestCase
 
     /**
      * @param array<string, mixed> $message
+     * @param string|null          $url     another server than the one of the class
      *
      * @return array{int, array<mixed>}
      */
-    protected static function post(array $message, ?string $token, ?string $revision = '2025-11-25'): array
+    protected static function post(array $message, ?string $token, ?string $revision = '2025-11-25', ?string $url = null): array
     {
         $notification = ($message['notification'] ?? false) === true;
         unset($message['notification']);
@@ -190,7 +191,7 @@ abstract class HttpServerTestCase extends TestCase
             $headers[] = 'MCP-Protocol-Version: ' . $revision;
         }
 
-        return self::request('POST', json_encode(['jsonrpc' => '2.0'] + ($notification ? [] : ['id' => 1]) + $message, JSON_THROW_ON_ERROR), $headers);
+        return self::request('POST', json_encode(['jsonrpc' => '2.0'] + ($notification ? [] : ['id' => 1]) + $message, JSON_THROW_ON_ERROR), $headers, $url);
     }
 
     /**
@@ -198,7 +199,7 @@ abstract class HttpServerTestCase extends TestCase
      *
      * @return array{int, array<mixed>}
      */
-    private static function request(string $method, string $body, array $headers): array
+    private static function request(string $method, string $body, array $headers, ?string $url = null): array
     {
         $context = stream_context_create(['http' => [
             'method' => $method,
@@ -207,7 +208,7 @@ abstract class HttpServerTestCase extends TestCase
             'ignore_errors' => true,
             'timeout' => 10,
         ]]);
-        $stream = fopen(self::$url, 'r', false, $context);
+        $stream = fopen($url ?? self::$url, 'r', false, $context);
         self::assertIsResource($stream);
         // Read from the stream's own metadata: $http_response_header is
         // deprecated as of PHP 8.5, and its replacement only exists from 8.4.

@@ -18,6 +18,14 @@ becomes the next version's section when it is published.
   left unwritable now shows in the host's log instead of a server that
   quietly builds its index on every request and learns nothing.
 
+- **The HTTP examples log why the index cache failed.** `docs/examples/http-server.php`
+  and the HTTP servers on the official PHP SDK and on logiscape/mcp-sdk-php
+  build their `FileIndexCache` with `indexCache()` of `notes.php`, which
+  hands each failure to `error_log()`, so a host that copies them sees a
+  directory it cannot write in its log. A test runs the plain server with a
+  file where that directory should be: the search still answers, and the
+  log names the reason.
+
 ### Fixed
 
 - **A path that can never work is refused when the store is built.** An

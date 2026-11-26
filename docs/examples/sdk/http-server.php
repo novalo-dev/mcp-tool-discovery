@@ -43,13 +43,13 @@ use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StreamableHttpTransport;
 use Novalo\McpToolDiscovery\Discovery;
 use Novalo\McpToolDiscovery\Protocol\Revision;
-use Novalo\McpToolDiscovery\Search\Cache\FileIndexCache;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 use Novalo\McpToolDiscovery\Tool\Tool;
 use Novalo\McpToolDiscovery\Tool\ToolSet;
 
 use function Example\Notes\definitions;
 use function Example\Notes\grantedRole;
+use function Example\Notes\indexCache;
 use function Example\Notes\instructions;
 use function Example\Notes\mode;
 use function Example\Notes\roleOf;
@@ -86,7 +86,7 @@ if (!is_dir($data) && !@mkdir($data, 0o700, true) && !is_dir($data)) {
 
 $tools = ToolSet::of(array_map(Tool::fromArray(...), definitions()));
 $notes = new Notes($data . '/notes.json');
-$search = new SearchSetup(cache: new FileIndexCache($data . '/index'));
+$search = new SearchSetup(cache: indexCache($data . '/index'));
 // Compact by default. In compact mode a change of rights moves no line of
 // the list, only what the search finds, so there would be nothing to send:
 // MCP_NOTES_MODE=direct lists every tool as itself, and the list moves;
