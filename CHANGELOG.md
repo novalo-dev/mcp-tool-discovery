@@ -10,6 +10,14 @@ becomes the next version's section when it is published.
 
 ### Added
 
+- **docs/MODES.md says from how many tools Direct costs more.** Choosing a
+  mode now opens on the four lines that decide it, before the table of
+  bytes, and the line on Direct gives a count measured on every benchmark
+  server instead of "a few tools": the compact list alone weighs as much as
+  6 to 9 tools listed as themselves, 9 to 13 with one search, so under about
+  ten tools Direct sends less. `ListCostTest` checks the count against the
+  servers, as it does the table.
+
 - **A conference organiser with 160 tools on the search benchmark.** The
   fourth large server in English: camelCase names, verb first, with eight
   to thirteen tools on each of a session, a speaker, a submission and a

@@ -113,6 +113,35 @@ final class ListCostTest extends TestCase
     }
 
     /**
+     * The line on Direct is where a host with a small server decides, so the
+     * count it gives is measured, not guessed: how many tools, at each
+     * server's own mean size, weigh as much as the compact list alone and
+     * as the list with one search. Rounded, the range over every server.
+     */
+    public function testTheDocsSayFromHowManyToolsDirectCostsMore(): void
+    {
+        $alone = [];
+        $withSearch = [];
+        foreach (self::rows() as $row) {
+            $perTool = $row['all'] / $row['tools'];
+            $alone[] = $row['compact'] / $perTool;
+            $withSearch[] = ($row['compact'] + $row['search']) / $perTool;
+        }
+        $modes = (string) file_get_contents(\dirname(__DIR__, 2) . '/docs/MODES.md');
+
+        self::assertSame(1, preg_match('/the compact list alone weighs as much as (\d+)\s+to (\d+) tools listed as themselves, and (\d+) to (\d+) with one search: under about\s+(\w+) tools, Direct sends less/', $modes, $sentence), 'docs/MODES.md: no sentence on when Direct sends less');
+        self::assertSame(
+            [(int) round(min($alone)), (int) round(max($alone)), (int) round(min($withSearch)), (int) round(max($withSearch))],
+            [(int) $sentence[1], (int) $sentence[2], (int) $sentence[3], (int) $sentence[4]],
+            'docs/MODES.md: the sentence on when Direct sends less',
+        );
+        // "About ten" has to sit inside the range measured with one search.
+        self::assertSame('ten', $sentence[5]);
+        self::assertLessThanOrEqual(10, min($withSearch));
+        self::assertGreaterThanOrEqual(10, max($withSearch));
+    }
+
+    /**
      * @return array<string, array{tools: int, all: int, compact: int, gateway: int, grouped: ?int, search: int}>
      */
     private static function rows(): array

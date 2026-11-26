@@ -16,7 +16,30 @@ own tools reach the host's tools. Four are written:
 
 A client sends the list of tools to the model with every request, so the list
 is the cost that repeats. A search answer enters the conversation once, when
-the client looks for a tool. Measured on the benchmark servers, in bytes of
+the client looks for a tool. Each mode weighs those two differently:
+
+- **Compact** is the default. Its list is the same size whatever the server,
+  under a quarter of the whole list from 40 tools, and the list with one
+  search stays under half of it. Each change keeps the confirmation of a
+  destructive tool.
+- **Gateway** is the smallest list, for a client that caps its tools very low
+  or a small model that handles one tool better than three. Its single tool
+  is destructive as soon as a change goes through it, so a client that asks
+  before each destructive call asks before searches too, unless the host sets
+  `changesApart`.
+- **Grouped** shows the map of the server without a search, for a client that
+  searches badly and a server whose tools fall into a few clear groups. It
+  leaves the schemas out but names every action, so its list grows with the
+  server. On the workspace its 8 tools take 7,154 bytes where the 28
+  actions they stand for would take 9,299: on short tools it saves almost a
+  quarter, more as the schemas grow.
+- **Direct** lists every tool as itself, the first column of the table
+  below. On the benchmark servers the compact list alone weighs as much as 6
+  to 9 tools listed as themselves, and 9 to 13 with one search: under about
+  ten tools, Direct sends less. It also suits the host that lets its users
+  turn the other modes off.
+
+The figures behind each line, measured on the benchmark servers in bytes of
 JSON on `2025-11-25` (`composer benchmark` prints this table, and
 [ListCostTest](../tests/Search/ListCostTest.php) guards what it shows):
 
@@ -66,25 +89,6 @@ them; tools with longer descriptions and schemas widen every gap. Only the
 workspace declares groups, in
 [tests/Fixtures/Groups.php](../tests/Fixtures/Groups.php), and 22 of its 50
 tools stay outside them, listed as themselves.
-
-- **Compact** is the default. Its list is the same size whatever the server,
-  under a quarter of the whole list from 40 tools, and the list with one
-  search stays under half of it. Each change keeps the confirmation of a
-  destructive tool.
-- **Gateway** is the smallest list, for a client that caps its tools very low
-  or a small model that handles one tool better than three. Its single tool
-  is destructive as soon as a change goes through it, so a client that asks
-  before each destructive call asks before searches too, unless the host sets
-  `changesApart`.
-- **Grouped** shows the map of the server without a search, for a client that
-  searches badly and a server whose tools fall into a few clear groups. It
-  leaves the schemas out but names every action, so its list grows with the
-  server. On the workspace its 8 tools take 7,154 bytes where the 28
-  actions they stand for would take 9,299: on short tools it saves almost a
-  quarter, more as the schemas grow.
-- **Direct** lists every tool as itself, the first column. It suits a server
-  with a few tools, where a search would cost more than it saves, and the
-  host that lets its users turn the other modes off.
 
 To see each one on a client of your own before choosing, the example server
 over stdio takes the mode by name, on the same four tools:
