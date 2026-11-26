@@ -89,6 +89,14 @@ becomes the next version's section when it is published.
 
 ### Fixed
 
+- **The Symfony example installs again.** It pinned
+  `symfony/framework-bundle` and `symfony/security-bundle` 6.4.49, which
+  Composer now refuses to install: a security advisory covers that
+  FrameworkBundle, whose router redirects could send a path starting with
+  `//` to another host. Both are pinned to 6.4.51, the release that fixes
+  it. A host that copied the example's `composer.json` should move to it
+  too.
+
 - **A path that can never work is refused when the store is built.** An
   empty path, or one with a null byte, given to `FileIndexCache` or
   `FileLearningStore` now throws `InvalidArgumentException` at once. Before,
