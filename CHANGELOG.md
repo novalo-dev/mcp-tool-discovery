@@ -40,6 +40,13 @@ becomes the next version's section when it is published.
   `FileLearningStore`, so a host that copies the quick start, the page
   most read first, no longer starts with a cache that fails without a word.
 
+- **docs/HOSTS.md opens on where to start.** A table names, for each kind
+  of server (by hand over stdio or HTTP, a process that stays up, Symfony,
+  Laravel, laravel/mcp, logiscape/mcp-sdk-php, the official SDK with its
+  tools outside its registry, added with `addTool()` or marked
+  `#[McpTool]`), the section to read and the file to copy, so a host finds
+  its case among twelve servers without reading the page from the top.
+
 ### Changed
 
 - **A request in one sentence keeps more of its trigrams.** The trigram

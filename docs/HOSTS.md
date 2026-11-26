@@ -15,6 +15,25 @@ Two of the SDK servers keep their tools outside the SDK, over stdio and over
 HTTP; the other two keep them in the SDK's own registry, added with
 `addTool()` or found by their `#[McpTool]` attribute.
 
+Start from the server closest to yours; each section says only what changes
+from the one it builds on, and its tables name the parts to copy.
+
+| Your server | Start from | Its file |
+|---|---|---|
+| written by hand, started by the client as a process | [A server over stdio](#a-server-over-stdio) | [stdio-server.php](examples/stdio-server.php) |
+| written by hand, one process per request behind PHP-FPM or a web server | [A server over HTTP](#a-server-over-http) | [http-server.php](examples/http-server.php) |
+| one process serving every request: ReactPHP, RoadRunner, Swoole, FrankenPHP | [A server that stays up](#a-server-that-stays-up-on-reactphp) | [react/server.php](examples/react/server.php) |
+| a route of a Symfony application | [A server in a Symfony application](#a-server-in-a-symfony-application) | [McpController](examples/symfony/src/McpController.php) |
+| a route of a Laravel application, with no MCP package | [A server in a Laravel application](#a-server-in-a-laravel-application) | [McpController](examples/laravel/app/McpController.php) |
+| a `Server` class of laravel/mcp | [A server written with laravel/mcp](#a-server-written-with-laravelmcp) | [NotesServer](examples/laravel-mcp/app/NotesServer.php) |
+| logiscape/mcp-sdk-php, over stdio or its HTTP runner | [A server on logiscape/mcp-sdk-php](#a-server-on-logiscapemcp-sdk-php), then [its HTTP runner](#over-the-sdks-http-runner) | [logiscape/server.php](examples/logiscape/server.php) |
+| the official SDK, tools kept by your own code | [A server on the official PHP SDK](#a-server-on-the-official-php-sdk), then [its HTTP transport](#over-the-sdks-http-transport) | [sdk/server.php](examples/sdk/server.php) |
+| the official SDK, tools added with `addTool()` | [Tools already in the SDK's registry](#tools-already-in-the-sdks-registry) | [sdk/registry.php](examples/sdk/registry.php) |
+| the official SDK, tools marked `#[McpTool]` | [Tools found by their attribute](#tools-found-by-their-attribute) | [sdk/attributes.php](examples/sdk/attributes.php) |
+
+Whichever it is, [What a host must keep](#what-a-host-must-keep) holds for
+every server, and is the list to check before the first client connects.
+
 ---
 
 ## A server over stdio
