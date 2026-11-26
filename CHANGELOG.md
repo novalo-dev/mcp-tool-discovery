@@ -35,6 +35,11 @@ becomes the next version's section when it is published.
   of the plain server, a file where the directory of the index should be,
   now runs against the Symfony and Laravel applications too.
 
+- **The quick start of the README logs why the cache or the store failed.**
+  Its search block hands the same `$log` to `FileIndexCache` and
+  `FileLearningStore`, so a host that copies the quick start, the page
+  most read first, no longer starts with a cache that fails without a word.
+
 ### Changed
 
 - **A request in one sentence keeps more of its trigrams.** The trigram

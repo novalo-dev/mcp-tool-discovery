@@ -166,14 +166,20 @@ use Novalo\McpToolDiscovery\Search\Learning\FileLearningStore;
 use Novalo\McpToolDiscovery\Search\SearchOptions;
 use Novalo\McpToolDiscovery\Search\SearchSetup;
 
+// told why an index could not be kept, or the learning file read or written
+$log = static fn(string $reason) => error_log($reason);
+
 $discovery = new Discovery(new CompactMode(), new MyGate($user, $myTools), new SearchSetup(
     options: new SearchOptions(synonyms: ['meeting' => 'calendar event']),
-    cache: new FileIndexCache('/var/cache/mcp-index'),            // build the index once
-    learning: new FileLearningStore('/var/lib/mcp/learning.json'), // learn from successful runs
+    cache: new FileIndexCache('/var/cache/mcp-index', $log),            // build the index once
+    learning: new FileLearningStore('/var/lib/mcp/learning.json', $log), // learn from successful runs
 ));
 ```
 
-A server that changes modes keeps its settings, its cache and what it learned.
+A cache or a store that fails never stops a request; without `$log`, a
+directory left unwritable only shows as a search that builds its index on
+every request and learns nothing. A server that changes modes keeps its
+settings, its cache and what it learned.
 
 ---
 
