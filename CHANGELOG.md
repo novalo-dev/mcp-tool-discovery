@@ -14,9 +14,27 @@ becomes the next version's section when it is published.
   mode now opens on the four lines that decide it, before the table of
   bytes, and the line on Direct gives a count measured on every benchmark
   server instead of "a few tools": the compact list alone weighs as much as
-  6 to 9 tools listed as themselves, 9 to 13 with one search, so under about
+  4 to 9 tools listed as themselves, 8 to 13 with one search, so under about
   ten tools Direct sends less. `ListCostTest` checks the count against the
   servers, as it does the table.
+
+- **A learning platform with 150 tools on the search benchmark, named as
+  generated tools are.** The fifth large server, and the first with no
+  titles: names made of a component and an object
+  (`core_enrol_suspend_enrolment`, `mod_assign_grant_extension`), and
+  descriptions of about 340 characters that close on the same sentences for
+  every tool that reads and every tool that changes something, as many
+  real servers of that size write them. Its 150 requests, one per tool,
+  were written before any of them was run, in the words of a teacher (hand
+  in, mark, take the roll). Nothing was tuned on it: on its test half, 59
+  of 75 come first in fields, 66 in the top 3 and 24 as one sentence, with
+  3.67 tools in an answer. The benchmark now holds 4105 requests over
+  thirty-six servers; its floors move to 1646 and 1851 in fields, 1781
+  asked again and 1197 and 1530 as one sentence, and the laravel/mcp line
+  to 675 and 999 as one sentence and 1189 and 1514 with the fields joined.
+  Its long descriptions make the compact list worth fewer tools listed as
+  themselves, so docs/MODES.md now says 4 to 9 alone and 8 to 13 with a
+  search; under about ten tools, Direct still sends less.
 
 - **A conference organiser with 160 tools on the search benchmark.** The
   fourth large server in English: camelCase names, verb first, with eight

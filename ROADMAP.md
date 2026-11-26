@@ -62,7 +62,10 @@ The benchmark says where the search still misses, in
   tools in kebab-case, verb first (an IT service desk) and an English one
   where most tools share an object with four others, in PascalCase (a
   leisure centre) and a fourth large English one, 160 tools in camelCase,
-  verb first, many on the same object (a conference organiser) are in.
+  verb first, many on the same object (a conference organiser) and a fifth
+  large one, 150 tools named as generated tools are, with no titles and
+  long descriptions that share their closing sentences (a learning
+  platform) are in.
 - **Accents.** A word of Latin, Greek or Cyrillic letters typed without its
   marks now meets the tool word it spells, a Greek word typed in capitals
   and a Russian `е` for `ё` included. `й` typed as `и` lies within the

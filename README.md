@@ -345,7 +345,7 @@ client gives its request **in fields**, and each field is scored on its own:
   it, under one id, so a host sees what its clients asked and missed. The
   library writes nothing itself ([docs/SEARCH.md](docs/SEARCH.md#log)).
 
-3955 requests over thirty-five fictional servers, a workspace (snake_case), a
+4105 requests over thirty-six fictional servers, a workspace (snake_case), a
 developer platform (camelCase), people operations (dotted names), a network
 of public libraries written in French (kebab-case), the office of a school
 written in German (PascalCase), a cloud hosting panel with 176 tools, the
@@ -370,16 +370,19 @@ English camelCase, an IT service desk with 150 tools, kebab-case,
 most of them neighbours, a leisure centre in English PascalCase, five
 or more tools on each of its bookings, memberships and classes, and a
 conference organiser with 160 tools in English camelCase, verb first, many
-of them on the same session, speaker, submission or registration.
+of them on the same session, speaker, submission or registration, and a
+learning platform with 150 tools named as generated ones are
+(`mod_assign_grant_extension`), with no titles and long descriptions that
+share the same closing sentences.
 Half were used to choose the settings; the other half, kept aside, gives the
 score:
 
-| Test half, 1981 requests | Right tool first | Right tool in the top 3 |
+| Test half, 2056 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
-| The request in fields | **1587** | **1785** |
-| The same request as one sentence | 1173 | 1496 |
-| In fields, after learning from the other half | 1587 | 1785 |
-| In fields, asked a second time | 1716 | 1859 |
+| The request in fields | **1646** | **1851** |
+| The same request as one sentence | 1197 | 1530 |
+| In fields, after learning from the other half | 1646 | 1851 |
+| In fields, asked a second time | 1781 | 1927 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -389,8 +392,8 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 657 | 972 |
-| The fields joined into one sentence | 1136 | 1454 |
+| The request as one sentence | 675 | 999 |
+| The fields joined into one sentence | 1189 | 1514 |
 
 A search over 50 tools takes about 2 ms with no cache and a tenth of a
 millisecond with one; over 500 tools, about 1 ms with a cache. [docs/SEARCH.md](docs/SEARCH.md) explains the ranking, the measures

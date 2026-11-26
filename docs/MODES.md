@@ -34,8 +34,8 @@ the client looks for a tool. Each mode weighs those two differently:
   actions they stand for would take 9,299: on short tools it saves almost a
   quarter, more as the schemas grow.
 - **Direct** lists every tool as itself, the first column of the table
-  below. On the benchmark servers the compact list alone weighs as much as 6
-  to 9 tools listed as themselves, and 9 to 13 with one search: under about
+  below. On the benchmark servers the compact list alone weighs as much as 4
+  to 9 tools listed as themselves, and 8 to 13 with one search: under about
   ten tools, Direct sends less. It also suits the host that lets its users
   turn the other modes off.
 
@@ -80,6 +80,7 @@ JSON on `2025-11-25` (`composer benchmark` prints this table, and
 | desk | 150 | 49,454 | 2,871 | 1,839 | - | 1,105 |
 | leisure | 40 | 13,467 | 2,871 | 1,839 | - | 1,102 |
 | summit | 160 | 53,994 | 2,871 | 1,839 | - | 932 |
+| campus | 150 | 98,166 | 2,871 | 1,839 | - | 2,592 |
 
 The search is the mean over the test half of the benchmark requests, text
 content only: the structured copy carries the same data. For English JSON a

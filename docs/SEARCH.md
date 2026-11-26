@@ -105,8 +105,8 @@ power of 0.1 to 0.7, or a bonus per field, with or without a threshold of
 20% to 60% of the field's best: 1593 to 1627 first, never above the base,
 and the top 3 down to 1742).
 
-On the benchmark below, the same requests find the right tool first 1587 times
-out of 1981 in fields, and 1173 times as one sentence.
+On the benchmark below, the same requests find the right tool first 1646 times
+out of 2056 in fields, and 1197 times as one sentence.
 
 ## How a tool is scored
 
@@ -640,7 +640,7 @@ skipped.
 
 ## The measures
 
-Thirty-two fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
+Thirty-six fictional servers: a workspace (50 tools, `acme_set_ticket_status`), a
 developer platform (40 tools, `archiveRepository`), people operations (40
 tools, `people.leave.approve`), a network of public libraries written in
 French (40 tools, `prolonger-pret`), the office of a school written in German
@@ -673,18 +673,20 @@ written in Georgian (40 tools, `qvevri_seal`), a coffee washing station
 written in Amharic (40 tools, `drying_bed_assign`), a community garden
 in English camelCase (40 tools, `swapWateringDuty`) and an IT service
 desk (150 tools, `link-incident-problem`), a leisure centre in English
-PascalCase (40 tools, `FreezeMembership`) and a conference organiser in
-English camelCase (160 tools, `promoteFromWaitlist`). 3955 requests, each written as one
+PascalCase (40 tools, `FreezeMembership`), a conference organiser in
+English camelCase (160 tools, `promoteFromWaitlist`) and a learning
+platform named as generated tools are, with no titles and long
+descriptions (150 tools, `mod_assign_grant_extension`). 4105 requests, each written as one
 sentence and in fields, with the tool a person would expect.
 The settings were chosen on the `train` half; the `test` half was kept aside
 and gives the score.
 
-| Test half, 1981 requests | Right tool first | Top 3 |
+| Test half, 2056 requests | Right tool first | Top 3 |
 |---|---|---|
-| The request in fields | 1587 | 1785 |
-| The same request as one sentence | 1173 | 1496 |
-| In fields, after every train request was run once | 1587 | 1785 |
-| In fields, after the test requests were run once, then asked again | 1716 | 1859 |
+| The request in fields | 1646 | 1851 |
+| The same request as one sentence | 1197 | 1530 |
+| In fields, after every train request was run once | 1646 | 1851 |
+| In fields, after the test requests were run once, then asked again | 1781 | 1927 |
 
 The same requests ranked by the search of laravel/mcp, Laravel's official MCP
 package, which a PHP host may already have: a substring score on the name,
@@ -694,10 +696,10 @@ fields are joined into one:
 
 | The same half, ranked as laravel/mcp v1.2.1 ranks | Right tool first | Top 3 |
 |---|---|---|
-| The request as one sentence | 657 | 972 |
-| The fields joined into one sentence | 1136 | 1454 |
+| The request as one sentence | 675 | 999 |
+| The fields joined into one sentence | 1189 | 1514 |
 
-As one sentence it trails on each of the thirty-five servers, the English ones
+As one sentence it trails on each of the thirty-six servers, the English ones
 included, and finds nothing first on the Chinese and Japanese ones: it cuts
 words at spaces, which those languages do not write. The test that guards
 the floors also checks that the library stays ahead on both lines.
@@ -1285,6 +1287,34 @@ reading tool whose object is in the title of the tools that change it
 (the closing date of the call for papers finds open and extend, and the
 cut leaves nothing else). Learned from the train half, one of its test
 requests drops a place and the total stays level.
+
+The learning platform is the fifth large server, and the first written as
+many real servers of that size are: 150 tools named after their component
+and their object (`core_enrol_suspend_enrolment`, `mod_quiz_override_user`),
+no titles, and descriptions of about 340 characters that open on "Use this
+tool to" and close on the same two sentences, one for every tool that reads
+and one for every tool that changes something ("Returns the IDs of the
+records changed and a list of warnings"). Its 150 requests, one per tool,
+were written on 2026-11-26 before any of them was run, in the words of a
+teacher or an administrator (hand in, mark, take the roll, tick off, wipe).
+Nothing was tuned on it: 59 of its 75 test requests come first in fields,
+66 in the top 3; 24 as one sentence, against 18 for laravel/mcp; asked
+again, 65. Its train half scores 55 and 67. It is the hardest of the large
+servers, and two things make it so. With no title, the words that name a
+tool sit only in its name and in a long description, so the scores of
+neighbours lie closer: an answer holds 3.67 tools, against 2.64 on the
+conference organiser, and the search answer weighs 2,592 bytes. And the
+shared sentences carry words a request uses: "list" is in the closing
+sentence of every tool that changes something, so on the train half "list
+| participants | of a course" finds the tool that messages them first.
+Dropping from each description the runs of four to six words that a tenth
+or more of the tools share, as boilerplate is taken out of web pages, was
+tried on the train half and not kept: 1747 to 1756 first in fields against
+1755, 1361 to 1371 as one sentence against 1370, and on the learning
+platform alone 54 to 56 in fields and 18 to 21 as one sentence against 55
+and 20. BM25 already gives a word every tool holds almost no weight; what
+the shared sentences cost is a word held by half the tools, which the
+dropped runs did not single out.
 
 Learning was measured both ways on purpose. Learned from other requests, it
 gains a little and loses nothing; on requests people repeat, it gains more.
