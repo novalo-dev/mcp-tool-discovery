@@ -926,6 +926,23 @@ final class ToolSearchTest extends TestCase
         self::assertSame(self::names((new ToolSearch($sensors, $raw))->search($sentence)), self::names((new ToolSearch($sensors))->search($sentence)));
     }
 
+    public function testASentenceKeepsTheTrigramsOfItsWords(): void
+    {
+        $ops = RecordingGate::server('ops');
+        $sentence = SearchQuery::text('add an extra flight to Madrid');
+        $fields = new SearchQuery('add', 'flight', 'extra flight to Madrid');
+        $whole = new SearchOptions(textTrigramPower: 1.0);
+
+        // "add an extra flight" finds the tool that schedules one either way.
+        // Two words more and its trigrams were divided by six instead of four,
+        // which let the tool that adds an aircraft come first.
+        self::assertSame('flight.schedule', self::names((new ToolSearch($ops, $whole))->search(SearchQuery::text('add an extra flight')))[0] ?? null);
+        self::assertSame('flight.schedule', self::names((new ToolSearch($ops))->search($sentence))[0] ?? null);
+        self::assertSame('aircraft.add', self::names((new ToolSearch($ops, $whole))->search($sentence))[0] ?? null);
+        // The fields are divided by their whole length, as before.
+        self::assertSame(self::names((new ToolSearch($ops, $whole))->search($fields)), self::names((new ToolSearch($ops))->search($fields)));
+    }
+
     public function testAWordTypedWithoutItsMarksFindsTheToolThatSpellsIt(): void
     {
         $tools = ToolSet::of([

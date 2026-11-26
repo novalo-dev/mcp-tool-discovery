@@ -100,7 +100,10 @@ final class ToolSearch
             $weight = $this->options->queryWeights[$field] ?? 1.0;
             // The description says what the tool is about; the other fields
             // name it (see SearchOptions::DESCRIPTION_WEIGHTS).
-            $fieldScores = $this->index->score($text, $field === 'description');
+            // A sentence has to name the tool alone, often in forms the tools
+            // do not write: its trigrams are divided by less than its length
+            // (see SearchOptions::textTrigramPower).
+            $fieldScores = $this->index->score($text, $field === 'description', $field === 'text' ? $this->options->textTrigramPower : 1.0);
             if ($fieldScores === []) {
                 continue;
             }

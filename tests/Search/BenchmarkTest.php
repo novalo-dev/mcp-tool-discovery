@@ -45,6 +45,14 @@ final class BenchmarkTest extends TestCase
         self::assertGreaterThanOrEqual(1638, $scores['learnedAgain']['first'], implode("\n", $scores['learnedAgain']['misses']));
     }
 
+    public function testOneSentenceFindsItsToolOftenEnough(): void
+    {
+        $scores = Benchmark::run();
+
+        self::assertGreaterThanOrEqual(1130, $scores['sentence']['first'], implode("\n", $scores['sentence']['misses']));
+        self::assertGreaterThanOrEqual(1440, $scores['sentence']['top3'], implode("\n", $scores['sentence']['misses']));
+    }
+
     public function testFieldsBeatOneSentence(): void
     {
         $scores = Benchmark::run();

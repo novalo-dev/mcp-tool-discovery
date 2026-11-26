@@ -70,6 +70,8 @@ final class SearchOptionsTest extends TestCase
         yield 'a cut that is not a number' => [static fn(): SearchOptions => new SearchOptions(cut: NAN), 'cut'];
         yield 'a field balance above 1' => [static fn(): SearchOptions => new SearchOptions(fieldBalance: 1.5), 'field balance'];
         yield 'a field balance that is not a number' => [static fn(): SearchOptions => new SearchOptions(fieldBalance: NAN), 'field balance'];
+        yield 'a text trigram power above 1' => [static fn(): SearchOptions => new SearchOptions(textTrigramPower: 2.0), 'text trigram power'];
+        yield 'a text trigram power that is not a number' => [static fn(): SearchOptions => new SearchOptions(textTrigramPower: NAN), 'text trigram power'];
         yield 'a negative trigram weight' => [static fn(): SearchOptions => new SearchOptions(trigramWeight: -0.1), 'trigram'];
         yield 'an infinite learning weight' => [static fn(): SearchOptions => new SearchOptions(learningWeight: INF), 'learning'];
         yield 'a synonym of two words' => [static fn(): SearchOptions => new SearchOptions(synonyms: ['team meeting' => 'calendar event']), '"team meeting"'];

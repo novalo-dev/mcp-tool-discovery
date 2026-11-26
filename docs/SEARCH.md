@@ -66,8 +66,47 @@ parameters at 0.3: 1599 to 1603), a floor added to each term found (BM25+,
 1599), and a sentence read with the weights of a description (1287 to 1244
 as one sentence).
 
+**A sentence keeps more of its trigrams.** In every field, the trigram
+scores are divided by the number of words, so a long request does not let
+its many trigrams outweigh the words themselves. A sentence (`text`, the
+`query` of `search_tools`) has to name the tool alone, and often does it
+in forms the tools do not write ("Adds" for "add", a verb in another
+case): divided by its whole length, the trigrams that reach those words
+weighed less with every word it added. Its trigrams are now divided by the
+number of its words to the power 0.4 (`SearchOptions::textTrigramPower`);
+"add an extra flight" found `flight.schedule` either way, but "add an
+extra flight to Madrid" found the tool that adds an aircraft first. The
+power is taken over the tokens: a run of Burmese or Lao is one token cut
+into many pairs of characters, still counted in full, or its trigrams
+found tools the run never named.
+Chosen on the train half (1894 requests, base 1287 first as one sentence,
+1540 in the top 3). Over the words: 0.75 gave 1301, 0.5 1307, 0.4 1308,
+0.3 1310, 0.25 1312 (1559 in the top 3), 0.2 1311 and 0.1 1305, and the
+same power for the other fields lost, 1623 to 1626 first in fields against
+1627, the description most. Over the tokens: 0 gave 1308, 0.15 1313, 0.2
+1314, 0.25 1315 (1560 in the top 3), 0.3 1312, **0.4 1310** (1554 in the
+top 3) and 0.5 1309. Below 0.4, "ΠΟΙΕΣ ΕΚΘΕΣΕΙΣ ΕΧΕΙ ΤΟ ΜΟΥΣΕΙΟ" (which
+exhibitions does the museum have) found the loan request of another
+"μουσείου" before the exhibitions, a request the unit tests hold: 0.4 is
+the most the train half gains with it kept. On the test half, as one
+sentence, from 1111 to 1130 first and 1418 to 1440 in the top 3; the
+requests in fields are ranked as before. A host
+gives `textTrigramPower: 1.0` to rank as before.
+
+Tried on the same half and not kept: a sentence scored word by word, each
+word divided by its own best match to a power (0 to 0.35: 1294 to 1307
+first, up to 1568 in the top 3, fewer first than the power of its length
+and a score per word); a field whose words no tool writes counted less
+(by its share of known words, 0.3 to 0.7 of its weight: 1594 to 1626 in
+fields, for the action, the object or the description alone 1613 to
+1626); and a tool found by several fields of a request counted more, as
+Lucene's coordination factor does (the share of fields that found it to a
+power of 0.1 to 0.7, or a bonus per field, with or without a threshold of
+20% to 60% of the field's best: 1593 to 1627 first, never above the base,
+and the top 3 down to 1742).
+
 On the benchmark below, the same requests find the right tool first 1514 times
-out of 1901 in fields, and 1111 times as one sentence.
+out of 1901 in fields, and 1130 times as one sentence.
 
 ## How a tool is scored
 
@@ -642,7 +681,7 @@ and gives the score.
 | Test half, 1901 requests | Right tool first | Top 3 |
 |---|---|---|
 | The request in fields | 1514 | 1708 |
-| The same request as one sentence | 1111 | 1418 |
+| The same request as one sentence | 1130 | 1440 |
 | In fields, after every train request was run once | 1515 | 1708 |
 | In fields, after the test requests were run once, then asked again | 1638 | 1780 |
 

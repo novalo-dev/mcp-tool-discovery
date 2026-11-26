@@ -312,10 +312,13 @@ final class ToolIndex
      *
      * @param bool $context whether the query describes what is wanted rather than naming it, and is
      *        scored under the second weighting when the index keeps one
+     * @param float $lengthPower the power of the number of query tokens the trigram scores are
+     *        divided by, beside the terms each token is cut into: 1 divides them by the number
+     *        of terms of the whole query
      *
      * @return array<int|string, float> id => score, in index order
      */
-    public function score(string $query, bool $context = false): array
+    public function score(string $query, bool $context = false, float $lengthPower = 1.0): array
     {
         $changedWords = $context ? $this->contextWords : null;
         $changedGrams = $context ? $this->contextGrams : null;
@@ -352,12 +355,18 @@ final class ToolIndex
             }
         }
 
+        // The trigrams are divided by the number of query words, so a long
+        // query does not let its many trigrams outweigh the words themselves.
+        // The caller may soften that for a sentence (lengthPower below 1, see
+        // SearchOptions::textTrigramPower), and only over its tokens: a run of
+        // Burmese or Thai is one token cut into many pairs, and softened over
+        // its pairs, its trigrams found tools the run never named.
+        $tokens = max(1, min(count($words), count(array_unique($this->analyzer->tokens($query)))));
+        $divisor = count($words) / $tokens * $tokens ** $lengthPower;
         $scores = [];
         foreach ($this->ids as $id) {
             $score = ($wordScores[$id] ?? 0.0)
-                // Divided by the number of query words, so a long query does
-                // not let its many trigrams outweigh the words themselves.
-                + $this->trigramWeight * ($gramScores[$id] ?? 0.0) / count($words);
+                + $this->trigramWeight * ($gramScores[$id] ?? 0.0) / $divisor;
             if ($score > 0) {
                 $scores[$id] = $score;
             }

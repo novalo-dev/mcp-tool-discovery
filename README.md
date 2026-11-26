@@ -369,7 +369,7 @@ score:
 | Test half, 1901 requests | Right tool first | Right tool in the top 3 |
 |---|---|---|
 | The request in fields | **1514** | **1708** |
-| The same request as one sentence | 1111 | 1418 |
+| The same request as one sentence | 1130 | 1440 |
 | In fields, after learning from the other half | 1515 | 1708 |
 | In fields, asked a second time | 1638 | 1780 |
 

@@ -37,6 +37,21 @@ becomes the next version's section when it is published.
 
 ### Changed
 
+- **A request in one sentence keeps more of its trigrams.** The trigram
+  scores of the text of a request (`query` in `search_tools`) are now
+  divided by the number of its words to the power 0.4 instead of by the
+  number itself (`SearchOptions::textTrigramPower`); a word of a script
+  written without spaces, cut into pairs, still counts its pairs in full,
+  and the other fields are divided as before. A sentence names the tool alone, often in forms the
+  tools do not write, and each word it added weighed the trigrams that
+  reach them less: "add an extra flight to Madrid" found the tool that
+  adds an aircraft before the one that schedules a flight. Chosen on the
+  train half; on the test half one sentence finds the right tool first
+  1130 times out of 1901 instead of 1111, and in the top 3 1440 times
+  instead of 1418. Requests in fields are ranked as before. A new floor
+  holds the sentence at 1130 and 1440. Give `textTrigramPower: 1.0` to
+  rank as before; a power outside 0 to 1, or NAN, is refused.
+
 - **A field of a request that matches more no longer outweighs the others
   by its size alone, and the action counts 0.8 instead of 0.5.** Each
   field's scores are now divided by the square root of its own best score

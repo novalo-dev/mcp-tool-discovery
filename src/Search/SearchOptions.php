@@ -72,6 +72,11 @@ final class SearchOptions
      * @param array<string, float> $descriptionWeights how much a match counts in each field of a tool
      *        for the description of a request, as $weights for the other fields; give it the same
      *        as $weights to read every field of a request alike
+     * @param float $textTrigramPower the power of its number of words that the trigram scores of
+     *        the text of a request, one sentence, are divided by; 1 divides them as in the other
+     *        fields. A sentence has to name the tool alone, often in forms the tools do not write,
+     *        and divided by its whole length a word reached the tool that writes it otherwise less
+     *        the longer the sentence. Chosen on the train half; see docs/SEARCH.md
      */
     public function __construct(
         array $weights = self::WEIGHTS,
@@ -85,6 +90,7 @@ final class SearchOptions
         public readonly int $learningCap = 5,
         array $descriptionWeights = self::DESCRIPTION_WEIGHTS,
         public readonly float $fieldBalance = 0.5,
+        public readonly float $textTrigramPower = 0.4,
     ) {
         // NAN passes every comparison below, and would rank every tool NAN.
         if (!is_finite($cut) || $cut < 0 || $cut > 1) {
@@ -101,6 +107,9 @@ final class SearchOptions
         }
         if (!is_finite($fieldBalance) || $fieldBalance < 0 || $fieldBalance > 1) {
             throw new \InvalidArgumentException('The field balance is a power of the best score of a field, between 0 and 1.');
+        }
+        if (!is_finite($textTrigramPower) || $textTrigramPower < 0 || $textTrigramPower > 1) {
+            throw new \InvalidArgumentException('The text trigram power is a power of the number of words of a sentence, between 0 and 1.');
         }
         // Merged over the defaults: an array given by name replaces the whole
         // default, so ['title' => 3.0] used to leave the name, the
